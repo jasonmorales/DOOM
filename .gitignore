@@ -1,0 +1,7 @@
+.vs/
+intermediate/
+**.sln
+**.vcxproj
+**.vcxproj.*
+**/bin
+**.exe

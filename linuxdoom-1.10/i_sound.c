@@ -30,19 +30,15 @@ rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
 
 #include <math.h>
 
-#include <sys/time.h>
+#include <time.h>
 #include <sys/types.h>
 
-#ifndef LINUX
-#include <sys/filio.h>
-#endif
+#include <io.h>
 
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
 
 // Linux voxware output.
-#include <linux/soundcard.h>
+//#include <linux/soundcard.h>
 
 // Timer stuff. Experimental.
 #include <time.h>
@@ -57,6 +53,11 @@ rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
 #include "w_wad.h"
 
 #include "doomdef.h"
+
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <threadpoollegacyapiset.h>
+
 
 // UNIX hack, to be removed.
 #ifdef SNDSERV
@@ -165,7 +166,7 @@ myioctl
     int		rc;
     extern int	errno;
     
-    rc = ioctl(fd, command, arg);  
+    //rc = ioctl(fd, command, arg);  
     if (rc < 0)
     {
 	fprintf(stderr, "ioctl(dsp,%d,arg) failed\n", command);
@@ -748,10 +749,10 @@ I_InitSound()
     sprintf(buffer, "%s", sndserver_filename);
   
   // start sound process
-  if ( !access(buffer, X_OK) )
+  if (!_access(buffer, X_OK) )
   {
     strcat(buffer, " -quiet");
-    sndserver = popen(buffer, "w");
+    sndserver = _popen(buffer, "w");
   }
   else
     fprintf(stderr, "Could not start sound server [%s]\n", buffer);
@@ -909,9 +910,9 @@ int I_QrySongPlaying(int handle)
 //  time independend timer happens to get lost due to heavy load.
 // SIGALRM and ITIMER_REAL doesn't really work well.
 // There are issues with profiling as well.
-static int /*__itimer_which*/  itimer = ITIMER_REAL;
+//static int /*__itimer_which*/  itimer = ITIMER_REAL;
 
-static int sig = SIGALRM;
+//static int sig = SIGALRM;
 
 // Interrupt handler.
 void I_HandleSoundTimer( int ignore )
@@ -940,6 +941,7 @@ void I_HandleSoundTimer( int ignore )
 // Get the interrupt. Set duration in millisecs.
 int I_SoundSetTimer( int duration_of_tick )
 {
+#if 0
   // Needed for gametick clockwork.
   struct itimerval    value;
   struct itimerval    ovalue;
@@ -967,12 +969,17 @@ int I_SoundSetTimer( int duration_of_tick )
 
   // Error is -1.
   res = setitimer( itimer, &value, &ovalue );
-
+  
   // Debug.
   if ( res == -1 )
     fprintf( stderr, "I_SoundSetTimer: interrupt n.a.\n");
-  
+
   return res;
+#endif
+
+  PHANDLE handle;
+  CreateTimerQueueTimer(handle, NULL, I_HandleSoundTimer, NULL, duration_of_tick, duration_of_tick, 0);
+  return 0;
 }
 
 

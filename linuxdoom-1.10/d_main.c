@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,8 +11,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	DOOM main program (D_DoomMain) and game loop (D_DoomLoop),
 //	plus functions to determine game mode (shareware, registered),
@@ -24,21 +19,8 @@
 //
 //-----------------------------------------------------------------------------
 
-
-static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
-
 #define	BGCOLOR		7
 #define	FGCOLOR		8
-
-
-#ifdef NORMALUNIX
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#endif
 
 
 #include "doomdef.h"
@@ -76,6 +58,13 @@ static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 
 
 #include "d_main.h"
+
+#include <malloc.h>
+#include <string.h>
+#include <stdlib.h>
+#include <direct.h>
+#include <io.h>
+#include <errno.h>
 
 //
 // D-DoomLoop()
@@ -359,9 +348,9 @@ void D_DoomLoop (void)
     if (M_CheckParm ("-debugfile"))
     {
 	char    filename[20];
-	sprintf (filename,"debug%i.txt",consoleplayer);
+	sprintf_s(filename, 20, "debug%i.txt", consoleplayer);
 	printf ("debug output to: %s\n",filename);
-	debugfile = fopen (filename,"w");
+	fopen_s(&debugfile, filename, "w");
     }
 	
     I_InitGraphics ();
@@ -560,59 +549,40 @@ void D_AddFile (char *file)
 // to determine whether registered/commercial features
 // should be executed (notably loading PWAD's).
 //
-void IdentifyVersion (void)
+void IdentifyVersion(void)
 {
-
-    char*	doom1wad;
-    char*	doomwad;
-    char*	doomuwad;
-    char*	doom2wad;
-
-    char*	doom2fwad;
-    char*	plutoniawad;
-    char*	tntwad;
-
-#ifdef NORMALUNIX
-    char *home;
-    char *doomwaddir;
-    doomwaddir = getenv("DOOMWADDIR");
-    if (!doomwaddir)
-	doomwaddir = ".";
+    const char *doomwaddir = ".";
 
     // Commercial.
-    doom2wad = malloc(strlen(doomwaddir)+1+9+1);
-    sprintf(doom2wad, "%s/doom2.wad", doomwaddir);
+	size_t size = strlen(doomwaddir)+1+9+1;
+	char *doom2wad = malloc(size);
+    sprintf_s(doom2wad, size, "%s/doom2.wad", doomwaddir);
 
     // Retail.
-    doomuwad = malloc(strlen(doomwaddir)+1+8+1);
-    sprintf(doomuwad, "%s/doomu.wad", doomwaddir);
+	size = strlen(doomwaddir)+1+9+1;
+	char *doomuwad = malloc(size);
+    sprintf_s(doomuwad, size, "%s/doomu.wad", doomwaddir);
     
     // Registered.
-    doomwad = malloc(strlen(doomwaddir)+1+8+1);
+	char *doomwad = malloc(strlen(doomwaddir)+1+8+1);
     sprintf(doomwad, "%s/doom.wad", doomwaddir);
     
     // Shareware.
-    doom1wad = malloc(strlen(doomwaddir)+1+9+1);
+	char *doom1wad = malloc(strlen(doomwaddir)+1+9+1);
     sprintf(doom1wad, "%s/doom1.wad", doomwaddir);
 
      // Bug, dear Shawn.
     // Insufficient malloc, caused spurious realloc errors.
-    plutoniawad = malloc(strlen(doomwaddir)+1+/*9*/12+1);
+	char *plutoniawad = malloc(strlen(doomwaddir)+1+/*9*/12+1);
     sprintf(plutoniawad, "%s/plutonia.wad", doomwaddir);
 
-    tntwad = malloc(strlen(doomwaddir)+1+9+1);
+	char *tntwad = malloc(strlen(doomwaddir)+1+9+1);
     sprintf(tntwad, "%s/tnt.wad", doomwaddir);
 
 
     // French stuff.
-    doom2fwad = malloc(strlen(doomwaddir)+1+10+1);
+	char *doom2fwad = malloc(strlen(doomwaddir)+1+10+1);
     sprintf(doom2fwad, "%s/doom2f.wad", doomwaddir);
-
-    home = getenv("HOME");
-    if (!home)
-      I_Error("Please set $HOME to your home directory");
-    sprintf(basedefault, "%s/.doomrc", home);
-#endif
 
     if (M_CheckParm ("-shdev"))
     {
@@ -655,7 +625,7 @@ void IdentifyVersion (void)
 	return;
     }
 
-    if ( !access (doom2fwad,R_OK) )
+    if (!_access(doom2fwad, R_OK))
     {
 	gamemode = commercial;
 	// C'est ridicule!
@@ -666,42 +636,42 @@ void IdentifyVersion (void)
 	return;
     }
 
-    if ( !access (doom2wad,R_OK) )
+    if ( !_access (doom2wad,R_OK) )
     {
 	gamemode = commercial;
 	D_AddFile (doom2wad);
 	return;
     }
 
-    if ( !access (plutoniawad, R_OK ) )
+    if ( !_access (plutoniawad, R_OK ) )
     {
       gamemode = commercial;
       D_AddFile (plutoniawad);
       return;
     }
 
-    if ( !access ( tntwad, R_OK ) )
+    if ( !_access ( tntwad, R_OK ) )
     {
       gamemode = commercial;
       D_AddFile (tntwad);
       return;
     }
 
-    if ( !access (doomuwad,R_OK) )
+    if ( !_access (doomuwad,R_OK) )
     {
       gamemode = retail;
       D_AddFile (doomuwad);
       return;
     }
 
-    if ( !access (doomwad,R_OK) )
+    if ( !_access (doomwad,R_OK) )
     {
       gamemode = registered;
       D_AddFile (doomwad);
       return;
     }
 
-    if ( !access (doom1wad,R_OK) )
+    if ( !_access (doom1wad,R_OK) )
     {
       gamemode = shareware;
       D_AddFile (doom1wad);
@@ -877,7 +847,7 @@ void D_DoomMain (void)
     if (M_CheckParm("-cdrom"))
     {
 	printf(D_CDROM);
-	mkdir("c:\\doomdata",0);
+	_mkdir("c:\\doomdata");
 	strcpy (basedefault,"c:/doomdata/default.cfg");
     }	
     
@@ -1026,7 +996,7 @@ void D_DoomMain (void)
     {
 	// These are the lumps that will be checked in IWAD,
 	// if any one is not present, execution will be aborted.
-	char name[23][8]=
+	char name[23][9]=
 	{
 	    "e2m1","e2m2","e2m3","e2m4","e2m5","e2m6","e2m7","e2m8","e2m9",
 	    "e3m1","e3m3","e3m3","e3m4","e3m5","e3m6","e3m7","e3m8","e3m9",

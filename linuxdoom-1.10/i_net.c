@@ -27,13 +27,7 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #include <string.h>
 #include <stdio.h>
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
 #include <errno.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <sys/ioctl.h>
 
 #include "i_system.h"
 #include "d_event.h"
@@ -47,6 +41,9 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #endif
 #include "i_net.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <winsock.h>
 
 
 
@@ -73,6 +70,7 @@ boolean NetListen (void);
 // NETWORKING
 //
 
+#define IPPORT_USERRESERVED 16384
 int	DOOMPORT =	(IPPORT_USERRESERVED +0x1d );
 
 int			sendsocket;
@@ -326,7 +324,7 @@ void I_InitNetwork (void)
     // build message to receive
     insocket = UDPsocket ();
     BindToLocalPort (insocket,htons(DOOMPORT));
-    ioctl (insocket, FIONBIO, &trueval);
+    //ioctl (insocket, FIONBIO, &trueval);
 
     sendsocket = UDPsocket ();
 }

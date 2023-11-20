@@ -37,6 +37,12 @@ rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 #include <alloca.h>
 #define O_BINARY		0
 #endif
+#include <malloc.h>
+
+#include <io.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <fcntl.h>
 
 #include "doomtype.h"
 #include "m_swap.h"
@@ -64,7 +70,7 @@ int			numlumps;
 void**			lumpcache;
 
 
-#define strcmpi	strcasecmp
+#define strcmpi	_stricmp
 
 void strupr (char* s)
 {
@@ -73,9 +79,9 @@ void strupr (char* s)
 
 int filelength (int handle) 
 { 
-    struct stat	fileinfo;
+    struct _stat fileinfo;
     
-    if (fstat (handle,&fileinfo) == -1)
+    if (_fstat (handle, &fileinfo) == -1)
 	I_Error ("Error fstating");
 
     return fileinfo.st_size;
@@ -160,7 +166,7 @@ void W_AddFile (char *filename)
 	reloadlump = numlumps;
     }
 		
-    if ( (handle = open (filename,O_RDONLY | O_BINARY)) == -1)
+    if ( (handle = _open (filename, _O_RDONLY | _O_BINARY)) == -1)
     {
 	printf (" couldn't open %s\n",filename);
 	return;
@@ -246,7 +252,7 @@ void W_Reload (void)
     if (!reloadname)
 	return;
 		
-    if ( (handle = open (reloadname,O_RDONLY | O_BINARY)) == -1)
+    if ( (handle = _open (reloadname, _O_RDONLY | _O_BINARY)) == -1)
 	I_Error ("W_Reload: couldn't open %s",reloadname);
 
     read (handle, &header, sizeof(header));
@@ -447,7 +453,7 @@ W_ReadLump
     if (l->handle == -1)
     {
 	// reloadable file, so use open / read / close
-	if ( (handle = open (reloadname,O_RDONLY | O_BINARY)) == -1)
+	if ( (handle = _open (reloadname, _O_RDONLY | _O_BINARY)) == -1)
 	    I_Error ("W_ReadLump: couldn't open %s",reloadname);
     }
     else

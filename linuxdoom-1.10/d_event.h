@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,15 +11,8 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
-//    
 //-----------------------------------------------------------------------------
-
-
-#ifndef __D_EVENT__
-#define __D_EVENT__
-
+#pragma once
 
 #include "doomtype.h"
 
@@ -99,9 +89,6 @@ typedef enum
   
 } buttoncode_t;
 
-
-
-
 //
 // GLOBAL VARIABLES
 //
@@ -112,11 +99,3 @@ extern  int             eventhead;
 extern	int		eventtail;
 
 extern  gameaction_t    gameaction;
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

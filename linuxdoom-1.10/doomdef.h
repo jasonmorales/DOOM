@@ -279,6 +279,8 @@ typedef enum
 
 #define KEY_LALT	KEY_RALT
 
+#define R_OK 04
+#define X_OK 00
 
 
 // DOOM basic types (boolean),
