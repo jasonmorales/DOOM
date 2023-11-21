@@ -551,12 +551,12 @@ void D_AddFile (char *file)
 //
 void IdentifyVersion(void)
 {
-    const char *doomwaddir = ".";
+    const char *doomwaddir = "E:\\personal\\doom\\data";
 
     // Commercial.
 	size_t size = strlen(doomwaddir)+1+9+1;
 	char *doom2wad = malloc(size);
-    sprintf_s(doom2wad, size, "%s/doom2.wad", doomwaddir);
+    sprintf_s(doom2wad, size, "%s\\doom2.wad", doomwaddir);
 
     // Retail.
 	size = strlen(doomwaddir)+1+9+1;
@@ -571,18 +571,8 @@ void IdentifyVersion(void)
 	char *doom1wad = malloc(strlen(doomwaddir)+1+9+1);
     sprintf(doom1wad, "%s/doom1.wad", doomwaddir);
 
-     // Bug, dear Shawn.
-    // Insufficient malloc, caused spurious realloc errors.
-	char *plutoniawad = malloc(strlen(doomwaddir)+1+/*9*/12+1);
-    sprintf(plutoniawad, "%s/plutonia.wad", doomwaddir);
-
 	char *tntwad = malloc(strlen(doomwaddir)+1+9+1);
     sprintf(tntwad, "%s/tnt.wad", doomwaddir);
-
-
-    // French stuff.
-	char *doom2fwad = malloc(strlen(doomwaddir)+1+10+1);
-    sprintf(doom2fwad, "%s/doom2f.wad", doomwaddir);
 
     if (M_CheckParm ("-shdev"))
     {
@@ -625,29 +615,11 @@ void IdentifyVersion(void)
 	return;
     }
 
-    if (!_access(doom2fwad, R_OK))
+    if (!_access(doom2wad, R_OK))
     {
-	gamemode = commercial;
-	// C'est ridicule!
-	// Let's handle languages in config files, okay?
-	language = french;
-	printf("French version\n");
-	D_AddFile (doom2fwad);
-	return;
-    }
-
-    if ( !_access (doom2wad,R_OK) )
-    {
-	gamemode = commercial;
-	D_AddFile (doom2wad);
-	return;
-    }
-
-    if ( !_access (plutoniawad, R_OK ) )
-    {
-      gamemode = commercial;
-      D_AddFile (plutoniawad);
-      return;
+		gamemode = commercial;
+		D_AddFile (doom2wad);
+		return;
     }
 
     if ( !_access ( tntwad, R_OK ) )

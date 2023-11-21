@@ -158,12 +158,8 @@ void S_StopChannel(int cnum);
 // Sets channels, SFX and music volume,
 //  allocates channel buffer, sets S_sfx lookup.
 //
-void S_Init
-( int		sfxVolume,
-  int		musicVolume )
+void S_Init(int sfxVolume, int musicVolume)
 {  
-  int		i;
-
   fprintf( stderr, "S_Init: default sfx volume %d\n", sfxVolume);
 
   // Whatever these did with DMX, these are rather dummies now.
@@ -176,23 +172,19 @@ void S_Init
   // Allocating the internal channels for mixing
   // (the maximum numer of sounds rendered
   // simultaneously) within zone memory.
-  channels =
-    (channel_t *) Z_Malloc(numChannels*sizeof(channel_t), PU_STATIC, 0);
+  channels = (channel_t*)Z_Malloc(numChannels * sizeof(channel_t), PU_STATIC, 0);
   
   // Free all channels for use
-  for (i=0 ; i<numChannels ; i++)
+  for (int i=0 ; i<numChannels ; i++)
     channels[i].sfxinfo = 0;
   
   // no sounds are playing, and they are not mus_paused
   mus_paused = 0;
 
   // Note that sounds have not been cached (yet).
-  for (i=1 ; i<NUMSFX ; i++)
+  for (int i=1 ; i<NUMSFX ; i++)
     S_sfx[i].lumpnum = S_sfx[i].usefulness = -1;
 }
-
-
-
 
 //
 // Per level startup code.

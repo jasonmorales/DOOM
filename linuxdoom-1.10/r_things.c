@@ -156,9 +156,6 @@ R_InstallSpriteLump
     sprtemp[frame].flip[rotation] = (byte)flipped;
 }
 
-
-
-
 //
 // R_InitSpriteDefs
 // Pass a null terminated list of sprite names
@@ -174,114 +171,95 @@ R_InstallSpriteLump
 //  letter/number appended.
 // The rotation character can be 0 to signify no rotations.
 //
-void R_InitSpriteDefs (char** namelist) 
+void R_InitSpriteDefs(char** namelist) 
 { 
-    char**	check;
-    int		i;
-    int		l;
-    int		intname;
-    int		frame;
-    int		rotation;
-    int		start;
-    int		end;
-    int		patched;
-		
     // count the number of sprite names
-    check = namelist;
+    char** check = namelist;
     while (*check != NULL)
 	check++;
 
     numsprites = check-namelist;
 	
     if (!numsprites)
-	return;
+	    return;
 		
-    sprites = Z_Malloc(numsprites *sizeof(*sprites), PU_STATIC, NULL);
+    sprites = Z_Malloc(numsprites * sizeof(spritedef_t), PU_STATIC, NULL);
 	
-    start = firstspritelump-1;
-    end = lastspritelump+1;
+    int start = firstspritelump - 1;
+    int end = lastspritelump + 1;
 	
     // scan all the lump names for each of the names,
     //  noting the highest frame letter.
     // Just compare 4 characters as ints
-    for (i=0 ; i<numsprites ; i++)
+    for (int i = 0; i < numsprites; ++i)
     {
-	spritename = namelist[i];
-	memset (sprtemp,-1, sizeof(sprtemp));
+	    spritename = namelist[i];
+	    memset(sprtemp, -1, sizeof(sprtemp));
 		
-	maxframe = -1;
-	intname = *(int *)namelist[i];
+	    maxframe = -1;
+        intptr_t intname = *(intptr_t*)namelist[i];
 	
-	// scan the lumps,
-	//  filling in the frames for whatever is found
-	for (l=start+1 ; l<end ; l++)
-	{
-	    if (*(int *)lumpinfo[l].name == intname)
+	    // scan the lumps,
+	    //  filling in the frames for whatever is found
+	    for (int l = start + 1; l < end ; ++l)
 	    {
-		frame = lumpinfo[l].name[4] - 'A';
-		rotation = lumpinfo[l].name[5] - '0';
+	        if (*(intptr_t*)lumpinfo[l].name == intname)
+	        {
+                int frame = lumpinfo[l].name[4] - 'A';
+                int rotation = lumpinfo[l].name[5] - '0';
+                int patched = modifiedgame ? W_GetNumForName (lumpinfo[l].name) : l;
 
-		if (modifiedgame)
-		    patched = W_GetNumForName (lumpinfo[l].name);
-		else
-		    patched = l;
+		        R_InstallSpriteLump(patched, frame, rotation, false);
 
-		R_InstallSpriteLump (patched, frame, rotation, false);
-
-		if (lumpinfo[l].name[6])
-		{
-		    frame = lumpinfo[l].name[6] - 'A';
-		    rotation = lumpinfo[l].name[7] - '0';
-		    R_InstallSpriteLump (l, frame, rotation, true);
-		}
+		        if (lumpinfo[l].name[6])
+		        {
+		            frame = lumpinfo[l].name[6] - 'A';
+		            rotation = lumpinfo[l].name[7] - '0';
+		            R_InstallSpriteLump (l, frame, rotation, true);
+		        }
+	        }
 	    }
-	}
 	
-	// check the frames that were found for completeness
-	if (maxframe == -1)
-	{
-	    sprites[i].numframes = 0;
-	    continue;
-	}
-		
-	maxframe++;
-	
-	for (frame = 0 ; frame < maxframe ; frame++)
-	{
-	    switch ((int)sprtemp[frame].rotate)
+	    // check the frames that were found for completeness
+	    if (maxframe == -1)
 	    {
-	      case -1:
-		// no rotations were found for that frame at all
-		I_Error ("R_InitSprites: No patches found "
-			 "for %s frame %c", namelist[i], frame+'A');
-		break;
+	        sprites[i].numframes = 0;
+	        continue;
+	    }
 		
-	      case 0:
-		// only the first rotation is needed
-		break;
+	    maxframe++;
+	
+	    for (int frame = 0 ; frame < maxframe; frame++)
+	    {
+	        switch ((int)sprtemp[frame].rotate)
+	        {
+	          case -1:
+		    // no rotations were found for that frame at all
+		    I_Error ("R_InitSprites: No patches found "
+			     "for %s frame %c", namelist[i], frame+'A');
+		    break;
+		
+	          case 0:
+		    // only the first rotation is needed
+		    break;
 			
-	      case 1:
-		// must have all 8 frames
-		for (rotation=0 ; rotation<8 ; rotation++)
-		    if (sprtemp[frame].lump[rotation] == -1)
-			I_Error ("R_InitSprites: Sprite %s frame %c "
-				 "is missing rotations",
-				 namelist[i], frame+'A');
-		break;
+	          case 1:
+		    // must have all 8 frames
+		    for (int rotation=0 ; rotation<8 ; rotation++)
+		        if (sprtemp[frame].lump[rotation] == -1)
+			    I_Error ("R_InitSprites: Sprite %s frame %c "
+				     "is missing rotations",
+				     namelist[i], frame+'A');
+		    break;
+	        }
 	    }
-	}
 	
-	// allocate space for the frames present and copy sprtemp to it
-	sprites[i].numframes = maxframe;
-	sprites[i].spriteframes = 
-	    Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
-	memcpy (sprites[i].spriteframes, sprtemp, maxframe*sizeof(spriteframe_t));
+	    // allocate space for the frames present and copy sprtemp to it
+	    sprites[i].numframes = maxframe;
+	    sprites[i].spriteframes = Z_Malloc(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+	    memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
     }
-
 }
-
-
-
 
 //
 // GAME FUNCTIONS
@@ -290,22 +268,18 @@ vissprite_t	vissprites[MAXVISSPRITES];
 vissprite_t*	vissprite_p;
 int		newvissprite;
 
-
-
 //
 // R_InitSprites
 // Called at program start.
 //
 void R_InitSprites (char** namelist)
 {
-    int		i;
-	
-    for (i=0 ; i<SCREENWIDTH ; i++)
+    for (int i=0 ; i<SCREENWIDTH ; i++)
     {
-	negonearray[i] = -1;
+	    negonearray[i] = -1;
     }
 	
-    R_InitSpriteDefs (namelist);
+    R_InitSpriteDefs(namelist);
 }
 
 

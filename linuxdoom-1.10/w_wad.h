@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,16 +15,9 @@
 //	WAD I/O functions.
 //
 //-----------------------------------------------------------------------------
+#pragma once
 
-
-#ifndef __W_WAD__
-#define __W_WAD__
-
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
+#include <stdint.h>
 
 //
 // TYPES
@@ -35,9 +25,9 @@
 typedef struct
 {
     // Should be "IWAD" or "PWAD".
-    char		identification[4];		
-    int			numlumps;
-    int			infotableofs;
+    char identification[4];		
+    int numlumps;
+    int infotableofs;
     
 } wadinfo_t;
 
@@ -64,26 +54,16 @@ typedef struct
 
 extern	void**		lumpcache;
 extern	lumpinfo_t*	lumpinfo;
-extern	int		numlumps;
+extern intptr_t numlumps;
 
-void    W_InitMultipleFiles (char** filenames);
-void    W_Reload (void);
+void W_InitMultipleFiles (char** filenames);
+void W_Reload (void);
 
-int	W_CheckNumForName (char* name);
-int	W_GetNumForName (char* name);
+intptr_t W_CheckNumForName(char* name);
+intptr_t W_GetNumForName(char* name);
 
-int	W_LumpLength (int lump);
-void    W_ReadLump (int lump, void *dest);
+int	W_LumpLength(intptr_t lump);
+void W_ReadLump(intptr_t lump, void *dest);
 
-void*	W_CacheLumpNum (int lump, int tag);
-void*	W_CacheLumpName (char* name, int tag);
-
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+void* W_CacheLumpNum(intptr_t lump, int tag);
+void* W_CacheLumpName(char* name, int tag);

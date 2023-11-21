@@ -279,7 +279,7 @@ typedef enum
 
 #define KEY_LALT	KEY_RALT
 
-#define R_OK 04
+#define R_OK 00
 #define X_OK 00
 
 
