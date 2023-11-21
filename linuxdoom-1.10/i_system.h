@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,18 +15,10 @@
 //	System specific interface stuff.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __I_SYSTEM__
-#define __I_SYSTEM__
+#pragma once
 
 #include "d_ticcmd.h"
 #include "d_event.h"
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 
 // Called by DoomMain.
 void I_Init (void);
@@ -86,12 +75,4 @@ byte* I_AllocLow (int length);
 void I_Tactile (int on, int off, int total);
 
 
-void I_Error (char *error, ...);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+void I_Error(const char *error, ...);

@@ -113,7 +113,7 @@ int             starttime;          	// for comparative timing purposes
  
 boolean         viewactive; 
  
-boolean         deathmatch;           	// only if started as net death 
+int deathmatch;           	// only if started as net death 
 boolean         netgame;                // only true if packets are broadcast 
 boolean         playeringame[MAXPLAYERS]; 
 player_t        players[MAXPLAYERS]; 
@@ -1185,13 +1185,12 @@ void G_DoWorldDone (void)
 // Can be called by the startup code or the menu task. 
 //
 extern boolean setsizeneeded;
-void R_ExecuteSetViewSize (void);
 
 char	savename[256];
 
-void G_LoadGame (char* name) 
+void G_LoadGame(const char* name) 
 { 
-    strcpy (savename, name); 
+    strcpy(savename, name); 
     gameaction = ga_loadgame; 
 } 
  
@@ -1245,7 +1244,7 @@ void G_DoLoadGame (void)
     Z_Free (savebuffer); 
  
     if (setsizeneeded)
-	R_ExecuteSetViewSize ();
+	R_ExecuteSetViewSize();
     
     // draw the pattern into the back screen
     R_FillBackScreen ();   
@@ -1573,13 +1572,13 @@ void G_BeginRecording (void)
 
 char*	defdemoname; 
  
-void G_DeferedPlayDemo (char* name) 
+void G_DeferedPlayDemo(const char* name) 
 { 
     defdemoname = name; 
     gameaction = ga_playdemo; 
 } 
  
-void G_DoPlayDemo (void) 
+void G_DoPlayDemo() 
 { 
     skill_t skill; 
     int             i, episode, map; 

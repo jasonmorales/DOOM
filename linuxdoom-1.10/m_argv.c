@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,23 +11,12 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
-// DESCRIPTION:
-//
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: m_argv.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
-
 
 #include <string.h>
 
-int		myargc;
-char**		myargv;
-
-
-
+int myargc = 0;
+char** myargv = NULL;
 
 //
 // M_CheckParm
@@ -38,19 +24,13 @@ char**		myargv;
 // in the program's command line arguments.
 // Returns the argument number (1 to argc-1)
 // or 0 if not present
-int M_CheckParm (char *check)
+int M_CheckParm(const char *check)
 {
-    int		i;
-
-    for (i = 1;i<myargc;i++)
+    for (int i = 1;i<myargc;i++)
     {
-	if ( !_stricmp(check, myargv[i]) )
-	    return i;
+	    if (!_stricmp(check, myargv[i]) )
+	        return i;
     }
 
     return 0;
 }
-
-
-
-

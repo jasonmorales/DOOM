@@ -129,7 +129,7 @@ typedef struct
 
 
 // Create any new ticcmds and broadcast to other players.
-void NetUpdate (void);
+void NetUpdate();
 
 // Broadcasts special packets to other players
 //  to notify of game exit

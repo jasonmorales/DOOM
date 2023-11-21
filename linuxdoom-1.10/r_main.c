@@ -668,7 +668,7 @@ R_SetViewSize
 //
 // R_ExecuteSetViewSize
 //
-void R_ExecuteSetViewSize (void)
+void R_ExecuteSetViewSize()
 {
     fixed_t	cosadj;
     fixed_t	dy;

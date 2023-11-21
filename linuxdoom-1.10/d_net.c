@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,17 +11,11 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	DOOM Network game communication and protocol,
 //	all OS independend parts.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char rcsid[] = "$Id: d_net.c,v 1.3 1997/02/03 22:01:47 b1 Exp $";
-
 
 #include "m_menu.h"
 #include "i_system.h"
@@ -33,6 +24,8 @@ static const char rcsid[] = "$Id: d_net.c,v 1.3 1997/02/03 22:01:47 b1 Exp $";
 #include "g_game.h"
 #include "doomdef.h"
 #include "doomstat.h"
+
+void D_ProcessEvents();
 
 #define	NCMD_EXIT		0x80000000
 #define	NCMD_RETRANSMIT		0x40000000
@@ -74,15 +67,11 @@ int		skiptics;
 int		ticdup;		
 int		maxsend;	// BACKUPTICS/(2*ticdup)-1
 
-
-void D_ProcessEvents (void); 
 void G_BuildTiccmd (ticcmd_t *cmd); 
 void D_DoAdvanceDemo (void);
  
 boolean		reboundpacket;
 doomdata_t	reboundstore;
-
-
 
 //
 //
@@ -365,7 +354,7 @@ void GetPackets (void)
 //
 int      gametime;
 
-void NetUpdate (void)
+void NetUpdate()
 {
     int             nowtime;
     int             newtics;
@@ -399,19 +388,19 @@ void NetUpdate (void)
     gameticdiv = gametic/ticdup;
     for (i=0 ; i<newtics ; i++)
     {
-	I_StartTic ();
-	D_ProcessEvents ();
-	if (maketic - gameticdiv >= BACKUPTICS/2-1)
-	    break;          // can't hold any more
+		I_StartTic ();
+		D_ProcessEvents();
+		if (maketic - gameticdiv >= BACKUPTICS/2-1)
+			break;          // can't hold any more
 	
-	//printf ("mk:%i ",maketic);
-	G_BuildTiccmd (&localcmds[maketic%BACKUPTICS]);
-	maketic++;
+		//printf ("mk:%i ",maketic);
+		G_BuildTiccmd (&localcmds[maketic%BACKUPTICS]);
+		maketic++;
     }
 
 
     if (singletics)
-	return;         // singletic update is syncronous
+		return;         // singletic update is syncronous
     
     // send the packet to the other nodes
     for (i=0 ; i<doomcom->numnodes ; i++)
@@ -552,7 +541,7 @@ void D_ArbitrateNetStart (void)
 //
 extern	int			viewangleoffset;
 
-void D_CheckNetGame (void)
+void D_CheckNetGame()
 {
     int             i;
 	

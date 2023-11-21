@@ -91,12 +91,10 @@ workspace 'Doom'
 
 		files {
 			--'ipx/**.c',
-			--'ipx/**.c',
 			--'sersrc/**.c',
-			--'sersrc/**.c',
-			--'sndserv/**.c',
 			--'sndserv/**.c',
 			'linuxdoom-1.10/**.c',
+            'linuxdoom-1.10/**.cpp',
 			'linuxdoom-1.10/**.h',
 			'**.natvis',
 		}

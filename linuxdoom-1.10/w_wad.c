@@ -282,7 +282,7 @@ uint64_t W_NumLumps()
 // W_CheckNumForName
 // Returns -1 if name not found.
 //
-intptr_t W_CheckNumForName(char* name)
+intptr_t W_CheckNumForName(const char* name)
 {
     union {
 	    char s[9];
@@ -321,12 +321,12 @@ intptr_t W_CheckNumForName(char* name)
 // W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
 //
-intptr_t W_GetNumForName(char* name)
+intptr_t W_GetNumForName(const char* name)
 {
     intptr_t i = W_CheckNumForName(name);
     
     if (i == -1)
-      I_Error ("W_GetNumForName: %s not found!", name);
+      I_Error("W_GetNumForName: %s not found!", name);
       
     return i;
 }
@@ -378,7 +378,7 @@ void W_ReadLump(intptr_t lump, void* dest)
 //
 void* W_CacheLumpNum(intptr_t lump, int tag)
 {
-    if ((unsigned)lump >= numlumps)
+    if (lump >= numlumps)
 	    I_Error("W_CacheLumpNum: %i >= numlumps", lump);
 		
     if (!lumpcache[lump])
@@ -399,7 +399,7 @@ void* W_CacheLumpNum(intptr_t lump, int tag)
 //
 // W_CacheLumpName
 //
-void* W_CacheLumpName(char* name, int tag)
+void* W_CacheLumpName(const char* name, int tag)
 {
     return W_CacheLumpNum(W_GetNumForName(name), tag);
 }
