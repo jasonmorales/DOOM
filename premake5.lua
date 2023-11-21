@@ -25,6 +25,7 @@ end)
 function standard_settings(project_name)
 	language 'C++'
     cppdialect 'C++latest'
+    cdialect 'C17'
     systemversion '10.0'
 	characterset 'unicode'
     warnings 'extra'
@@ -53,12 +54,12 @@ function standard_settings(project_name)
 		symbols 'on'
 		optimize 'off'
 		targetsuffix '_d'
-		debugcommand 'bin/doom_d.exe'
+		debugcommand ('bin/' .. project_name .. '_d.exe')
 
 	filter 'Release'
 		defines { 'NDEBUG' }
 		optimize 'full'
-		debugcommand 'bin/doom.exe'
+		debugcommand ('bin/' .. project_name .. '.exe')
 		
 	filter {}
 end
@@ -90,17 +91,19 @@ workspace 'Doom'
 		entrypoint 'WinMainCRTStartup'
 
 		files {
-			--'ipx/**.c',
-			--'sersrc/**.c',
-			--'sndserv/**.c',
+			'ipx/**.c',
+			'sersrc/**.c',
+			'sndserv/**.c',
 			'linuxdoom-1.10/**.c',
             'linuxdoom-1.10/**.cpp',
 			'linuxdoom-1.10/**.h',
 			'**.natvis',
 		}
 
+        filter 'files:sersrc/** or files:ipx/** or files:sndserv/**'
+            flags { 'ExcludeFromBuild' }
+
 		includedirs {
-			'src/core',
 			'lib/glew-' .. glew_version .. '/include',
 		}
 
@@ -113,7 +116,7 @@ workspace 'Doom'
 			os.copyfile('lib/glew-' .. glew_version .. '/bin/Release/x64/glew32.dll', 'bin/glew32.dll')
 		end
 
-		filter{'system:windows'}		
+		filter 'system:windows'
 			libdirs {
 				'lib/glew-' .. glew_version .. '/lib/Release/x64',
 			}
@@ -128,7 +131,7 @@ workspace 'Doom'
 				'ws2_32',
 			}
 
-		filter{'system:linux'}
+		filter 'system:linux'
 			libdirs {
 				'/opt/vc/lib',
 			}
@@ -136,13 +139,4 @@ workspace 'Doom'
 				'EGL',
 				'GLESv2',
 			}
-		filter{}
-
-		defines { 'CORE_EXPORTS' }
-		
-		--filter { 'files:src/core/dummy.cpp' }
-		--	flags { 'NoPCH' }
-		--filter {}
-
-		--pchsource 'src/core/build/pch.cpp'
-		--pchheader 'build/pch.h'
+		filter {}
