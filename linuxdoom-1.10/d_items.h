@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,35 +15,21 @@
 //	Items: key cards, artifacts, weapon, ammunition.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __D_ITEMS__
-#define __D_ITEMS__
+#pragma once
 
 #include "doomdef.h"
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
+#include "info.h"
 
 // Weapon info: sprite frames, ammunition use.
-typedef struct
+struct weaponinfo_t
 {
-    ammotype_t	ammo;
-    int		upstate;
-    int		downstate;
-    int		readystate;
-    int		atkstate;
-    int		flashstate;
+    ammotype_t ammo;
+    statenum_t upstate;
+    statenum_t downstate;
+    statenum_t readystate;
+    statenum_t atkstate;
+    statenum_t flashstate;
 
-} weaponinfo_t;
+};
 
-extern  weaponinfo_t    weaponinfo[NUMWEAPONS];
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+extern weaponinfo_t weaponinfo[NUMWEAPONS];

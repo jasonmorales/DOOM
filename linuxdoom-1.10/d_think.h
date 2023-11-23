@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -20,17 +17,7 @@
 //  suffers state changes of more or less violent nature.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __D_THINK__
-#define __D_THINK__
-
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
+#pragma once
 
 //
 // Experimental stuff.
@@ -38,42 +25,36 @@
 //  we will need to handle the various
 //  action functions cleanly.
 //
-typedef  void (*actionf_v)();
-typedef  void (*actionf_p1)( void* );
-typedef  void (*actionf_p2)( void*, void* );
+using actionf_v = void(*)();
+using actionf_p1 = void(*)(struct mobj_t*);
+using actionf_p2 = void(*)(struct player_t*, struct pspdef_t*);
 
-typedef union
+union actionf_t
 {
-  actionf_p1	acp1;
-  actionf_v	acv;
-  actionf_p2	acp2;
+    actionf_v acv;
+    actionf_p1 acp1;
+    actionf_p2 acp2;
 
-} actionf_t;
-
-
-
-
+    actionf_t(std::nullptr_t) : acv{nullptr} {}
+    actionf_t(actionf_p1 in) : acp1{in} {}
+    actionf_t(actionf_p2 in) : acp2{in} {}
+};
 
 // Historically, "think_t" is yet another
 //  function pointer to a routine to handle
 //  an actor.
-typedef actionf_t  think_t;
-
+using think_t = actionf_t;
 
 // Doubly linked list of actors.
-typedef struct thinker_s
+struct thinker_t
 {
-    struct thinker_s*	prev;
-    struct thinker_s*	next;
-    think_t		function;
-    
-} thinker_t;
+    thinker_t* prev;
+    thinker_t* next;
+    think_t function;
 
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+    thinker_t()
+        : prev{nullptr}
+        , next{nullptr}
+        , function{nullptr}
+    {}
+};

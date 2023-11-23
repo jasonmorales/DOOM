@@ -74,7 +74,7 @@ extern  Language_t   language;
 //
 
 // Defaults for menu, methinks.
-extern  skill_t		startskill;
+extern skill_t startskill;
 extern  int             startepisode;
 extern	int		startmap;
 
@@ -106,8 +106,8 @@ extern  int	deathmatch;
 //  Sound FX volume has default, 0 - 15
 //  Music volume has default, 0 - 15
 // These are multiplied by 8.
-extern int snd_SfxVolume;      // maximum volume for sound
-extern int snd_MusicVolume;    // maximum volume for music
+extern intptr_t snd_SfxVolume;      // maximum volume for sound
+extern intptr_t snd_MusicVolume;    // maximum volume for music
 
 // Current music/sfx card - index useless
 //  w/o a reference LUT in a sound module.
@@ -252,7 +252,7 @@ extern  boolean         precache;
 //  to force a wipe on the next draw
 extern  gamestate_t     wipegamestate;
 
-extern  int             mouseSensitivity;
+extern  intptr_t             mouseSensitivity;
 //?
 // debug flag to cancel adaptiveness
 extern  boolean         singletics;	
@@ -264,7 +264,7 @@ extern  int             bodyqueslot;
 // Needed to store the number of the dummy sky flat.
 // Used for rendering,
 //  as well as tracking projectiles etc.
-extern int		skyflatnum;
+extern intptr_t skyflatnum;
 
 
 

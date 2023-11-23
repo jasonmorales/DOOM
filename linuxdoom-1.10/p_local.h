@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,14 +15,11 @@
 //	Play functions, animation, global header.
 //
 //-----------------------------------------------------------------------------
+#pragma once
 
-
-#ifndef __P_LOCAL__
-#define __P_LOCAL__
-
-#ifndef __R_LOCAL__
 #include "r_local.h"
-#endif
+
+#include <limits>
 
 #define FLOATSPEED		(FRACUNIT*4)
 
@@ -92,8 +86,8 @@ void	P_PlayerThink (player_t* player);
 //
 // P_MOBJ
 //
-#define ONFLOORZ		MININT
-#define ONCEILINGZ		MAXINT
+constexpr auto ONFLOORZ = std::numeric_limits<int>::min();
+constexpr auto ONCEILINGZ = std::numeric_limits<int>::max();
 
 // Time interval for item respawning.
 #define ITEMQUESIZE		128
@@ -277,13 +271,3 @@ P_DamageMobj
 // P_SPEC
 //
 #include "p_spec.h"
-
-
-#endif	// __P_LOCAL__
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
-
-

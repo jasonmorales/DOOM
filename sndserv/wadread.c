@@ -75,7 +75,7 @@ typedef struct lumpinfo_struct
     int		handle;
     int		filepos;
     int		size;
-    char	name[8];
+    char	name[9];
 
 } lumpinfo_t;
 
@@ -147,34 +147,26 @@ int filelength (int handle)
     return fileinfo.st_size;
 }
 
-
-
 void openwad(char* wadname)
 {
-
-    int		wadfile;
-    int		tableoffset;
-    int		tablelength;
-    int		tablefilelength;
-    int		i;
-    wadinfo_t	header;
     filelump_t*	filetable;
 
     // open and read the wadfile header
-    wadfile = open(wadname, O_RDONLY);
+    int wadfile = open(wadname, O_RDONLY);
 
     if (wadfile < 0)
 	derror("Could not open wadfile");
 
+    wadinfo_t header;
     read(wadfile, &header, sizeof header);
 
     if (strncmp(header.identification, "IWAD", 4))
 	derror("wadfile has weirdo header");
 
     numlumps = LONG(header.numlumps);
-    tableoffset = LONG(header.infotableofs);
-    tablelength = numlumps * sizeof(lumpinfo_t);
-    tablefilelength = numlumps * sizeof(filelump_t);
+    int tableoffset = LONG(header.infotableofs);
+    int tablelength = numlumps * sizeof(lumpinfo_t);
+    int tablefilelength = numlumps * sizeof(filelump_t);
     lumpinfo = (lumpinfo_t *) malloc(tablelength);
     filetable = (filelump_t *) ((char*)lumpinfo + tablelength - tablefilelength);
 
@@ -183,15 +175,14 @@ void openwad(char* wadname)
     read(wadfile, filetable, tablefilelength);
 
     // process the table to make the endianness right and shift it down
-    for (i=0 ; i<numlumps ; i++)
+    for (int i=0 ; i<numlumps ; i++)
     {
-	strncpy(lumpinfo[i].name, filetable[i].name, 8);
-	lumpinfo[i].handle = wadfile;
-	lumpinfo[i].filepos = LONG(filetable[i].filepos);
-	lumpinfo[i].size = LONG(filetable[i].size);
-	// fprintf(stderr, "lump [%.8s] exists\n", lumpinfo[i].name);
+	    strncpy(lumpinfo[i].name, filetable[i].name, 8);
+	    lumpinfo[i].handle = wadfile;
+	    lumpinfo[i].filepos = LONG(filetable[i].filepos);
+	    lumpinfo[i].size = LONG(filetable[i].size);
+	    // fprintf(stderr, "lump [%.8s] exists\n", lumpinfo[i].name);
     }
-
 }
 
 void*

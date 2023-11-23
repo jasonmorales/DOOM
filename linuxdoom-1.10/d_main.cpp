@@ -22,56 +22,32 @@
 #define	BGCOLOR		7
 #define	FGCOLOR		8
 
-extern "C"
-{
 #include "doomdef.h"
 #include "doomstat.h"
-
 #include "dstrings.h"
 #include "sounds.h"
 
-#include "z_zone.h"
-#include "w_wad.h"
-#include "s_sound.h"
-#include "v_video.h"
-
+#include "am_map.h"
+#include "d_main.h"
 #include "f_finale.h"
 #include "f_wipe.h"
-
-#include "m_argv.h"
-#include "m_misc.h"
-#include "m_menu.h"
-
+#include "g_game.h"
+#include "hu_stuff.h"
 #include "i_system.h"
 #include "i_sound.h"
 #include "i_video.h"
-
-#include "g_game.h"
-
-#include "hu_stuff.h"
-#include "wi_stuff.h"
-#include "st_stuff.h"
-#include "am_map.h"
-
+#include "m_argv.h"
+#include "m_misc.h"
+#include "m_menu.h"
 #include "p_setup.h"
+#include "r_main.h"
 #include "r_local.h"
-
-#include "d_main.h"
-
-extern boolean inhelpscreens;
-extern boolean setsizeneeded;
-extern int showMessages;
-extern int forwardmove[2];
-extern int sidemove[2];
-extern void* statcopy;                            
-
-void D_CheckNetGame();
-void G_BuildTiccmd(ticcmd_t* cmd);
-void D_DoAdvanceDemo();
-void R_ExecuteSetViewSize (void);
-
-boolean advancedemo;
-}
+#include "s_sound.h"
+#include "st_stuff.h"
+#include "v_video.h"
+#include "w_wad.h"
+#include "wi_stuff.h"
+#include "z_zone.h"
 
 #include <malloc.h>
 #include <string.h>
@@ -79,6 +55,20 @@ boolean advancedemo;
 #include <direct.h>
 #include <io.h>
 #include <errno.h>
+#include <crtdbg.h>
+
+void D_DoAdvanceDemo();
+void D_CheckNetGame();
+void G_BuildTiccmd(ticcmd_t* cmd);
+
+extern boolean inhelpscreens;
+extern boolean setsizeneeded;
+extern intptr_t showMessages;
+extern int forwardmove[2];
+extern int sidemove[2];
+extern void* statcopy;                            
+
+boolean advancedemo;
 
 //
 // D-DoomLoop()
@@ -147,7 +137,6 @@ void D_PostEvent (event_t* ev)
 // D_ProcessEvents
 // Send all the events of the given timestamp down the responder chain
 //
-extern "C" void D_ProcessEvents();
 void D_ProcessEvents()
 {
     // IF STORE DEMO, DO NOT ACCEPT INPUT
@@ -178,7 +167,7 @@ void D_Display (void)
     static  boolean		menuactivestate = false;
     static  boolean		inhelpscreensstate = false;
     static  boolean		fullscreen = false;
-    static  gamestate_t oldgamestate = GS_INVALID;
+    static  gamestate_t oldgamestate = GS_FORCE_WIPE;
     static  int			borderdrawcount;
     int				nowtime;
     int				tics;
@@ -197,7 +186,7 @@ void D_Display (void)
     if (setsizeneeded)
     {
 		R_ExecuteSetViewSize();
-		oldgamestate = GS_INVALID;                      // force background redraw
+		oldgamestate = GS_FORCE_WIPE;                      // force background redraw
 		borderdrawcount = 3;
     }
 
@@ -254,13 +243,13 @@ void D_Display (void)
     
     // clean up border stuff
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
-		I_SetPalette(static_cast<byte*>(W_CacheLumpName("PLAYPAL", PU_CACHE)));
+		I_SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
 
     // see if the border needs to be initially drawn
     if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL)
     {
-	viewactivestate = false;        // view was not active
-	R_FillBackScreen();    // draw the pattern into the back screen
+		viewactivestate = false;        // view was not active
+		R_FillBackScreen();    // draw the pattern into the back screen
     }
 
     // see if the border needs to be updated to the screen
@@ -288,7 +277,7 @@ void D_Display (void)
 			y = 4;
 		else
 			y = viewwindowy+4;
-		V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, static_cast<patch_t*>(W_CacheLumpName("M_PAUSE", PU_CACHE)));
+		V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, W_CacheLumpName<patch_t>("M_PAUSE", PU_CACHE));
     }
 
 
@@ -409,7 +398,7 @@ void D_PageTicker()
 //
 void D_PageDrawer()
 {
-    V_DrawPatch(0, 0, 0, static_cast<patch_t*>(W_CacheLumpName(pagename, PU_CACHE)));
+    V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>(pagename, PU_CACHE));
 }
 
 //
@@ -715,6 +704,8 @@ void FindResponseFile (void)
 //
 void D_DoomMain()
 {
+	_CrtSetDebugFillThreshold(0);
+
 	static char title[128];
 
     int             p;

@@ -43,14 +43,13 @@ typedef struct
 //
 // WADFILE I/O related stuff.
 //
-typedef struct
+struct lumpinfo_t
 {
-    char	name[8];
-    int		handle;
-    int		position;
-    int		size;
-} lumpinfo_t;
-
+    char name[9] /*= {0}*/;
+    int handle;
+    int position;
+    int size;
+};
 
 extern	void**		lumpcache;
 extern	lumpinfo_t*	lumpinfo;
@@ -65,5 +64,16 @@ intptr_t W_GetNumForName(const char* name);
 int	W_LumpLength(intptr_t lump);
 void W_ReadLump(intptr_t lump, void *dest);
 
-void* W_CacheLumpNum(intptr_t lump, int tag);
-void* W_CacheLumpName(const char* name, int tag);
+void* W_CacheLumpNum_internal(intptr_t lump, int tag);
+
+template<typename T = patch_t>
+T* W_CacheLumpNum(intptr_t lump, int tag)
+{
+    return static_cast<T*>(W_CacheLumpNum_internal(lump, tag));
+}
+
+template<typename T = patch_t>
+T* W_CacheLumpName(const char* name, int tag)
+{
+    return W_CacheLumpNum<T>(W_GetNumForName(name), tag);
+}

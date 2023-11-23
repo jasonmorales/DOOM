@@ -55,16 +55,16 @@
 #define ANGLETOFINESHIFT	19		
 
 // Effective size is 10240.
-extern  fixed_t		finesine[5*FINEANGLES/4];
+extern const fixed_t finesine[];
 
-// Re-use data, is just PI/2 pahse shift.
-extern  fixed_t*	finecosine;
+// Re-use data, is just PI/2 phase shift.
+extern const fixed_t* finecosine;
 
 
 // Effective size is 4096.
 extern fixed_t		finetangent[FINEANGLES/2];
 
-// Binary Angle Measument, BAM.
+// Binary Angle Measurement, BAM.
 #define ANG45			0x20000000
 #define ANG90			0x40000000
 #define ANG180		0x80000000

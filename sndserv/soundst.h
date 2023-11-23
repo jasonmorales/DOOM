@@ -271,7 +271,7 @@ int I_QrySongPlaying(int handle);
 //
 void I_SetChannels(int channels);
 
-int I_GetSfxLumpNum (sfxinfo_t*);
+intptr_t I_GetSfxLumpNum (sfxinfo_t*);
 
 
 // Starts a sound in a particular sound channel.

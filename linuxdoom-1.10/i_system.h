@@ -20,13 +20,15 @@
 #include "d_ticcmd.h"
 #include "d_event.h"
 
+#include <stdint.h>
+
 // Called by DoomMain.
 void I_Init (void);
 
 // Called by startup code
 // to get the ammount of memory to malloc
 // for the zone management.
-byte*	I_ZoneBase (int *size);
+byte*	I_ZoneBase (intptr_t *size);
 
 
 // Called by D_DoomLoop,

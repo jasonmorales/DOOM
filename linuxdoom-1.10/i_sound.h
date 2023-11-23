@@ -29,7 +29,7 @@
 #ifdef SNDSERV
 #include <stdio.h>
 extern FILE* sndserver;
-extern char* sndserver_filename;
+extern const char* sndserver_filename;
 #endif
 
 #include "doomstat.h"
@@ -56,7 +56,7 @@ void I_ShutdownSound(void);
 void I_SetChannels();
 
 // Get raw data lump index for sound descriptor.
-int I_GetSfxLumpNum (sfxinfo_t* sfxinfo );
+intptr_t I_GetSfxLumpNum (sfxinfo_t* sfxinfo );
 
 
 // Starts a sound in a particular sound channel.

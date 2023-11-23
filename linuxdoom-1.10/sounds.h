@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -19,10 +16,7 @@
 //	Kept as a sample, DOOM2  sounds. Frozen.
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __SOUNDS__
-#define __SOUNDS__
-
+#pragma once
 
 //
 // SoundFX struct.
@@ -32,7 +26,7 @@ typedef struct sfxinfo_struct	sfxinfo_t;
 struct sfxinfo_struct
 {
     // up to 6-character name
-    char*	name;
+    const char*	name;
 
     // Sfx singularity (only one at a time)
     int		singularity;
@@ -67,10 +61,10 @@ struct sfxinfo_struct
 //
 // MusicInfo struct.
 //
-typedef struct
+struct musicinfo_t
 {
     // up to 6-character name
-    char*	name;
+    const char*	name;
 
     // lump number of music
     int		lumpnum;
@@ -80,8 +74,7 @@ typedef struct
 
     // music handle once registered
     int handle;
-    
-} musicinfo_t;
+} ;
 
 
 
@@ -287,11 +280,3 @@ typedef enum
     sfx_radio,
     NUMSFX
 } sfxenum_t;
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
-

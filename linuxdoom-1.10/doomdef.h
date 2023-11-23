@@ -58,7 +58,6 @@ typedef enum
 typedef enum
 {
   english,
-  french,
   german,
   unknown
 
@@ -126,7 +125,7 @@ typedef enum
     GS_FINALE,
     GS_DEMOSCREEN,
 
-    GS_INVALID
+    GS_FORCE_WIPE
 
 } gamestate_t;
 
@@ -309,7 +308,7 @@ typedef enum
 //#include "dstrings.h"
 
 // Player is a special actor.
-//struct player_s;
+//struct player_t;
 
 
 //#include "d_items.h"

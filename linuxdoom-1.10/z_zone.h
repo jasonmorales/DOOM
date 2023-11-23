@@ -39,7 +39,14 @@
 
 
 void Z_Init();
-void* Z_Malloc(intptr_t size, int tag, void *ptr);
+
+void* Z_Malloc_internal(intptr_t size, int tag, void* ptr);
+template<typename T = byte>
+T* Z_Malloc(intptr_t size, int tag, void* ptr)
+{
+    return static_cast<T*>(Z_Malloc_internal(size, tag, ptr));
+}
+
 void Z_Free(void *ptr);
 void Z_FreeTags(int lowtag, int hightag);
 void Z_DumpHeap(int lowtag, int hightag);
@@ -66,6 +73,6 @@ typedef struct memblock_s
 #define Z_ChangeTag(p,t) \
 { \
       if (( (memblock_t*)((intptr_t)(p) - sizeof(memblock_t)))->id!=0x1d4a11) \
-	  I_Error("Z_CT at "__FILE__":%i",__LINE__); \
+	  I_Error("Z_CT at " __FILE__ ":%i",__LINE__); \
 	  Z_ChangeTag2(p, t); \
 };

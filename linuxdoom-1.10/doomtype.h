@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -19,11 +16,7 @@
 //	 separating modules.
 //    
 //-----------------------------------------------------------------------------
-
-
-#ifndef __DOOMTYPE__
-#define __DOOMTYPE__
-
+#pragma once
 
 #ifndef __BYTEBOOL__
 #define __BYTEBOOL__
@@ -36,11 +29,7 @@ typedef enum {false, true} boolean;
 typedef unsigned char byte;
 #endif
 
-
-// Predefined with some OS.
-#ifdef LINUX
-#include <values.h>
-#else
+#if !defined(__cplusplus)
 #define MAXCHAR		((char)0x7f)
 #define MAXSHORT	((short)0x7fff)
 
@@ -54,13 +43,3 @@ typedef unsigned char byte;
 #define MININT		((int)0x80000000)	
 #define MINLONG		((long)0x80000000)
 #endif
-
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //  Sprite animation.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __P_PSPR__
-#define __P_PSPR__
+#pragma once
 
 // Basic data types.
 // Needs fixed point, and BAM angles.
@@ -38,11 +32,6 @@
 // and the Frame Sequence table.
 #include "info.h"
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
 //
 // Frame flags:
 // handles maximum brightness (torches, muzzle flare, light sources)
@@ -57,26 +46,19 @@
 // drawn directly on the view screen,
 // coordinates are given for a 320*200 view screen.
 //
-typedef enum
+enum psprnum_t
 {
     ps_weapon,
     ps_flash,
     NUMPSPRITES
 
-} psprnum_t;
+};
 
-typedef struct
+struct pspdef_t
 {
     state_t*	state;	// a NULL state means not active
     int		tics;
     fixed_t	sx;
     fixed_t	sy;
 
-} pspdef_t;
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+};
