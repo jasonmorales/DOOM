@@ -27,8 +27,8 @@ int WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {
     myargc = 1;
     myargv = &args;
- 
-    D_DoomMain (); 
+
+    D_DoomMain();
 
     return 0;
-} 
+}

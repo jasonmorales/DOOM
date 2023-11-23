@@ -35,9 +35,9 @@ union actionf_t
     actionf_p1 acp1;
     actionf_p2 acp2;
 
-    actionf_t(std::nullptr_t) : acv{nullptr} {}
-    actionf_t(actionf_p1 in) : acp1{in} {}
-    actionf_t(actionf_p2 in) : acp2{in} {}
+    actionf_t(std::nullptr_t) : acv{ nullptr } {}
+    actionf_t(actionf_p1 in) : acp1{ in } {}
+    actionf_t(actionf_p2 in) : acp2{ in } {}
 };
 
 // Historically, "think_t" is yet another
@@ -53,8 +53,8 @@ struct thinker_t
     think_t function;
 
     thinker_t()
-        : prev{nullptr}
-        , next{nullptr}
-        , function{nullptr}
+        : prev{ nullptr }
+        , next{ nullptr }
+        , function{ nullptr }
     {}
 };

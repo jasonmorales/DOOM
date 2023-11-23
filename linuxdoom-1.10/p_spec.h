@@ -39,76 +39,76 @@ extern	int	levelTimeCount;
 
 
 // at game start
-void    P_InitPicAnims (void);
+void    P_InitPicAnims(void);
 
 // at map load
-void    P_SpawnSpecials (void);
+void    P_SpawnSpecials(void);
 
 // every tic
-void    P_UpdateSpecials (void);
+void    P_UpdateSpecials(void);
 
 // when needed
 boolean
 P_UseSpecialLine
-( mobj_t*	thing,
-  line_t*	line,
-  int		side );
+(mobj_t* thing,
+    line_t* line,
+    int		side);
 
 void
 P_ShootSpecialLine
-( mobj_t*	thing,
-  line_t*	line );
+(mobj_t* thing,
+    line_t* line);
 
 void
 P_CrossSpecialLine
-( int		linenum,
-  int		side,
-  mobj_t*	thing );
+(int		linenum,
+    int		side,
+    mobj_t* thing);
 
-void    P_PlayerInSpecialSector (player_t* player);
+void    P_PlayerInSpecialSector(player_t* player);
 
 int
 twoSided
-( int		sector,
-  int		line );
+(int		sector,
+    int		line);
 
 sector_t*
 getSector
-( int		currentSector,
-  int		line,
-  int		side );
+(int		currentSector,
+    int		line,
+    int		side);
 
 side_t*
 getSide
-( int		currentSector,
-  int		line,
-  int		side );
+(int		currentSector,
+    int		line,
+    int		side);
 
 fixed_t P_FindLowestFloorSurrounding(sector_t* sec);
 fixed_t P_FindHighestFloorSurrounding(sector_t* sec);
 
 fixed_t
 P_FindNextHighestFloor
-( sector_t*	sec,
-  int		currentheight );
+(sector_t* sec,
+    int		currentheight);
 
 fixed_t P_FindLowestCeilingSurrounding(sector_t* sec);
 fixed_t P_FindHighestCeilingSurrounding(sector_t* sec);
 
 int
 P_FindSectorFromLineTag
-( line_t*	line,
-  int		start );
+(line_t* line,
+    int		start);
 
 int
 P_FindMinSurroundingLight
-( sector_t*	sector,
-  int		max );
+(sector_t* sector,
+    int		max);
 
 sector_t*
 getNextSector
-( line_t*	line,
-  sector_t*	sec );
+(line_t* line,
+    sector_t* sec);
 
 
 //
@@ -124,11 +124,11 @@ int EV_DoDonut(line_t* line);
 typedef struct
 {
     thinker_t	thinker;
-    sector_t*	sector;
+    sector_t* sector;
     int		count;
     int		maxlight;
     int		minlight;
-    
+
 } fireflicker_t;
 
 
@@ -136,13 +136,13 @@ typedef struct
 typedef struct
 {
     thinker_t	thinker;
-    sector_t*	sector;
+    sector_t* sector;
     int		count;
     int		maxlight;
     int		minlight;
     int		maxtime;
     int		mintime;
-    
+
 } lightflash_t;
 
 
@@ -150,13 +150,13 @@ typedef struct
 typedef struct
 {
     thinker_t	thinker;
-    sector_t*	sector;
+    sector_t* sector;
     int		count;
     int		minlight;
     int		maxlight;
     int		darktime;
     int		brighttime;
-    
+
 } strobe_t;
 
 
@@ -165,7 +165,7 @@ typedef struct
 typedef struct
 {
     thinker_t	thinker;
-    sector_t*	sector;
+    sector_t* sector;
     int		minlight;
     int		maxlight;
     int		direction;
@@ -178,24 +178,24 @@ typedef struct
 #define FASTDARK			15
 #define SLOWDARK			35
 
-void    P_SpawnFireFlicker (sector_t* sector);
-void    T_LightFlash (lightflash_t* flash);
-void    P_SpawnLightFlash (sector_t* sector);
-void    T_StrobeFlash (strobe_t* flash);
+void    P_SpawnFireFlicker(sector_t* sector);
+void    T_LightFlash(lightflash_t* flash);
+void    P_SpawnLightFlash(sector_t* sector);
+void    T_StrobeFlash(strobe_t* flash);
 
 void
 P_SpawnStrobeFlash
-( sector_t*	sector,
-  int		fastOrSlow,
-  int		inSync );
+(sector_t* sector,
+    int		fastOrSlow,
+    int		inSync);
 
 void    EV_StartLightStrobing(line_t* line);
 void    EV_TurnTagLightsOff(line_t* line);
 
 void
 EV_LightTurnOn
-( line_t*	line,
-  int		bright );
+(line_t* line,
+    int		bright);
 
 void    T_Glow(glow_t* g);
 void    P_SpawnGlowingLight(sector_t* sector);
@@ -211,7 +211,7 @@ typedef struct
     char	name1[9];
     char	name2[9];
     short	episode;
-    
+
 } switchlist_t;
 
 
@@ -226,18 +226,18 @@ typedef enum
 
 typedef struct
 {
-    line_t*	line;
+    line_t* line;
     bwhere_e	where;
     int		btexture;
     int		btimer;
-    mobj_t*	soundorg;
+    mobj_t* soundorg;
 
 } button_t;
 
 
 
 
- // max # of wall switches in a level
+// max # of wall switches in a level
 #define MAXSWITCHES		50
 
  // 4 players, 4 buttons each at once, max.
@@ -246,12 +246,12 @@ typedef struct
  // 1 second, in ticks. 
 #define BUTTONTIME      35             
 
-extern button_t	buttonlist[MAXBUTTONS]; 
+extern button_t	buttonlist[MAXBUTTONS];
 
 void
 P_ChangeSwitchTexture
-( line_t*	line,
-  int		useAgain );
+(line_t* line,
+    int		useAgain);
 
 void P_InitSwitchList(void);
 
@@ -285,7 +285,7 @@ typedef enum
 typedef struct
 {
     thinker_t	thinker;
-    sector_t*	sector;
+    sector_t* sector;
     fixed_t	speed;
     fixed_t	low;
     fixed_t	high;
@@ -296,7 +296,7 @@ typedef struct
     boolean	crush;
     int		tag;
     plattype_e	type;
-    
+
 } plat_t;
 
 
@@ -306,15 +306,15 @@ typedef struct
 #define MAXPLATS		30
 
 
-extern plat_t*	activeplats[MAXPLATS];
+extern plat_t* activeplats[MAXPLATS];
 
-void    T_PlatRaise(plat_t*	plat);
+void    T_PlatRaise(plat_t* plat);
 
 int
 EV_DoPlat
-( line_t*	line,
-  plattype_e	type,
-  int		amount );
+(line_t* line,
+    plattype_e	type,
+    int		amount);
 
 void    P_AddActivePlat(plat_t* plat);
 void    P_RemoveActivePlat(plat_t* plat);
@@ -344,19 +344,19 @@ typedef struct
 {
     thinker_t	thinker;
     vldoor_e	type;
-    sector_t*	sector;
+    sector_t* sector;
     fixed_t	topheight;
     fixed_t	speed;
 
     // 1 = up, 0 = waiting at top, -1 = down
     int             direction;
-    
+
     // tics to wait at the top
     int             topwait;
     // (keep in case a door going down is reset)
     // when it reaches 0, start going down
     int             topcountdown;
-    
+
 } vldoor_t;
 
 
@@ -366,27 +366,27 @@ typedef struct
 
 void
 EV_VerticalDoor
-( line_t*	line,
-  mobj_t*	thing );
+(line_t* line,
+    mobj_t* thing);
 
 int
 EV_DoDoor
-( line_t*	line,
-  vldoor_e	type );
+(line_t* line,
+    vldoor_e	type);
 
 int
 EV_DoLockedDoor
-( line_t*	line,
-  vldoor_e	type,
-  mobj_t*	thing );
+(line_t* line,
+    vldoor_e	type,
+    mobj_t* thing);
 
-void    T_VerticalDoor (vldoor_t* door);
-void    P_SpawnDoorCloseIn30 (sector_t* sec);
+void    T_VerticalDoor(vldoor_t* door);
+void    P_SpawnDoorCloseIn30(sector_t* sec);
 
 void
 P_SpawnDoorRaiseIn5Mins
-( sector_t*	sec,
-  int		secnum );
+(sector_t* sec,
+    int		secnum);
 
 
 
@@ -419,12 +419,12 @@ typedef struct
 {
     thinker_t	thinker;
     sdt_e	type;
-    line_t*	line;
+    line_t* line;
     int		frame;
     int		whichDoorIndex;
     int		timer;
-    sector_t*	frontsector;
-    sector_t*	backsector;
+    sector_t* frontsector;
+    sector_t* backsector;
     sd_e	 status;
 
 } slidedoor_t;
@@ -441,7 +441,7 @@ typedef struct
     char	backFrame2[9];
     char	backFrame3[9];
     char	backFrame4[9];
-    
+
 } slidename_t;
 
 
@@ -468,8 +468,8 @@ void P_InitSlidingDoorFrames(void);
 
 void
 EV_SlidingDoor
-( line_t*	line,
-  mobj_t*	thing );
+(line_t* line,
+    mobj_t* thing);
 #endif
 
 
@@ -494,7 +494,7 @@ typedef struct
 {
     thinker_t	thinker;
     ceiling_e	type;
-    sector_t*	sector;
+    sector_t* sector;
     fixed_t	bottomheight;
     fixed_t	topheight;
     fixed_t	speed;
@@ -504,9 +504,9 @@ typedef struct
     int		direction;
 
     // ID
-    int		tag;                   
+    int		tag;
     int		olddirection;
-    
+
 } ceiling_t;
 
 
@@ -517,14 +517,14 @@ typedef struct
 #define CEILWAIT		150
 #define MAXCEILINGS		30
 
-extern ceiling_t*	activeceilings[MAXCEILINGS];
+extern ceiling_t* activeceilings[MAXCEILINGS];
 
 int
 EV_DoCeiling
-( line_t*	line,
-  ceiling_e	type );
+(line_t* line,
+    ceiling_e	type);
 
-void    T_MoveCeiling (ceiling_t* ceiling);
+void    T_MoveCeiling(ceiling_t* ceiling);
 void    P_AddActiveCeiling(ceiling_t* c);
 void    P_RemoveActiveCeiling(ceiling_t* c);
 int	EV_CeilingCrushStop(line_t* line);
@@ -538,35 +538,35 @@ typedef enum
 {
     // lower floor to highest surrounding floor
     lowerFloor,
-    
+
     // lower floor to lowest surrounding floor
     lowerFloorToLowest,
-    
+
     // lower floor to highest surrounding floor VERY FAST
     turboLower,
-    
+
     // raise floor to lowest surrounding CEILING
     raiseFloor,
-    
+
     // raise floor to next highest surrounding floor
     raiseFloorToNearest,
 
     // raise floor to shortest height texture around it
     raiseToTexture,
-    
+
     // lower floor to lowest surrounding floor
     //  and change floorpic
     lowerAndChange,
-  
+
     raiseFloor24,
     raiseFloor24AndChange,
     raiseFloorCrush,
 
-     // raise to next highest floor, turbo-speed
-    raiseFloorTurbo,       
+    // raise to next highest floor, turbo-speed
+    raiseFloorTurbo,
     donutRaise,
     raiseFloor512
-    
+
 } floor_e;
 
 
@@ -576,7 +576,7 @@ typedef enum
 {
     build8,	// slowly build by 8
     turbo16	// quickly build by 16
-    
+
 } stair_e;
 
 
@@ -586,7 +586,7 @@ typedef struct
     thinker_t	thinker;
     floor_e	type;
     boolean	crush;
-    sector_t*	sector;
+    sector_t* sector;
     int		direction;
     int		newspecial;
     short	texture;
@@ -604,38 +604,38 @@ typedef enum
     ok,
     crushed,
     pastdest
-    
+
 } result_e;
 
 result_e
 T_MovePlane
-( sector_t*	sector,
-  fixed_t	speed,
-  fixed_t	dest,
-  boolean	crush,
-  int		floorOrCeiling,
-  int		direction );
+(sector_t* sector,
+    fixed_t	speed,
+    fixed_t	dest,
+    boolean	crush,
+    int		floorOrCeiling,
+    int		direction);
 
 int
 EV_BuildStairs
-( line_t*	line,
-  stair_e	type );
+(line_t* line,
+    stair_e	type);
 
 int
 EV_DoFloor
-( line_t*	line,
-  floor_e	floortype );
+(line_t* line,
+    floor_e	floortype);
 
-void T_MoveFloor( floormove_t* floor);
+void T_MoveFloor(floormove_t* floor);
 
 //
 // P_TELEPT
 //
 int
 EV_Teleport
-( line_t*	line,
-  int		side,
-  mobj_t*	thing );
+(line_t* line,
+    int		side,
+    mobj_t* thing);
 
 #endif
 //-----------------------------------------------------------------------------

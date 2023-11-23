@@ -50,8 +50,8 @@
 
 typedef enum
 {
-    CMD_SEND	= 1,
-    CMD_GET	= 2
+    CMD_SEND = 1,
+    CMD_GET = 2
 
 } command_t;
 
@@ -65,7 +65,7 @@ typedef struct
     unsigned		checksum;
     // Only valid if NCMD_RETRANSMIT.
     byte		retransmitfrom;
-    
+
     byte		starttic;
     byte		player;
     byte		numtics;
@@ -80,15 +80,15 @@ typedef struct
 {
     // Supposed to be DOOMCOM_ID?
     long		id;
-    
+
     // DOOM executes an int to execute commands.
-    short		intnum;		
+    short		intnum;
     // Communication between DOOM and the driver.
     // Is CMD_SEND or CMD_GET.
     short		command;
     // Is dest for send, set by get (-1 = no packet).
     short		remotenode;
-    
+
     // Number of bytes in doomdata to be sent
     short		datalength;
 
@@ -110,7 +110,7 @@ typedef struct
     // Info specific to this node.
     short		consoleplayer;
     short		numplayers;
-    
+
     // These are related to the 3-display mode,
     //  in which two drones looking left and right
     //  were used to render two additional views
@@ -119,11 +119,11 @@ typedef struct
     // 1 = left, 0 = center, -1 = right
     short		angleoffset;
     // 1 = drone
-    short		drone;		
+    short		drone;
 
     // The packet data to be sent.
     doomdata_t		data;
-    
+
 } doomcom_t;
 
 
@@ -133,10 +133,10 @@ void NetUpdate();
 
 // Broadcasts special packets to other players
 //  to notify of game exit
-void D_QuitNetGame (void);
+void D_QuitNetGame(void);
 
 //? how many ticks to run?
-void TryRunTics (void);
+void TryRunTics(void);
 
 
 #endif

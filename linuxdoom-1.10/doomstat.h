@@ -93,8 +93,8 @@ extern  boolean	netgame;
 
 // Flag: true only if started as net deathmatch.
 // An enum might handle altdeath/cooperative better.
-extern  int	deathmatch;	
-	
+extern  int	deathmatch;
+
 // -------------------------
 // Internal parameters for sound rendering.
 // These have been taken from the DOS version,
@@ -155,7 +155,7 @@ extern	int		scaledviewwidth;
 extern  int	viewangleoffset;
 
 // Player taking events, and displaying.
-extern  int	consoleplayer;	
+extern  int	consoleplayer;
 extern  int	displayplayer;
 
 
@@ -184,7 +184,7 @@ extern  boolean	demoplayback;
 extern  boolean	demorecording;
 
 // Quit after playing a demo from cmdline.
-extern  boolean		singledemo;	
+extern  boolean		singledemo;
 
 
 
@@ -218,14 +218,14 @@ extern  boolean		playeringame[MAXPLAYERS];
 // Player spawn spots for deathmatch.
 #define MAX_DM_STARTS   10
 extern  mapthing_t      deathmatchstarts[MAX_DM_STARTS];
-extern  mapthing_t*	deathmatch_p;
+extern  mapthing_t* deathmatch_p;
 
 // Player spawn spots.
 extern  mapthing_t      playerstarts[MAXPLAYERS];
 
 // Intermission stats.
 // Parameters for world map / intermission.
-extern  wbstartstruct_t		wminfo;	
+extern  wbstartstruct_t		wminfo;
 
 
 // LUT of ammunition limits for each kind.
@@ -242,7 +242,7 @@ extern  int		maxammo[NUMAMMO];
 
 // File handling stuff.
 extern	char		basedefault[1024];
-extern  FILE*		debugfile;
+extern  FILE* debugfile;
 
 // if true, load all graphics at level load
 extern  boolean         precache;
@@ -255,7 +255,7 @@ extern  gamestate_t     wipegamestate;
 extern  intptr_t             mouseSensitivity;
 //?
 // debug flag to cancel adaptiveness
-extern  boolean         singletics;	
+extern  boolean         singletics;
 
 extern  int             bodyqueslot;
 
@@ -271,10 +271,10 @@ extern intptr_t skyflatnum;
 // Netgame stuff (buffers and pointers, i.e. indices).
 
 // This is ???
-extern  doomcom_t*	doomcom;
+extern  doomcom_t* doomcom;
 
 // This points inside doomcom.
-extern  doomdata_t*	netbuffer;	
+extern  doomdata_t* netbuffer;
 
 
 extern  ticcmd_t	localcmds[BACKUPTICS];

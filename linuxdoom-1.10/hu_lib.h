@@ -47,14 +47,14 @@ typedef struct
     // left-justified position of scrolling text window
     int		x;
     int		y;
-    
-    patch_t**	f;			// font
+
+    patch_t** f;			// font
     int		sc;			// start character
-    char	l[HU_MAXLINELENGTH+1];	// line of text
+    char	l[HU_MAXLINELENGTH + 1];	// line of text
     int		len;		      	// current line length
 
     // whether this line needs to be udpated
-    int		needsupdate;	      
+    int		needsupdate;
 
 } hu_textline_t;
 
@@ -69,7 +69,7 @@ typedef struct
     int			cl;		// current line number
 
     // pointer to boolean stating whether to update window
-    boolean*		on;
+    boolean* on;
     boolean		laston;		// last value of *->on.
 
 } hu_stext_t;
@@ -82,11 +82,11 @@ typedef struct
 {
     hu_textline_t	l;		// text line to input on
 
-     // left margin past which I am not to delete characters
+    // left margin past which I am not to delete characters
     int			lm;
 
     // pointer to boolean stating whether to update window
-    boolean*		on; 
+    boolean* on;
     boolean		laston; // last value of *->on;
 
 } hu_itext_t;
@@ -104,21 +104,21 @@ void HUlib_init(void);
 //
 
 // clear a line of text
-void	HUlib_clearTextLine(hu_textline_t *t);
+void	HUlib_clearTextLine(hu_textline_t* t);
 
-void	HUlib_initTextLine(hu_textline_t *t, int x, int y, patch_t **f, int sc);
-
-// returns success
-boolean HUlib_addCharToTextLine(hu_textline_t *t, char ch);
+void	HUlib_initTextLine(hu_textline_t* t, int x, int y, patch_t** f, int sc);
 
 // returns success
-boolean HUlib_delCharFromTextLine(hu_textline_t *t);
+boolean HUlib_addCharToTextLine(hu_textline_t* t, char ch);
+
+// returns success
+boolean HUlib_delCharFromTextLine(hu_textline_t* t);
 
 // draws tline
-void	HUlib_drawTextLine(hu_textline_t *l, boolean drawcursor);
+void	HUlib_drawTextLine(hu_textline_t* l, boolean drawcursor);
 
 // erases text line
-void	HUlib_eraseTextLine(hu_textline_t *l); 
+void	HUlib_eraseTextLine(hu_textline_t* l);
 
 
 //
@@ -128,16 +128,16 @@ void	HUlib_eraseTextLine(hu_textline_t *l);
 // ?
 void
 HUlib_initSText
-( hu_stext_t*	s,
-  int		x,
-  int		y,
-  int		h,
-  patch_t**	font,
-  int		startchar,
-  boolean*	on );
+(hu_stext_t* s,
+    int		x,
+    int		y,
+    int		h,
+    patch_t** font,
+    int		startchar,
+    boolean* on);
 
 // add a new line
-void HUlib_addLineToSText(hu_stext_t* s);  
+void HUlib_addLineToSText(hu_stext_t* s);
 
 // ?
 void HUlib_addMessageToSText(hu_stext_t* s, const char* prefix, const char* msg);
@@ -146,17 +146,17 @@ void HUlib_addMessageToSText(hu_stext_t* s, const char* prefix, const char* msg)
 void HUlib_drawSText(hu_stext_t* s);
 
 // erases all stext lines
-void HUlib_eraseSText(hu_stext_t* s); 
+void HUlib_eraseSText(hu_stext_t* s);
 
 // Input Text Line widget routines
 void
 HUlib_initIText
-( hu_itext_t*	it,
-  int		x,
-  int		y,
-  patch_t**	font,
-  int		startchar,
-  boolean*	on );
+(hu_itext_t* it,
+    int		x,
+    int		y,
+    patch_t** font,
+    int		startchar,
+    boolean* on);
 
 // enforces left margin
 void HUlib_delCharFromIText(hu_itext_t* it);
@@ -170,19 +170,19 @@ void HUlib_resetIText(hu_itext_t* it);
 // left of left-margin
 void
 HUlib_addPrefixToIText
-( hu_itext_t*	it,
-  char*		str );
+(hu_itext_t* it,
+    char* str);
 
 // whether eaten
 boolean
 HUlib_keyInIText
-( hu_itext_t*	it,
-  unsigned char ch );
+(hu_itext_t* it,
+    unsigned char ch);
 
 void HUlib_drawIText(hu_itext_t* it);
 
 // erases all itext lines
-void HUlib_eraseIText(hu_itext_t* it); 
+void HUlib_eraseIText(hu_itext_t* it);
 
 #endif
 //-----------------------------------------------------------------------------

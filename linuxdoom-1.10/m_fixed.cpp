@@ -31,10 +31,10 @@
 
 fixed_t
 FixedMul
-( fixed_t	a,
-  fixed_t	b )
+(fixed_t	a,
+    fixed_t	b)
 {
-    return ((long long) a * (long long) b) >> FRACBITS;
+    return ((long long)a * (long long)b) >> FRACBITS;
 }
 
 //
@@ -42,21 +42,21 @@ FixedMul
 //
 fixed_t FixedDiv(fixed_t a, fixed_t b)
 {
-    if ( (abs(a)>>14) >= abs(b))
-	    return (a^b)<0 ? std::numeric_limits<fixed_t>::min() : std::numeric_limits<fixed_t>::max();
+    if ((abs(a) >> 14) >= abs(b))
+        return (a ^ b) < 0 ? std::numeric_limits<fixed_t>::min() : std::numeric_limits<fixed_t>::max();
 
-    return FixedDiv2(a,b);
+    return FixedDiv2(a, b);
 }
 
 fixed_t
 FixedDiv2
-( fixed_t	a,
-  fixed_t	b )
+(fixed_t	a,
+    fixed_t	b)
 {
 #if 0
     long long c;
-    c = ((long long)a<<16) / ((long long)b);
-    return (fixed_t) c;
+    c = ((long long)a << 16) / ((long long)b);
+    return (fixed_t)c;
 #endif
 
     double c;
@@ -64,6 +64,6 @@ FixedDiv2
     c = ((double)a) / ((double)b) * FRACUNIT;
 
     if (c >= 2147483648.0 || c < -2147483648.0)
-	I_Error("FixedDiv: divide by zero");
-    return (fixed_t) c;
+        I_Error("FixedDiv: divide by zero");
+    return (fixed_t)c;
 }

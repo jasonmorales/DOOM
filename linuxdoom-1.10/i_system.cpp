@@ -41,30 +41,30 @@ int	mb_used = 6;
 
 void
 I_Tactile
-( int	on,
-  int	off,
-  int	total )
+(int	on,
+    int	off,
+    int	total)
 {
-  // UNUSED.
-  on = off = total = 0;
+    // UNUSED.
+    on = off = total = 0;
 }
 
 ticcmd_t	emptycmd;
-ticcmd_t*	I_BaseTiccmd(void)
+ticcmd_t* I_BaseTiccmd(void)
 {
     return &emptycmd;
 }
 
 
-int  I_GetHeapSize (void)
+int  I_GetHeapSize(void)
 {
-    return mb_used*1024*1024;
+    return mb_used * 1024 * 1024;
 }
 
-byte* I_ZoneBase (intptr_t*	size)
+byte* I_ZoneBase(intptr_t* size)
 {
-    *size = mb_used*1024*1024;
-    return (byte *) malloc (*size);
+    *size = mb_used * 1024 * 1024;
+    return (byte*)malloc(*size);
 }
 
 
@@ -73,23 +73,23 @@ byte* I_ZoneBase (intptr_t*	size)
 // I_GetTime
 // returns time in 1/70th second tics
 //
-int  I_GetTime (void)
+int  I_GetTime(void)
 {
     timespec ts;
     time_t newtics;
     static time_t basetime = 0;
-  
+
     timespec_get(&ts, TIME_UTC);
     if (!basetime)
-	basetime = ts.tv_sec;
-    newtics = (ts.tv_sec-basetime) * TICRATE + ts.tv_nsec * TICRATE / 1'000'000'000;
+        basetime = ts.tv_sec;
+    newtics = (ts.tv_sec - basetime) * TICRATE + ts.tv_nsec * TICRATE / 1'000'000'000;
     return newtics;
 }
 
 //
 // I_Init
 //
-void I_Init (void)
+void I_Init(void)
 {
     I_InitSound();
     //  I_InitGraphics();
@@ -98,12 +98,12 @@ void I_Init (void)
 //
 // I_Quit
 //
-void I_Quit (void)
+void I_Quit(void)
 {
-    D_QuitNetGame ();
+    D_QuitNetGame();
     I_ShutdownSound();
     I_ShutdownMusic();
-    M_SaveDefaults ();
+    M_SaveDefaults();
     I_ShutdownGraphics();
     exit(0);
 }
@@ -114,19 +114,17 @@ void I_WaitVBL(int count)
 }
 
 void I_BeginRead(void)
-{
-}
+{}
 
 void I_EndRead(void)
-{
-}
+{}
 
-byte*	I_AllocLow(int length)
+byte* I_AllocLow(int length)
 {
-    byte*	mem;
-        
-    mem = (byte *)malloc (length);
-    memset (mem,0,length);
+    byte* mem;
+
+    mem = (byte*)malloc(length);
+    memset(mem, 0, length);
     return mem;
 }
 
@@ -136,25 +134,25 @@ byte*	I_AllocLow(int length)
 //
 extern boolean demorecording;
 
-void I_Error(const char *error, ...)
+void I_Error(const char* error, ...)
 {
     va_list	argptr;
 
     // Message first.
-    va_start (argptr,error);
-    fprintf (stderr, "Error: ");
-    vfprintf (stderr,error,argptr);
-    fprintf (stderr, "\n");
-    va_end (argptr);
+    va_start(argptr, error);
+    fprintf(stderr, "Error: ");
+    vfprintf(stderr, error, argptr);
+    fprintf(stderr, "\n");
+    va_end(argptr);
 
-    fflush( stderr );
+    fflush(stderr);
 
     // Shutdown. Here might be other errors.
     if (demorecording)
-	G_CheckDemoStatus();
+        G_CheckDemoStatus();
 
-    D_QuitNetGame ();
+    D_QuitNetGame();
     I_ShutdownGraphics();
-    
+
     exit(-1);
 }

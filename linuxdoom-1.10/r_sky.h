@@ -38,7 +38,7 @@ extern  int		skytexture;
 extern int		skytexturemid;
 
 // Called whenever the view size changes.
-void R_InitSkyMap (void);
+void R_InitSkyMap(void);
 
 #endif
 //-----------------------------------------------------------------------------

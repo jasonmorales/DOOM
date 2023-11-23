@@ -47,12 +47,12 @@ T* Z_Malloc(intptr_t size, int tag, void* ptr)
     return static_cast<T*>(Z_Malloc_internal(size, tag, ptr));
 }
 
-void Z_Free(void *ptr);
+void Z_Free(void* ptr);
 void Z_FreeTags(int lowtag, int hightag);
 void Z_DumpHeap(int lowtag, int hightag);
-void Z_FileDumpHeap(FILE *f);
+void Z_FileDumpHeap(FILE* f);
 void Z_CheckHeap(void);
-void Z_ChangeTag2(void *ptr, int tag);
+void Z_ChangeTag2(void* ptr, int tag);
 intptr_t Z_FreeMemory();
 
 

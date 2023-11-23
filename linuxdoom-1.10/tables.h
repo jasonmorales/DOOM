@@ -46,7 +46,7 @@
 
 
 #include "m_fixed.h"
-	
+
 #define FINEANGLES		8192
 #define FINEMASK		(FINEANGLES-1)
 
@@ -62,7 +62,7 @@ extern const fixed_t* finecosine;
 
 
 // Effective size is 4096.
-extern fixed_t		finetangent[FINEANGLES/2];
+extern fixed_t		finetangent[FINEANGLES / 2];
 
 // Binary Angle Measurement, BAM.
 #define ANG45			0x20000000
@@ -81,15 +81,15 @@ typedef unsigned angle_t;
 // Effective size is 2049;
 // The +1 size is to handle the case when x==y
 //  without additional checking.
-extern angle_t		tantoangle[SLOPERANGE+1];
+extern angle_t		tantoangle[SLOPERANGE + 1];
 
 
 // Utility function,
 //  called by R_PointToAngle.
 int
 SlopeDiv
-( unsigned	num,
-  unsigned	den);
+(unsigned	num,
+    unsigned	den);
 
 
 #endif

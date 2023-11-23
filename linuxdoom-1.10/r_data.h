@@ -24,13 +24,13 @@
 // Retrieve column data for span blitting.
 byte*
 R_GetColumn
-( int		tex,
-  int		col );
+(int		tex,
+    int		col);
 
 
 // I/O, setting up the stuff.
-void R_InitData (void);
-void R_PrecacheLevel (void);
+void R_InitData(void);
+void R_PrecacheLevel(void);
 
 
 // Retrieval.
@@ -41,5 +41,5 @@ intptr_t R_FlatNumForName(const char* name);
 
 // Called by P_Ticker for switches and animations,
 // returns the texture number for the texture name.
-int R_TextureNumForName(const char *name);
-int R_CheckTextureNumForName(const char *name);
+int R_TextureNumForName(const char* name);
+int R_CheckTextureNumForName(const char* name);

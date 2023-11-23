@@ -81,6 +81,8 @@ workspace 'Doom'
 		['project'] = {
 			'premake5.lua',
 			'tasks.txt',
+            '.editorconfig',
+            '.gitignore',
 		}
 	}
 

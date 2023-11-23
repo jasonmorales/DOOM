@@ -25,31 +25,31 @@
 // Global parameters/defines.
 //
 // DOOM version
-enum { VERSION =  110 };
+enum { VERSION = 110 };
 
 
 // Game mode handling - identify IWAD version
 //  to handle IWAD dependend animations etc.
 typedef enum
 {
-  shareware,	// DOOM 1 shareware, E1, M9
-  registered,	// DOOM 1 registered, E3, M27
-  commercial,	// DOOM 2 retail, E1 M34
-  // DOOM 2 german edition not handled
-  retail,	// DOOM 1 retail, E4, M36
-  indetermined	// Well, no IWAD found.
-  
+    shareware,	// DOOM 1 shareware, E1, M9
+    registered,	// DOOM 1 registered, E3, M27
+    commercial,	// DOOM 2 retail, E1 M34
+    // DOOM 2 german edition not handled
+    retail,	// DOOM 1 retail, E4, M36
+    indetermined	// Well, no IWAD found.
+
 } GameMode_t;
 
 
 // Mission packs - might be useful for TC stuff?
 typedef enum
 {
-  doom,		// DOOM 1
-  doom2,	// DOOM 2
-  pack_tnt,	// TNT mission pack
-  pack_plut,	// Plutonia pack
-  none
+    doom,		// DOOM 1
+    doom2,	// DOOM 2
+    pack_tnt,	// TNT mission pack
+    pack_plut,	// Plutonia pack
+    none
 
 } GameMission_t;
 
@@ -57,9 +57,9 @@ typedef enum
 // Identify language to use, software localization.
 typedef enum
 {
-  english,
-  german,
-  unknown
+    english,
+    german,
+    unknown
 
 } Language_t;
 
@@ -164,9 +164,9 @@ typedef enum
     it_blueskull,
     it_yellowskull,
     it_redskull,
-    
+
     NUMCARDS
-    
+
 } card_t;
 
 
@@ -187,7 +187,7 @@ typedef enum
     wp_supershotgun,
 
     NUMWEAPONS,
-    
+
     // No pending weapon change.
     wp_nochange
 
@@ -217,7 +217,7 @@ typedef enum
     pw_allmap,
     pw_infrared,
     NUMPOWERS
-    
+
 } powertype_t;
 
 
@@ -229,11 +229,11 @@ typedef enum
 //
 typedef enum
 {
-    INVULNTICS	= (30*TICRATE),
-    INVISTICS	= (60*TICRATE),
-    INFRATICS	= (120*TICRATE),
-    IRONTICS	= (60*TICRATE)
-    
+    INVULNTICS = (30 * TICRATE),
+    INVISTICS = (60 * TICRATE),
+    INFRATICS = (120 * TICRATE),
+    IRONTICS = (60 * TICRATE)
+
 } powerduration_t;
 
 

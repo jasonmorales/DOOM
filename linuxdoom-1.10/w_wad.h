@@ -25,10 +25,10 @@
 typedef struct
 {
     // Should be "IWAD" or "PWAD".
-    char identification[4];		
+    char identification[4];
     int numlumps;
     int infotableofs;
-    
+
 } wadinfo_t;
 
 
@@ -37,7 +37,7 @@ typedef struct
     int			filepos;
     int			size;
     char		name[8];
-    
+
 } filelump_t;
 
 //
@@ -51,18 +51,18 @@ struct lumpinfo_t
     int size;
 };
 
-extern	void**		lumpcache;
-extern	lumpinfo_t*	lumpinfo;
+extern	void** lumpcache;
+extern	lumpinfo_t* lumpinfo;
 extern intptr_t numlumps;
 
-void W_InitMultipleFiles (char** filenames);
-void W_Reload (void);
+void W_InitMultipleFiles(char** filenames);
+void W_Reload(void);
 
 intptr_t W_CheckNumForName(const char* name);
 intptr_t W_GetNumForName(const char* name);
 
 int	W_LumpLength(intptr_t lump);
-void W_ReadLump(intptr_t lump, void *dest);
+void W_ReadLump(intptr_t lump, void* dest);
 
 void* W_CacheLumpNum_internal(intptr_t lump, int tag);
 

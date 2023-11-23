@@ -56,17 +56,17 @@ void I_ShutdownSound(void);
 void I_SetChannels();
 
 // Get raw data lump index for sound descriptor.
-intptr_t I_GetSfxLumpNum (sfxinfo_t* sfxinfo );
+intptr_t I_GetSfxLumpNum(sfxinfo_t* sfxinfo);
 
 
 // Starts a sound in a particular sound channel.
 int
 I_StartSound
-( int		id,
-  int		vol,
-  int		sep,
-  int		pitch,
-  int		priority );
+(int		id,
+    int		vol,
+    int		sep,
+    int		pitch,
+    int		priority);
 
 
 // Stops a sound channel.
@@ -81,10 +81,10 @@ int I_SoundIsPlaying(int handle);
 //  and pitch of a sound channel.
 void
 I_UpdateSoundParams
-( int		handle,
-  int		vol,
-  int		sep,
-  int		pitch );
+(int		handle,
+    int		vol,
+    int		sep,
+    int		pitch);
 
 
 //
@@ -98,15 +98,15 @@ void I_SetMusicVolume(int volume);
 void I_PauseSong(int handle);
 void I_ResumeSong(int handle);
 // Registers a song handle to song data.
-int I_RegisterSong(void *data);
+int I_RegisterSong(void* data);
 // Called by anything that wishes to start music.
 //  plays a song, and when the song is done,
 //  starts playing it again in an endless loop.
 // Horrible thing to do, considering.
 void
 I_PlaySong
-( int		handle,
-  int		looping );
+(int		handle,
+    int		looping);
 // Stops a song over 3 seconds.
 void I_StopSong(int handle);
 // See above (register), then think backwards
