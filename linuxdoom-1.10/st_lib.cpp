@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,17 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	The status bar widget code.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: st_lib.c,v 1.4 1997/02/03 16:47:56 b1 Exp $";
-
 #include <ctype.h>
 
 #include "doomdef.h"
@@ -55,7 +45,7 @@ extern boolean		automapactive;
 //
 patch_t* sttminus;
 
-void STlib_init(void)
+void STlib_init()
 {
     sttminus = W_CacheLumpName("STTMINUS", PU_STATIC);
 }

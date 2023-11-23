@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //	Rendering of moving objects, sprites.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __R_THINGS__
-#define __R_THINGS__
+#pragma once
 
 
 #ifdef __GNUG__
@@ -52,25 +46,17 @@ extern fixed_t		pspriteiscale;
 void R_DrawMaskedColumn(column_t* column);
 
 
-void R_SortVisSprites(void);
+void R_SortVisSprites();
 
 void R_AddSprites(sector_t* sec);
-void R_AddPSprites(void);
-void R_DrawSprites(void);
+void R_AddPSprites();
+void R_DrawSprites();
 void R_InitSprites(const char** namelist);
-void R_ClearSprites(void);
-void R_DrawMasked(void);
+void R_ClearSprites();
+void R_DrawMasked();
 
 void
 R_ClipVisSprite
 (vissprite_t* vis,
     int			xl,
     int			xh);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

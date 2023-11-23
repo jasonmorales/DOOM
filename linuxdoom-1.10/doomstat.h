@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -23,10 +20,7 @@
 //   In practice, things are a bit messy.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __D_STATE__
-#define __D_STATE__
+#pragma once
 
 // We need globally shared data structures,
 //  for defining the global state variables.
@@ -35,13 +29,6 @@
 
 // We need the playr data structure as well.
 #include "d_player.h"
-
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
 
 // ------------------------
 // Command line parameters.
@@ -285,12 +272,3 @@ extern  int             nettics[MAXNETNODES];
 
 extern  ticcmd_t        netcmds[MAXPLAYERS][BACKUPTICS];
 extern	int		ticdup;
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

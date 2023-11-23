@@ -61,8 +61,8 @@ void Z_ClearZone(memzone_t* zone)
 
     block->prev = block->next = &zone->blocklist;
 
-    // NULL indicates a free block.
-    block->user = NULL;
+    // nullptr indicates a free block.
+    block->user = nullptr;
 
     block->size = zone->size - sizeof(memzone_t);
 }
@@ -85,8 +85,8 @@ void Z_Init()
 
     block->prev = block->next = &mainzone->blocklist;
 
-    // NULL indicates a free block.
-    block->user = NULL;
+    // nullptr indicates a free block.
+    block->user = nullptr;
 
     block->size = mainzone->size - sizeof(memzone_t);
 }
@@ -111,7 +111,7 @@ void Z_Free(void* ptr)
     }
 
     // mark as free
-    block->user = NULL;
+    block->user = nullptr;
     block->tag = 0;
     block->id = 0;
 
@@ -145,7 +145,7 @@ void Z_Free(void* ptr)
 
 //
 // Z_Malloc
-// You can pass a NULL user if the tag is < PU_PURGELEVEL.
+// You can pass a nullptr user if the tag is < PU_PURGELEVEL.
 //
 #define MINFRAGMENT		64
 
@@ -211,8 +211,8 @@ void* Z_Malloc_internal(intptr_t size, int tag, void* user)
         memblock_t* newblock = (memblock_t*)((byte*)base + size);
         newblock->size = extra;
 
-        // NULL indicates free block.
-        newblock->user = NULL;
+        // nullptr indicates free block.
+        newblock->user = nullptr;
         newblock->tag = 0;
         newblock->prev = base;
         newblock->next = base->next;
@@ -251,7 +251,7 @@ void* Z_Malloc_internal(intptr_t size, int tag, void* user)
 //
 void Z_FreeTags(int lowtag, int hightag)
 {
-    memblock_t* next = NULL;
+    memblock_t* next = nullptr;
     for (memblock_t* block = mainzone->blocklist.next; block != &mainzone->blocklist; block = next)
     {
         // get link before freeing
@@ -340,7 +340,7 @@ void Z_FileDumpHeap(FILE* f)
 //
 // Z_CheckHeap
 //
-void Z_CheckHeap(void)
+void Z_CheckHeap()
 {
     memblock_t* block;
 

@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -19,9 +16,7 @@
 //	All the rendering/drawing stuff is here.
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __R_LOCAL__
-#define __R_LOCAL__
+#pragma once
 
 // Binary Angles, sine/cosine/atan lookups.
 #include "tables.h"
@@ -44,10 +39,3 @@
 #include "r_data.h"
 #include "r_things.h"
 #include "r_draw.h"
-
-#endif		// __R_LOCAL__
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

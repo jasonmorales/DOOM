@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,16 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	DOOM graphics stuff for X11, UNIX.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
-
 #include <stdlib.h>
 //#include <sys/ipc.h>
 //#include <sys/shm.h>
@@ -103,7 +94,7 @@ static int	multiply = 1;
 //  Translates the key currently in X_event
 //
 
-int xlatekey(void)
+int xlatekey()
 {
 
     int rc;
@@ -171,7 +162,7 @@ int xlatekey(void)
 }
 #endif
 
-void I_ShutdownGraphics(void)
+void I_ShutdownGraphics()
 {
 #if 0
     // Detach from X server
@@ -183,7 +174,7 @@ void I_ShutdownGraphics(void)
     shmctl(X_shminfo.shmid, IPC_RMID, 0);
 
     // Paranoia.
-    image->data = NULL;
+    image->data = nullptr;
 #endif
 }
 
@@ -192,7 +183,7 @@ void I_ShutdownGraphics(void)
 //
 // I_StartFrame
 //
-void I_StartFrame(void)
+void I_StartFrame()
 {
     // er?
 
@@ -203,7 +194,7 @@ static int	lastmousey = 0;
 boolean		mousemoved = false;
 boolean		shmFinished;
 
-void I_GetEvent(void)
+void I_GetEvent()
 {
 #if 0
     event_t event;
@@ -321,7 +312,7 @@ createnullcursor
 //
 // I_StartTic
 //
-void I_StartTic(void)
+void I_StartTic()
 {
 #if 0
     if (!X_display)
@@ -356,7 +347,7 @@ void I_StartTic(void)
 //
 // I_UpdateNoBlit
 //
-void I_UpdateNoBlit(void)
+void I_UpdateNoBlit()
 {
     // what is this?
 }
@@ -364,7 +355,7 @@ void I_UpdateNoBlit(void)
 //
 // I_FinishUpdate
 //
-void I_FinishUpdate(void)
+void I_FinishUpdate()
 {
 #if 0
     static int	lasttic;
@@ -707,7 +698,7 @@ void grabsharedmemory(int size)
 }
 #endif
 
-void I_InitGraphics(void)
+void I_InitGraphics()
 {
 #if 0
     char* displayname;
@@ -935,7 +926,7 @@ void I_InitGraphics(void)
 
 unsigned	exptable[256];
 
-void InitExpand(void)
+void InitExpand()
 {
     int		i;
 
@@ -945,7 +936,7 @@ void InitExpand(void)
 
 double		exptable2[256 * 256];
 
-void InitExpand2(void)
+void InitExpand2()
 {
     int		i;
     int		j;

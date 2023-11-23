@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //
 //    
 //-----------------------------------------------------------------------------
-
-
-#ifndef __F_FINALE__
-#define __F_FINALE__
+#pragma once
 
 
 #include "doomtype.h"
@@ -34,20 +28,10 @@
 boolean F_Responder(event_t* ev);
 
 // Called by main loop.
-void F_Ticker(void);
+void F_Ticker();
 
 // Called by main loop.
-void F_Drawer(void);
+void F_Drawer();
 
 
-void F_StartFinale(void);
-
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+void F_StartFinale();

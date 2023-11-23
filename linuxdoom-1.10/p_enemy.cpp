@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,18 +11,12 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Enemy thinking, AI.
 //	Action Pointer Functions
 //	that are associated with states/frames. 
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_enemy.c,v 1.5 1997/02/03 22:45:11 b1 Exp $";
-
 #include <stdlib.h>
 
 #include "m_random.h"
@@ -641,7 +632,7 @@ seeyou:
             || actor->type == MT_CYBORG)
         {
             // full volume
-            S_StartSound(NULL, sound);
+            S_StartSound(nullptr, sound);
         }
         else
             S_StartSound(actor, sound);
@@ -1201,7 +1192,7 @@ void A_VileChase(mobj_t* actor)
                     corpsehit->height <<= 2;
                     corpsehit->flags = info->flags;
                     corpsehit->health = info->spawnhealth;
-                    corpsehit->target = NULL;
+                    corpsehit->target = nullptr;
 
                     return;
                 }
@@ -1549,7 +1540,7 @@ void A_Scream(mobj_t* actor)
         || actor->type == MT_CYBORG)
     {
         // full volume
-        S_StartSound(NULL, sound);
+        S_StartSound(nullptr, sound);
     }
     else
         S_StartSound(actor, sound);
@@ -1823,13 +1814,13 @@ void A_BrainAwake([[maybe_unused]] mobj_t* mo)
         }
     }
 
-    S_StartSound(NULL, sfx_bossit);
+    S_StartSound(nullptr, sfx_bossit);
 }
 
 
 void A_BrainPain([[maybe_unused]] mobj_t* mo)
 {
-    S_StartSound(NULL, sfx_bospn);
+    S_StartSound(nullptr, sfx_bospn);
 }
 
 
@@ -1854,7 +1845,7 @@ void A_BrainScream(mobj_t* mo)
             th->tics = 1;
     }
 
-    S_StartSound(NULL, sfx_bosdth);
+    S_StartSound(nullptr, sfx_bosdth);
 }
 
 
@@ -1906,7 +1897,7 @@ void A_BrainSpit(mobj_t* mo)
     newmobj->reactiontime =
         ((targ->y - mo->y) / newmobj->momy) / newmobj->state->tics;
 
-    S_StartSound(NULL, sfx_bospit);
+    S_StartSound(nullptr, sfx_bospit);
 }
 
 

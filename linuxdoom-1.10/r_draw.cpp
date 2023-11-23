@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,20 +11,12 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	The actual span/column drawing functions.
 //	Here find the main potential for optimization,
 //	 e.g. inline assembly, different algorithms.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: r_draw.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
-
-
 #include "doomdef.h"
 
 #include "i_system.h"
@@ -102,7 +91,7 @@ int			dccount;
 // Thus a special case loop for very fast rendering can
 //  be used. It has also been used with Wolfenstein 3D.
 // 
-void R_DrawColumn(void)
+void R_DrawColumn()
 {
     int			count;
     byte* dest;
@@ -152,7 +141,7 @@ void R_DrawColumn(void)
 // UNUSED.
 // Loop unrolled.
 #if 0
-void R_DrawColumn(void)
+void R_DrawColumn()
 {
     int			count;
     byte* source;
@@ -208,7 +197,7 @@ void R_DrawColumn(void)
 #endif
 
 
-void R_DrawColumnLow(void)
+void R_DrawColumnLow()
 {
     int			count;
     byte* dest;
@@ -282,7 +271,7 @@ int	fuzzpos = 0;
 //  could create the SHADOW effect,
 //  i.e. spectres and invisible players.
 //
-void R_DrawFuzzColumn(void)
+void R_DrawFuzzColumn()
 {
     int			count;
     byte* dest;
@@ -382,7 +371,7 @@ void R_DrawFuzzColumn(void)
 byte* dc_translation;
 byte* translationtables;
 
-void R_DrawTranslatedColumn(void)
+void R_DrawTranslatedColumn()
 {
     int			count;
     byte* dest;
@@ -508,7 +497,7 @@ int			dscount;
 
 //
 // Draws the actual span.
-void R_DrawSpan(void)
+void R_DrawSpan()
 {
     fixed_t		xfrac;
     fixed_t		yfrac;
@@ -558,7 +547,7 @@ void R_DrawSpan(void)
 // UNUSED.
 // Loop unrolled by 4.
 #if 0
-void R_DrawSpan(void)
+void R_DrawSpan()
 {
     unsigned	position, step;
 
@@ -631,7 +620,7 @@ void R_DrawSpan(void)
 //
 // Again..
 //
-void R_DrawSpanLow(void)
+void R_DrawSpanLow()
 {
     fixed_t		xfrac;
     fixed_t		yfrac;
@@ -719,7 +708,7 @@ R_InitBuffer
 //  for variable screen sizes
 // Also draws a beveled edge.
 //
-void R_FillBackScreen(void)
+void R_FillBackScreen()
 {
     byte* src;
     byte* dest;
@@ -831,7 +820,7 @@ V_MarkRect
     int		width,
     int		height);
 
-void R_DrawViewBorder(void)
+void R_DrawViewBorder()
 {
     int		top;
     int		side;

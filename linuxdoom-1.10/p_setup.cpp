@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,18 +11,11 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Do all the WAD I/O, get map description,
 //	set up initial state and misc. LUTs.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_setup.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
-
-
 #include <math.h>
 
 #include "z_zone.h"
@@ -236,7 +226,7 @@ void P_LoadSectors(int lump)
         ss->lightlevel = SHORT(ms->lightlevel);
         ss->special = SHORT(ms->special);
         ss->tag = SHORT(ms->tag);
-        ss->thinglist = NULL;
+        ss->thinglist = nullptr;
     }
 
     Z_Free(data);
@@ -642,7 +632,7 @@ void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
         for (i = 0; i < MAXPLAYERS; i++)
             if (playeringame[i])
             {
-                players[i].mo = NULL;
+                players[i].mo = nullptr;
                 G_DeathMatchSpawnPlayer(i);
             }
 
@@ -670,7 +660,7 @@ void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
 //
 // P_Init
 //
-void P_Init(void)
+void P_Init()
 {
     P_InitSwitchList();
     P_InitPicAnims();

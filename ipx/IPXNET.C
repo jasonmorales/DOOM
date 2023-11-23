@@ -29,7 +29,7 @@ localadr_t          localadr;           // set at startup
 
 extern int socketid;
 
-void far (*IPX)(void);
+void far (*IPX)();
 
 long           localtime;          // for time stamp in packets
 long           remotetime;
@@ -66,7 +66,7 @@ void ListenForPacket(ECB *ecb)
 }
 
 
-void GetLocalAddress (void)
+void GetLocalAddress ()
 {
      _SI = FP_OFF(&localadr);
      _ES = FP_SEG(&localadr);
@@ -84,7 +84,7 @@ void GetLocalAddress (void)
 ====================
 */
 
-void InitNetwork (void)
+void InitNetwork ()
 {
      int     i,j;
 
@@ -155,7 +155,7 @@ void InitNetwork (void)
 ====================
 */
 
-void ShutdownNetwork (void)
+void ShutdownNetwork ()
 {
 	if (IPX)
 			CloseSocket (socketid);
@@ -220,7 +220,7 @@ unsigned short ShortSwap (unsigned short i)
 ==============
 */
 
-int GetPacket (void)
+int GetPacket ()
 {
      int             packetnum;
      int             i, j;

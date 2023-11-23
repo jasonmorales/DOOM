@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //
 //    
 //-----------------------------------------------------------------------------
-
-
-#ifndef __M_MISC__
-#define __M_MISC__
+#pragma once
 
 
 #include "doomtype.h"
@@ -38,11 +32,11 @@ M_ReadFile
 (char const* name,
     byte** buffer);
 
-void M_ScreenShot(void);
+void M_ScreenShot();
 
-void M_LoadDefaults(void);
+void M_LoadDefaults();
 
-void M_SaveDefaults(void);
+void M_SaveDefaults();
 
 
 int
@@ -51,11 +45,3 @@ M_DrawText
     int		y,
     boolean	direct,
     char* string);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

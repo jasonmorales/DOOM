@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,18 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:  none
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: s_sound.c,v 1.6 1997/02/03 22:45:12 b1 Exp $";
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -191,7 +179,7 @@ void S_Init(int sfxVolume, int musicVolume)
 // Kills playing sounds at start of level,
 //  determines music if any, changes music.
 //
-void S_Start(void)
+void S_Start()
 {
     int cnum;
     int mnum;
@@ -486,7 +474,7 @@ void S_StopSound(void* origin)
 //
 // Stop and resume music, during game PAUSE.
 //
-void S_PauseSound(void)
+void S_PauseSound()
 {
     if (mus_playing && !mus_paused)
     {
@@ -495,7 +483,7 @@ void S_PauseSound(void)
     }
 }
 
-void S_ResumeSound(void)
+void S_ResumeSound()
 {
     if (mus_playing && mus_paused)
     {
@@ -672,7 +660,7 @@ void S_ChangeMusic(int musicnum, int looping)
 }
 
 
-void S_StopMusic(void)
+void S_StopMusic()
 {
     if (mus_playing)
     {

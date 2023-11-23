@@ -16,7 +16,7 @@ extern	char **myargv;
 
 doomcom_t	doomcom;
 int			vectorishooked;
-void interrupt (*olddoomvect) (void);
+void interrupt (*olddoomvect) ();
 
 
 
@@ -62,7 +62,7 @@ These fields in doomcom should be filled in before calling:
 =============
 */
 
-void LaunchDOOM (void)
+void LaunchDOOM ()
 {
 	char	*newargs[99];
 	char	adrstring[10];
@@ -106,7 +106,7 @@ void LaunchDOOM (void)
 	flatadr = (long)_DS*16 + (unsigned)&doomcom;
 	sprintf (adrstring,"%lu",flatadr);
 	newargs[myargc+1] = adrstring;
-	newargs[myargc+2] = NULL;
+	newargs[myargc+2] = nullptr;
 
 //	spawnv  (P_WAIT, "m:\\newdoom\\doom", newargs);
 	if (!access("doom2.exe",0))

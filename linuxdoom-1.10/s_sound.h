@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,17 +15,7 @@
 //	The not so system specific sound interface.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __S_SOUND__
-#define __S_SOUND__
-
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
+#pragma once
 
 //
 // Initializes sound stuff, including volume
@@ -48,7 +35,7 @@ S_Init
 // Kills playing sounds at start of level,
 //  determines music if any, changes music.
 //
-void S_Start(void);
+void S_Start();
 
 
 //
@@ -85,11 +72,11 @@ S_ChangeMusic
     int		looping);
 
 // Stops the music fer sure.
-void S_StopMusic(void);
+void S_StopMusic();
 
 // Stop and resume music, during game PAUSE.
-void S_PauseSound(void);
-void S_ResumeSound(void);
+void S_PauseSound();
+void S_ResumeSound();
 
 
 //
@@ -99,11 +86,3 @@ void S_UpdateSounds(void* listener);
 
 void S_SetMusicVolume(int volume);
 void S_SetSfxVolume(int volume);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

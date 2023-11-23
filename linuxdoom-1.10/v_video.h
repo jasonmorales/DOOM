@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -20,10 +17,7 @@
 //	Functions to blit a block to the screen.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __V_VIDEO__
-#define __V_VIDEO__
+#pragma once
 
 #include "doomtype.h"
 
@@ -54,7 +48,7 @@ extern	intptr_t	usegamma;
 
 
 // Allocates buffer screens, call before R_Init.
-void V_Init(void);
+void V_Init();
 
 
 void
@@ -110,10 +104,3 @@ V_MarkRect
     int		y,
     int		width,
     int		height);
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

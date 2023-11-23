@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //	Refresh, visplane stuff (floor, ceilings).
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __R_PLANE__
-#define __R_PLANE__
+#pragma once
 
 
 #include "r_data.h"
@@ -46,8 +40,8 @@ extern short		ceilingclip[SCREENWIDTH];
 extern fixed_t		yslope[SCREENHEIGHT];
 extern fixed_t		distscale[SCREENWIDTH];
 
-void R_InitPlanes(void);
-void R_ClearPlanes(void);
+void R_InitPlanes();
+void R_ClearPlanes();
 
 void
 R_MapPlane
@@ -63,7 +57,7 @@ R_MakeSpans
     int		t2,
     int		b2);
 
-void R_DrawPlanes(void);
+void R_DrawPlanes();
 
 visplane_t*
 R_FindPlane
@@ -76,12 +70,3 @@ R_CheckPlane
 (visplane_t* pl,
     int		start,
     int		stop);
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

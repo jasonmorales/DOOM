@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,15 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:  heads-up text and input code
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: hu_lib.c,v 1.3 1997/01/26 07:44:58 b1 Exp $";
-
 #include <ctype.h>
 
 #include "doomdef.h"
@@ -39,7 +30,7 @@ rcsid[] = "$Id: hu_lib.c,v 1.3 1997/01/26 07:44:58 b1 Exp $";
 
 extern boolean	automapactive;	// in AM_map.c
 
-void HUlib_init(void)
+void HUlib_init()
 {}
 
 void HUlib_clearTextLine(hu_textline_t* t)

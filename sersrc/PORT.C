@@ -8,8 +8,8 @@
 
 void jump_start( void );
 
-void interrupt isr_8250 (void);
-void interrupt isr_16550 (void);
+void interrupt isr_8250 ();
+void interrupt isr_16550 ();
 
 union	REGS	regs;
 struct	SREGS	sregs;
@@ -24,7 +24,7 @@ int			irq;
 int			modem_status = -1;
 int			line_status = -1;
 
-void interrupt (*oldirqvect) (void);
+void interrupt (*oldirqvect) ();
 int			irqintnum;
 
 int	   		comport;
@@ -40,7 +40,7 @@ int			baudbits;
 ==============
 */
 
-void GetUart (void)
+void GetUart ()
 {
 	char   far *system_data;
 	static int ISA_uarts[] = {0x3f8,0x2f8,0x3e8,0x2e8};
@@ -100,7 +100,7 @@ void GetUart (void)
 ===============
 */
 
-void InitPort (void)
+void InitPort ()
 {
 	int mcr;
 	int	temp;
@@ -284,7 +284,7 @@ void write_byte( int c )
 ==============
 */
 
-void interrupt isr_8250(void)
+void interrupt isr_8250()
 {
 	int c;
 
@@ -345,7 +345,7 @@ void interrupt isr_8250(void)
 ==============
 */
 
-void interrupt isr_16550(void)
+void interrupt isr_16550()
 {
 	int c;
 	int	count;

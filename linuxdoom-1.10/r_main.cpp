@@ -105,11 +105,11 @@ int			extralight;
 
 
 
-void (*colfunc) (void);
-void (*basecolfunc) (void);
-void (*fuzzcolfunc) (void);
-void (*transcolfunc) (void);
-void (*spanfunc) (void);
+void (*colfunc) ();
+void (*basecolfunc) ();
+void (*fuzzcolfunc) ();
+void (*transcolfunc) ();
+void (*spanfunc) ();
 
 
 
@@ -373,7 +373,7 @@ R_PointToDist
 //
 // R_InitPointToAngle
 //
-void R_InitPointToAngle(void)
+void R_InitPointToAngle()
 {
     // UNUSED - now getting from tables.c
 #if 0
@@ -456,7 +456,7 @@ fixed_t R_ScaleFromGlobalAngle(angle_t visangle)
 //
 // R_InitTables
 //
-void R_InitTables(void)
+void R_InitTables()
 {
     // UNUSED: now getting from tables.c
 #if 0
@@ -491,7 +491,7 @@ void R_InitTables(void)
 //
 // R_InitTextureMapping
 //
-void R_InitTextureMapping(void)
+void R_InitTextureMapping()
 {
     int			i;
     int			x;
@@ -561,7 +561,7 @@ void R_InitTextureMapping(void)
 //
 #define DISTMAP		2
 
-void R_InitLightTables(void)
+void R_InitLightTables()
 {
     int		i;
     int		j;
@@ -720,7 +720,7 @@ extern intptr_t	screenblocks;
 
 
 
-void R_Init(void)
+void R_Init()
 {
     R_InitData();
     printf("\nR_InitData");

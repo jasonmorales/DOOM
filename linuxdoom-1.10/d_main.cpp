@@ -155,7 +155,7 @@ void D_ProcessEvents()
 // wipegamestate can be set to -1 to force a wipe on the next draw
 gamestate_t wipegamestate = GS_DEMOSCREEN;
 
-void D_Display(void)
+void D_Display()
 {
     static boolean viewactivestate = false;
     static boolean menuactivestate = false;
@@ -309,7 +309,7 @@ void D_Display(void)
 //
 extern boolean demorecording;
 
-void D_DoomLoop(void)
+void D_DoomLoop()
 {
     if (demorecording)
         G_BeginRecording();
@@ -402,7 +402,7 @@ void D_AdvanceDemo()
 // This cycles through the demo sequences.
 // FIXME - version dependend demo numbers?
 //
-void D_DoAdvanceDemo(void)
+void D_DoAdvanceDemo()
 {
     players[consoleplayer].playerstate = PST_LIVE; // not reborn
     advancedemo = false;
@@ -471,7 +471,7 @@ void D_DoAdvanceDemo(void)
 //
 // D_StartTitle
 //
-void D_StartTitle(void)
+void D_StartTitle()
 {
     gameaction = ga_nothing;
     demosequence = -1;
@@ -615,7 +615,7 @@ void IdentifyVersion()
 //
 // Find a Response File
 //
-void FindResponseFile(void)
+void FindResponseFile()
 {
     int i;
 #define MAXARGVS 100

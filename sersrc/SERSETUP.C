@@ -119,7 +119,7 @@ int		packetlen;
 int		inescape;
 int		newpacket;
 
-boolean ReadPacket (void)
+boolean ReadPacket ()
 {
 	int	c;
 
@@ -209,7 +209,7 @@ void WritePacket (char *buffer, int len)
 =============
 */
 
-void interrupt NetISR (void)
+void interrupt NetISR ()
 {
 	if (doomcom.command == CMD_SEND)
 	{
@@ -245,7 +245,7 @@ void interrupt NetISR (void)
 =================
 */
 
-void Connect (void)
+void Connect ()
 {
 	struct time	time;
 	int			oldsec;
@@ -460,7 +460,7 @@ void ReadLine (FILE *f, char *dest)
 =============
 */
 
-void ReadModemCfg (void)
+void ReadModemCfg ()
 {
 	int		mcr;
 	FILE	*f;
@@ -490,7 +490,7 @@ void ReadModemCfg (void)
 =============
 */
 
-void Dial (void)
+void Dial ()
 {
 	char	cmd[80];
 	int		p;
@@ -516,7 +516,7 @@ void Dial (void)
 =============
 */
 
-void Answer (void)
+void Answer ()
 {
 	ModemCommand(startup);
 	ModemResponse ("OK");
@@ -534,7 +534,7 @@ void Answer (void)
 //	Find a Response File
 //
 //========================================================
-void FindResponseFile (void)
+void FindResponseFile ()
 {
 	int		i;
 	#define	MAXARGVS	100
@@ -611,7 +611,7 @@ void FindResponseFile (void)
 =================
 */
 
-void main(void)
+void main()
 {
 	int				p;
 
@@ -675,6 +675,6 @@ void main(void)
 //
 	LaunchDOOM ();
 
-	Error (NULL);
+	Error (nullptr);
 }
 

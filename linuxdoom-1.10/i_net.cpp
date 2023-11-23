@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,15 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -62,8 +53,8 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #define htonl(x) ntohl(x)
 #define htons(x) ntohs(x)
 
-void	NetSend(void);
-boolean NetListen(void);
+void	NetSend();
+boolean NetListen();
 
 
 //
@@ -78,14 +69,14 @@ int			insocket;
 
 struct	sockaddr_in	sendaddress[MAXNETNODES];
 
-void	(*netget) (void);
-void	(*netsend) (void);
+void	(*netget) ();
+void	(*netsend) ();
 
 
 //
 // UDPsocket
 //
-int UDPsocket(void)
+int UDPsocket()
 {
     // allocate a socket
     auto s = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -117,7 +108,7 @@ void BindToLocalPort(int s, int port)
 //
 // PacketSend
 //
-void PacketSend(void)
+void PacketSend()
 {
     int		c;
     doomdata_t	sw;
@@ -155,7 +146,7 @@ void PacketSend(void)
 //
 // PacketGet
 //
-void PacketGet(void)
+void PacketGet()
 {
     int			i;
     int			c;
@@ -215,7 +206,7 @@ void PacketGet(void)
 
 
 
-int GetLocalAddress(void)
+int GetLocalAddress()
 {
     char		hostname[1024];
     struct hostent* hostentry;	// host information entry
@@ -237,7 +228,7 @@ int GetLocalAddress(void)
 //
 // I_InitNetwork
 //
-void I_InitNetwork(void)
+void I_InitNetwork()
 {
     int			i;
     int			p;
@@ -328,7 +319,7 @@ void I_InitNetwork(void)
 }
 
 
-void I_NetCmd(void)
+void I_NetCmd()
 {
     if (doomcom->command == CMD_SEND)
     {

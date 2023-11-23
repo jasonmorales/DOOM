@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,16 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Archiving: SaveGame I/O.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_tick.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "p_local.h"
@@ -44,7 +35,7 @@ byte* save_p;
 //
 // P_ArchivePlayers
 //
-void P_ArchivePlayers(void)
+void P_ArchivePlayers()
 {
     int		i;
     int		j;
@@ -76,7 +67,7 @@ void P_ArchivePlayers(void)
 //
 // P_UnArchivePlayers
 //
-void P_UnArchivePlayers(void)
+void P_UnArchivePlayers()
 {
     int		i;
     int		j;
@@ -92,9 +83,9 @@ void P_UnArchivePlayers(void)
         save_p += sizeof(player_t);
 
         // will be set when unarc thinker
-        players[i].mo = NULL;
-        players[i].message = NULL;
-        players[i].attacker = NULL;
+        players[i].mo = nullptr;
+        players[i].message = nullptr;
+        players[i].attacker = nullptr;
 
         for (j = 0; j < NUMPSPRITES; j++)
         {
@@ -111,7 +102,7 @@ void P_UnArchivePlayers(void)
 //
 // P_ArchiveWorld
 //
-void P_ArchiveWorld(void)
+void P_ArchiveWorld()
 {
     int			i;
     int			j;
@@ -164,7 +155,7 @@ void P_ArchiveWorld(void)
 //
 // P_UnArchiveWorld
 //
-void P_UnArchiveWorld(void)
+void P_UnArchiveWorld()
 {
     int			i;
     int			j;
@@ -229,7 +220,7 @@ typedef enum
 //
 // P_ArchiveThinkers
 //
-void P_ArchiveThinkers(void)
+void P_ArchiveThinkers()
 {
     thinker_t* th;
     mobj_t* mobj;
@@ -263,7 +254,7 @@ void P_ArchiveThinkers(void)
 //
 // P_UnArchiveThinkers
 //
-void P_UnArchiveThinkers(void)
+void P_UnArchiveThinkers()
 {
     byte		tclass;
     thinker_t* currentthinker;
@@ -297,11 +288,11 @@ void P_UnArchiveThinkers(void)
 
         case tc_mobj:
             PADSAVEP();
-            mobj = Z_Malloc<mobj_t>(sizeof(*mobj), PU_LEVEL, NULL);
+            mobj = Z_Malloc<mobj_t>(sizeof(*mobj), PU_LEVEL, nullptr);
             memcpy(mobj, save_p, sizeof(*mobj));
             save_p += sizeof(*mobj);
             mobj->state = &states[(int)mobj->state];
-            mobj->target = NULL;
+            mobj->target = nullptr;
             if (mobj->player)
             {
                 mobj->player = &players[(int)mobj->player - 1];
@@ -350,7 +341,7 @@ enum
 // T_Glow, (glow_t: sector_t *),
 // T_PlatRaise, (plat_t: sector_t *), - active list
 //
-void P_ArchiveSpecials(void)
+void P_ArchiveSpecials()
 {
     thinker_t* th;
     ceiling_t* ceiling;
@@ -365,7 +356,7 @@ void P_ArchiveSpecials(void)
     // save off the current thinkers
     for (th = thinkercap.next; th != &thinkercap; th = th->next)
     {
-        if (th->function.acv == (actionf_v)NULL)
+        if (th->function.acv == (actionf_v)nullptr)
         {
             for (i = 0; i < MAXCEILINGS;i++)
                 if (activeceilings[i] == (ceiling_t*)th)
@@ -470,7 +461,7 @@ void P_ArchiveSpecials(void)
 //
 // P_UnArchiveSpecials
 //
-void P_UnArchiveSpecials(void)
+void P_UnArchiveSpecials()
 {
     byte		tclass;
     floormove_t* floor;
@@ -491,7 +482,7 @@ void P_UnArchiveSpecials(void)
         case tc_ceiling:
         {
             PADSAVEP();
-            auto* ceiling = Z_Malloc<ceiling_t>(sizeof(ceiling_t), PU_LEVEL, NULL);
+            auto* ceiling = Z_Malloc<ceiling_t>(sizeof(ceiling_t), PU_LEVEL, nullptr);
             memcpy(ceiling, save_p, sizeof(*ceiling));
             save_p += sizeof(*ceiling);
             ceiling->sector = &sectors[(int)ceiling->sector];
@@ -508,7 +499,7 @@ void P_UnArchiveSpecials(void)
         case tc_door:
         {
             PADSAVEP();
-            auto* door = Z_Malloc<vldoor_t>(sizeof(vldoor_t), PU_LEVEL, NULL);
+            auto* door = Z_Malloc<vldoor_t>(sizeof(vldoor_t), PU_LEVEL, nullptr);
             memcpy(door, save_p, sizeof(*door));
             save_p += sizeof(*door);
             door->sector = &sectors[(int)door->sector];
@@ -520,7 +511,7 @@ void P_UnArchiveSpecials(void)
 
         case tc_floor:
             PADSAVEP();
-            floor = Z_Malloc<floormove_t>(sizeof(*floor), PU_LEVEL, NULL);
+            floor = Z_Malloc<floormove_t>(sizeof(*floor), PU_LEVEL, nullptr);
             memcpy(floor, save_p, sizeof(*floor));
             save_p += sizeof(*floor);
             floor->sector = &sectors[(int)floor->sector];
@@ -531,7 +522,7 @@ void P_UnArchiveSpecials(void)
 
         case tc_plat:
             PADSAVEP();
-            plat = Z_Malloc<plat_t>(sizeof(*plat), PU_LEVEL, NULL);
+            plat = Z_Malloc<plat_t>(sizeof(*plat), PU_LEVEL, nullptr);
             memcpy(plat, save_p, sizeof(*plat));
             save_p += sizeof(*plat);
             plat->sector = &sectors[(int)plat->sector];
@@ -546,7 +537,7 @@ void P_UnArchiveSpecials(void)
 
         case tc_flash:
             PADSAVEP();
-            flash = Z_Malloc<lightflash_t>(sizeof(*flash), PU_LEVEL, NULL);
+            flash = Z_Malloc<lightflash_t>(sizeof(*flash), PU_LEVEL, nullptr);
             memcpy(flash, save_p, sizeof(*flash));
             save_p += sizeof(*flash);
             flash->sector = &sectors[(int)flash->sector];
@@ -556,7 +547,7 @@ void P_UnArchiveSpecials(void)
 
         case tc_strobe:
             PADSAVEP();
-            strobe = Z_Malloc<strobe_t>(sizeof(*strobe), PU_LEVEL, NULL);
+            strobe = Z_Malloc<strobe_t>(sizeof(*strobe), PU_LEVEL, nullptr);
             memcpy(strobe, save_p, sizeof(*strobe));
             save_p += sizeof(*strobe);
             strobe->sector = &sectors[(int)strobe->sector];
@@ -566,7 +557,7 @@ void P_UnArchiveSpecials(void)
 
         case tc_glow:
             PADSAVEP();
-            glow = Z_Malloc<glow_t>(sizeof(*glow), PU_LEVEL, NULL);
+            glow = Z_Malloc<glow_t>(sizeof(*glow), PU_LEVEL, nullptr);
             memcpy(glow, save_p, sizeof(*glow));
             save_p += sizeof(*glow);
             glow->sector = &sectors[(int)glow->sector];

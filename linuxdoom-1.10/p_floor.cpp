@@ -213,7 +213,7 @@ void T_MoveFloor(floormove_t* floor)
 
     if (res == pastdest)
     {
-        floor->sector->specialdata = NULL;
+        floor->sector->specialdata = nullptr;
 
         if (floor->direction == 1)
         {

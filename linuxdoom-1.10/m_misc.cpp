@@ -134,7 +134,7 @@ M_ReadFile
         I_Error("Couldn't read file %s", name);
 
     length = fileinfo.st_size;
-    buf = Z_Malloc(length, PU_STATIC, NULL);
+    buf = Z_Malloc(length, PU_STATIC, nullptr);
     count = _read(handle, buf, length);
     _close(handle);
 
@@ -275,7 +275,7 @@ char* defaultfile;
 //
 // M_SaveDefaults
 //
-void M_SaveDefaults(void)
+void M_SaveDefaults()
 {
     FILE* f = nullptr;
     fopen_s(&f, defaultfile, "w");
@@ -304,7 +304,7 @@ void M_SaveDefaults(void)
 //
 extern byte	scantokey[128];
 
-void M_LoadDefaults(void)
+void M_LoadDefaults()
 {
     int		i;
     char	def[80];
@@ -411,7 +411,7 @@ WritePCXfile
     pcx_t* pcx;
     byte* pack;
 
-    pcx = Z_Malloc<pcx_t>(width * height * 2 + 1000, PU_STATIC, NULL);
+    pcx = Z_Malloc<pcx_t>(width * height * 2 + 1000, PU_STATIC, nullptr);
 
     pcx->manufacturer = 0x0a;		// PCX id
     pcx->version = 5;			// 256 color
@@ -460,7 +460,7 @@ WritePCXfile
 //
 // M_ScreenShot
 //
-void M_ScreenShot(void)
+void M_ScreenShot()
 {
     int		i;
     byte* linear;

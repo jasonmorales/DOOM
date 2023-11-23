@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //      Refresh/rendering module, shared data struct definitions.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __R_DEFS__
-#define __R_DEFS__
+#pragma once
 
 
 // Screenwidth.
@@ -251,7 +245,7 @@ typedef struct
 
     // Sector references.
     // Could be retrieved from linedef, too.
-    // backsector is NULL for one sided lines
+    // backsector is nullptr for one sided lines
     sector_t* frontsector;
     sector_t* backsector;
 
@@ -478,13 +472,3 @@ typedef struct
     byte		pad4;
 
 } visplane_t;
-
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

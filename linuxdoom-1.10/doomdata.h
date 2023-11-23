@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -20,9 +17,7 @@
 //  some internal structures shared by many modules are here
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __DOOMDATA__
-#define __DOOMDATA__
+#pragma once
 
 // The most basic types we use, portability.
 #include "doomtype.h"
@@ -195,9 +190,6 @@ typedef struct
 
 } mapnode_t;
 
-
-
-
 // Thing definition, position, orientation and type,
 // plus skill/visibility flags and attributes.
 typedef struct
@@ -208,15 +200,3 @@ typedef struct
     short		type;
     short		options;
 } mapthing_t;
-
-
-
-
-
-#endif			// __DOOMDATA__
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
-

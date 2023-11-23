@@ -1,4 +1,3 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
 // $Id: soundsrv.c,v 1.3 1997/01/29 22:40:44 b1 Exp $
@@ -34,12 +33,6 @@
 //	 mostly used with Linux voxware.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char rcsid[] = "$Id: soundsrv.c,v 1.3 1997/01/29 22:40:44 b1 Exp $";
-
-
-
 #include <math.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -139,7 +132,7 @@ static void derror(char* msg)
     exit(-1);
 }
 
-int mix(void)
+int mix()
 {
 
     register int		dl;
@@ -407,7 +400,7 @@ static struct timeval		last={0,0};
 
 static struct timezone		whocares;
 
-void updatesounds(void)
+void updatesounds()
 {
 
     mix();
@@ -534,7 +527,7 @@ void outputushort(int num)
     }
 }
 
-void initdata(void)
+void initdata()
 {
 
     int		i;
@@ -570,7 +563,7 @@ void initdata(void)
 
 
 
-void quit(void)
+void quit()
 {
     I_ShutdownMusic();
     I_ShutdownSound();

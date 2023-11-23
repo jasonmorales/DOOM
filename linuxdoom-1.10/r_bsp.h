@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,15 +15,7 @@
 //	Refresh module, BSP traversal and handling.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __R_BSP__
-#define __R_BSP__
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
+#pragma once
 
 extern seg_t* curline;
 extern side_t* sidedef;
@@ -57,16 +46,8 @@ typedef void (*drawfunc_t) (int start, int stop);
 
 
 // BSP?
-void R_ClearClipSegs(void);
-void R_ClearDrawSegs(void);
+void R_ClearClipSegs();
+void R_ClearDrawSegs();
 
 
 void R_RenderBSPNode(int bspnum);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

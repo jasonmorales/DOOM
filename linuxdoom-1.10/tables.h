@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -31,19 +28,9 @@
 //	  maps tan(angle) to angle fast. Gotta search.	
 //    
 //-----------------------------------------------------------------------------
+#pragma once
 
-
-#ifndef __TABLES__
-#define __TABLES__
-
-
-
-#ifdef LINUX
-#include <math.h>
-#else
 #define PI				3.141592657
-#endif
-
 
 #include "m_fixed.h"
 
@@ -90,11 +77,3 @@ int
 SlopeDiv
 (unsigned	num,
     unsigned	den);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,20 +11,12 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Gamma correction LUT stuff.
 //	Functions to draw patches (by post) directly to screen.
 //	Functions to blit a block to the screen.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: v_video.c,v 1.5 1997/02/03 22:45:13 b1 Exp $";
-
-
 #include "i_system.h"
 #include "r_local.h"
 
@@ -479,7 +468,7 @@ V_GetBlock
 //
 // V_Init
 // 
-void V_Init(void)
+void V_Init()
 {
     int		i;
     byte* base;

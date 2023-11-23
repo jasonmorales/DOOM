@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,15 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:  Heads-up displays
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: hu_stuff.c,v 1.4 1997/02/03 16:47:52 b1 Exp $";
-
 #include <ctype.h>
 
 #include "doomdef.h"
@@ -347,7 +338,7 @@ char ForeignTranslation(unsigned char ch)
     return ch < 128 ? frenchKeyMap[ch] : ch;
 }
 
-void HU_Init(void)
+void HU_Init()
 {
 
     int		i;
@@ -365,12 +356,12 @@ void HU_Init(void)
     }
 }
 
-void HU_Stop(void)
+void HU_Stop()
 {
     headsupactive = false;
 }
 
-void HU_Start(void)
+void HU_Start()
 {
     int		i;
 
@@ -436,7 +427,7 @@ void HU_Start(void)
 
 }
 
-void HU_Drawer(void)
+void HU_Drawer()
 {
 
     HUlib_drawSText(&w_message);
@@ -446,7 +437,7 @@ void HU_Drawer(void)
 
 }
 
-void HU_Erase(void)
+void HU_Erase()
 {
 
     HUlib_eraseSText(&w_message);
@@ -455,7 +446,7 @@ void HU_Erase(void)
 
 }
 
-void HU_Ticker(void)
+void HU_Ticker()
 {
 
     int i, rc;
@@ -550,7 +541,7 @@ void HU_queueChatChar(char c)
     }
 }
 
-char HU_dequeueChatChar(void)
+char HU_dequeueChatChar()
 {
     char c;
 

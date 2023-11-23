@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //	Savegame I/O, archiving, persistence.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __P_SAVEG__
-#define __P_SAVEG__
+#pragma once
 
 
 #ifdef __GNUG__
@@ -31,21 +25,13 @@
 
 // Persistent storage/archiving.
 // These are the load / save game routines.
-void P_ArchivePlayers(void);
-void P_UnArchivePlayers(void);
-void P_ArchiveWorld(void);
-void P_UnArchiveWorld(void);
-void P_ArchiveThinkers(void);
-void P_UnArchiveThinkers(void);
-void P_ArchiveSpecials(void);
-void P_UnArchiveSpecials(void);
+void P_ArchivePlayers();
+void P_UnArchivePlayers();
+void P_ArchiveWorld();
+void P_UnArchiveWorld();
+void P_ArchiveThinkers();
+void P_UnArchiveThinkers();
+void P_ArchiveSpecials();
+void P_UnArchiveSpecials();
 
 extern byte* save_p;
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

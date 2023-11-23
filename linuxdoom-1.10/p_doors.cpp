@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,16 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION: Door animation code (opening/closing)
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_doors.c,v 1.4 1997/02/03 16:47:53 b1 Exp $";
-
-
 #include "z_zone.h"
 #include "doomdef.h"
 #include "p_local.h"
@@ -127,7 +117,7 @@ void T_VerticalDoor(vldoor_t* door)
             {
             case blazeRaise:
             case blazeClose:
-                door->sector->specialdata = NULL;
+                door->sector->specialdata = nullptr;
                 P_RemoveThinker(&door->thinker);  // unlink and free
                 S_StartSound((mobj_t*)&door->sector->soundorg,
                     sfx_bdcls);
@@ -135,7 +125,7 @@ void T_VerticalDoor(vldoor_t* door)
 
             case normal:
             case close:
-                door->sector->specialdata = NULL;
+                door->sector->specialdata = nullptr;
                 P_RemoveThinker(&door->thinker);  // unlink and free
                 break;
 
@@ -185,7 +175,7 @@ void T_VerticalDoor(vldoor_t* door)
             case close30ThenOpen:
             case blazeOpen:
             case open:
-                door->sector->specialdata = NULL;
+                door->sector->specialdata = nullptr;
                 P_RemoveThinker(&door->thinker);  // unlink and free
                 break;
 
@@ -225,7 +215,7 @@ EV_DoLockedDoor
         if (!p->cards[it_bluecard] && !p->cards[it_blueskull])
         {
             p->message = PD_BLUEO;
-            S_StartSound(NULL, sfx_oof);
+            S_StartSound(nullptr, sfx_oof);
             return 0;
         }
         break;
@@ -237,7 +227,7 @@ EV_DoLockedDoor
         if (!p->cards[it_redcard] && !p->cards[it_redskull])
         {
             p->message = PD_REDO;
-            S_StartSound(NULL, sfx_oof);
+            S_StartSound(nullptr, sfx_oof);
             return 0;
         }
         break;
@@ -250,7 +240,7 @@ EV_DoLockedDoor
             !p->cards[it_yellowskull])
         {
             p->message = PD_YELLOWO;
-            S_StartSound(NULL, sfx_oof);
+            S_StartSound(nullptr, sfx_oof);
             return 0;
         }
         break;
@@ -374,7 +364,7 @@ EV_VerticalDoor
         if (!player->cards[it_bluecard] && !player->cards[it_blueskull])
         {
             player->message = PD_BLUEK;
-            S_StartSound(NULL, sfx_oof);
+            S_StartSound(nullptr, sfx_oof);
             return;
         }
         break;
@@ -388,7 +378,7 @@ EV_VerticalDoor
             !player->cards[it_yellowskull])
         {
             player->message = PD_YELLOWK;
-            S_StartSound(NULL, sfx_oof);
+            S_StartSound(nullptr, sfx_oof);
             return;
         }
         break;
@@ -401,7 +391,7 @@ EV_VerticalDoor
         if (!player->cards[it_redcard] && !player->cards[it_redskull])
         {
             player->message = PD_REDK;
-            S_StartSound(NULL, sfx_oof);
+            S_StartSound(nullptr, sfx_oof);
             return;
         }
         break;
@@ -554,7 +544,7 @@ void P_SpawnDoorRaiseIn5Mins(sector_t* sec, [[maybe_unused]] int secnum)
 
 slideframe_t slideFrames[MAXSLIDEDOORS];
 
-void P_InitSlidingDoorFrames(void)
+void P_InitSlidingDoorFrames()
 {
     int		i;
     int		f1;
@@ -629,7 +619,7 @@ void T_SlidingDoor(slidedoor_t* door)
 
                 if (door->type == sdt_openOnly)
                 {
-                    door->frontsector->specialdata = NULL;
+                    door->frontsector->specialdata = nullptr;
                     P_RemoveThinker(&door->thinker);
                     break;
                 }
@@ -657,8 +647,8 @@ void T_SlidingDoor(slidedoor_t* door)
         if (!door->timer--)
         {
             // CAN DOOR CLOSE?
-            if (door->frontsector->thinglist != NULL ||
-                door->backsector->thinglist != NULL)
+            if (door->frontsector->thinglist != nullptr ||
+                door->backsector->thinglist != nullptr)
             {
                 door->timer = SDOORWAIT;
                 break;
@@ -677,7 +667,7 @@ void T_SlidingDoor(slidedoor_t* door)
             {
                 // IF DOOR IS DONE CLOSING...
                 door->line->flags |= ML_BLOCKING;
-                door->frontsector->specialdata = NULL;
+                door->frontsector->specialdata = nullptr;
                 P_RemoveThinker(&door->thinker);
                 break;
             }
@@ -714,7 +704,7 @@ EV_SlidingDoor
 
     // Make sure door isn't already being animated
     sec = line->frontsector;
-    door = NULL;
+    door = nullptr;
     if (sec->specialdata)
     {
         if (!thing->player)

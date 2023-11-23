@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -17,9 +14,7 @@
 // DESCRIPTION:  none
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __HULIB__
-#define __HULIB__
+#pragma once
 
 // We are referring to patches.
 #include "r_defs.h"
@@ -97,7 +92,7 @@ typedef struct
 //
 
 // initializes heads-up widget library
-void HUlib_init(void);
+void HUlib_init();
 
 //
 // textline code
@@ -183,10 +178,3 @@ void HUlib_drawIText(hu_itext_t* it);
 
 // erases all itext lines
 void HUlib_eraseIText(hu_itext_t* it);
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

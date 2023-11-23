@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //	Networking stuff.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __D_NET__
-#define __D_NET__
+#pragma once
 
 #include "d_player.h"
 
@@ -133,17 +127,7 @@ void NetUpdate();
 
 // Broadcasts special packets to other players
 //  to notify of game exit
-void D_QuitNetGame(void);
+void D_QuitNetGame();
 
 //? how many ticks to run?
-void TryRunTics(void);
-
-
-#endif
-
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
-
+void TryRunTics();

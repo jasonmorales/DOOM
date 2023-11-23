@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //
 //    
 //-----------------------------------------------------------------------------
-
-
-#ifndef __M_RANDOM__
-#define __M_RANDOM__
+#pragma once
 
 
 #include "doomtype.h"
@@ -30,18 +24,10 @@
 
 // Returns a number from 0 to 255,
 // from a lookup table.
-int M_Random(void);
+int M_Random();
 
 // As M_Random, but used only by the play simulation.
-int P_Random(void);
+int P_Random();
 
 // Fix randoms for demos.
-void M_ClearRandom(void);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+void M_ClearRandom();

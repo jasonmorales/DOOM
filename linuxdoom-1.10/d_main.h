@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -13,8 +10,6 @@
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
-//
-// $Log:$
 //
 // DESCRIPTION:
 //	System specific interface stuff.
@@ -35,7 +30,7 @@ void D_AddFile(const char* file);
 // calls all startup code, parses command line options.
 // If not overrided by user input, calls N_AdvanceDemo.
 //
-void D_DoomMain(void);
+void D_DoomMain();
 
 // Called by IO functions when input is detected.
 void D_PostEvent(event_t* ev);
@@ -43,7 +38,7 @@ void D_PostEvent(event_t* ev);
 //
 // BASE LEVEL
 //
-void D_PageTicker(void);
-void D_PageDrawer(void);
-void D_AdvanceDemo(void);
-void D_StartTitle(void);
+void D_PageTicker();
+void D_PageDrawer();
+void D_AdvanceDemo();
+void D_StartTitle();

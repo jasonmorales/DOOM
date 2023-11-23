@@ -51,7 +51,7 @@ void Z_Free(void* ptr);
 void Z_FreeTags(int lowtag, int hightag);
 void Z_DumpHeap(int lowtag, int hightag);
 void Z_FileDumpHeap(FILE* f);
-void Z_CheckHeap(void);
+void Z_CheckHeap();
 void Z_ChangeTag2(void* ptr, int tag);
 intptr_t Z_FreeMemory();
 
@@ -59,7 +59,7 @@ intptr_t Z_FreeMemory();
 typedef struct memblock_s
 {
     intptr_t size;	// including the header and possibly tiny fragments
-    void** user;	// NULL if a free block
+    void** user;	// nullptr if a free block
     int tag;	// purgelevel
     int id;	// should be ZONEID
     struct memblock_s* next;

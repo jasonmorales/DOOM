@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,18 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	BSP traversal, handling of LineSegs for rendering.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: r_bsp.c,v 1.4 1997/02/03 22:45:12 b1 Exp $";
-
-
 #include "doomdef.h"
 
 #include "m_bbox.h"
@@ -65,7 +54,7 @@ R_StoreWallRange
 //
 // R_ClearDrawSegs
 //
-void R_ClearDrawSegs(void)
+void R_ClearDrawSegs()
 {
     ds_p = drawsegs;
 }
@@ -242,7 +231,7 @@ R_ClipPassWallSegment
 //
 // R_ClearClipSegs
 //
-void R_ClearClipSegs(void)
+void R_ClearClipSegs()
 {
     solidsegs[0].first = -0x7fffffff;
     solidsegs[0].last = -1;
@@ -520,7 +509,7 @@ void R_Subsector(int num)
             frontsector->lightlevel);
     }
     else
-        floorplane = NULL;
+        floorplane = nullptr;
 
     if (frontsector->ceilingheight > viewz
         || frontsector->ceilingpic == skyflatnum)
@@ -530,7 +519,7 @@ void R_Subsector(int num)
             frontsector->lightlevel);
     }
     else
-        ceilingplane = NULL;
+        ceilingplane = nullptr;
 
     R_AddSprites(frontsector);
 

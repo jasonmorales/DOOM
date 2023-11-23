@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,19 +11,12 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Here is a core component: drawing the floors and ceilings,
 //	 while maintaining a per column clipping list only.
 //	Moreover, the sky areas have to be determined.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: r_plane.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
-
 #include <stdlib.h>
 
 #include "i_system.h"
@@ -98,7 +88,7 @@ fixed_t			cachedystep[SCREENHEIGHT];
 // R_InitPlanes
 // Only at game startup.
 //
-void R_InitPlanes(void)
+void R_InitPlanes()
 {
     // Doh!
 }
@@ -182,7 +172,7 @@ R_MapPlane
 // R_ClearPlanes
 // At begining of frame.
 //
-void R_ClearPlanes(void)
+void R_ClearPlanes()
 {
     int		i;
     angle_t	angle;
@@ -364,7 +354,7 @@ R_MakeSpans
 // R_DrawPlanes
 // At the end of each frame.
 //
-void R_DrawPlanes(void)
+void R_DrawPlanes()
 {
     visplane_t* pl;
     int			light;

@@ -138,7 +138,7 @@ extern  line_t* linespeciallist[MAXLINEANIMS];
 
 
 
-void P_InitPicAnims(void)
+void P_InitPicAnims()
 {
     //	Init animation
     lastanim = anims;
@@ -232,7 +232,7 @@ twoSided
 //
 // getNextSector()
 // Return sector_t * of sector next to current.
-// NULL if not two-sided line
+// nullptr if not two-sided line
 //
 sector_t*
 getNextSector
@@ -240,7 +240,7 @@ getNextSector
     sector_t* sec)
 {
     if (!(line->flags & ML_TWOSIDED))
-        return NULL;
+        return nullptr;
 
     if (line->frontsector == sec)
         return line->backsector;
@@ -1010,14 +1010,14 @@ void P_PlayerInSpecialSector(player_t* player)
         // HELLSLIME DAMAGE
         if (!player->powers[pw_ironfeet])
             if (!(leveltime & 0x1f))
-                P_DamageMobj(player->mo, NULL, NULL, 10);
+                P_DamageMobj(player->mo, nullptr, nullptr, 10);
         break;
 
     case 7:
         // NUKAGE DAMAGE
         if (!player->powers[pw_ironfeet])
             if (!(leveltime & 0x1f))
-                P_DamageMobj(player->mo, NULL, NULL, 5);
+                P_DamageMobj(player->mo, nullptr, nullptr, 5);
         break;
 
     case 16:
@@ -1028,7 +1028,7 @@ void P_PlayerInSpecialSector(player_t* player)
             || (P_Random() < 5))
         {
             if (!(leveltime & 0x1f))
-                P_DamageMobj(player->mo, NULL, NULL, 20);
+                P_DamageMobj(player->mo, nullptr, nullptr, 20);
         }
         break;
 
@@ -1043,7 +1043,7 @@ void P_PlayerInSpecialSector(player_t* player)
         player->cheats &= ~CF_GODMODE;
 
         if (!(leveltime & 0x1f))
-            P_DamageMobj(player->mo, NULL, NULL, 20);
+            P_DamageMobj(player->mo, nullptr, nullptr, 20);
 
         if (player->health <= 10)
             G_ExitLevel();
@@ -1067,7 +1067,7 @@ void P_PlayerInSpecialSector(player_t* player)
 boolean		levelTimer;
 int		levelTimeCount;
 
-void P_UpdateSpecials(void)
+void P_UpdateSpecials()
 {
     anim_t* anim;
     int		pic;
@@ -1223,7 +1223,7 @@ line_t* linespeciallist[MAXLINEANIMS];
 
 
 // Parses command line parameters.
-void P_SpawnSpecials(void)
+void P_SpawnSpecials()
 {
     sector_t* sector;
     int		i;
@@ -1336,10 +1336,10 @@ void P_SpawnSpecials(void)
 
     //	Init other misc stuff
     for (i = 0;i < MAXCEILINGS;i++)
-        activeceilings[i] = NULL;
+        activeceilings[i] = nullptr;
 
     for (i = 0;i < MAXPLATS;i++)
-        activeplats[i] = NULL;
+        activeplats[i] = nullptr;
 
     for (i = 0;i < MAXBUTTONS;i++)
         memset(&buttonlist[i], 0, sizeof(button_t));

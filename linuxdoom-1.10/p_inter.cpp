@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,18 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Handling interactions (i.e., collisions).
 //
 //-----------------------------------------------------------------------------
-
-
-static const char
-rcsid[] = "$Id: p_inter.c,v 1.4 1997/02/03 22:45:11 b1 Exp $";
-
-
 // Data.
 #include "doomdef.h"
 #include "dstrings.h"
@@ -191,7 +180,7 @@ P_GiveWeapon
         player->pendingweapon = weapon;
 
         if (player == &players[consoleplayer])
-            S_StartSound(NULL, sfx_wpnup);
+            S_StartSound(nullptr, sfx_wpnup);
         return false;
     }
 
@@ -657,7 +646,7 @@ P_TouchSpecialThing
     P_RemoveMobj(special);
     player->bonuscount += BONUSADD;
     if (player == &players[consoleplayer])
-        S_StartSound(NULL, sound);
+        S_StartSound(nullptr, sound);
 }
 
 
@@ -764,11 +753,11 @@ P_KillMobj
 // P_DamageMobj
 // Damages both enemies and players
 // "inflictor" is the thing that caused the damage
-//  creature or missile, can be NULL (slime, etc)
+//  creature or missile, can be nullptr (slime, etc)
 // "source" is the thing to target after taking damage
-//  creature or NULL
+//  creature or nullptr
 // Source and inflictor are the same for melee attacks.
-// Source can be NULL for slime, barrel explosions
+// Source can be nullptr for slime, barrel explosions
 // and other environmental stuff.
 //
 void

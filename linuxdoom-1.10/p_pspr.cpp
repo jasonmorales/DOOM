@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,17 +11,11 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Weapon sprite animation, weapon objects.
 //	Action functions for weapons.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_pspr.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
-
 #include "doomdef.h"
 #include "d_event.h"
 
@@ -71,7 +62,7 @@ P_SetPsprite
         if (!stnum)
         {
             // object removed itself
-            psp->state = NULL;
+            psp->state = nullptr;
             break;
         }
 
@@ -808,7 +799,7 @@ void P_SetupPsprites(player_t* player)
 
     // remove all psprites
     for (i = 0; i < NUMPSPRITES; i++)
-        player->psprites[i].state = NULL;
+        player->psprites[i].state = nullptr;
 
     // spawn the gun
     player->pendingweapon = player->readyweapon;

@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,16 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Intermission screens.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: wi_stuff.c,v 1.7 1997/02/03 22:45:13 b1 Exp $";
-
 #include <stdio.h>
 
 #include "z_zone.h"
@@ -403,7 +394,7 @@ static patch_t** lnames;
 // UNUSED static unsigned char *background=0;
 
 
-void WI_slamBackground(void)
+void WI_slamBackground()
 {
     memcpy(screens[0], screens[1], SCREENWIDTH * SCREENHEIGHT);
     V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
@@ -418,7 +409,7 @@ boolean WI_Responder([[maybe_unused]] event_t* ev)
 
 
 // Draws "<Levelname> Finished!"
-void WI_drawLF(void)
+void WI_drawLF()
 {
     int y = WI_TITLEY;
 
@@ -436,7 +427,7 @@ void WI_drawLF(void)
 
 
 // Draws "Entering <LevelName>"
-void WI_drawEL(void)
+void WI_drawEL()
 {
     int y = WI_TITLEY;
 
@@ -500,7 +491,7 @@ WI_drawOnLnode
 
 
 
-void WI_initAnimatedBack(void)
+void WI_initAnimatedBack()
 {
     int		i;
     anim_t* a;
@@ -529,7 +520,7 @@ void WI_initAnimatedBack(void)
 
 }
 
-void WI_updateAnimatedBack(void)
+void WI_updateAnimatedBack()
 {
     int		i;
     anim_t* a;
@@ -580,7 +571,7 @@ void WI_updateAnimatedBack(void)
 
 }
 
-void WI_drawAnimatedBack(void)
+void WI_drawAnimatedBack()
 {
     int			i;
     anim_t* a;
@@ -715,20 +706,20 @@ WI_drawTime
 }
 
 
-void WI_End(void)
+void WI_End()
 {
-    void WI_unloadData(void);
+    void WI_unloadData();
     WI_unloadData();
 }
 
-void WI_initNoState(void)
+void WI_initNoState()
 {
     state = NoState;
     acceleratestage = 0;
     cnt = 10;
 }
 
-void WI_updateNoState(void)
+void WI_updateNoState()
 {
 
     WI_updateAnimatedBack();
@@ -744,7 +735,7 @@ void WI_updateNoState(void)
 static boolean		snl_pointeron = false;
 
 
-void WI_initShowNextLoc(void)
+void WI_initShowNextLoc()
 {
     state = ShowNextLoc;
     acceleratestage = 0;
@@ -753,7 +744,7 @@ void WI_initShowNextLoc(void)
     WI_initAnimatedBack();
 }
 
-void WI_updateShowNextLoc(void)
+void WI_updateShowNextLoc()
 {
     WI_updateAnimatedBack();
 
@@ -763,7 +754,7 @@ void WI_updateShowNextLoc(void)
         snl_pointeron = (cnt & 31) < 20;
 }
 
-void WI_drawShowNextLoc(void)
+void WI_drawShowNextLoc()
 {
 
     int		i;
@@ -804,7 +795,7 @@ void WI_drawShowNextLoc(void)
 
 }
 
-void WI_drawNoState(void)
+void WI_drawNoState()
 {
     snl_pointeron = true;
     WI_drawShowNextLoc();
@@ -833,7 +824,7 @@ static int		dm_state;
 static int		dm_frags[MAXPLAYERS][MAXPLAYERS];
 static int		dm_totals[MAXPLAYERS];
 
-void WI_initDeathmatchStats(void)
+void WI_initDeathmatchStats()
 {
     int		i;
     int		j;
@@ -861,7 +852,7 @@ void WI_initDeathmatchStats(void)
 
 
 
-void WI_updateDeathmatchStats(void)
+void WI_updateDeathmatchStats()
 {
 
     int		i;
@@ -964,7 +955,7 @@ void WI_updateDeathmatchStats(void)
 
 
 
-void WI_drawDeathmatchStats(void)
+void WI_drawDeathmatchStats()
 {
 
     int		i;
@@ -1061,7 +1052,7 @@ static int	cnt_frags[MAXPLAYERS];
 static int	dofrags;
 static int	ng_state;
 
-void WI_initNetgameStats(void)
+void WI_initNetgameStats()
 {
 
     int i;
@@ -1089,7 +1080,7 @@ void WI_initNetgameStats(void)
 
 
 
-void WI_updateNetgameStats(void)
+void WI_updateNetgameStats()
 {
 
     int		i;
@@ -1244,7 +1235,7 @@ void WI_updateNetgameStats(void)
 
 
 
-void WI_drawNetgameStats(void)
+void WI_drawNetgameStats()
 {
     int		i;
     int		x;
@@ -1301,7 +1292,7 @@ void WI_drawNetgameStats(void)
 
 static int	sp_state;
 
-void WI_initStats(void)
+void WI_initStats()
 {
     state = StatCount;
     acceleratestage = 0;
@@ -1313,7 +1304,7 @@ void WI_initStats(void)
     WI_initAnimatedBack();
 }
 
-void WI_updateStats(void)
+void WI_updateStats()
 {
 
     WI_updateAnimatedBack();
@@ -1419,7 +1410,7 @@ void WI_updateStats(void)
 
 }
 
-void WI_drawStats(void)
+void WI_drawStats()
 {
     // line height
     int lh;
@@ -1453,7 +1444,7 @@ void WI_drawStats(void)
 
 }
 
-void WI_checkForAccelerate(void)
+void WI_checkForAccelerate()
 {
     int   i;
     player_t* player;
@@ -1486,7 +1477,7 @@ void WI_checkForAccelerate(void)
 
 
 // Updates stuff each tick
-void WI_Ticker(void)
+void WI_Ticker()
 {
     // counter for general background animation
     bcnt++;
@@ -1521,7 +1512,7 @@ void WI_Ticker(void)
 
 }
 
-void WI_loadData(void)
+void WI_loadData()
 {
     int		i;
     int		j;
@@ -1682,7 +1673,7 @@ void WI_loadData(void)
 
 }
 
-void WI_unloadData(void)
+void WI_unloadData()
 {
     int		i;
     int		j;
@@ -1746,7 +1737,7 @@ void WI_unloadData(void)
         Z_ChangeTag(bp[i], PU_CACHE);
 }
 
-void WI_Drawer(void)
+void WI_Drawer()
 {
     switch (state)
     {

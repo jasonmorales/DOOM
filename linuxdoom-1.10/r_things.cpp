@@ -35,8 +35,8 @@
 #define MINZ				(FRACUNIT*4)
 #define BASEYCENTER			100
 
-//void R_DrawColumn (void);
-//void R_DrawFuzzColumn (void);
+//void R_DrawColumn ();
+//void R_DrawFuzzColumn ();
 
 
 
@@ -164,7 +164,7 @@ void R_InitSpriteDefs(const char** namelist)
 {
     // count the number of sprite names
     const char** check = namelist;
-    while (*check != NULL)
+    while (*check != nullptr)
         check++;
 
     numsprites = check - namelist;
@@ -172,7 +172,7 @@ void R_InitSpriteDefs(const char** namelist)
     if (!numsprites)
         return;
 
-    sprites = Z_Malloc<spritedef_t>(numsprites * sizeof(spritedef_t), PU_STATIC, NULL);
+    sprites = Z_Malloc<spritedef_t>(numsprites * sizeof(spritedef_t), PU_STATIC, nullptr);
 
     int start = firstspritelump - 1;
     int end = lastspritelump + 1;
@@ -245,7 +245,7 @@ void R_InitSpriteDefs(const char** namelist)
 
         // allocate space for the frames present and copy sprtemp to it
         sprites[i].numframes = maxframe;
-        sprites[i].spriteframes = Z_Malloc<spriteframe_t>(maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
+        sprites[i].spriteframes = Z_Malloc<spriteframe_t>(maxframe * sizeof(spriteframe_t), PU_STATIC, nullptr);
         memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
     }
 }
@@ -277,7 +277,7 @@ void R_InitSprites(const char** namelist)
 // R_ClearSprites
 // Called at frame start.
 //
-void R_ClearSprites(void)
+void R_ClearSprites()
 {
     vissprite_p = vissprites;
 }
@@ -288,7 +288,7 @@ void R_ClearSprites(void)
 //
 vissprite_t	overflowsprite;
 
-vissprite_t* R_NewVisSprite(void)
+vissprite_t* R_NewVisSprite()
 {
     if (vissprite_p == &vissprites[MAXVISSPRITES])
         return &overflowsprite;
@@ -368,7 +368,7 @@ void R_DrawVisSprite(vissprite_t* vis, [[maybe_unused]] int x1, [[maybe_unused]]
 
     if (!dc_colormap)
     {
-        // NULL colormap = shadow draw
+        // nullptr colormap = shadow draw
         colfunc = fuzzcolfunc;
     }
     else if (vis->mobjflags & MF_TRANSLATION)
@@ -534,7 +534,7 @@ void R_ProjectSprite(mobj_t* thing)
     if (thing->flags & MF_SHADOW)
     {
         // shadow draw
-        vis->colormap = NULL;
+        vis->colormap = nullptr;
     }
     else if (fixedcolormap)
     {
@@ -673,7 +673,7 @@ void R_DrawPSprite(pspdef_t* psp)
         || viewplayer->powers[pw_invisibility] & 8)
     {
         // shadow draw
-        vis->colormap = NULL;
+        vis->colormap = nullptr;
     }
     else if (fixedcolormap)
     {
@@ -699,7 +699,7 @@ void R_DrawPSprite(pspdef_t* psp)
 //
 // R_DrawPlayerSprites
 //
-void R_DrawPlayerSprites(void)
+void R_DrawPlayerSprites()
 {
     int		i;
     int		lightnum;
@@ -736,7 +736,7 @@ void R_DrawPlayerSprites(void)
 //
 vissprite_t	vsprsortedhead;
 
-void R_SortVisSprites(void)
+void R_SortVisSprites()
 {
     fixed_t		bestscale;
 
@@ -904,7 +904,7 @@ void R_DrawSprite(vissprite_t* spr)
 //
 // R_DrawMasked
 //
-void R_DrawMasked(void)
+void R_DrawMasked()
 {
     vissprite_t* spr;
     drawseg_t* ds;

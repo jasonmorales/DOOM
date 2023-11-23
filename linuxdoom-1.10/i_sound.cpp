@@ -62,7 +62,7 @@ const char* sndserver_filename = "./sndserver ";
 
 // Get the interrupt. Set duration in millisecs.
 int I_SoundSetTimer(int duration_of_tick);
-void I_SoundDelTimer(void);
+void I_SoundDelTimer();
 #else
 // None?
 #endif
@@ -516,7 +516,7 @@ int I_SoundIsPlaying(int handle)
 //
 // This function currently supports only 16bit.
 //
-void I_UpdateSound(void)
+void I_UpdateSound()
 {
 #ifdef SNDINTR
     // Debug. Count buffer misses with interrupt.
@@ -642,7 +642,7 @@ void I_UpdateSound(void)
 //  only output be done asynchronous?
 //
 void
-I_SubmitSound(void)
+I_SubmitSound()
 {
     // Write it to DSP device.
     _write(audio_fd, mixbuffer, SAMPLECOUNT * BUFMUL);
@@ -663,7 +663,7 @@ void I_UpdateSoundParams
     handle = vol = sep = pitch = 0;
 }
 
-void I_ShutdownSound(void)
+void I_ShutdownSound()
 {
 #ifdef SNDSERV
     if (sndserver)
@@ -800,8 +800,8 @@ void I_InitSound()
 // Still no music done.
 // Remains. Dummies.
 //
-void I_InitMusic(void) {}
-void I_ShutdownMusic(void) {}
+void I_InitMusic() {}
+void I_ShutdownMusic() {}
 
 static int	looping = 0;
 static int	musicdies = -1;
@@ -843,7 +843,7 @@ void I_UnRegisterSong(int handle)
 int I_RegisterSong(void* data)
 {
     // UNUSED.
-    data = NULL;
+    data = nullptr;
 
     return 1;
 }
@@ -941,7 +941,7 @@ int I_SoundSetTimer(int duration_of_tick)
 #endif
 
     PHANDLE handle = nullptr;
-    CreateTimerQueueTimer(handle, NULL, I_HandleSoundTimer, NULL, duration_of_tick, duration_of_tick, 0);
+    CreateTimerQueueTimer(handle, nullptr, I_HandleSoundTimer, nullptr, duration_of_tick, duration_of_tick, 0);
     return 0;
 }
 

@@ -82,7 +82,7 @@ int CheckParm(char *parm)
 =============
 */
 
-void interrupt NetISR (void)
+void interrupt NetISR ()
 {
      if (doomcom.command == CMD_SEND)
      {
@@ -109,7 +109,7 @@ them
 ===================
 */
 
-void LookForNodes (void)
+void LookForNodes ()
 {
      int             i,j,k;
      int             netids[MAXNETNODES];
@@ -258,7 +258,7 @@ void LookForNodes (void)
 //	Find a Response File
 //
 //========================================================
-void FindResponseFile (void)
+void FindResponseFile ()
 {
 	int		i;
 	#define	MAXARGVS	100
@@ -334,7 +334,7 @@ void FindResponseFile (void)
 =============
 */
 
-void main (void)
+void main ()
 	 {
 	 int  i;
 	 unsigned char far *vector;
@@ -372,7 +372,7 @@ void main (void)
 		  {
 		  doomcom.intnum = sscanf ("0x%x",myargv[i+1]);
 		  vector = *(char far * far *)(doomcom.intnum*4);
-		  if(vector != NULL && *vector != 0xcf)
+		  if(vector != nullptr && *vector != 0xcf)
 			   {
 		   printf(STR_VECTSPEC"\n", doomcom.intnum);
 			   exit(-1);
@@ -384,7 +384,7 @@ void main (void)
 doomcom.intnum++)
 			   {
 			   vector = *(char far * far *)(doomcom.intnum*4);
-			   if(vector == NULL || *vector == 0xcf)
+			   if(vector == nullptr || *vector == 0xcf)
 					break;
 			   }
 		  if(doomcom.intnum == 0x67)

@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,17 +11,11 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Movement, collision handling.
 //	Shooting and aiming.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_map.c,v 1.5 1997/02/03 22:45:11 b1 Exp $";
-
 #include <stdlib.h>
 
 #include "m_bbox.h"
@@ -139,7 +130,7 @@ P_TeleportMove
     tmbbox[BOXLEFT] = x - tmthing->radius;
 
     newsubsec = R_PointInSubsector(x, y);
-    ceilingline = NULL;
+    ceilingline = nullptr;
 
     // The base floor/ceiling is from the subsector
     // that contains the point.
@@ -397,7 +388,7 @@ P_CheckPosition
     tmbbox[BOXLEFT] = x - tmthing->radius;
 
     newsubsec = R_PointInSubsector(x, y);
-    ceilingline = NULL;
+    ceilingline = nullptr;
 
     // The base floor / ceiling is from the subsector
     // that contains the point.
@@ -791,7 +782,7 @@ retry:
 //
 // P_LineAttack
 //
-mobj_t* linetarget;	// who got hit (or NULL)
+mobj_t* linetarget;	// who got hit (or nullptr)
 mobj_t* shootthing;
 
 // Height if not aiming up or down
@@ -1040,7 +1031,7 @@ P_AimLineAttack
     bottomslope = -100 * FRACUNIT / 160;
 
     attackrange = distance;
-    linetarget = NULL;
+    linetarget = nullptr;
 
     P_PathTraverse(t1->x, t1->y,
         x2, y2,
@@ -1297,7 +1288,7 @@ boolean PIT_ChangeSector(mobj_t* thing)
 
     if (crushchange && !(leveltime & 3))
     {
-        P_DamageMobj(thing, NULL, NULL, 10);
+        P_DamageMobj(thing, nullptr, nullptr, 10);
 
         // spray blood in a random direction
         mo = P_SpawnMobj(thing->x,

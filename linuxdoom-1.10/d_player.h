@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __D_PLAYER__
-#define __D_PLAYER__
+#pragma once
 
 
 // The player data structure depends on a number
@@ -143,7 +137,7 @@ struct player_t
     int			damagecount;
     int			bonuscount;
 
-    // Who did damage (NULL for floors/ceilings).
+    // Who did damage (nullptr for floors/ceilings).
     mobj_t* attacker;
 
     // So gun flashes light up areas.
@@ -209,11 +203,3 @@ typedef struct
     wbplayerstruct_t	plyr[MAXPLAYERS];
 
 } wbstartstruct_t;
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

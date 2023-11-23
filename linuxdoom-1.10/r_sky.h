@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //	Sky rendering.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __R_SKY__
-#define __R_SKY__
+#pragma once
 
 
 #ifdef __GNUG__
@@ -38,11 +32,4 @@ extern  int		skytexture;
 extern int		skytexturemid;
 
 // Called whenever the view size changes.
-void R_InitSkyMap(void);
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+void R_InitSkyMap();

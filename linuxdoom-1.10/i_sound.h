@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -19,9 +16,7 @@
 //	System interface, sound.
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __I_SOUND__
-#define __I_SOUND__
+#pragma once
 
 #include "doomdef.h"
 
@@ -41,11 +36,11 @@ extern const char* sndserver_filename;
 void I_InitSound();
 
 // ... update sound buffer and audio device at runtime...
-void I_UpdateSound(void);
-void I_SubmitSound(void);
+void I_UpdateSound();
+void I_SubmitSound();
 
 // ... shut down and relase at program termination.
-void I_ShutdownSound(void);
+void I_ShutdownSound();
 
 
 //
@@ -90,8 +85,8 @@ I_UpdateSoundParams
 //
 //  MUSIC I/O
 //
-void I_InitMusic(void);
-void I_ShutdownMusic(void);
+void I_InitMusic();
+void I_ShutdownMusic();
 // Volume.
 void I_SetMusicVolume(int volume);
 // PAUSE game handling.
@@ -111,12 +106,3 @@ I_PlaySong
 void I_StopSong(int handle);
 // See above (register), then think backwards
 void I_UnRegisterSong(int handle);
-
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

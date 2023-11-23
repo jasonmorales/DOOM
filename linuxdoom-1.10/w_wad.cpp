@@ -127,7 +127,7 @@ void W_AddFile(char* filename)
     printf(" adding %s\n", filename);
     intptr_t startlump = numlumps;
 
-    filelump_t* fileinfo = NULL;
+    filelump_t* fileinfo = nullptr;
     if (_stricmp(filename + strlen(filename) - 3, "wad"))
     {
         // single lump file
@@ -191,7 +191,7 @@ void W_AddFile(char* filename)
 // Flushes any of the reloadable lumps in memory
 //  and reloads the directory.
 //
-void W_Reload(void)
+void W_Reload()
 {
     if (!reloadname)
         return;
@@ -268,7 +268,7 @@ void W_InitFile(char* filename)
     char* names[2];
 
     names[0] = filename;
-    names[1] = NULL;
+    names[1] = nullptr;
     W_InitMultipleFiles(names);
 }
 
@@ -404,7 +404,7 @@ void* W_CacheLumpNum_internal(intptr_t lump, int tag)
 //
 int		info[2500][10];
 
-void W_Profile(void)
+void W_Profile()
 {
     static int profilecount = 0;
 

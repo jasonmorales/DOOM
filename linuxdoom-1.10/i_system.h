@@ -23,7 +23,7 @@
 #include <stdint.h>
 
 // Called by DoomMain.
-void I_Init(void);
+void I_Init();
 
 // Called by startup code
 // to get the ammount of memory to malloc
@@ -33,7 +33,7 @@ byte* I_ZoneBase(intptr_t* size);
 
 // Called by D_DoomLoop,
 // returns current time in tics.
-int I_GetTime(void);
+int I_GetTime();
 
 
 //
@@ -44,7 +44,7 @@ int I_GetTime(void);
 // are performed here (joystick reading).
 // Can call D_PostEvent.
 //
-void I_StartFrame(void);
+void I_StartFrame();
 
 
 //
@@ -52,7 +52,7 @@ void I_StartFrame(void);
 // called before processing each tic in a frame.
 // Quick syncronous operations are performed here.
 // Can call D_PostEvent.
-void I_StartTic(void);
+void I_StartTic();
 
 // Asynchronous interrupt functions should maintain private queues
 // that are read by the synchronous functions
@@ -62,12 +62,12 @@ void I_StartTic(void);
 // or calls a loadable driver to build it.
 // This ticcmd will then be modified by the gameloop
 // for normal input.
-ticcmd_t* I_BaseTiccmd(void);
+ticcmd_t* I_BaseTiccmd();
 
 
 // Called by M_Responder when quit is selected.
 // Clean exit, displays sell blurb.
-void I_Quit(void);
+void I_Quit();
 
 
 // Allocates from low memory under dos,

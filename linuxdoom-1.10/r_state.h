@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,10 +15,7 @@
 //	Refresh/render internal state variables (global).
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __R_STATE__
-#define __R_STATE__
+#pragma once
 
 // Need data structure definitions.
 #include "d_player.h"
@@ -128,11 +122,3 @@ extern int		sscount;
 
 extern visplane_t* floorplane;
 extern visplane_t* ceilingplane;
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

@@ -13,7 +13,7 @@
 
 doomcom_t doomcom;
 int            vectorishooked;
-void interrupt (*olddoomvect) (void);
+void interrupt (*olddoomvect) ();
 
 
 
@@ -37,7 +37,7 @@ packet
 =============
 */
 
-void LaunchDOOM (void)
+void LaunchDOOM ()
 {
 	 char *newargs[99];
 	 char adrstring[10];
@@ -48,7 +48,7 @@ void LaunchDOOM (void)
 
 // hook the interrupt vector
 	 olddoomvect = getvect (doomcom.intnum);
-     setvect (doomcom.intnum,(void interrupt (*)(void))MK_FP(_CS, 
+     setvect (doomcom.intnum,(void interrupt (*)())MK_FP(_CS, 
 (int)NetISR));
      vectorishooked = 1;
 
@@ -58,7 +58,7 @@ void LaunchDOOM (void)
 	 flatadr = (long)_DS*16 + (unsigned)&doomcom;
 	 sprintf (adrstring,"%lu",flatadr);
 	 newargs[_argc+1] = adrstring;
-	 newargs[_argc+2] = NULL;
+	 newargs[_argc+2] = nullptr;
 
 	 if (!access("doom2.exe",0))
 		spawnv  (P_WAIT, "doom2", newargs);

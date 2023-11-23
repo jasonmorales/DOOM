@@ -87,7 +87,7 @@ intptr_t NetbufferSize()
 //
 // Checksum 
 //
-unsigned NetbufferChecksum(void)
+unsigned NetbufferChecksum()
 {
     uint32_t c = 0x1234567;
 
@@ -170,7 +170,7 @@ void HSendPacket(int node, int	flags)
 // HGetPacket
 // Returns false if no packet is waiting
 //
-boolean HGetPacket(void)
+boolean HGetPacket()
 {
     if (reboundpacket)
     {
@@ -422,7 +422,7 @@ listen:
 //
 // CheckAbort
 //
-void CheckAbort(void)
+void CheckAbort()
 {
     event_t* ev;
     int		stoptic;
@@ -445,7 +445,7 @@ void CheckAbort(void)
 //
 // D_ArbitrateNetStart
 //
-void D_ArbitrateNetStart(void)
+void D_ArbitrateNetStart()
 {
     int		i;
     boolean	gotinfo[MAXNETNODES];
@@ -601,7 +601,7 @@ int	oldnettics;
 
 extern	boolean	advancedemo;
 
-void TryRunTics(void)
+void TryRunTics()
 {
     int		i;
     int		lowtic;

@@ -56,7 +56,7 @@ extern	lumpinfo_t* lumpinfo;
 extern intptr_t numlumps;
 
 void W_InitMultipleFiles(char** filenames);
-void W_Reload(void);
+void W_Reload();
 
 intptr_t W_CheckNumForName(const char* name);
 intptr_t W_GetNumForName(const char* name);

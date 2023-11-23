@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,9 +15,7 @@
 // 	The status bar widget code.
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __STLIB__
-#define __STLIB__
+#pragma once
 
 
 // We are referring to patches.
@@ -147,7 +142,7 @@ typedef struct
 // More precisely, initialize STMINUS,
 //  everything else is done somewhere else.
 //
-void STlib_init(void);
+void STlib_init();
 
 
 
@@ -217,10 +212,3 @@ void
 STlib_updateBinIcon
 (st_binicon_t* bi,
     boolean		refresh);
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

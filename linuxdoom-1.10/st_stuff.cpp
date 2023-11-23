@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,19 +11,12 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Status bar code.
 //	Does the face/direction indicator animatin.
 //	Does palette indicators as well (red pain/berserk, bright pickup)
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: st_stuff.c,v 1.6 1997/02/03 22:45:13 b1 Exp $";
-
-
 #include <stdio.h>
 
 #include "i_system.h"
@@ -494,9 +484,9 @@ extern char* mapnames[];
 //
 // STATUS BAR CODE
 //
-void ST_Stop(void);
+void ST_Stop();
 
-void ST_refreshBackground(void)
+void ST_refreshBackground()
 {
 
     if (st_statusbaron)
@@ -726,7 +716,7 @@ ST_Responder(event_t* ev)
 
 
 
-int ST_calcPainOffset(void)
+int ST_calcPainOffset()
 {
     int		health;
     static int	lastcalc;
@@ -749,7 +739,7 @@ int ST_calcPainOffset(void)
 // the precedence of expressions is:
 //  dead > evil grin > turned head > straight ahead
 //
-void ST_updateFaceWidget(void)
+void ST_updateFaceWidget()
 {
     int		i;
     angle_t	badguyangle;
@@ -921,7 +911,7 @@ void ST_updateFaceWidget(void)
 
 }
 
-void ST_updateWidgets(void)
+void ST_updateWidgets()
 {
     static int	largeammo = 1994; // means "n/a"
     int		i;
@@ -985,7 +975,7 @@ void ST_updateWidgets(void)
 
 }
 
-void ST_Ticker(void)
+void ST_Ticker()
 {
 
     st_clock++;
@@ -997,7 +987,7 @@ void ST_Ticker(void)
 
 static int st_palette = 0;
 
-void ST_doPaletteStuff(void)
+void ST_doPaletteStuff()
 {
 
     int		palette;
@@ -1086,7 +1076,7 @@ void ST_drawWidgets(boolean refresh)
 
 }
 
-void ST_doRefresh(void)
+void ST_doRefresh()
 {
 
     st_firsttime = false;
@@ -1099,7 +1089,7 @@ void ST_doRefresh(void)
 
 }
 
-void ST_diffDraw(void)
+void ST_diffDraw()
 {
     // update all widgets
     ST_drawWidgets(false);
@@ -1121,7 +1111,7 @@ void ST_Drawer(boolean fullscreen, boolean refresh)
 
 }
 
-void ST_loadGraphics(void)
+void ST_loadGraphics()
 {
 
     int		i;
@@ -1198,13 +1188,13 @@ void ST_loadGraphics(void)
 
 }
 
-void ST_loadData(void)
+void ST_loadData()
 {
     lu_palette = W_GetNumForName("PLAYPAL");
     ST_loadGraphics();
 }
 
-void ST_unloadGraphics(void)
+void ST_unloadGraphics()
 {
 
     int i;
@@ -1241,12 +1231,12 @@ void ST_unloadGraphics(void)
 
 }
 
-void ST_unloadData(void)
+void ST_unloadData()
 {
     ST_unloadGraphics();
 }
 
-void ST_initData(void)
+void ST_initData()
 {
 
     int		i;
@@ -1279,7 +1269,7 @@ void ST_initData(void)
 
 
 
-void ST_createWidgets(void)
+void ST_createWidgets()
 {
 
     int i;
@@ -1441,7 +1431,7 @@ void ST_createWidgets(void)
 static boolean	st_stopped = true;
 
 
-void ST_Start(void)
+void ST_Start()
 {
 
     if (!st_stopped)
@@ -1453,7 +1443,7 @@ void ST_Start(void)
 
 }
 
-void ST_Stop(void)
+void ST_Stop()
 {
     if (st_stopped)
         return;
@@ -1463,7 +1453,7 @@ void ST_Stop(void)
     st_stopped = true;
 }
 
-void ST_Init(void)
+void ST_Init()
 {
     veryfirsttime = 0;
     ST_loadData();

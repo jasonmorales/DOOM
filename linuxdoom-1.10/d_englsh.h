@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -19,9 +16,7 @@
 //	English language support (default).
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __D_ENGLSH__
-#define __D_ENGLSH__
+#pragma once
 
 //
 //	Printed strings for translation
@@ -691,11 +686,3 @@
 #define CC_SPIDER	"THE SPIDER MASTERMIND"
 #define CC_CYBER	"THE CYBERDEMON"
 #define CC_HERO	"OUR HERO"
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

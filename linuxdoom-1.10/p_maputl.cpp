@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,8 +11,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Movement/collision utility functions,
 //	as used by function in p_map.c. 
@@ -23,11 +18,6 @@
 //	and some PIT_* functions to use for iteration.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_maputl.c,v 1.5 1997/02/03 22:45:11 b1 Exp $";
-
-
 #include <stdlib.h>
 
 
@@ -407,7 +397,7 @@ P_SetThingPosition(mobj_t* thing)
         // invisible things don't go into the sector links
         sec = ss->sector;
 
-        thing->sprev = NULL;
+        thing->sprev = nullptr;
         thing->snext = sec->thinglist;
 
         if (sec->thinglist)
@@ -430,7 +420,7 @@ P_SetThingPosition(mobj_t* thing)
             && blocky < bmapheight)
         {
             link = &blocklinks[blocky * bmapwidth + blockx];
-            thing->bprev = NULL;
+            thing->bprev = nullptr;
             thing->bnext = *link;
             if (*link)
                 (*link)->bprev = thing;
@@ -440,7 +430,7 @@ P_SetThingPosition(mobj_t* thing)
         else
         {
             // thing is off the map
-            thing->bnext = thing->bprev = NULL;
+            thing->bnext = thing->bprev = nullptr;
         }
     }
 }

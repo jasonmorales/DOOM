@@ -52,7 +52,7 @@
 
 
 
-boolean	G_CheckDemoStatus(void);
+boolean	G_CheckDemoStatus();
 void	G_ReadDemoTiccmd(ticcmd_t* cmd);
 void	G_WriteDemoTiccmd(ticcmd_t* cmd);
 void	G_PlayerReborn(int player);
@@ -60,14 +60,14 @@ void	G_InitNew(skill_t skill, int episode, int map);
 
 void	G_DoReborn(int playernum);
 
-void	G_DoLoadLevel(void);
-void	G_DoNewGame(void);
-void	G_DoLoadGame(void);
-void	G_DoPlayDemo(void);
-void	G_DoCompleted(void);
-void	G_DoVictory(void);
-void	G_DoWorldDone(void);
-void	G_DoSaveGame(void);
+void	G_DoLoadLevel();
+void	G_DoNewGame();
+void	G_DoLoadGame();
+void	G_DoPlayDemo();
+void	G_DoCompleted();
+void	G_DoVictory();
+void	G_DoWorldDone();
+void	G_DoSaveGame();
 
 
 gameaction_t    gameaction;
@@ -406,7 +406,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 //
 extern  gamestate_t     wipegamestate;
 
-void G_DoLoadLevel(void)
+void G_DoLoadLevel()
 {
     // Set the sky map.
     // First thing, we have a dummy sky texture name,
@@ -564,7 +564,7 @@ boolean G_Responder(event_t* ev)
 // G_Ticker
 // Make ticcmd_ts for the players.
 //
-void G_Ticker(void)
+void G_Ticker()
 {
     int		i;
     int		buf;
@@ -896,7 +896,7 @@ void G_DoReborn(int playernum)
         // respawn at the start
 
         // first dissasociate the corpse 
-        players[playernum].mo->player = NULL;
+        players[playernum].mo->player = nullptr;
 
         // spawn at random spot if in death match 
         if (deathmatch)
@@ -928,7 +928,7 @@ void G_DoReborn(int playernum)
 }
 
 
-void G_ScreenShot(void)
+void G_ScreenShot()
 {
     gameaction = ga_screenshot;
 }
@@ -960,14 +960,14 @@ int cpars[32] =
 boolean		secretexit;
 extern char* pagename;
 
-void G_ExitLevel(void)
+void G_ExitLevel()
 {
     secretexit = false;
     gameaction = ga_completed;
 }
 
 // Here's for the german edition.
-void G_SecretExitLevel(void)
+void G_SecretExitLevel()
 {
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
     if ((gamemode == commercial)
@@ -978,7 +978,7 @@ void G_SecretExitLevel(void)
     gameaction = ga_completed;
 }
 
-void G_DoCompleted(void)
+void G_DoCompleted()
 {
     int             i;
 
@@ -1105,7 +1105,7 @@ void G_DoCompleted(void)
 //
 // G_WorldDone 
 //
-void G_WorldDone(void)
+void G_WorldDone()
 {
     gameaction = ga_worlddone;
 
@@ -1130,7 +1130,7 @@ void G_WorldDone(void)
     }
 }
 
-void G_DoWorldDone(void)
+void G_DoWorldDone()
 {
     gamestate = GS_LEVEL;
     gamemap = wminfo.next + 1;
@@ -1156,7 +1156,7 @@ void G_LoadGame(const char* name)
 #define VERSIONSIZE		16 
 
 
-void G_DoLoadGame(void)
+void G_DoLoadGame()
 {
     int		i;
     char	vcheck[VERSIONSIZE];
@@ -1220,7 +1220,7 @@ void G_SaveGame(int slot, char* description)
     sendsave = true;
 }
 
-void G_DoSaveGame(void)
+void G_DoSaveGame()
 {
     char	name[100];
     char	name2[VERSIONSIZE];
@@ -1295,7 +1295,7 @@ G_DeferedInitNew
 }
 
 
-void G_DoNewGame(void)
+void G_DoNewGame()
 {
     demoplayback = false;
     netdemo = false;
@@ -1495,7 +1495,7 @@ void G_RecordDemo(char* name)
     demorecording = true;
 }
 
-void G_BeginRecording(void)
+void G_BeginRecording()
 {
     demo_p = demobuffer;
 
@@ -1591,7 +1591,7 @@ void G_TimeDemo(char* name)
 ===================
 */
 
-boolean G_CheckDemoStatus(void)
+boolean G_CheckDemoStatus()
 {
     int             endtime;
 

@@ -76,15 +76,15 @@ const char* t6text = T6TEXT;
 const char* finaletext;
 const char* finaleflat;
 
-void	F_StartCast(void);
-void	F_CastTicker(void);
+void	F_StartCast();
+void	F_CastTicker();
 boolean F_CastResponder(event_t* ev);
-void	F_CastDrawer(void);
+void	F_CastDrawer();
 
 //
 // F_StartFinale
 //
-void F_StartFinale(void)
+void F_StartFinale()
 {
     gameaction = ga_nothing;
     gamestate = GS_FINALE;
@@ -195,7 +195,7 @@ boolean F_Responder(event_t* event)
 //
 // F_Ticker
 //
-void F_Ticker(void)
+void F_Ticker()
 {
     int		i;
 
@@ -247,7 +247,7 @@ void F_Ticker(void)
 extern	patch_t* hu_font[HU_FONTSIZE];
 
 
-void F_TextWrite(void)
+void F_TextWrite()
 {
     int		x, y, w;
     int		count;
@@ -358,7 +358,7 @@ boolean		castattacking;
 extern	gamestate_t     wipegamestate;
 
 
-void F_StartCast(void)
+void F_StartCast()
 {
     wipegamestate = GS_FORCE_WIPE;		// force a screen wipe
     castnum = 0;
@@ -376,7 +376,7 @@ void F_StartCast(void)
 //
 // F_CastTicker
 //
-void F_CastTicker(void)
+void F_CastTicker()
 {
     int		st;
     int		sfx;
@@ -389,10 +389,10 @@ void F_CastTicker(void)
         // switch from deathstate to next monster
         castnum++;
         castdeath = false;
-        if (castorder[castnum].name == NULL)
+        if (castorder[castnum].name == nullptr)
             castnum = 0;
         if (mobjinfo[castorder[castnum].type].seesound)
-            S_StartSound(NULL, mobjinfo[castorder[castnum].type].seesound);
+            S_StartSound(nullptr, mobjinfo[castorder[castnum].type].seesound);
         caststate = &states[mobjinfo[castorder[castnum].type].seestate];
         castframes = 0;
     }
@@ -438,7 +438,7 @@ void F_CastTicker(void)
         }
 
         if (sfx)
-            S_StartSound(NULL, sfx);
+            S_StartSound(nullptr, sfx);
     }
 
     if (castframes == 12)
@@ -498,7 +498,7 @@ boolean F_CastResponder(event_t* ev)
     castframes = 0;
     castattacking = false;
     if (mobjinfo[castorder[castnum].type].deathsound)
-        S_StartSound(NULL, mobjinfo[castorder[castnum].type].deathsound);
+        S_StartSound(nullptr, mobjinfo[castorder[castnum].type].deathsound);
 
     return true;
 }
@@ -612,7 +612,7 @@ F_DrawPatchCol
 //
 // F_BunnyScroll
 //
-void F_BunnyScroll(void)
+void F_BunnyScroll()
 {
     int		scrolled;
     int		x;
@@ -653,7 +653,7 @@ void F_BunnyScroll(void)
         stage = 6;
     if (stage > laststage)
     {
-        S_StartSound(NULL, sfx_pistol);
+        S_StartSound(nullptr, sfx_pistol);
         laststage = stage;
     }
 
@@ -664,7 +664,7 @@ void F_BunnyScroll(void)
 //
 // F_Drawer
 //
-void F_Drawer(void)
+void F_Drawer()
 {
     if (finalestage == 2)
     {

@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -21,10 +18,7 @@
 //	 utility functions, etc.
 //
 //-----------------------------------------------------------------------------
-
-
-#ifndef __P_SPEC__
-#define __P_SPEC__
+#pragma once
 
 
 //
@@ -39,13 +33,13 @@ extern	int	levelTimeCount;
 
 
 // at game start
-void    P_InitPicAnims(void);
+void    P_InitPicAnims();
 
 // at map load
-void    P_SpawnSpecials(void);
+void    P_SpawnSpecials();
 
 // every tic
-void    P_UpdateSpecials(void);
+void    P_UpdateSpecials();
 
 // when needed
 boolean
@@ -253,7 +247,7 @@ P_ChangeSwitchTexture
 (line_t* line,
     int		useAgain);
 
-void P_InitSwitchList(void);
+void P_InitSwitchList();
 
 
 //
@@ -464,7 +458,7 @@ typedef struct
 // how many diff. types of anims
 #define MAXSLIDEDOORS	5                            
 
-void P_InitSlidingDoorFrames(void);
+void P_InitSlidingDoorFrames();
 
 void
 EV_SlidingDoor
@@ -636,10 +630,3 @@ EV_Teleport
 (line_t* line,
     int		side,
     mobj_t* thing);
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

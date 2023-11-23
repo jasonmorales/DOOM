@@ -1,4 +1,3 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
 // $Id: sounds.c,v 1.3 1997/01/29 22:40:44 b1 Exp $
@@ -32,12 +31,6 @@
 //	Kept as a sample, DOOM sounds.
 //
 //-----------------------------------------------------------------------------
-
-
-static const char rcsid[] = "$Id: sounds.c,v 1.3 1997/01/29 22:40:44 b1 Exp $";
-
-
-
 // Not exactly a good idea.
 enum { false, true };
 

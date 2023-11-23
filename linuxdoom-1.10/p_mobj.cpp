@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -14,16 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// $Log:$
-//
 // DESCRIPTION:
 //	Moving object handling. Spawn functions.
 //
 //-----------------------------------------------------------------------------
-
-static const char
-rcsid[] = "$Id: p_mobj.c,v 1.5 1997/02/03 22:45:12 b1 Exp $";
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "m_random.h"
@@ -421,7 +412,7 @@ void P_MobjThinker(mobj_t* mobj)
     {
         P_XYMovement(mobj);
 
-        // FIXME: decent NOP/NULL/Nil function pointer please.
+        // FIXME: decent NOP/nullptr/Nil function pointer please.
         if (mobj->thinker.function.acv == (actionf_v)(-1))
             return;		// mobj was removed
     }
@@ -430,7 +421,7 @@ void P_MobjThinker(mobj_t* mobj)
     {
         P_ZMovement(mobj);
 
-        // FIXME: decent NOP/NULL/Nil function pointer please.
+        // FIXME: decent NOP/nullptr/Nil function pointer please.
         if (mobj->thinker.function.acv == (actionf_v)(-1))
             return;		// mobj was removed
     }
@@ -486,7 +477,7 @@ P_SpawnMobj
     state_t* st;
     mobjinfo_t* info;
 
-    auto mobj = Z_Malloc<mobj_t>(sizeof(mobj_t), PU_LEVEL, NULL);
+    auto mobj = Z_Malloc<mobj_t>(sizeof(mobj_t), PU_LEVEL, nullptr);
     memset(mobj, 0, sizeof(*mobj));
     info = &mobjinfo[type];
 
@@ -574,7 +565,7 @@ void P_RemoveMobj(mobj_t* mobj)
 //
 // P_RespawnSpecials
 //
-void P_RespawnSpecials(void)
+void P_RespawnSpecials()
 {
     fixed_t		x;
     fixed_t		y;
@@ -670,7 +661,7 @@ void P_SpawnPlayer(mapthing_t* mthing)
     p->mo = mobj;
     p->playerstate = PST_LIVE;
     p->refire = 0;
-    p->message = NULL;
+    p->message = nullptr;
     p->damagecount = 0;
     p->bonuscount = 0;
     p->extralight = 0;

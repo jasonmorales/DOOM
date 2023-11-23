@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -17,9 +14,7 @@
 // DESCRIPTION:  Head up display
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __HU_STUFF_H__
-#define __HU_STUFF_H__
+#pragma once
 
 #include "d_event.h"
 
@@ -47,20 +42,12 @@
 // HEADS UP TEXT
 //
 
-void HU_Init(void);
-void HU_Start(void);
+void HU_Init();
+void HU_Start();
 
 boolean HU_Responder(event_t* ev);
 
-void HU_Ticker(void);
-void HU_Drawer(void);
-char HU_dequeueChatChar(void);
-void HU_Erase(void);
-
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------
+void HU_Ticker();
+void HU_Drawer();
+char HU_dequeueChatChar();
+void HU_Erase();

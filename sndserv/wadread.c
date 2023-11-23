@@ -1,4 +1,3 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
 // $Id: wadread.c,v 1.3 1997/01/30 19:54:23 b1 Exp $
@@ -33,12 +32,6 @@
 //	Welcome to Department of Redundancy Department. Again :-).
 //
 //-----------------------------------------------------------------------------
-
-
-static const char rcsid[] = "$Id: wadread.c,v 1.3 1997/01/30 19:54:23 b1 Exp $";
-
-
-
 #include <malloc.h>
 #include <fcntl.h>
 #include <sys/stat.h>

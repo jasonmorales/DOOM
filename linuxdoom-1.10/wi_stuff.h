@@ -1,7 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
-//
-// $Id:$
 //
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
@@ -18,11 +15,7 @@
 //  Intermission.
 //
 //-----------------------------------------------------------------------------
-
-#ifndef __WI_STUFF__
-#define __WI_STUFF__
-
-//#include "v_video.h"
+#pragma once
 
 #include "doomdef.h"
 
@@ -37,18 +30,11 @@ typedef enum
 } stateenum_t;
 
 // Called by main loop, animate the intermission.
-void WI_Ticker(void);
+void WI_Ticker();
 
 // Called by main loop,
 // draws the intermission directly into the screen buffer.
-void WI_Drawer(void);
+void WI_Drawer();
 
 // Setup for an intermission screen.
 void WI_Start(wbstartstruct_t* wbstartstruct);
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// $Log:$
-//
-//-----------------------------------------------------------------------------

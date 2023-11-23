@@ -1,4 +1,3 @@
-// Emacs style mode select   -*- C++ -*- 
 //-----------------------------------------------------------------------------
 //
 // $Id: linux.c,v 1.3 1997/01/26 07:45:01 b1 Exp $
@@ -31,10 +30,6 @@
 //	UNIX, soundserver for Linux i386.
 //
 //-----------------------------------------------------------------------------
-
-static const char rcsid[] = "$Id: linux.c,v 1.3 1997/01/26 07:45:01 b1 Exp $";
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -64,7 +59,7 @@ myioctl
     }
 }
 
-void I_InitMusic(void)
+void I_InitMusic()
 {
 }
 
@@ -106,13 +101,13 @@ I_SubmitOutputBuffer
     write(audio_fd, samples, samplecount*4);
 }
 
-void I_ShutdownSound(void)
+void I_ShutdownSound()
 {
 
     close(audio_fd);
 
 }
 
-void I_ShutdownMusic(void)
+void I_ShutdownMusic()
 {
 }

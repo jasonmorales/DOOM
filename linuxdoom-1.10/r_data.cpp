@@ -395,13 +395,13 @@ void R_InitTextures()
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
-    int* maptex1 = NULL;
+    int* maptex1 = nullptr;
     int* maptex = maptex1 = W_CacheLumpName<int>("TEXTURE1", PU_STATIC);
     int numtextures1 = *maptex;
     maxoff = W_LumpLength(W_GetNumForName("TEXTURE1"));
     directory = maptex + 1;
 
-    int* maptex2 = NULL;
+    int* maptex2 = nullptr;
     if (W_CheckNumForName("TEXTURE2") != -1)
     {
         maptex2 = W_CacheLumpName<int>("TEXTURE2", PU_STATIC);
@@ -410,7 +410,7 @@ void R_InitTextures()
     }
     else
     {
-        maptex2 = NULL;
+        maptex2 = nullptr;
         numtextures2 = 0;
         maxoff2 = 0;
     }
@@ -512,7 +512,7 @@ void R_InitTextures()
 //
 // R_InitFlats
 //
-void R_InitFlats(void)
+void R_InitFlats()
 {
     firstflat = W_GetNumForName("F_START") + 1;
     lastflat = W_GetNumForName("F_END") - 1;
@@ -531,7 +531,7 @@ void R_InitFlats(void)
 //  so the sprite does not need to be cached completely
 //  just for having the header info ready during rendering.
 //
-void R_InitSpriteLumps(void)
+void R_InitSpriteLumps()
 {
     int		i;
     patch_t* patch;
@@ -653,7 +653,7 @@ int		flatmemory;
 int		texturememory;
 int		spritememory;
 
-void R_PrecacheLevel(void)
+void R_PrecacheLevel()
 {
     char* flatpresent;
     char* texturepresent;

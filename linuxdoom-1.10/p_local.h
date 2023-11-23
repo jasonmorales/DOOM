@@ -64,7 +64,7 @@
 extern	thinker_t	thinkercap;
 
 
-void P_InitThinkers(void);
+void P_InitThinkers();
 void P_AddThinker(thinker_t* thinker);
 void P_RemoveThinker(thinker_t* thinker);
 
@@ -98,7 +98,7 @@ extern int		iquehead;
 extern int		iquetail;
 
 
-void P_RespawnSpecials(void);
+void P_RespawnSpecials();
 
 mobj_t*
 P_SpawnMobj
@@ -211,7 +211,7 @@ void 	P_UseLines(player_t* player);
 
 boolean P_ChangeSector(sector_t* sector, boolean crunch);
 
-extern mobj_t* linetarget;	// who got hit (or NULL)
+extern mobj_t* linetarget;	// who got hit (or nullptr)
 
 fixed_t
 P_AimLineAttack

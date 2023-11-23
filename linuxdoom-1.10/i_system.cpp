@@ -1,7 +1,5 @@
 //-----------------------------------------------------------------------------
 //
-// $Id:$
-//
 // Copyright (C) 1993-1996 by id Software, Inc.
 //
 // This source is available for distribution and/or modification
@@ -50,13 +48,13 @@ I_Tactile
 }
 
 ticcmd_t	emptycmd;
-ticcmd_t* I_BaseTiccmd(void)
+ticcmd_t* I_BaseTiccmd()
 {
     return &emptycmd;
 }
 
 
-int  I_GetHeapSize(void)
+int  I_GetHeapSize()
 {
     return mb_used * 1024 * 1024;
 }
@@ -73,7 +71,7 @@ byte* I_ZoneBase(intptr_t* size)
 // I_GetTime
 // returns time in 1/70th second tics
 //
-int  I_GetTime(void)
+int  I_GetTime()
 {
     timespec ts;
     time_t newtics;
@@ -89,7 +87,7 @@ int  I_GetTime(void)
 //
 // I_Init
 //
-void I_Init(void)
+void I_Init()
 {
     I_InitSound();
     //  I_InitGraphics();
@@ -98,7 +96,7 @@ void I_Init(void)
 //
 // I_Quit
 //
-void I_Quit(void)
+void I_Quit()
 {
     D_QuitNetGame();
     I_ShutdownSound();
@@ -113,10 +111,10 @@ void I_WaitVBL(int count)
     std::this_thread::sleep_for(std::chrono::milliseconds(1'000 / 70));
 }
 
-void I_BeginRead(void)
+void I_BeginRead()
 {}
 
-void I_EndRead(void)
+void I_EndRead()
 {}
 
 byte* I_AllocLow(int length)
