@@ -14,7 +14,7 @@ public:
     template<typename... Ts>
     string(Ts... in) : std::string(in...) {}
 
-    int32 length() const
+    inline int32 length() const
     {
         auto out = std::string::length();
         assert(out <= std::numeric_limits<int32>::max());
@@ -28,7 +28,7 @@ public:
     template<typename... Ts>
     string_view(Ts... in) : std::string_view(in...) {}
 
-    int32 length() const
+    inline int32 length() const
     {
         auto out = std::string_view::length();
         assert(out <= std::numeric_limits<int32>::max());

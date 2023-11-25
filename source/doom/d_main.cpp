@@ -619,8 +619,6 @@ void D_DoomMain()
 {
     static char title[128];
 
-    _CrtSetDebugFillThreshold(0);
-
     IdentifyVersion();
 
     setvbuf(stdout, nullptr, _IONBF, 0);
@@ -765,18 +763,18 @@ void D_DoomMain()
     if (vector<string_view> fileList; CommandLine::GetValueList("-file", fileList))
     {
         modifiedgame = true; // homebrew levels
-        for (auto file : fileList)
-            D_AddFile(string(file).c_str());
+        for (auto fileName : fileList)
+            D_AddFile(string(fileName).c_str());
     }
 
     if (string_view name;
         CommandLine::TryGetValues("-playdemo", name) ||
         CommandLine::TryGetValues("-timedemo", name))
     {
-        string file(name);
-        file += ".lmp";
-        D_AddFile(file.c_str());
-        printf("Playing demo %s.\n", file.c_str());
+        string fileName(name);
+        fileName += ".lmp";
+        D_AddFile(fileName.c_str());
+        printf("Playing demo %s.\n", fileName.c_str());
     }
 
     // get skill / episode / map from parms

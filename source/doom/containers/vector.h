@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <concepts>
 
 namespace nonstd
 {
@@ -32,6 +33,7 @@ public:
 
     inline bool has(const T& value) const { return std::find(super::begin(), super::end(), value) != super::end(); }
     template<typename F>
+    requires std::predicate<F, T>
     inline bool has(const F& test) const { return std::any_of(super::begin(), super::end(), test); }
 };
 

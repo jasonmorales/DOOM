@@ -30,7 +30,7 @@ T parse_number(string_view str)
     {
         ++at;
         if (at == end || is_whitespace(*at))
-            return value;
+            return {};
 
         switch (*at | 32)
         {
@@ -65,8 +65,12 @@ T parse_number(string_view str)
 
         ++at;
     }
+
+    auto out = value * sign;
+    assert(out <= std::numeric_limits<T>::max() && out >= std::numeric_limits<T>::min());
+
     if (at == end || (*at != '.' && (*at | 32) != 'e'))
-        return value * sign;
+        return static_cast<T>(out);
 
     T frac = 0;
     T div = 1;
@@ -90,8 +94,11 @@ T parse_number(string_view str)
         frac /= div;
     }
 
+    out = (value + frac) * sign;
+    assert(out <= std::numeric_limits<T>::max() && out >= std::numeric_limits<T>::min());
+
     if (at == end || (*at | 32) != 'e')
-        return (value + frac) * sign;
+        return static_cast<T>(out);
 
     ++at;
 
@@ -103,8 +110,9 @@ T parse_number(string_view str)
         exp_sign = 44 - *at;
         ++at;
     }
+
     if (at == end || !is_valid_digit(at, base))
-        return (value + frac) * sign;
+        return static_cast<T>(out);
 
     T exp_value = 0;
     while (at < end && is_valid_digit(at, base))
@@ -118,7 +126,10 @@ T parse_number(string_view str)
         ++at;
     }
     exp_value *= exp_sign;
-    return (value + frac) * pow(base, exp_value) * sign;
+
+    out *= nonstd::pow(base, exp_value);
+    assert(out <= std::numeric_limits<T>::max() && out >= std::numeric_limits<T>::min());
+    return static_cast<T>(out);
 }
 
 template<typename TO, typename FROM>

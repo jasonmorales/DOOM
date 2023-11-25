@@ -29,6 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {
     CommandLine::Initialize(args);
 
+    _CrtSetDebugFillThreshold(0);
+
     D_DoomMain();
 
     return 0;

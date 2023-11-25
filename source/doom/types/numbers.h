@@ -2,6 +2,10 @@
 
 #include <stdint.h>
 #include <type_traits>
+#include <concepts>
+#include <cmath>
+#include <limits>
+#include <assert.h>
 
 using int8 = int8_t;
 using int16 = int16_t;
@@ -28,3 +32,38 @@ constexpr bool is_floating_point = std::is_floating_point_v<T>;
 
 template<typename T>
 constexpr bool is_arithmetic = std::is_arithmetic_v<T>;
+
+namespace nonstd
+{
+
+template<typename B, typename E>
+requires std::integral<B> && std::integral<E>
+inline constexpr std::common_type_t<B, E> pow(B b, E e)
+{
+    using R = std::common_type_t<B, E>;
+
+    if (e == 0)
+        return 1;
+    if (e == 1)
+        return b;
+
+    if (e & 1)
+    {
+        auto out = b * pow(b * b, (e - 1) / 2);
+        assert(out <= std::numeric_limits<R>::max());
+        return static_cast<R>(out);
+    }
+
+    auto out = pow(b * b, e / 2);
+    assert(out <= std::numeric_limits<R>::max());
+    return static_cast<R>(out);
+}
+
+template<typename B, typename E>
+requires std::floating_point<B> || std::floating_point<E>
+inline constexpr std::common_type<B, E> pow(B b, E e)
+{
+    return std::pow(b, e);
+}
+
+}
