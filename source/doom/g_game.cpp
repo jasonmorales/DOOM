@@ -1227,7 +1227,7 @@ void G_DoSaveGame()
     char* description;
     int		i;
 
-    if (M_CheckParm("-cdrom"))
+    if (CommandLine::HasArg("-cdrom"))
         sprintf_s(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", savegameslot);
     else
         sprintf_s(name, SAVEGAMENAME "%d.dsg", savegameslot);
@@ -1475,20 +1475,19 @@ void G_WriteDemoTiccmd(ticcmd_t* cmd)
     G_ReadDemoTiccmd(cmd);         // make SURE it is exactly the same 
 }
 
-
-
 //
 // G_RecordDemo 
 // 
-void G_RecordDemo(char* name)
+void G_RecordDemo(const char* name)
 {
     usergame = false;
     strcpy_s(demoname, name);
     strcat_s(demoname, ".lmp");
     int maxsize = 0x20000;
-    int i = M_CheckParm("-maxdemo");
-    if (i && i < myargc - 1)
-        maxsize = atoi(myargv[i + 1]) * 1024;
+
+    if (CommandLine::TryGetValues("-maxdemo", maxsize))
+        maxsize *= 1024;
+
     demobuffer = static_cast<byte*>(Z_Malloc(maxsize, PU_STATIC, nullptr));
     demoend = demobuffer + maxsize;
 
@@ -1569,10 +1568,10 @@ void G_DoPlayDemo()
 //
 // G_TimeDemo 
 //
-void G_TimeDemo(char* name)
+void G_TimeDemo(const char* name)
 {
-    nodrawers = M_CheckParm("-nodraw");
-    noblit = M_CheckParm("-noblit");
+    nodrawers = CommandLine::HasArg("-nodraw");
+    noblit = CommandLine::HasArg("-noblit");
     timingdemo = true;
     singletics = true;
 

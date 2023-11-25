@@ -12,24 +12,84 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
-#include <string.h>
 
-int myargc = 0;
-char** myargv = nullptr;
+#include "i_system.h"
+#include "m_argv.h"
 
-//
-// M_CheckParm
-// Checks for the given parameter
-// in the program's command line arguments.
-// Returns the argument number (1 to argc-1)
-// or 0 if not present
-int M_CheckParm(const char* check)
+#include <fstream>
+
+string_view CommandLine::commandLine;
+vector<string_view> CommandLine::args;
+vector<string_view> CommandLine::fileStack;
+vector<char*> CommandLine::responseFileContent;
+
+void CommandLine::Initialize(string_view source)
 {
-    for (int i = 1;i < myargc;i++)
-    {
-        if (!_stricmp(check, myargv[i]))
-            return i;
-    }
+    commandLine = source;
+    Parse(commandLine);
+}
 
-    return 0;
+bool CommandLine::HasArg(string_view name)
+{
+    return args.has(name);
+}
+
+bool CommandLine::HasArg(const std::function<bool(string_view)>& condition)
+{
+    return args.has(condition);
+}
+
+void CommandLine::Parse(string_view source)
+{
+    int32 start = 0;
+    int32 end = 0;
+    int32 last = source.length();
+
+    while(end < last)
+    {
+        // Eat whitespace
+        while (end < last && is_whitespace(source[end])) ++ end;
+        start = end;
+
+        bool inString = false;
+        while (end < last && (inString || !is_whitespace(source[end])))
+        {
+            if (source[end] == '"')
+                inString = !inString;
+
+            ++end;
+        }
+
+        if (start == end)
+            continue;
+
+        auto arg = source.substr(start, end - start);
+        if (arg.starts_with('@'))
+            ParseResponseFile(arg.substr(1));
+        else
+            args.push_back(arg);
+
+        start = end = end + 1;
+    }
+}
+
+void CommandLine::ParseResponseFile(string_view path)
+{
+    if (fileStack.has(path))
+        I_Error("Recursive response file!");
+
+    fileStack.push_back(path);
+
+    auto file = std::ifstream{string{path}, std::ifstream::binary | std::ifstream::ate};
+    if (!file.is_open())
+        I_Error("No such response file!");
+
+    auto size = file.tellg();
+    auto content =new char[size];
+    responseFileContent.push_back(content);
+    file.seekg(0);
+    file.read(content, size);
+    Parse(string_view(content, size));
+
+    fileStack.pop_back();
 }

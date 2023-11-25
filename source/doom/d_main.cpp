@@ -314,7 +314,7 @@ void D_DoomLoop()
     if (demorecording)
         G_BeginRecording();
 
-    if (M_CheckParm("-debugfile"))
+    if (CommandLine::HasArg("-debugfile"))
     {
         char filename[20];
         sprintf_s(filename, 20, "debug%i.txt", consoleplayer);
@@ -528,7 +528,7 @@ void IdentifyVersion()
     char* tntwad = static_cast<char*>(malloc(size));
     sprintf_s(tntwad, size, "%s/tnt.wad", doomwaddir);
 
-    if (M_CheckParm("-shdev"))
+    if (CommandLine::HasArg("-shdev"))
     {
         gamemode = shareware;
         devparm = true;
@@ -539,7 +539,7 @@ void IdentifyVersion()
         return;
     }
 
-    if (M_CheckParm("-regdev"))
+    if (CommandLine::HasArg("-regdev"))
     {
         gamemode = registered;
         devparm = true;
@@ -551,7 +551,7 @@ void IdentifyVersion()
         return;
     }
 
-    if (M_CheckParm("-comdev"))
+    if (CommandLine::HasArg("-comdev"))
     {
         gamemode = commercial;
         devparm = true;
@@ -613,105 +613,27 @@ void IdentifyVersion()
 }
 
 //
-// Find a Response File
-//
-void FindResponseFile()
-{
-    int i;
-#define MAXARGVS 100
-
-    for (i = 1; i < myargc; i++)
-        if (myargv[i][0] == '@')
-        {
-            int size;
-            int k;
-            int index;
-            int indexinfile;
-            char* infile;
-            char* file;
-            char* moreargs[20];
-            char* firstargv;
-
-            // READ THE RESPONSE FILE INTO MEMORY
-            FILE* handle = nullptr;
-            fopen_s(&handle, &myargv[i][1], "rb");
-            if (!handle)
-            {
-                printf("\nNo such response file!");
-                exit(1);
-            }
-            printf("Found response file %s!\n", &myargv[i][1]);
-            fseek(handle, 0, SEEK_END);
-            size = ftell(handle);
-            fseek(handle, 0, SEEK_SET);
-            file = static_cast<char*>(malloc(size));
-            fread(file, size, 1, handle);
-            fclose(handle);
-
-            // KEEP ALL CMDLINE ARGS FOLLOWING @RESPONSEFILE ARG
-            for (index = 0, k = i + 1; k < myargc; k++)
-                moreargs[index++] = myargv[k];
-
-            firstargv = myargv[0];
-            myargv = static_cast<char**>(malloc(sizeof(char*) * MAXARGVS));
-            memset(myargv, 0, sizeof(char*) * MAXARGVS);
-            myargv[0] = firstargv;
-
-            infile = file;
-            indexinfile = k = 0;
-            indexinfile++; // SKIP PAST ARGV[0] (KEEP IT)
-            do
-            {
-                myargv[indexinfile++] = infile + k;
-                while (k < size &&
-                    ((*(infile + k) >= ' ' + 1) && (*(infile + k) <= 'z')))
-                    k++;
-                *(infile + k) = 0;
-                while (k < size &&
-                    ((*(infile + k) <= ' ') || (*(infile + k) > 'z')))
-                    k++;
-            } while (k < size);
-
-            for (k = 0; k < index; k++)
-                myargv[indexinfile++] = moreargs[k];
-            myargc = indexinfile;
-
-            // DISPLAY ARGS
-            printf("%d command-line args:\n", myargc);
-            for (k = 1; k < myargc; k++)
-                printf("%s\n", myargv[k]);
-
-            break;
-        }
-}
-
-//
 // D_DoomMain
 //
 void D_DoomMain()
 {
-    _CrtSetDebugFillThreshold(0);
-
     static char title[128];
 
-    int p;
-    char file[256];
-
-    FindResponseFile();
+    _CrtSetDebugFillThreshold(0);
 
     IdentifyVersion();
 
     setvbuf(stdout, nullptr, _IONBF, 0);
     modifiedgame = false;
 
-    nomonsters = M_CheckParm("-nomonsters");
-    respawnparm = M_CheckParm("-respawn");
-    fastparm = M_CheckParm("-fast");
-    devparm = M_CheckParm("-devparm");
+    nomonsters = CommandLine::HasArg("-nomonsters");
+    respawnparm = CommandLine::HasArg("-respawn");
+    fastparm = CommandLine::HasArg("-fast");
+    devparm = CommandLine::HasArg("-devparm");
 
-    if (M_CheckParm("-altdeath"))
+    if (CommandLine::HasArg("-altdeath"))
         deathmatch = 2;
-    else if (M_CheckParm("-deathmatch"))
+    else if (CommandLine::HasArg("-deathmatch"))
         deathmatch = 1;
 
     switch (gamemode)
@@ -774,7 +696,7 @@ void D_DoomMain()
     if (devparm)
         printf(D_DEVSTR);
 
-    if (M_CheckParm("-cdrom"))
+    if (CommandLine::HasArg("-cdrom"))
     {
         printf(D_CDROM);
         _mkdir("c:\\doomdata");
@@ -782,17 +704,16 @@ void D_DoomMain()
     }
 
     // turbo option
-    p = M_CheckParm("-turbo");
-    if (p)
+    if (CommandLine::HasArg("-turbo"))
     {
         int scale = 200;
+        CommandLine::TryGetValues("-turbo", scale);
 
-        if (p < myargc - 1)
-            scale = atoi(myargv[p + 1]);
         if (scale < 10)
             scale = 10;
         if (scale > 400)
             scale = 400;
+
         printf("turbo scale: %i%%\n", scale);
         forwardmove[0] = forwardmove[0] * scale / 100;
         forwardmove[1] = forwardmove[1] * scale / 100;
@@ -800,58 +721,62 @@ void D_DoomMain()
         sidemove[1] = sidemove[1] * scale / 100;
     }
 
+    char file[256];
+
+    auto doWarp = [](int32 ep, int32 map)
+    {
+        if (gamemode == commercial)
+            startmap = ep;
+        else
+        {
+            startepisode = ep;
+            startmap = map;
+        }
+        autostart = true;
+};
+
     // add any files specified on the command line with -file wadfile
     // to the wad list
     //
     // convenience hack to allow -wart e m to add a wad file
     // prepend a tilde to the filename so wadfile will be reloadable
-    p = M_CheckParm("-wart");
-    if (p)
+    if (int32 ep = 0, map = 0; CommandLine::TryGetValues("-wart", ep, map))
     {
-        myargv[p][4] = 'p'; // big hack, change to -warp
-
         // Map name handling.
         switch (gamemode)
         {
         case shareware:
         case retail:
         case registered:
-            sprintf_s(file, "~" DEVMAPS "E%cM%c.wad", myargv[p + 1][0], myargv[p + 2][0]);
-            printf("Warping to Episode %s, Map %s.\n", myargv[p + 1], myargv[p + 2]);
+            sprintf_s(file, "~" DEVMAPS "E%dM%d.wad", ep, map);
+            printf("Warping to Episode %d, Map %d.\n", ep, map);
             break;
 
         case commercial:
         default:
-            p = atoi(myargv[p + 1]);
-            if (p < 10)
-                sprintf_s(file, "~" DEVMAPS "cdata/map0%i.wad", p);
-            else
-                sprintf_s(file, "~" DEVMAPS "cdata/map%i.wad", p);
+            sprintf_s(file, "~" DEVMAPS "cdata/map%02d.wad", ep);
             break;
         }
         D_AddFile(file);
+
+        doWarp(ep,map);
     }
 
-    p = M_CheckParm("-file");
-    if (p)
+    if (vector<string_view> fileList; CommandLine::GetValueList("-file", fileList))
     {
-        // the parms after p are wadfile/lump names,
-        // until end of parms or another - preceded parm
         modifiedgame = true; // homebrew levels
-        while (++p != myargc && myargv[p][0] != '-')
-            D_AddFile(myargv[p]);
+        for (auto file : fileList)
+            D_AddFile(string(file).c_str());
     }
 
-    p = M_CheckParm("-playdemo");
-
-    if (!p)
-        p = M_CheckParm("-timedemo");
-
-    if (p && p < myargc - 1)
+    if (string_view name;
+        CommandLine::TryGetValues("-playdemo", name) ||
+        CommandLine::TryGetValues("-timedemo", name))
     {
-        sprintf_s(file, "%s.lmp", myargv[p + 1]);
-        D_AddFile(file);
-        printf("Playing demo %s.lmp.\n", myargv[p + 1]);
+        string file(name);
+        file += ".lmp";
+        D_AddFile(file.c_str());
+        printf("Playing demo %s.\n", file.c_str());
     }
 
     // get skill / episode / map from parms
@@ -860,48 +785,31 @@ void D_DoomMain()
     startmap = 1;
     autostart = false;
 
-    p = M_CheckParm("-skill");
-    if (p && p < myargc - 1)
+    if (int32 skill = 0; CommandLine::TryGetValues("-skill", skill))
     {
-        startskill = static_cast<skill_t>(myargv[p + 1][0] - '1');
+        startskill = static_cast<skill_t>(skill);
         autostart = true;
     }
 
-    p = M_CheckParm("-episode");
-    if (p && p < myargc - 1)
+    if (CommandLine::TryGetValues("-episode", startepisode))
     {
-        startepisode = myargv[p + 1][0] - '0';
         startmap = 1;
         autostart = true;
     }
 
-    p = M_CheckParm("-timer");
-    if (p && p < myargc - 1 && deathmatch)
+    if (int32 time = 0; CommandLine::TryGetValues("-timer", time) && deathmatch)
     {
-        int time;
-        time = atoi(myargv[p + 1]);
         printf("Levels will end after %d minute", time);
         if (time > 1)
             printf("s");
         printf(".\n");
     }
 
-    p = M_CheckParm("-avg");
-    if (p && p < myargc - 1 && deathmatch)
+    if (CommandLine::HasArg("-avg") && deathmatch)
         printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
 
-    p = M_CheckParm("-warp");
-    if (p && p < myargc - 1)
-    {
-        if (gamemode == commercial)
-            startmap = atoi(myargv[p + 1]);
-        else
-        {
-            startepisode = myargv[p + 1][0] - '0';
-            startmap = myargv[p + 2][0] - '0';
-        }
-        autostart = true;
-    }
+    if (int32 ep = 0, map = 0; CommandLine::TryGetValues("-warp", ep, map))
+        doWarp(ep,map);
 
     // init subsystems
     printf("V_Init: allocate screens.\n");
@@ -1002,45 +910,39 @@ void D_DoomMain()
     ST_Init();
 
     // check for a driver that wants intermission stats
-    p = M_CheckParm("-statcopy");
-    if (p && p < myargc - 1)
+    if (int64 val; CommandLine::TryGetValues("-playdemo", val))
     {
         // for statistics driver
-        statcopy = reinterpret_cast<void*>(static_cast<intptr_t>(atoi(myargv[p + 1])));
+        statcopy = reinterpret_cast<void*>(val);
         printf("External statistics registered.\n");
     }
 
-    // start the apropriate game based on parms
-    p = M_CheckParm("-record");
-
-    if (p && p < myargc - 1)
+    // start the appropriate game based on params
+    if (string name; CommandLine::TryGetValues("-record", name))
     {
-        G_RecordDemo(myargv[p + 1]);
+        G_RecordDemo(name.c_str());
         autostart = true;
     }
 
-    p = M_CheckParm("-playdemo");
-    if (p && p < myargc - 1)
+    if (string demo; CommandLine::TryGetValues("-playdemo", demo))
     {
         singledemo = true; // quit after one demo
-        G_DeferedPlayDemo(myargv[p + 1]);
+        G_DeferedPlayDemo(demo.c_str());
         D_DoomLoop(); // never returns
     }
 
-    p = M_CheckParm("-timedemo");
-    if (p && p < myargc - 1)
+    if (string demo; CommandLine::TryGetValues("-timedemo", demo))
     {
-        G_TimeDemo(myargv[p + 1]);
+        G_TimeDemo(demo.c_str());
         D_DoomLoop(); // never returns
     }
 
-    p = M_CheckParm("-loadgame");
-    if (p && p < myargc - 1)
+    if (int load; CommandLine::TryGetValues("-loadgame", load))
     {
-        if (M_CheckParm("-cdrom"))
-            sprintf_s(file, "c:\\doomdata\\" SAVEGAMENAME "%c.dsg", myargv[p + 1][0]);
+        if (CommandLine::HasArg("-cdrom"))
+            sprintf_s(file, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", load);
         else
-            sprintf_s(file, SAVEGAMENAME "%c.dsg", myargv[p + 1][0]);
+            sprintf_s(file, SAVEGAMENAME "%d.dsg", load);
         G_LoadGame(file);
     }
 

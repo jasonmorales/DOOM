@@ -60,6 +60,7 @@ workspace 'Doom'
 		location 'project'
 		objdir 'intermediate'
 		targetdir 'bin'
+		debugdir '.'
 
 		filter 'Debug'
 			defines { 'DEBUG', '_DEBUG' }
@@ -98,8 +99,8 @@ workspace 'Doom'
 			'glu32',
 			--'glew32',
 			'winmm',
-			'dinput8',
-			'dxguid',
+			--'dinput8',
+			--'dxguid',
 			'ws2_32',
 		}
 

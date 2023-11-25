@@ -11,8 +11,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
 //-----------------------------------------------------------------------------
 #include <stdlib.h>
 #include <string.h>
@@ -27,10 +25,9 @@
 
 #include "doomstat.h"
 
-#ifdef __GNUG__
-#pragma implementation "i_net.h"
-#endif
 #include "i_net.h"
+
+#include "utility/convert.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -224,25 +221,17 @@ int GetLocalAddress()
     return *(int*)hostentry->h_addr_list[0];
 }
 
-
 //
 // I_InitNetwork
 //
 void I_InitNetwork()
 {
-    int			i;
-    int			p;
-    struct hostent* hostentry;	// host information entry
-
     doomcom = static_cast<doomcom_t*>(malloc(sizeof(*doomcom)));
-
     memset(doomcom, 0, sizeof(*doomcom));
 
     // set up for network
-    i = M_CheckParm("-dup");
-    if (i && i < myargc - 1)
+    if (CommandLine::TryGetValues("-dup", doomcom->ticdup))
     {
-        doomcom->ticdup = myargv[i + 1][0] - '0';
         if (doomcom->ticdup < 1)
             doomcom->ticdup = 1;
         if (doomcom->ticdup > 9)
@@ -251,22 +240,18 @@ void I_InitNetwork()
     else
         doomcom->ticdup = 1;
 
-    if (M_CheckParm("-extratic"))
+    if (CommandLine::HasArg("-extratic"))
         doomcom->extratics = 1;
     else
         doomcom->extratics = 0;
 
-    p = M_CheckParm("-port");
-    if (p && p < myargc - 1)
-    {
-        DOOMPORT = atoi(myargv[p + 1]);
+    if (CommandLine::TryGetValues("-port", DOOMPORT))
         printf("using alternate port %i\n", DOOMPORT);
-    }
 
     // parse network game options,
     //  -net <consoleplayer> <host> <host> ...
-    i = M_CheckParm("-net");
-    if (!i)
+    vector<string_view> netSettings;
+    if (!CommandLine::GetValueList("-net", netSettings) || netSettings.empty())
     {
         // single player game
         netgame = false;
@@ -282,27 +267,25 @@ void I_InitNetwork()
     netgame = true;
 
     // parse player number and host list
-    doomcom->consoleplayer = myargv[i + 1][0] - '1';
+    doomcom->consoleplayer = convert<short>(netSettings[0]) - 1;
 
     doomcom->numnodes = 1;	// this node for sure
 
-    i++;
-    while (++i < myargc && myargv[i][0] != '-')
+    for (auto arg = netSettings.begin() + 1; arg != netSettings.end(); ++arg)
     {
+        auto argStr = string(*arg);
         sendaddress[doomcom->numnodes].sin_family = AF_INET;
         sendaddress[doomcom->numnodes].sin_port = htons(DOOMPORT);
-        if (myargv[i][0] == '.')
+        if (argStr[0] == '.')
         {
-            sendaddress[doomcom->numnodes].sin_addr.s_addr
-                = inet_addr(myargv[i] + 1);
+            sendaddress[doomcom->numnodes].sin_addr.s_addr = inet_addr(argStr.substr(1).c_str());
         }
         else
         {
-            hostentry = gethostbyname(myargv[i]);
+            struct hostent* hostentry = gethostbyname(argStr.c_str());
             if (!hostentry)
-                I_Error("gethostbyname: couldn't find %s", myargv[i]);
-            sendaddress[doomcom->numnodes].sin_addr.s_addr
-                = *(int*)hostentry->h_addr_list[0];
+                I_Error("gethostbyname: couldn't find %s", argStr.c_str());
+            sendaddress[doomcom->numnodes].sin_addr.s_addr = *(int*)hostentry->h_addr_list[0];
         }
         doomcom->numnodes++;
     }

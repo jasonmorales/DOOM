@@ -6,3 +6,4 @@ intermediate/
 **/bin
 **.exe
 **.wad
+/project

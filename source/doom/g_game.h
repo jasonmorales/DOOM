@@ -46,12 +46,11 @@ void G_DoLoadGame();
 void G_SaveGame(int slot, char* description);
 
 // Only called by startup code.
-void G_RecordDemo(char* name);
+void G_RecordDemo(const char* name);
 
 void G_BeginRecording();
 
-void G_PlayDemo(char* name);
-void G_TimeDemo(char* name);
+void G_TimeDemo(const char* name);
 boolean G_CheckDemoStatus();
 
 void G_ExitLevel();

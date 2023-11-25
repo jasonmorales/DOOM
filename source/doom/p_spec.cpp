@@ -1237,18 +1237,15 @@ void P_SpawnSpecials()
     // See if -TIMER needs to be used.
     levelTimer = false;
 
-    i = M_CheckParm("-avg");
-    if (i && deathmatch)
+    if (CommandLine::HasArg("-avg") && deathmatch)
     {
         levelTimer = true;
         levelTimeCount = 20 * 60 * 35;
     }
 
-    i = M_CheckParm("-timer");
-    if (i && deathmatch)
+    if (int32 time = 0; CommandLine::TryGetValues("-timer", time))
     {
-        int	time;
-        time = atoi(myargv[i + 1]) * 60 * 35;
+        time *= 60 * 35;
         levelTimer = true;
         levelTimeCount = time;
     }

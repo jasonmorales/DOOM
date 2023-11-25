@@ -42,6 +42,10 @@
 
 #include "m_misc.h"
 
+
+#include "types/strings.h"
+
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -270,7 +274,7 @@ default_t	defaults[] =
 };
 
 int	numdefaults;
-char* defaultfile;
+string defaultfile;
 
 //
 // M_SaveDefaults
@@ -278,7 +282,7 @@ char* defaultfile;
 void M_SaveDefaults()
 {
     FILE* f = nullptr;
-    fopen_s(&f, defaultfile, "w");
+    fopen_s(&f, defaultfile.c_str(), "w");
     if (!f)
         return; // can't write the file, but don't complain
 
@@ -319,18 +323,14 @@ void M_LoadDefaults()
         *defaults[i].location = defaults[i].defaultvalue;
 
     // check for a custom default file
-    i = M_CheckParm("-config");
-    if (i && i < myargc - 1)
-    {
-        defaultfile = myargv[i + 1];
-        printf("	default file: %s\n", defaultfile);
-    }
+    if (CommandLine::TryGetValues("-config", defaultfile))
+        printf("	default file: %s\n", defaultfile.c_str());
     else
         defaultfile = basedefault;
 
     // read the file in, overriding any set defaults
     FILE* f = nullptr;
-    fopen_s(&f, defaultfile, "r");
+    fopen_s(&f, defaultfile.c_str(), "r");
     if (f)
     {
         while (!feof(f))

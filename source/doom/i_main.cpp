@@ -16,17 +16,18 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "doomdef.h"
 #include "m_argv.h"
 #include "d_main.h"
 
 #define WIN32_LEAN_AND_MEAN
+#define NOSERVICE
+#define NOMCX
+#define NOIME
 #include <Windows.h>
 
-int WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {
-    myargc = 1;
-    myargv = &args;
+    CommandLine::Initialize(args);
 
     D_DoomMain();
 

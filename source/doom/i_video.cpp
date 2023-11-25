@@ -58,7 +58,6 @@ int XShmGetEventBase(Display* dpy); // problems with g++?
 
 #if 0
 
-
 Display* X_display = 0;
 Window		X_mainWindow;
 Colormap	X_cmap;
@@ -76,6 +75,7 @@ boolean		doShm;
 
 XShmSegmentInfo	X_shminfo;
 int		X_shmeventtype;
+#endif
 
 // Fake mouse handling.
 // This cannot work properly w/o DGA.
@@ -97,8 +97,8 @@ static int	multiply = 1;
 int xlatekey()
 {
 
-    int rc;
-
+    int rc = 0;
+#if 0
     switch (rc = XKeycodeToKeysym(X_display, X_event.xkey.keycode, 0))
     {
     case XK_Left:	rc = KEY_LEFTARROW;	break;
@@ -156,11 +156,10 @@ int xlatekey()
             rc = rc - 'A' + 'a';
         break;
     }
+#endif
 
     return rc;
-
 }
-#endif
 
 void I_ShutdownGraphics()
 {
@@ -357,7 +356,6 @@ void I_UpdateNoBlit()
 //
 void I_FinishUpdate()
 {
-#if 0
     static int	lasttic;
     int		tics;
     int		i;
@@ -378,7 +376,7 @@ void I_FinishUpdate()
             screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0x0;
 
     }
-
+#if 0
     // scales the screen size before blitting it
     if (multiply == 2)
     {
@@ -700,8 +698,6 @@ void grabsharedmemory(int size)
 
 void I_InitGraphics()
 {
-#if 0
-    char* displayname;
     char* d;
     int			n;
     int			pnum;
@@ -714,8 +710,10 @@ void I_InitGraphics()
 
     int			oktodraw;
     unsigned long	attribmask;
+#if 0
     XSetWindowAttributes attribs;
     XGCValues		xgcvalues;
+#endif
     int			valuemask;
     static int		firsttime = 1;
 
@@ -725,32 +723,32 @@ void I_InitGraphics()
 
     signal(SIGINT, (void (*)(int)) I_Quit);
 
-    if (M_CheckParm("-2"))
+    if (CommandLine::HasArg("-2"))
         multiply = 2;
 
-    if (M_CheckParm("-3"))
+    if (CommandLine::HasArg("-3"))
         multiply = 3;
 
-    if (M_CheckParm("-4"))
+    if (CommandLine::HasArg("-4"))
         multiply = 4;
 
+#if 0
     X_width = SCREENWIDTH * multiply;
     X_height = SCREENHEIGHT * multiply;
+#endif
 
     // check for command-line display name
-    if ((pnum = M_CheckParm("-disp"))) // suggest parentheses around assignment
-        displayname = myargv[pnum + 1];
-    else
-        displayname = 0;
+    string displayname;
+    CommandLine::TryGetValues("-disp", displayname);
 
     // check if the user wants to grab the mouse (quite unnice)
-    grabMouse = !!M_CheckParm("-grabmouse");
+    grabMouse = CommandLine::HasArg("-grabmouse");
 
     // check for command-line geometry
-    if ((pnum = M_CheckParm("-geom"))) // suggest parentheses around assignment
+    if (string geom; CommandLine::TryGetValues("-geom", geom))
     {
         // warning: char format, different type arg 3,5
-        n = sscanf(myargv[pnum + 1], "%c%d%c%d", &xsign, &x, &ysign, &y);
+        n = sscanf(geom.c_str(), "%c%d%c%d", &xsign, &x, &ysign, &y);
 
         if (n == 2)
             x = y = 0;
@@ -765,6 +763,7 @@ void I_InitGraphics()
             I_Error("bad -geom parameter");
     }
 
+#if 0
     // open the display
     X_display = XOpenDisplay(displayname);
     if (!X_display)

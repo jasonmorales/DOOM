@@ -505,7 +505,7 @@ void M_ReadSaveStrings()
 
     for (i = 0;i < load_end;i++)
     {
-        if (M_CheckParm("-cdrom"))
+        if (CommandLine::HasArg("-cdrom"))
             sprintf_s(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", i);
         else
             sprintf_s(name, SAVEGAMENAME"%d.dsg", i);
@@ -565,7 +565,7 @@ void M_LoadSelect(int choice)
 {
     char    name[256];
 
-    if (M_CheckParm("-cdrom"))
+    if (CommandLine::HasArg("-cdrom"))
         sprintf_s(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", choice);
     else
         sprintf_s(name, SAVEGAMENAME"%d.dsg", choice);
