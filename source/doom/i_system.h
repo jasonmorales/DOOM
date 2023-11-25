@@ -31,16 +31,16 @@ void I_Init();
 byte* I_ZoneBase(intptr_t* size);
 
 
-// Called by D_DoomLoop,
+// Called by Doom::Loop,
 // returns current time in tics.
 int I_GetTime();
 
 
 //
-// Called by D_DoomLoop,
+// Called by Doom::Loop,
 // called before processing any tics in a frame
 // (just after displaying a frame).
-// Time consuming syncronous operations
+// Time consuming synchronous operations
 // are performed here (joystick reading).
 // Can call D_PostEvent.
 //
@@ -48,9 +48,9 @@ void I_StartFrame();
 
 
 //
-// Called by D_DoomLoop,
+// Called by Doom::Loop,
 // called before processing each tic in a frame.
-// Quick syncronous operations are performed here.
+// Quick synchronous operations are performed here.
 // Can call D_PostEvent.
 void I_StartTic();
 

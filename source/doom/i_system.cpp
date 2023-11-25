@@ -34,6 +34,10 @@
 #include <chrono>
 #include <thread>
 
+
+#include "d_main.h"
+extern Doom* g_doom;
+
 int	mb_used = 6;
 
 
@@ -130,8 +134,6 @@ byte* I_AllocLow(int length)
 //
 // I_Error
 //
-extern boolean demorecording;
-
 void I_Error(const char* error, ...)
 {
     va_list	argptr;
@@ -146,8 +148,8 @@ void I_Error(const char* error, ...)
     fflush(stderr);
 
     // Shutdown. Here might be other errors.
-    if (demorecording)
-        G_CheckDemoStatus();
+    if (g_doom->IsDemoRecording())
+        G_CheckDemoStatus(g_doom);
 
     D_QuitNetGame();
     I_ShutdownGraphics();

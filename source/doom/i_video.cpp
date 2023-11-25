@@ -15,67 +15,25 @@
 //	DOOM graphics stuff for X11, UNIX.
 //
 //-----------------------------------------------------------------------------
-#include <stdlib.h>
-//#include <sys/ipc.h>
-//#include <sys/shm.h>
-
-#if 0
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
-
-#include <X11/extensions/XShm.h>
-// Had to dig up XShm.c for this one.
-// It is in the libXext, but not in the XFree86 headers.
-#ifdef LINUX
-int XShmGetEventBase(Display* dpy); // problems with g++?
-#endif
-
-#endif
-
-#include <stdarg.h>
-#include <time.h>
-#include <sys/types.h>
-
-//#include <netinet/in.h>
-//#include <errnos.h>
-#include <signal.h>
-
 #include "doomstat.h"
 #include "i_system.h"
+#include "i_video.h"
 #include "v_video.h"
 #include "m_argv.h"
 #include "d_main.h"
 
 #include "doomdef.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
 #include <winsock.h>
 
+#include <stdlib.h>
+#include <stdarg.h>
+#include <time.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <algorithm>
 
 #define POINTER_WARP_COUNTDOWN	1
-
-#if 0
-
-Display* X_display = 0;
-Window		X_mainWindow;
-Colormap	X_cmap;
-Visual* X_visual;
-GC		X_gc;
-XEvent		X_event;
-int		X_screen;
-XVisualInfo	X_visualinfo;
-XImage* image;
-int		X_width;
-int		X_height;
-
-// MIT SHared Memory extension.
-boolean		doShm;
-
-XShmSegmentInfo	X_shminfo;
-int		X_shmeventtype;
-#endif
 
 // Fake mouse handling.
 // This cannot work properly w/o DGA.
@@ -83,17 +41,9 @@ int		X_shmeventtype;
 boolean		grabMouse;
 int		doPointerWarp = POINTER_WARP_COUNTDOWN;
 
-// Blocky mode,
-// replace each 320x200 pixel with multiply*multiply pixels.
-// According to Dave Taylor, it still is a bonehead thing
-// to use ....
-static int	multiply = 1;
-
-
 //
 //  Translates the key currently in X_event
 //
-
 int xlatekey()
 {
 
@@ -177,15 +127,8 @@ void I_ShutdownGraphics()
 #endif
 }
 
-
-
-//
-// I_StartFrame
-//
 void I_StartFrame()
 {
-    // er?
-
 }
 
 static int	lastmousex = 0;
@@ -342,18 +285,10 @@ void I_StartTic()
 #endif
 }
 
-
-//
-// I_UpdateNoBlit
-//
 void I_UpdateNoBlit()
 {
-    // what is this?
 }
 
-//
-// I_FinishUpdate
-//
 void I_FinishUpdate()
 {
     static int	lasttic;
@@ -378,7 +313,7 @@ void I_FinishUpdate()
     }
 #if 0
     // scales the screen size before blitting it
-    if (multiply == 2)
+    if (screenMultiply == 2)
     {
         unsigned int* olineptrs[2];
         unsigned int* ilineptr;
@@ -421,7 +356,7 @@ void I_FinishUpdate()
         }
 
     }
-    else if (multiply == 3)
+    else if (screenMultiply == 3)
     {
         unsigned int* olineptrs[3];
         unsigned int* ilineptr;
@@ -477,7 +412,7 @@ void I_FinishUpdate()
         }
 
     }
-    else if (multiply == 4)
+    else if (screenMultiply == 4)
     {
         // Broken. Gotta fix this some day.
         void Expand4(unsigned*, double*);
@@ -696,230 +631,495 @@ void grabsharedmemory(int size)
 }
 #endif
 
-void I_InitGraphics()
+// This is the default window proc that all windows use after being initialized. It
+// simply looks up the associated Window class and then passes the event parameters
+// along to the custom function.
+LRESULT CALLBACK GlobalWindowProc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    char* d;
-    int			n;
-    int			pnum;
-    int			x = 0;
-    int			y = 0;
+    auto* window = reinterpret_cast<Video*>(GetWindowLongPtr(handle, GWLP_USERDATA));
+    return window->HandleSystemEvent({handle, msg, wParam, lParam});
+}
 
-    // warning: char format, different type arg
-    char		xsign = ' ';
-    char		ysign = ' ';
+// This is the default window proc that all windows use during initialization. It is
+// meant to handle the WM_NCCREATE message, which comes prior to even WM_CREATE. This
+// message carries a pointer to the Window class that this window belongs to, so it
+// can be associated. It then changes over to the simpler window proc, above.
+LRESULT CALLBACK GlobalInitWindowProc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg == WM_NCCREATE)
+    {
+        LPCREATESTRUCT create(reinterpret_cast<LPCREATESTRUCT>(lParam));
 
-    int			oktodraw;
-    unsigned long	attribmask;
+        // Assign the pointer to the Window class that owns this window to the "user data" of this window
+        SetLastError(0);
+        auto result(SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams)));
+        auto error_core = GetLastError();
+        if (result == 0 && error_core != 0)
+        {
+            LPWSTR buffer(NULL);
+            FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_core, 0, (LPWSTR)&buffer, 0, nullptr);
+            MessageBoxW(nullptr, buffer, L"Error in WM_NCCREATE", MB_OK);
+            LocalFree(buffer);
+            return FALSE;
+        }
+
+        // Replace this window proc with the simpler version which passes the event to the Window class
+        SetLastError(0);
+        result = SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(GlobalWindowProc));
+        error_core = GetLastError();
+        if (result == 0 && error_core != 0)
+        {
+            LPWSTR buffer(NULL);
+            FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_core, 0, (LPWSTR)&buffer, 0, nullptr);
+            MessageBoxW(nullptr, buffer, L"Error in WM_NCCREATE", MB_OK);
+            LocalFree(buffer);
+            return FALSE;
+        }
+    }
+
+    return DefWindowProc(handle, msg, wParam, lParam);
+}
+
+LRESULT Video::HandleSystemEvent(const SystemEvent& event)
+{
 #if 0
-    XSetWindowAttributes attribs;
-    XGCValues		xgcvalues;
-#endif
-    int			valuemask;
-    static int		firsttime = 1;
+    using Input::Button;
 
-    if (!firsttime)
+    auto get_modifier_key_flags = [w_param = event.wParam]() -> Input::Event::Flag
+        {
+            Input::Event::Flag out;
+            if ((w_param & MK_CONTROL) != 0) out.set(Input::Event::Flag::Ctrl);
+            if ((w_param & MK_SHIFT) != 0) out.set(Input::Event::Flag::Shift);
+            if ((GetKeyState(VK_MENU) & 0x8000) != 0) out.set(Input::Event::Flag::Alt);
+            if ((w_param & MK_LBUTTON) != 0) out.set(Input::Event::Flag::MouseLeft);
+            if ((w_param & MK_MBUTTON) != 0) out.set(Input::Event::Flag::MouseMiddle);
+            if ((w_param & MK_RBUTTON) != 0) out.set(Input::Event::Flag::MouseRight);
+            if ((w_param & MK_XBUTTON1) != 0) out.set(Input::Event::Flag::MouseX1);
+            if ((w_param & MK_XBUTTON2) != 0) out.set(Input::Event::Flag::MouseX2);
+            return out;
+        };
+
+    auto cursor_pos = [this, l_param = event.lParam](bool absolute = false) -> v2i
+        {
+            if (!absolute)
+                return {GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)};
+
+            auto client = GetClientArea();
+            return {GET_X_LPARAM(l_param) - client.left(), GET_Y_LPARAM(l_param) - client.top()};
+        };
+
+    auto handle_mouse_wheel = [&, w_param = event.wParam](Input::Button key)
+        {
+            auto count = GET_WHEEL_DELTA_WPARAM(w_param) / WHEEL_DELTA;
+            key = enum_offset(key, sign(count));
+            count = std::abs(count);
+
+            for (int i(0); i < count; ++i)
+            {
+                input->AddEvent(Input::Device::Mouse, key, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos(true));
+            }
+        };
+#endif
+    switch (event.message)
+    {
+    case WM_ACTIVATE:
+        hasFocus = (LOWORD(event.wParam) != WA_INACTIVE);
+        //input->OnFocusChanged(has_focus);
+        break;
+
+    case WM_SETFOCUS:
+        //input->OnFocusChanged(true);
+        break;
+    case WM_KILLFOCUS:
+        //input->OnFocusChanged(false);
+        break;
+
+    case WM_MOUSEACTIVATE:
+        return MA_ACTIVATEANDEAT;
+
+    case WM_CREATE:
+        break;
+
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        BeginPaint(event.handle, &ps);
+        EndPaint(event.handle, &ps);
+    }
+    return 0;
+
+    case WM_SIZING:
+    {
+        RECT actual = {};
+        GetClientRect(windowHandle, &actual);
+        windowWidth = actual.right - actual.left;
+        windowHeight = actual.bottom - actual.top;
+        //display->SetDimensions(width, height);
+        return TRUE;
+    }
+    case WM_SIZE:
+    {
+        RECT actual = {};
+        GetClientRect(windowHandle, &actual);
+        windowWidth = actual.right - actual.left;
+        windowHeight = actual.bottom - actual.top;
+        //display->SetDimensions(width, height);
+        return 0;
+    }
+    case WM_DROPFILES:
+        break;
+
+    case WM_DEVICECHANGE:
+        /*LOG(Core, Debug, "WM_DEVICECHANGE" + "\n"
+            + "hwnd = " + std::to_string(reinterpret_cast<intptr_t>(event.handle)).c_str() + "\n"
+            + "msg = " + std::to_string(event.message).c_str() + "\n"
+            + "wparam = " + std::to_string(event.wParam).c_str() + "\n"
+            + "lparam = " + std::to_string(event.lParam).c_str() + "\n");
+        input->ScanForDevices();*/
+        break;
+
+    case WM_SYSCOMMAND:
+        switch (event.wParam)
+        {
+        case SC_SCREENSAVE:
+        case SC_MONITORPOWER:
+            return 0;
+        }	
+        break;
+
+    case WM_CLOSE:
+        PostQuitMessage(0);
+        return 0;
+
+#if 0
+    case WM_MOUSEWHEEL:
+        handle_mouse_wheel(Button::MouseWheel_V);
+        return 0;
+
+    case WM_MOUSEHWHEEL:
+        handle_mouse_wheel(Button::MouseWheel_H);
+        return 0;
+
+    case WM_LBUTTONDOWN:
+        input->AddEvent(Input::Device::Mouse, Button::MouseLeft, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_LBUTTONUP:
+        input->AddEvent(Input::Device::Mouse, Button::MouseLeft, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_RBUTTONDOWN:
+        input->AddEvent(Input::Device::Mouse, Button::MouseRight, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_RBUTTONUP:
+        input->AddEvent(Input::Device::Mouse, Button::MouseRight, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_MBUTTONDOWN:
+        input->AddEvent(Input::Device::Mouse, Button::MouseMiddle, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_MBUTTONUP:
+        input->AddEvent(Input::Device::Mouse, Button::MouseMiddle, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_XBUTTONDOWN:
+        if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON1)
+            input->AddEvent(Input::Device::Mouse, Button::MouseX1, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        else if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON2)
+            input->AddEvent(Input::Device::Mouse, Button::MouseX2, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return TRUE;
+    case WM_XBUTTONUP:
+        if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON1)
+            input->AddEvent(Input::Device::Mouse, Button::MouseX1, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
+        else if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON2)
+            input->AddEvent(Input::Device::Mouse, Button::MouseX2, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
+        return TRUE;
+
+    case WM_LBUTTONDBLCLK:
+        input->AddEvent(Input::Device::Mouse, Button::MouseLeftDbl, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        input->AddEvent(Input::Device::Mouse, Button::MouseLeft, Input::Event::Flag::DoubleClick | Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_RBUTTONDBLCLK:
+        input->AddEvent(Input::Device::Mouse, Button::MouseRightDbl, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        input->AddEvent(Input::Device::Mouse, Button::MouseRight, Input::Event::Flag::DoubleClick | Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return 0;
+    case WM_MBUTTONDBLCLK:
+        input->AddEvent(Input::Device::Mouse, Button::MouseMiddleDbl, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        input->AddEvent(Input::Device::Mouse, Button::MouseMiddle, Input::Event::Flag::DoubleClick | Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
+        return 0;
+
+    case WM_KEYDOWN:
+    case WM_SYSKEYDOWN:
+    {
+        if (event.wParam == VK_SHIFT)
+            return 0;
+
+        uint32 scan_code = (event.lParam >> 16) & 0xff;
+        auto extended = TestBit(event.lParam, 24);
+        auto key = input->TranslateButton(event.wParam, scan_code, extended);
+
+        /*
+        std::stringstream msg;
+        msg << "WM_KEYDOWN " << event.message << " " << event.wParam << " " << event.lParam << " " << scan_code << " " << extended << " " << enum_string(key) << " " << TestBit(event.lParam, 30) << "\n";
+        Host::DebugOutput(msg.str());
+        /**/
+
+        auto count = event.lParam & 0xffff;
+        Input::Event::Flag flags = Input::Event::Flag::Down;
+        auto alt_down = (HIWORD(event.lParam) & KF_ALTDOWN);
+        if (alt_down)
+            flags.set(Input::Event::Flag::Alt);
+        if (TestBit(event.lParam, 30))
+            flags.set(Input::Event::Flag::Repeated);
+        else
+            flags.set(Input::Event::Flag::Changed);
+        for (int i(0); i < count; ++i)
+        {
+            input->AddEvent(Input::Device::Keyboard, key, flags);
+        }
+    }
+    return 0;
+
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+    {
+        if (event.wParam == VK_SHIFT)
+            return 0;
+
+        uint32 scan_code = (event.lParam >> 16) & 0xff;
+        auto extended = TestBit(event.lParam, 24);
+        auto key = input->TranslateButton(event.wParam, scan_code, extended);
+
+        /*
+        std::stringstream msg;
+        msg << "WM_KEYUP " << event.message << " " << event.wParam << " " << event.lParam << " " << scan_code << " " << extended << " " << enum_string(key) << "\n";
+        Host::DebugOutput(msg.str());
+        /**/
+
+        input->AddEvent(Input::Device::Keyboard, key, Input::Event::Flag::Up | Input::Event::Flag::Changed);
+    }
+    return 0;
+
+    case WM_UNICHAR:
+    case WM_CHAR:
+    case WM_SYSCHAR:
+    {
+        int count(event.lParam & 0xffff);
+        for (int i(0); i < count; ++i)
+        {
+            input->AddCharacterToStream(Input::Device::Keyboard, wchar_t(event.wParam));
+        }
+    }
+    return 0;
+#endif
+    }
+
+    return DefWindowProc(event.handle, event.message, event.wParam, event.lParam);
+}
+
+void Video::DeliverSystemMessages()
+{
+    // TODO: This could be in a thread
+    MSG msg;
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
+    {
+        // Check for a WM_QUIT message
+        auto result(GetMessage(&msg, nullptr, 0, 0));
+        if (result == -1)
+            continue;
+
+        if (result == 0)
+            I_Quit();
+
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+}
+
+bool Video::RegisterWindowClass()
+{
+    // TODO: Build this from non OS specific data passed into the function, then check
+    //   to see if a class with that "signature" already exists or not, skipping
+    //   registration if it is unnecessary
+    WNDCLASSEX wc;
+    memset(&wc, 0, sizeof(wc));
+    wc.cbSize = sizeof(wc);
+    wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | CS_DBLCLKS;
+    wc.lpfnWndProc = GlobalInitWindowProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = sizeof(Video*);
+    wc.hInstance = GetModuleHandle(nullptr);
+    wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+    wc.hbrBackground = nullptr;
+    wc.lpszMenuName = nullptr;
+    wc.lpszClassName = WindowClassName;
+    wc.hIconSm = LoadIcon(nullptr, IDI_APPLICATION);
+
+    if (::RegisterClassEx(&wc) == 0)
+    {
+        auto error_core = GetLastError();
+        if (error_core != ERROR_CLASS_ALREADY_EXISTS)
+        {
+            LPWSTR buffer(NULL);
+            FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_core, 0, (LPWSTR)&buffer, 0, nullptr);
+            MessageBoxW(nullptr, buffer, L"Error in RegisterClassEx", MB_OK);
+            LocalFree(buffer);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void Video::Init()
+{
+    if (isInitialized)
         return;
-    firsttime = 0;
 
-    signal(SIGINT, (void (*)(int)) I_Quit);
+    isInitialized = true;
 
-    if (CommandLine::HasArg("-2"))
-        multiply = 2;
+    CommandLine::TryGetValues("-multiply", screenMultiply);
 
-    if (CommandLine::HasArg("-3"))
-        multiply = 3;
+    windowWidth *= screenMultiply;
+    windowHeight *= screenMultiply;
 
-    if (CommandLine::HasArg("-4"))
-        multiply = 4;
+    isFullScreen = CommandLine::HasArg("-fullscreen");
+    isExclusive = CommandLine::HasArg("-exclusive");
+    isBorderless = CommandLine::HasArg("-borderless");
+    isResizeable = CommandLine::HasArg("-resizeable");
 
-#if 0
-    X_width = SCREENWIDTH * multiply;
-    X_height = SCREENHEIGHT * multiply;
-#endif
-
-    // check for command-line display name
-    string displayname;
-    CommandLine::TryGetValues("-disp", displayname);
-
-    // check if the user wants to grab the mouse (quite unnice)
-    grabMouse = CommandLine::HasArg("-grabmouse");
-
-    // check for command-line geometry
-    if (string geom; CommandLine::TryGetValues("-geom", geom))
+    if (isFullScreen && isExclusive)
     {
-        // warning: char format, different type arg 3,5
-        n = sscanf(geom.c_str(), "%c%d%c%d", &xsign, &x, &ysign, &y);
+        DEVMODE mode;
+        ZeroMemory(&mode, sizeof(DEVMODE));
+        mode.dmSize = sizeof(DEVMODE);
+        mode.dmPelsWidth = windowWidth;
+        mode.dmPelsHeight = windowHeight;
+        mode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
 
-        if (n == 2)
-            x = y = 0;
-        else if (n == 6)
-        {
-            if (xsign == '-')
-                x = -x;
-            if (ysign == '-')
-                y = -y;
-        }
-        else
-            I_Error("bad -geom parameter");
+        DWORD display_flags = CDS_FULLSCREEN;
+        ChangeDisplaySettings(&mode, display_flags);
     }
 
-#if 0
-    // open the display
-    X_display = XOpenDisplay(displayname);
-    if (!X_display)
-    {
-        if (displayname)
-            I_Error("Could not open display [%s]", displayname);
-        else
-            I_Error("Could not open display (DISPLAY=[%s])", getenv("DISPLAY"));
-    }
-
-    // use the default visual 
-    X_screen = DefaultScreen(X_display);
-    if (!XMatchVisualInfo(X_display, X_screen, 8, PseudoColor, &X_visualinfo))
-        I_Error("xdoom currently only supports 256-color PseudoColor screens");
-    X_visual = X_visualinfo.visual;
-
-    // check for the MITSHM extension
-    doShm = XShmQueryExtension(X_display);
-
-    // even if it's available, make sure it's a local connection
-    if (doShm)
-    {
-        if (!displayname) displayname = (char*)getenv("DISPLAY");
-        if (displayname)
-        {
-            d = displayname;
-            while (*d && (*d != ':')) d++;
-            if (*d) *d = 0;
-            if (!(!_stricmp(displayname, "unix") || !*displayname)) doShm = false;
-        }
-    }
-
-    fprintf(stderr, "Using MITSHM extension\n");
-
-    // create the colormap
-    X_cmap = XCreateColormap(X_display, RootWindow(X_display,
-        X_screen), X_visual, AllocAll);
-
-    // setup attributes for main window
-    attribmask = CWEventMask | CWColormap | CWBorderPixel;
-    attribs.event_mask =
-        KeyPressMask
-        | KeyReleaseMask
-        // | PointerMotionMask | ButtonPressMask | ButtonReleaseMask
-        | ExposureMask;
-
-    attribs.colormap = X_cmap;
-    attribs.border_pixel = 0;
-
-    // create the main window
-    X_mainWindow = XCreateWindow(X_display,
-        RootWindow(X_display, X_screen),
-        x, y,
-        X_width, X_height,
-        0, // borderwidth
-        8, // depth
-        InputOutput,
-        X_visual,
-        attribmask,
-        &attribs);
-
-    XDefineCursor(X_display, X_mainWindow,
-        createnullcursor(X_display, X_mainWindow));
-
-    // create the GC
-    valuemask = GCGraphicsExposures;
-    xgcvalues.graphics_exposures = False;
-    X_gc = XCreateGC(X_display,
-        X_mainWindow,
-        valuemask,
-        &xgcvalues);
-
-    // map the window
-    XMapWindow(X_display, X_mainWindow);
-
-    // wait until it is OK to draw
-    oktodraw = 0;
-    while (!oktodraw)
-    {
-        XNextEvent(X_display, &X_event);
-        if (X_event.type == Expose
-            && !X_event.xexpose.count)
-        {
-            oktodraw = 1;
-        }
-    }
-
-    // grabs the pointer so it is restricted to this window
-    if (grabMouse)
-        XGrabPointer(X_display, X_mainWindow, True,
-            ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
-            GrabModeAsync, GrabModeAsync,
-            X_mainWindow, None, CurrentTime);
-
-    if (doShm)
-    {
-
-        X_shmeventtype = XShmGetEventBase(X_display) + ShmCompletion;
-
-        // create the image
-        image = XShmCreateImage(X_display,
-            X_visual,
-            8,
-            ZPixmap,
-            0,
-            &X_shminfo,
-            X_width,
-            X_height);
-
-        grabsharedmemory(image->bytes_per_line * image->height);
+    if (!RegisterWindowClass())
+        I_Error("Failed to register window class");
 
 
-        // UNUSED
-        // create the shared memory segment
-        // X_shminfo.shmid = shmget (IPC_PRIVATE,
-        // image->bytes_per_line * image->height, IPC_CREAT | 0777);
-        // if (X_shminfo.shmid < 0)
-        // {
-        // perror("");
-        // I_Error("shmget() failed in InitGraphics()");
-        // }
-        // fprintf(stderr, "shared memory id=%d\n", X_shminfo.shmid);
-        // attach to the shared memory segment
-        // image->data = X_shminfo.shmaddr = shmat(X_shminfo.shmid, 0, 0);
+    // Figure out the dimensions of the window, factoring in style elements like
+    // border and caption bar
+    windowStyle = isBorderless ? WS_POPUP : WS_OVERLAPPEDWINDOW;
+    windowStyle |= WS_CAPTION;
 
+    if (isFullScreen)
+        windowStyle |= WS_MAXIMIZE;
 
-        if (!image->data)
-        {
-            perror("");
-            I_Error("shmat() failed in InitGraphics()");
-        }
-
-        // get the X server to attach to it
-        if (!XShmAttach(X_display, &X_shminfo))
-            I_Error("XShmAttach() failed in InitGraphics()");
-
-    }
+    if (isResizeable)
+        windowStyle |= WS_THICKFRAME;
     else
-    {
-        image = XCreateImage(X_display,
-            X_visual,
-            8,
-            ZPixmap,
-            0,
-            (char*)malloc(X_width * X_height),
-            X_width, X_height,
-            8,
-            X_width);
+        windowStyle &= ~WS_THICKFRAME;
 
+    auto dpi = GetDpiForSystem();
+    int32 screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
+    int32 screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
+    //SystemParametersInfoForDpi(SPI_GETWORKAREA, 
+    windowWidth = std::min(screenWidth, windowWidth);
+    windowHeight = std::min(screenHeight, windowHeight);
+
+    if (isFullScreen)
+    {
+        RECT rec_non_client = {};
+        AdjustWindowRectExForDpi(&rec_non_client, windowStyle, FALSE, 0, dpi);
+        windowWidth = screenWidth - (rec_non_client.right - rec_non_client.left);
+        windowHeight = screenHeight - (rec_non_client.bottom - rec_non_client.top);
     }
 
-    if (multiply == 1)
-        screens[0] = (unsigned char*)(image->data);
-    else
-        screens[0] = (unsigned char*)malloc(SCREENWIDTH * SCREENHEIGHT);
+    RECT rec;
+    rec.left = 0;
+    rec.right = windowWidth;
+    rec.top = 0;
+    rec.bottom = windowHeight;
+    AdjustWindowRectExForDpi(&rec, windowStyle, FALSE, 0, dpi);
+
+    // Create the window
+    windowHandle = ::CreateWindowExW(
+        windowStyleEx,
+        WindowClassName,
+        L"Doom",
+        windowStyle,
+        isFullScreen ? 0 : CW_USEDEFAULT,
+        isFullScreen ? 0 : CW_USEDEFAULT,
+        rec.right - rec.left,
+        rec.bottom - rec.top,
+        nullptr,
+        nullptr,
+        0,
+        this);
+
+
+    RECT actual = {};
+    GetClientRect(windowHandle, &actual);
+    windowWidth = actual.right - actual.left;
+    windowHeight = actual.bottom - actual.top;
+
+    if (windowHandle == nullptr)
+    {
+        auto error_core = GetLastError();
+        LPWSTR buffer = nullptr;
+        FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_core, 0, (LPWSTR)&buffer, 0, nullptr);
+        MessageBoxW(nullptr, buffer, L"Error in CreateWindowW", MB_OK);
+        LocalFree(buffer);
+        return;
+    }
+
+    // Get a device context for the window
+    deviceContext = GetDC(windowHandle);
+
+    // Set the pixel format
+    PIXELFORMATDESCRIPTOR pfd;
+    ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
+    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    pfd.nVersion = 1;
+    pfd.dwFlags = 0
+        | PFD_DRAW_TO_WINDOW
+        | PFD_SUPPORT_OPENGL
+        | PFD_DOUBLEBUFFER
+        | PFD_DEPTH_DONTCARE
+        | PFD_TYPE_RGBA
+        ;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.cAlphaBits = 0;
+    pfd.cAccumBits = 0;
+    pfd.cDepthBits = 0;
+    pfd.cStencilBits = 8;
+    pfd.cAuxBuffers = 0;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+
+    auto pixel_format = ChoosePixelFormat(deviceContext, &pfd);
+    SetPixelFormat(deviceContext, pixel_format, &pfd);
+
+    auto dummy_context = wglCreateContext(deviceContext);
+    wglMakeCurrent(deviceContext, dummy_context);
+#if 0
+    glewInit();
+
+    // Create the render context
+    int attributes[] =
+    {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+        //WGL_CONTEXT_LAYER_PLANE_ARB, 0,
+        //WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB | WGL_CONTEXT_DEBUG_BIT_ARB,
+        //WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB | WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+        0
+    };
+
+    renderContext = wglCreateContextAttribsARB(device_context, nullptr, attributes);
+    wglMakeCurrent(nullptr, nullptr);
+    wglDeleteContext(dummy_context);
+
+    MakeCurrent();
+    display->SetDimensions(width, height);
+    display->Init();
 #endif
+    ShowWindow(windowHandle, SW_SHOWNORMAL);
 }
 
 

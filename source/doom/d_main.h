@@ -19,19 +19,11 @@
 
 #include "d_event.h"
 
-#define MAXWADFILES             20
-extern char* wadfiles[MAXWADFILES];
+#include "containers/vector.h"
 
-void D_AddFile(const char* file);
+#include <filesystem>
 
 //
-// D_DoomMain()
-// Not a globally visible function, just included for source reference,
-// calls all startup code, parses command line options.
-// If not overrided by user input, calls N_AdvanceDemo.
-//
-void D_DoomMain();
-
 // Called by IO functions when input is detected.
 void D_PostEvent(event_t* ev);
 
@@ -42,3 +34,33 @@ void D_PageTicker();
 void D_PageDrawer();
 void D_AdvanceDemo();
 void D_StartTitle();
+
+class Video;
+
+class Doom
+{
+public:
+    Doom() = default;
+    ~Doom() = default;
+
+    void Main();
+    void Loop();
+
+    bool IsModified() const { return isModified; }
+    bool IsDemoRecording() const { return isDemoRecording; }
+
+    void SetDemoRecording(bool b) { isDemoRecording = b; }
+
+private:
+    void IdentifyVersion();
+    void AddFile(const std::filesystem::path& path);
+
+    Video* video = nullptr;
+
+    // Set if homebrew PWAD stuff has been added.
+    bool isModified = false;
+
+    bool isDemoRecording = false;
+
+    vector<std::filesystem::path> wadFiles;
+};

@@ -98,9 +98,9 @@ void F_StartFinale()
     {
 
         // DOOM 1 - E1, E3 or E4, but each nine missions
-    case shareware:
-    case registered:
-    case retail:
+    case GameMode::Doom1Shareware:
+    case GameMode::Doom1Registered:
+    case GameMode::Doom1Retail:
     {
         S_ChangeMusic(mus_victor, true);
 
@@ -130,7 +130,7 @@ void F_StartFinale()
     }
 
     // DOOM II and missions packs with E1, M34
-    case commercial:
+    case GameMode::Doom2Commercial:
     {
         S_ChangeMusic(mus_read_m, true);
 
@@ -200,7 +200,7 @@ void F_Ticker()
     int		i;
 
     // check for skipping
-    if ((gamemode == commercial)
+    if ((gamemode == GameMode::Doom2Commercial)
         && (finalecount > 50))
     {
         // go on to the next level
@@ -226,7 +226,7 @@ void F_Ticker()
         return;
     }
 
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
         return;
 
     if (!finalestage && finalecount > strlen(finaletext) * TEXTSPEED + TEXTWAIT)
@@ -302,7 +302,7 @@ void F_TextWrite()
             continue;
         }
 
-        w = SHORT(hu_font[c]->width);
+        w = (hu_font[c]->width);
         if (cx + w > SCREENWIDTH)
             break;
         V_DrawPatch(cx, cy, 0, hu_font[c]);
@@ -523,7 +523,7 @@ void F_CastPrint(const char* text)
             continue;
         }
 
-        int w = SHORT(hu_font[c]->width);
+        int w = (hu_font[c]->width);
         width += w;
     }
 
@@ -543,7 +543,7 @@ void F_CastPrint(const char* text)
             continue;
         }
 
-        int w = SHORT(hu_font[c]->width);
+        int w = (hu_font[c]->width);
         V_DrawPatch(cx, 180, 0, hu_font[c]);
         cx += w;
     }
@@ -589,7 +589,7 @@ F_DrawPatchCol
     byte* desttop;
     int		count;
 
-    column = (column_t*)((byte*)patch + LONG(patch->columnofs[col]));
+    column = (column_t*)((byte*)patch + (patch->columnofs[col]));
     desttop = screens[0] + x;
 
     // step through the posts in a column
@@ -679,7 +679,7 @@ void F_Drawer()
         switch (gameepisode)
         {
         case 1:
-            if (gamemode == retail)
+            if (gamemode == GameMode::Doom1Retail)
                 V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
             else
                 V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));

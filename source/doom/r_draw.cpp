@@ -727,7 +727,7 @@ void R_FillBackScreen()
     if (scaledviewwidth == 320)
         return;
 
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
         name = name2;
     else
         name = name1;

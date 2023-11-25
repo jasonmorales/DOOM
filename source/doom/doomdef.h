@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "types/numbers.h"
+
 //
 // Global parameters/defines.
 //
@@ -29,17 +31,15 @@ enum { VERSION = 110 };
 
 
 // Game mode handling - identify IWAD version
-//  to handle IWAD dependend animations etc.
-typedef enum
+//  to handle IWAD dependent animations etc.
+enum class GameMode : int32
 {
-    shareware,	// DOOM 1 shareware, E1, M9
-    registered,	// DOOM 1 registered, E3, M27
-    commercial,	// DOOM 2 retail, E1 M34
-    // DOOM 2 german edition not handled
-    retail,	// DOOM 1 retail, E4, M36
-    indetermined	// Well, no IWAD found.
-
-} GameMode_t;
+    Doom1Shareware,	    // DOOM 1 shareware, E1, M9
+    Doom1Registered,	// DOOM 1 registered, E3, M27
+    Doom2Commercial,	// DOOM 2 retail, E1 M34
+    Doom1Retail,	    // DOOM 1 retail, E4, M36
+    Unknown,            // Well, no IWAD found.
+};
 
 
 // Mission packs - might be useful for TC stuff?
@@ -47,7 +47,6 @@ typedef enum
 {
     doom,		// DOOM 1
     doom2,	// DOOM 2
-    pack_tnt,	// TNT mission pack
     pack_plut,	// Plutonia pack
     none
 

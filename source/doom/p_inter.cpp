@@ -396,7 +396,7 @@ P_TouchSpecialThing
         break;
 
     case SPR_MEGA:
-        if (gamemode != commercial)
+        if (gamemode != GameMode::Doom2Commercial)
             return;
         player->health = 200;
         player->mo->health = player->health;

@@ -17,15 +17,5 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
-
-// Called by D_DoomMain.
-
-
 void I_InitNetwork();
 void I_NetCmd();

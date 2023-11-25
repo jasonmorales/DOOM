@@ -20,7 +20,7 @@
 #include "doomdef.h"
 #include "d_event.h"
 
-
+class Doom;
 
 //
 // GAME
@@ -46,19 +46,19 @@ void G_DoLoadGame();
 void G_SaveGame(int slot, char* description);
 
 // Only called by startup code.
-void G_RecordDemo(const char* name);
+void G_RecordDemo(Doom* doom, const char* name);
 
 void G_BeginRecording();
 
 void G_TimeDemo(const char* name);
-boolean G_CheckDemoStatus();
+boolean G_CheckDemoStatus(Doom* doom);
 
 void G_ExitLevel();
 void G_SecretExitLevel();
 
 void G_WorldDone();
 
-void G_Ticker();
+void G_Ticker(Doom* doom);
 boolean G_Responder(event_t* ev);
 
 void G_ScreenShot();

@@ -44,6 +44,10 @@
 #include "wi_stuff.h"
 #include "z_zone.h"
 
+
+extern Doom* g_doom;
+
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -52,7 +56,7 @@
 
 
 
-boolean	G_CheckDemoStatus();
+boolean	G_CheckDemoStatus(Doom* doom);
 void	G_ReadDemoTiccmd(ticcmd_t* cmd);
 void	G_WriteDemoTiccmd(ticcmd_t* cmd);
 void	G_PlayerReborn(int player);
@@ -101,7 +105,6 @@ int             levelstarttic;          // gametic at level start
 int             totalkills, totalitems, totalsecret;    // for intermission 
 
 char            demoname[32];
-boolean         demorecording;
 boolean         demoplayback;
 boolean		netdemo;
 byte* demobuffer;
@@ -417,9 +420,7 @@ void G_DoLoadLevel()
 
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.
-    if ((gamemode == commercial)
-        || (gamemode == static_cast<decltype(gamemode)>(pack_tnt))
-        || (gamemode == static_cast<decltype(gamemode)>(pack_plut)))
+    if ((gamemode == GameMode::Doom2Commercial))
     {
         skytexture = R_TextureNumForName("SKY3");
         if (gamemap < 12)
@@ -564,7 +565,7 @@ boolean G_Responder(event_t* ev)
 // G_Ticker
 // Make ticcmd_ts for the players.
 //
-void G_Ticker()
+void G_Ticker(Doom* doom)
 {
     int		i;
     int		buf;
@@ -627,7 +628,7 @@ void G_Ticker()
 
             if (demoplayback)
                 G_ReadDemoTiccmd(cmd);
-            if (demorecording)
+            if (doom->IsDemoRecording())
                 G_WriteDemoTiccmd(cmd);
 
             // check for turbo cheats
@@ -970,7 +971,7 @@ void G_ExitLevel()
 void G_SecretExitLevel()
 {
     // IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if ((gamemode == commercial)
+    if ((gamemode == GameMode::Doom2Commercial)
         && (W_CheckNumForName("map31") < 0))
         secretexit = false;
     else
@@ -991,7 +992,7 @@ void G_DoCompleted()
     if (automapactive)
         AM_Stop();
 
-    if (gamemode != commercial)
+    if (gamemode != GameMode::Doom2Commercial)
         switch (gamemap)
         {
         case 8:
@@ -1005,7 +1006,7 @@ void G_DoCompleted()
 
     //#if 0  Hmmm - why?
     if ((gamemap == 8)
-        && (gamemode != commercial))
+        && (gamemode != GameMode::Doom2Commercial))
     {
         // victory 
         gameaction = ga_victory;
@@ -1013,7 +1014,7 @@ void G_DoCompleted()
     }
 
     if ((gamemap == 9)
-        && (gamemode != commercial))
+        && (gamemode != GameMode::Doom2Commercial))
     {
         // exit secret level 
         for (i = 0; i < MAXPLAYERS; i++)
@@ -1027,7 +1028,7 @@ void G_DoCompleted()
     wminfo.last = gamemap - 1;
 
     // wminfo.next is 0 biased, unlike gamemap
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
     {
         if (secretexit)
             switch (gamemap)
@@ -1074,7 +1075,7 @@ void G_DoCompleted()
     wminfo.maxitems = totalitems;
     wminfo.maxsecret = totalsecret;
     wminfo.maxfrags = 0;
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
         wminfo.partime = 35 * cpars[gamemap - 1];
     else
         wminfo.partime = 35 * pars[gameepisode][gamemap];
@@ -1112,7 +1113,7 @@ void G_WorldDone()
     if (secretexit)
         players[consoleplayer].didsecret = true;
 
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
     {
         switch (gamemap)
         {
@@ -1339,12 +1340,12 @@ G_InitNew
     if (episode < 1)
         episode = 1;
 
-    if (gamemode == retail)
+    if (gamemode == GameMode::Doom1Retail)
     {
         if (episode > 4)
             episode = 4;
     }
-    else if (gamemode == shareware)
+    else if (gamemode == GameMode::Doom1Shareware)
     {
         if (episode > 1)
             episode = 1;	// only start episode 1 on shareware
@@ -1361,7 +1362,7 @@ G_InitNew
         map = 1;
 
     if ((map > 9)
-        && (gamemode != commercial))
+        && (gamemode != GameMode::Doom2Commercial))
         map = 9;
 
     M_ClearRandom();
@@ -1405,7 +1406,7 @@ G_InitNew
     viewactive = true;
 
     // set the sky map for the episode
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
     {
         skytexture = R_TextureNumForName("SKY3");
         if (gamemap < 12)
@@ -1446,7 +1447,7 @@ void G_ReadDemoTiccmd(ticcmd_t* cmd)
     if (*demo_p == DEMOMARKER)
     {
         // end of demo data stream 
-        G_CheckDemoStatus();
+        G_CheckDemoStatus(g_doom);
         return;
     }
     cmd->forwardmove = ((signed char)*demo_p++);
@@ -1459,7 +1460,7 @@ void G_ReadDemoTiccmd(ticcmd_t* cmd)
 void G_WriteDemoTiccmd(ticcmd_t* cmd)
 {
     if (gamekeydown['q'])           // press q to end demo recording 
-        G_CheckDemoStatus();
+        G_CheckDemoStatus(g_doom);
     *demo_p++ = cmd->forwardmove;
     *demo_p++ = cmd->sidemove;
     *demo_p++ = (cmd->angleturn + 128) >> 8;
@@ -1468,7 +1469,7 @@ void G_WriteDemoTiccmd(ticcmd_t* cmd)
     if (demo_p > demoend - 16)
     {
         // no more space 
-        G_CheckDemoStatus();
+        G_CheckDemoStatus(g_doom);
         return;
     }
 
@@ -1478,7 +1479,7 @@ void G_WriteDemoTiccmd(ticcmd_t* cmd)
 //
 // G_RecordDemo 
 // 
-void G_RecordDemo(const char* name)
+void G_RecordDemo(Doom* doom, const char* name)
 {
     usergame = false;
     strcpy_s(demoname, name);
@@ -1491,7 +1492,7 @@ void G_RecordDemo(const char* name)
     demobuffer = static_cast<byte*>(Z_Malloc(maxsize, PU_STATIC, nullptr));
     demoend = demobuffer + maxsize;
 
-    demorecording = true;
+    doom->SetDemoRecording(true);
 }
 
 void G_BeginRecording()
@@ -1590,7 +1591,7 @@ void G_TimeDemo(const char* name)
 ===================
 */
 
-boolean G_CheckDemoStatus()
+boolean G_CheckDemoStatus(Doom* doom)
 {
     int             endtime;
 
@@ -1620,17 +1621,14 @@ boolean G_CheckDemoStatus()
         return true;
     }
 
-    if (demorecording)
+    if (doom->IsDemoRecording())
     {
         *demo_p++ = DEMOMARKER;
         M_WriteFile(demoname, demobuffer, demo_p - demobuffer);
         Z_Free(demobuffer);
-        demorecording = false;
+        doom->SetDemoRecording(false);
         I_Error("Demo %s recorded", demoname);
     }
 
     return false;
 }
-
-
-

@@ -17,19 +17,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
 #include "doomtype.h"
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
-// Called by D_DoomMain,
-// determines the hardware configuration
-// and sets up the video mode
-void I_InitGraphics();
-
+#include "system/windows.h"
+#include "types/numbers.h"
 
 void I_ShutdownGraphics();
 
@@ -46,3 +37,59 @@ void I_ReadScreen(byte* scr);
 
 void I_BeginRead();
 void I_EndRead();
+
+struct SystemEvent
+{
+    HWND handle = nullptr;
+    UINT message = 0;
+    WPARAM wParam = 0;
+    LPARAM lParam = 0;
+
+    SystemEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
+        : handle{handle}
+        , message{message}
+        , wParam{wParam}
+        , lParam{lParam}
+    {}
+};
+
+class Video
+{
+public:
+    void Init();
+
+    LRESULT HandleSystemEvent(const SystemEvent& event);
+    void DeliverSystemMessages();
+
+private:
+    bool RegisterWindowClass();
+
+    const wchar_t* WindowClassName = L"DoomWindow";
+
+    bool isInitialized = false;
+
+    bool isFullScreen = false;
+    bool isExclusive = false;
+    bool isBorderless = false;
+    bool isResizeable = false;
+
+    HWND windowHandle = nullptr;
+    HDC deviceContext = nullptr;
+    HGLRC renderContext = nullptr;
+
+    bool hasFocus = true;
+
+    // Blocky mode,
+    // replace each 320x200 pixel with multiply*multiply pixels.
+    // According to Dave Taylor, it still is a bonehead thing to use ....
+    int32 screenMultiply = 1;
+
+    int32 windowWidth = 320;
+    int32 windowHeight = 200;
+
+    int32 screenWidth = 0;
+    int32 screenHeight = 0;
+
+    DWORD windowStyle = 0;
+    DWORD windowStyleEx = 0;
+};

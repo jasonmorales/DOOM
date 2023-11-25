@@ -26,6 +26,7 @@
 #include "r_local.h"
 
 #include "doomstat.h"
+#include "d_main.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -160,7 +161,7 @@ R_InstallSpriteLump
 //  letter/number appended.
 // The rotation character can be 0 to signify no rotations.
 //
-void R_InitSpriteDefs(const char** namelist)
+void R_InitSpriteDefs(Doom* doom, const char** namelist)
 {
     // count the number of sprite names
     const char** check = namelist;
@@ -196,7 +197,7 @@ void R_InitSpriteDefs(const char** namelist)
             {
                 int frame = lumpinfo[l].name[4] - 'A';
                 int rotation = lumpinfo[l].name[5] - '0';
-                int patched = modifiedgame ? W_GetNumForName(lumpinfo[l].name) : l;
+                int patched = doom->IsModified() ? W_GetNumForName(lumpinfo[l].name) : l;
 
                 R_InstallSpriteLump(patched, frame, rotation, false);
 
@@ -261,14 +262,14 @@ int		newvissprite;
 // R_InitSprites
 // Called at program start.
 //
-void R_InitSprites(const char** namelist)
+void R_InitSprites(Doom* doom, const char** namelist)
 {
     for (int i = 0; i < SCREENWIDTH; i++)
     {
         negonearray[i] = -1;
     }
 
-    R_InitSpriteDefs(namelist);
+    R_InitSpriteDefs(doom, namelist);
 }
 
 
@@ -388,11 +389,11 @@ void R_DrawVisSprite(vissprite_t* vis, [[maybe_unused]] int x1, [[maybe_unused]]
     {
         texturecolumn = frac >> FRACBITS;
 #ifdef RANGECHECK
-        if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
+        if (texturecolumn < 0 || texturecolumn >= (patch->width))
             I_Error("R_DrawSpriteRange: bad texturecolumn");
 #endif
         column = (column_t*)((byte*)patch +
-            LONG(patch->columnofs[texturecolumn]));
+            (patch->columnofs[texturecolumn]));
         R_DrawMaskedColumn(column);
     }
 

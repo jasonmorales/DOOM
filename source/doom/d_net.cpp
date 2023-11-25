@@ -25,6 +25,11 @@
 #include "doomdef.h"
 #include "doomstat.h"
 
+
+#include "d_main.h"
+extern Doom* g_doom;
+
+
 void D_ProcessEvents();
 void G_BuildTiccmd(ticcmd_t* cmd);
 void D_DoAdvanceDemo();
@@ -270,8 +275,8 @@ void GetPackets()
             strcpy_s(exitmsg, "Player 1 left the game");
             exitmsg[7] += static_cast<char>(netconsole);
             players[consoleplayer].message = exitmsg;
-            if (demorecording)
-                G_CheckDemoStatus();
+            if (g_doom->IsDemoRecording())
+                G_CheckDemoStatus(g_doom);
             continue;
         }
 
@@ -710,7 +715,7 @@ void TryRunTics()
             if (advancedemo)
                 D_DoAdvanceDemo();
             M_Ticker();
-            G_Ticker();
+            G_Ticker(g_doom);
             gametic++;
 
             // modify command for duplicated tics

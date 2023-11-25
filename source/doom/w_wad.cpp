@@ -60,9 +60,9 @@ int filelength(int handle)
 }
 #endif
 
-void ExtractFileBase(char* path, char* dest)
+void ExtractFileBase(const char* path, char* dest)
 {
-    char* src = path + strlen(path) - 1;
+    const char* src = path + strlen(path) - 1;
 
     // back up until a \ or the start
     while (src != path
@@ -103,9 +103,9 @@ void ExtractFileBase(char* path, char* dest)
 // But: the reload feature is a fragile hack...
 
 intptr_t reloadlump;
-char* reloadname;
+const char* reloadname;
 
-void W_AddFile(char* filename)
+void W_AddFile(const char* filename)
 {
     // open the file and add to directory
 
@@ -134,7 +134,7 @@ void W_AddFile(char* filename)
         filelump_t singleinfo;
         fileinfo = &singleinfo;
         singleinfo.filepos = 0;
-        singleinfo.size = LONG(_filelength(handle));
+        singleinfo.size = (_filelength(handle));
         ExtractFileBase(filename, singleinfo.name);
         numlumps++;
     }
@@ -151,11 +151,9 @@ void W_AddFile(char* filename)
                 I_Error("Wad file %s doesn't have IWAD "
                     "or PWAD id\n", filename);
             }
-
-            // ???modifiedgame = true;		
         }
         header.numlumps = header.numlumps;
-        header.infotableofs = LONG(header.infotableofs);
+        header.infotableofs = (header.infotableofs);
         int length = header.numlumps * sizeof(filelump_t);
         fileinfo = static_cast<filelump_t*>(alloca(length));
         _lseek(handle, header.infotableofs, SEEK_SET);
@@ -203,7 +201,7 @@ void W_Reload()
     wadinfo_t header;
     _read(handle, &header, sizeof(header));
     intptr_t lumpcount = header.numlumps;
-    header.infotableofs = LONG(header.infotableofs);
+    header.infotableofs = (header.infotableofs);
     size_t length = lumpcount * sizeof(filelump_t);
     filelump_t* fileinfo = static_cast<decltype(fileinfo)>(alloca(length));
     _lseek(handle, header.infotableofs, SEEK_SET);
@@ -217,8 +215,8 @@ void W_Reload()
         if (lumpcache[i])
             Z_Free(lumpcache[i]);
 
-        lump_p->position = LONG(fileinfo->filepos);
-        lump_p->size = LONG(fileinfo->size);
+        lump_p->position = (fileinfo->filepos);
+        lump_p->size = (fileinfo->size);
     }
 
     _close(handle);
@@ -236,7 +234,7 @@ void W_Reload()
 // The name searcher looks backwards, so a later file
 //  does override all earlier ones.
 //
-void W_InitMultipleFiles(char** filenames)
+void W_InitMultipleFiles(const vector<std::filesystem::path>& files)
 {
     // open all the files, load headers, and count lumps
     numlumps = 0;
@@ -244,8 +242,8 @@ void W_InitMultipleFiles(char** filenames)
     // will be realloced as lumps are added
     lumpinfo = static_cast<decltype(lumpinfo)>(malloc(1));
 
-    for (; *filenames; filenames++)
-        W_AddFile(*filenames);
+    for (auto& file : files)
+        W_AddFile(file.string().c_str());
 
     if (!numlumps)
         I_Error("W_InitFiles: no files found");
@@ -258,18 +256,6 @@ void W_InitMultipleFiles(char** filenames)
         I_Error("Couldn't allocate lumpcache");
 
     memset(lumpcache, 0, size);
-}
-
-// W_InitFile
-// Just initialize from a single file.
-//
-void W_InitFile(char* filename)
-{
-    char* names[2];
-
-    names[0] = filename;
-    names[1] = nullptr;
-    W_InitMultipleFiles(names);
 }
 
 //

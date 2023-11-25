@@ -1,7 +1,8 @@
 #pragma once
 
+#include "types/numbers.h"
+
 #include <assert.h>
-#include <limits>
 #include <vector>
 #include <algorithm>
 #include <functional>

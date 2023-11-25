@@ -29,12 +29,8 @@
 
 #include "utility/convert.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#include "system/windows.h"
 #include <winsock.h>
-
-
-
 
 // For some odd reason...
 #define ntohl(x) \

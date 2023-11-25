@@ -17,10 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-#ifdef __GNUG__
-#pragma interface
-#endif
+class Doom;
 
 #define MAXVISSPRITES  	128
 
@@ -51,12 +48,8 @@ void R_SortVisSprites();
 void R_AddSprites(sector_t* sec);
 void R_AddPSprites();
 void R_DrawSprites();
-void R_InitSprites(const char** namelist);
+void R_InitSprites(Doom* doom, const char** namelist);
 void R_ClearSprites();
 void R_DrawMasked();
 
-void
-R_ClipVisSprite
-(vissprite_t* vis,
-    int			xl,
-    int			xh);
+void R_ClipVisSprite(vissprite_t* vis, int xl, int xh);

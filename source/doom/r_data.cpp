@@ -244,7 +244,7 @@ void R_GenerateComposite(int texnum)
     {
         realpatch = W_CacheLumpNum(patch->patch, PU_CACHE);
         x1 = patch->originx;
-        x2 = x1 + SHORT(realpatch->width);
+        x2 = x1 + (realpatch->width);
 
         if (x1 < 0)
             x = 0;
@@ -261,7 +261,7 @@ void R_GenerateComposite(int texnum)
                 continue;
 
             patchcol = (column_t*)((byte*)realpatch
-                + LONG(realpatch->columnofs[x - x1]));
+                + (realpatch->columnofs[x - x1]));
             R_DrawColumnInCache(patchcol,
                 block + colofs[x],
                 patch->originy,
@@ -304,7 +304,7 @@ void R_GenerateLookup(int texnum)
     {
         patch_t* realpatch = W_CacheLumpNum(patch->patch, PU_CACHE);
         int x1 = patch->originx;
-        int x2 = x1 + SHORT(realpatch->width);
+        int x2 = x1 + (realpatch->width);
 
         int x = (x1 < 0) ? 0 : x1;
 
@@ -315,7 +315,7 @@ void R_GenerateLookup(int texnum)
         {
             patchcount[x]++;
             collump[x] = patch->patch;
-            colofs[x] = LONG(realpatch->columnofs[x - x1]) + 3;
+            colofs[x] = (realpatch->columnofs[x - x1]) + 3;
         }
     }
 
@@ -405,7 +405,7 @@ void R_InitTextures()
     if (W_CheckNumForName("TEXTURE2") != -1)
     {
         maptex2 = W_CacheLumpName<int>("TEXTURE2", PU_STATIC);
-        numtextures2 = LONG(*maptex2);
+        numtextures2 = (*maptex2);
         maxoff2 = W_LumpLength(W_GetNumForName("TEXTURE2"));
     }
     else
@@ -451,7 +451,7 @@ void R_InitTextures()
             directory = maptex + 1;
         }
 
-        offset = LONG(*directory);
+        offset = (*directory);
 
         if (offset > maxoff)
             I_Error("R_InitTextures: bad texture directory");
@@ -460,12 +460,12 @@ void R_InitTextures()
 
         texture_t* texture = textures[i] =
             Z_Malloc<texture_t>(sizeof(texture_t)
-                + sizeof(texpatch_t) * (SHORT(mtexture->patchcount) - 1),
+                + sizeof(texpatch_t) * ((mtexture->patchcount) - 1),
                 PU_STATIC, 0);
 
-        texture->width = SHORT(mtexture->width);
-        texture->height = SHORT(mtexture->height);
-        texture->patchcount = SHORT(mtexture->patchcount);
+        texture->width = (mtexture->width);
+        texture->height = (mtexture->height);
+        texture->patchcount = (mtexture->patchcount);
 
         memcpy(texture->name, mtexture->name, sizeof(texture->name));
         mappatch_t* mpatch = &mtexture->patches[0];
@@ -474,9 +474,9 @@ void R_InitTextures()
         int j = 0;
         for (; j < texture->patchcount; j++, mpatch++, patch++)
         {
-            patch->originx = SHORT(mpatch->originx);
-            patch->originy = SHORT(mpatch->originy);
-            patch->patch = patchlookup[SHORT(mpatch->patch)];
+            patch->originx = (mpatch->originx);
+            patch->originy = (mpatch->originy);
+            patch->patch = patchlookup[(mpatch->patch)];
             if (patch->patch == -1)
                 I_Error("R_InitTextures: Missing patch in texture %s", texture->name);
         }
@@ -550,9 +550,9 @@ void R_InitSpriteLumps()
             printf(".");
 
         patch = W_CacheLumpNum(firstspritelump + i, PU_CACHE);
-        spritewidth[i] = SHORT(patch->width) << FRACBITS;
-        spriteoffset[i] = SHORT(patch->leftoffset) << FRACBITS;
-        spritetopoffset[i] = SHORT(patch->topoffset) << FRACBITS;
+        spritewidth[i] = (patch->width) << FRACBITS;
+        spriteoffset[i] = (patch->leftoffset) << FRACBITS;
+        spritetopoffset[i] = (patch->topoffset) << FRACBITS;
     }
 }
 

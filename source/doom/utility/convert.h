@@ -148,3 +148,11 @@ TO convert(FROM in)
 {
     return in;
 }
+
+
+template<typename TO, typename FROM>
+requires is_arithmetic<FROM> && is_same<TO, string>
+TO convert(FROM in)
+{
+    return std::to_string(in);
+}

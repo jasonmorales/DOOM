@@ -102,10 +102,10 @@ void P_InitSwitchList()
 
     episode = 1;
 
-    if (gamemode == registered)
+    if (gamemode == GameMode::Doom1Registered)
         episode = 2;
     else
-        if (gamemode == commercial)
+        if (gamemode == GameMode::Doom2Commercial)
             episode = 3;
 
     for (index = 0, i = 0;i < MAXSWITCHES;i++)

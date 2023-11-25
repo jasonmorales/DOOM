@@ -12,18 +12,16 @@
 // for more details.
 //
 // DESCRIPTION:
-//	Main program, simply calls D_DoomMain high level loop.
+//	Main program, simply calls Doom::Main high level loop.
 //
 //-----------------------------------------------------------------------------
 
 #include "m_argv.h"
 #include "d_main.h"
 
-#define WIN32_LEAN_AND_MEAN
-#define NOSERVICE
-#define NOMCX
-#define NOIME
-#include <Windows.h>
+#include "system/windows.h"
+
+Doom* g_doom = nullptr;
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {
@@ -31,7 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 
     _CrtSetDebugFillThreshold(0);
 
-    D_DoomMain();
+    g_doom = new Doom;
+    g_doom->Main();
 
     return 0;
 }

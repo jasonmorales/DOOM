@@ -17,8 +17,6 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-
 #include "d_event.h"
 
 //
@@ -40,7 +38,6 @@ void M_Ticker();
 // draws the menus directly into the screen buffer.
 void M_Drawer();
 
-// Called by D_DoomMain,
 // loads the config file.
 void M_Init();
 

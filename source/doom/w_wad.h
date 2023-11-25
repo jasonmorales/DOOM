@@ -19,6 +19,10 @@
 
 #include <stdint.h>
 
+#include "containers/vector.h"
+
+#include <filesystem>
+
 //
 // TYPES
 //
@@ -55,7 +59,7 @@ extern	void** lumpcache;
 extern	lumpinfo_t* lumpinfo;
 extern intptr_t numlumps;
 
-void W_InitMultipleFiles(char** filenames);
+void W_InitMultipleFiles(const vector<std::filesystem::path>& files);
 void W_Reload();
 
 intptr_t W_CheckNumForName(const char* name);

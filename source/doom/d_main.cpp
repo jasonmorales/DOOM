@@ -12,7 +12,7 @@
 // for more details.
 //
 // DESCRIPTION:
-//	DOOM main program (D_DoomMain) and game loop (D_DoomLoop),
+//	DOOM main program (Doom::Main) and game loop (Doom::Loop),
 //	plus functions to determine game mode (shareware, registered),
 //	parse command line parameters, configure game parameters (turbo),
 //	and call the startup functions.
@@ -70,19 +70,6 @@ extern void* statcopy;
 
 boolean advancedemo;
 
-//
-// D-DoomLoop()
-// Not a globally visible function,
-//  just included for source reference,
-//  called by D_DoomMain, never exits.
-// Manages timing and IO,
-//  calls all ?_Responder, ?_Ticker, and ?_Drawer,
-//  calls I_GetTime, I_StartFrame, and I_StartTic
-//
-void D_DoomLoop();
-
-char* wadfiles[MAXWADFILES];
-
 boolean devparm;	 // started game with -devparm
 boolean nomonsters;	 // checkparm of -nomonsters
 boolean respawnparm; // checkparm of -respawn
@@ -134,7 +121,7 @@ void D_PostEvent(event_t* ev)
 void D_ProcessEvents()
 {
     // IF STORE DEMO, DO NOT ACCEPT INPUT
-    if (gamemode == commercial && (W_CheckNumForName("map01") < 0))
+    if (gamemode == GameMode::Doom2Commercial && (W_CheckNumForName("map01") < 0))
         return;
 
     for (; eventtail != eventhead; eventtail = (++eventtail) & (MAXEVENTS - 1))
@@ -304,28 +291,32 @@ void D_Display()
     } while (!done);
 }
 
-//
-//  D_DoomLoop
-//
-extern boolean demorecording;
-
-void D_DoomLoop()
+// Doom::Loop()
+// Not a globally visible function,
+//  just included for source reference,
+//  called by Doom::Main, never exits.
+// Manages timing and IO,
+//  calls all ?_Responder, ?_Ticker, and ?_Drawer,
+//  calls I_GetTime, I_StartFrame, and I_StartTic
+void Doom::Loop()
 {
-    if (demorecording)
+    if (isDemoRecording)
         G_BeginRecording();
 
     if (CommandLine::HasArg("-debugfile"))
     {
-        char filename[20];
-        sprintf_s(filename, 20, "debug%i.txt", consoleplayer);
-        printf("debug output to: %s\n", filename);
-        fopen_s(&debugfile, filename, "w");
+        string fileName = "debug" + convert<string>(consoleplayer) + ".txt";
+        printf("debug output to: %s\n", fileName.c_str());
+        fopen_s(&debugfile, fileName.c_str(), "w");
     }
 
-    I_InitGraphics();
+    video = new Video;
+    video->Init();
 
     while (1)
     {
+        video->DeliverSystemMessages();
+
         // frame syncronous IO operations
         I_StartFrame();
 
@@ -338,7 +329,7 @@ void D_DoomLoop()
             if (advancedemo)
                 D_DoAdvanceDemo();
             M_Ticker();
-            G_Ticker();
+            G_Ticker(this);
             gametic++;
             maketic++;
         }
@@ -410,7 +401,7 @@ void D_DoAdvanceDemo()
     paused = false;
     gameaction = ga_nothing;
 
-    if (gamemode == retail)
+    if (gamemode == GameMode::Doom1Retail)
         demosequence = (demosequence + 1) % 7;
     else
         demosequence = (demosequence + 1) % 6;
@@ -418,13 +409,13 @@ void D_DoAdvanceDemo()
     switch (demosequence)
     {
     case 0:
-        if (gamemode == commercial)
+        if (gamemode == GameMode::Doom2Commercial)
             pagetic = 35 * 11;
         else
             pagetic = 170;
         gamestate = GS_DEMOSCREEN;
         pagename = "TITLEPIC";
-        if (gamemode == commercial)
+        if (gamemode == GameMode::Doom2Commercial)
             S_StartMusic(mus_dm2ttl);
         else
             S_StartMusic(mus_intro);
@@ -442,7 +433,7 @@ void D_DoAdvanceDemo()
         break;
     case 4:
         gamestate = GS_DEMOSCREEN;
-        if (gamemode == commercial)
+        if (gamemode == GameMode::Doom2Commercial)
         {
             pagetic = 35 * 11;
             pagename = "TITLEPIC";
@@ -452,7 +443,7 @@ void D_DoAdvanceDemo()
         {
             pagetic = 200;
 
-            if (gamemode == retail)
+            if (gamemode == GameMode::Doom1Retail)
                 pagename = "CREDIT";
             else
                 pagename = "HELP2";
@@ -478,151 +469,98 @@ void D_StartTitle()
     D_AdvanceDemo();
 }
 
-//
-// D_AddFile
-//
-void D_AddFile(const char* file)
+void Doom::AddFile(const std::filesystem::path& path)
 {
-    int numwadfiles = 0;
-    for (; wadfiles[numwadfiles]; ++numwadfiles)
-        ;
-
-    auto length = strlen(file) + 1;
-    char* newfile = static_cast<char*>(malloc(length));
-    strcpy_s(newfile, length, file);
-
-    wadfiles[numwadfiles] = newfile;
+    wadFiles.push_back(path);
 }
 
-//
-// IdentifyVersion
 // Checks availability of IWAD files by name,
 // to determine whether registered/commercial features
 // should be executed (notably loading PWAD's).
-//
-void IdentifyVersion()
+void Doom::IdentifyVersion()
 {
-    const char* doomwaddir = "E:\\personal\\doom\\data";
-
-    // Commercial.
-    auto size = strlen(doomwaddir) + 1 + 9 + 1;
-    char* doom2wad = static_cast<char*>(malloc(size));
-    sprintf_s(doom2wad, size, "%s\\doom2.wad", doomwaddir);
-
-    // Retail.
-    size = strlen(doomwaddir) + 1 + 9 + 1;
-    char* doomuwad = static_cast<char*>(malloc(size));
-    sprintf_s(doomuwad, size, "%s/doomu.wad", doomwaddir);
-
-    // Registered.
-    size = strlen(doomwaddir) + 1 + 8 + 1;
-    char* doomwad = static_cast<char*>(malloc(size));
-    sprintf_s(doomwad, size, "%s/doom.wad", doomwaddir);
-
-    // Shareware.
-    size = strlen(doomwaddir) + 1 + 9 + 1;
-    char* doom1wad = static_cast<char*>(malloc(size));
-    sprintf_s(doom1wad, size, "%s/doom1.wad", doomwaddir);
-
-    size = strlen(doomwaddir) + 1 + 9 + 1;
-    char* tntwad = static_cast<char*>(malloc(size));
-    sprintf_s(tntwad, size, "%s/tnt.wad", doomwaddir);
-
     if (CommandLine::HasArg("-shdev"))
     {
-        gamemode = shareware;
+        gamemode = GameMode::Doom1Shareware;
         devparm = true;
-        D_AddFile(DEVDATA "doom1.wad");
-        D_AddFile(DEVMAPS "data_se/texture1.lmp");
-        D_AddFile(DEVMAPS "data_se/pnames.lmp");
+        AddFile(DEVDATA "doom1.wad");
+        AddFile(DEVMAPS "data_se/texture1.lmp");
+        AddFile(DEVMAPS "data_se/pnames.lmp");
         strcpy_s(basedefault, DEVDATA "default.cfg");
         return;
     }
 
     if (CommandLine::HasArg("-regdev"))
     {
-        gamemode = registered;
+        gamemode = GameMode::Doom1Registered;
         devparm = true;
-        D_AddFile(DEVDATA "doom.wad");
-        D_AddFile(DEVMAPS "data_se/texture1.lmp");
-        D_AddFile(DEVMAPS "data_se/texture2.lmp");
-        D_AddFile(DEVMAPS "data_se/pnames.lmp");
+        AddFile(DEVDATA "doom.wad");
+        AddFile(DEVMAPS "data_se/texture1.lmp");
+        AddFile(DEVMAPS "data_se/texture2.lmp");
+        AddFile(DEVMAPS "data_se/pnames.lmp");
         strcpy_s(basedefault, DEVDATA "default.cfg");
         return;
     }
 
     if (CommandLine::HasArg("-comdev"))
     {
-        gamemode = commercial;
+        gamemode = GameMode::Doom2Commercial;
         devparm = true;
-        /* I don't bother
-        if(plutonia)
-            D_AddFile (DEVDATA"plutonia.wad");
-        else if(tnt)
-            D_AddFile (DEVDATA"tnt.wad");
-        else*/
-        D_AddFile(DEVDATA "doom2.wad");
 
-        D_AddFile(DEVMAPS "cdata/texture1.lmp");
-        D_AddFile(DEVMAPS "cdata/pnames.lmp");
+        AddFile(DEVDATA "doom2.wad");
+        AddFile(DEVMAPS "cdata/texture1.lmp");
+        AddFile(DEVMAPS "cdata/pnames.lmp");
         strcpy_s(basedefault, DEVDATA "default.cfg");
         return;
     }
 
-    if (!_access(doom2wad, R_OK))
+    std::filesystem::path doomWadDir = "data";
+
+    // Commercial.
+    std::filesystem::path doom2Wad = doomWadDir / "doom2.wad";
+    if (std::filesystem::exists(doom2Wad))
     {
-        gamemode = commercial;
-        D_AddFile(doom2wad);
+        gamemode = GameMode::Doom2Commercial;
+        AddFile(doom2Wad.string().c_str());
         return;
     }
 
-    if (!_access(tntwad, R_OK))
+    // Retail.
+    std::filesystem::path doomUWad = doomWadDir / "doomu.wad";
+    if (std::filesystem::exists(doomUWad))
     {
-        gamemode = commercial;
-        D_AddFile(tntwad);
+        gamemode = GameMode::Doom1Retail;
+        AddFile(doomUWad.string().c_str());
         return;
     }
 
-    if (!_access(doomuwad, R_OK))
+    // Registered.
+    std::filesystem::path doomWad = doomWadDir / "doom.wad";
+    if (std::filesystem::exists(doomWad))
     {
-        gamemode = retail;
-        D_AddFile(doomuwad);
+        gamemode = GameMode::Doom1Registered;
+        AddFile(doomWad.string().c_str());
         return;
     }
 
-    if (!_access(doomwad, R_OK))
+    // Shareware.
+    std::filesystem::path doom1Wad = doomWadDir / "doom1.wad";
+    if (std::filesystem::exists(doom1Wad))
     {
-        gamemode = registered;
-        D_AddFile(doomwad);
-        return;
-    }
-
-    if (!_access(doom1wad, R_OK))
-    {
-        gamemode = shareware;
-        D_AddFile(doom1wad);
+        gamemode = GameMode::Doom1Shareware;
+        AddFile(doom1Wad.string().c_str());
         return;
     }
 
     printf("Game mode indeterminate.\n");
-    gamemode = indetermined;
-
-    // We don't abort. Let's see what the PWAD contains.
-    // exit(1);
-    // I_Error ("Game mode indeterminate\n");
+    gamemode = GameMode::Unknown;
 }
 
-//
-// D_DoomMain
-//
-void D_DoomMain()
+void Doom::Main()
 {
-    static char title[128];
-
     IdentifyVersion();
 
     setvbuf(stdout, nullptr, _IONBF, 0);
-    modifiedgame = false;
 
     nomonsters = CommandLine::HasArg("-nomonsters");
     respawnparm = CommandLine::HasArg("-respawn");
@@ -634,52 +572,37 @@ void D_DoomMain()
     else if (CommandLine::HasArg("-deathmatch"))
         deathmatch = 1;
 
+    static char title[128];
     switch (gamemode)
     {
-    case retail:
+    case GameMode::Doom1Retail:
         sprintf_s(title,
             "                         "
             "The Ultimate DOOM Startup v%i.%i"
             "                           ",
             VERSION / 100, VERSION % 100);
         break;
-    case shareware:
+    case GameMode::Doom1Shareware:
         sprintf_s(title,
             "                            "
             "DOOM Shareware Startup v%i.%i"
             "                           ",
             VERSION / 100, VERSION % 100);
         break;
-    case registered:
+    case GameMode::Doom1Registered:
         sprintf_s(title,
             "                            "
             "DOOM Registered Startup v%i.%i"
             "                           ",
             VERSION / 100, VERSION % 100);
         break;
-    case commercial:
+    case GameMode::Doom2Commercial:
         sprintf_s(title,
             "                         "
             "DOOM 2: Hell on Earth v%i.%i"
             "                           ",
             VERSION / 100, VERSION % 100);
         break;
-        /*FIXME
-               case pack_plut:
-            sprintf (title,
-                 "                   "
-                 "DOOM 2: Plutonia Experiment v%i.%i"
-                 "                           ",
-                 VERSION/100,VERSION%100);
-            break;
-              case pack_tnt:
-            sprintf (title,
-                 "                     "
-                 "DOOM 2: TNT - Evilution v%i.%i"
-                 "                           ",
-                 VERSION/100,VERSION%100);
-            break;
-        */
     default:
         sprintf_s(title,
             "                     "
@@ -723,7 +646,7 @@ void D_DoomMain()
 
     auto doWarp = [](int32 ep, int32 map)
     {
-        if (gamemode == commercial)
+        if (gamemode == GameMode::Doom2Commercial)
             startmap = ep;
         else
         {
@@ -743,28 +666,28 @@ void D_DoomMain()
         // Map name handling.
         switch (gamemode)
         {
-        case shareware:
-        case retail:
-        case registered:
+        case GameMode::Doom1Shareware:
+        case GameMode::Doom1Retail:
+        case GameMode::Doom1Registered:
             sprintf_s(file, "~" DEVMAPS "E%dM%d.wad", ep, map);
             printf("Warping to Episode %d, Map %d.\n", ep, map);
             break;
 
-        case commercial:
+        case GameMode::Doom2Commercial:
         default:
             sprintf_s(file, "~" DEVMAPS "cdata/map%02d.wad", ep);
             break;
         }
-        D_AddFile(file);
+        AddFile(file);
 
         doWarp(ep,map);
     }
 
     if (vector<string_view> fileList; CommandLine::GetValueList("-file", fileList))
     {
-        modifiedgame = true; // homebrew levels
+        isModified = true; // homebrew levels
         for (auto fileName : fileList)
-            D_AddFile(string(fileName).c_str());
+            AddFile(string(fileName).c_str());
     }
 
     if (string_view name;
@@ -773,7 +696,7 @@ void D_DoomMain()
     {
         string fileName(name);
         fileName += ".lmp";
-        D_AddFile(fileName.c_str());
+        AddFile(fileName.c_str());
         printf("Playing demo %s.\n", fileName.c_str());
     }
 
@@ -820,10 +743,10 @@ void D_DoomMain()
     Z_Init();
 
     printf("W_Init: Init WADfiles.\n");
-    W_InitMultipleFiles(wadfiles);
+    W_InitMultipleFiles(wadFiles);
 
     // Check for -file in shareware
-    if (modifiedgame)
+    if (isModified)
     {
         // These are the lumps that will be checked in IWAD,
         // if any one is not present, execution will be aborted.
@@ -834,19 +757,19 @@ void D_DoomMain()
             "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1" };
         int i;
 
-        if (gamemode == shareware)
+        if (gamemode == GameMode::Doom1Shareware)
             I_Error("\nYou cannot -file with the shareware ", "version. Register!");
 
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version.
-        if (gamemode == registered)
+        if (gamemode == GameMode::Doom1Registered)
             for (i = 0; i < 23; i++)
                 if (W_CheckNumForName(name[i]) < 0)
                     I_Error("\nThis is not the registered version.");
     }
 
-    // Iff additonal PWAD files are used, print modified banner
-    if (modifiedgame)
+    // If additional PWAD files are used, print modified banner
+    if (isModified)
     {
         /*m*/ printf(
             "===========================================================================\n"
@@ -861,16 +784,16 @@ void D_DoomMain()
     // Check and print which version is executed.
     switch (gamemode)
     {
-    case shareware:
-    case indetermined:
+    case GameMode::Doom1Shareware:
+    case GameMode::Unknown:
         printf(
             "===========================================================================\n"
             "                                Shareware!\n"
             "===========================================================================\n");
         break;
-    case registered:
-    case retail:
-    case commercial:
+    case GameMode::Doom1Registered:
+    case GameMode::Doom1Retail:
+    case GameMode::Doom2Commercial:
         printf(
             "===========================================================================\n"
             "                 Commercial product - do not distribute!\n"
@@ -890,7 +813,7 @@ void D_DoomMain()
     R_Init();
 
     printf("\nP_Init: Init Playloop state.\n");
-    P_Init();
+    P_Init(this);
 
     printf("I_Init: Setting up machine state.\n");
     I_Init();
@@ -918,7 +841,7 @@ void D_DoomMain()
     // start the appropriate game based on params
     if (string name; CommandLine::TryGetValues("-record", name))
     {
-        G_RecordDemo(name.c_str());
+        G_RecordDemo(this, name.c_str());
         autostart = true;
     }
 
@@ -926,13 +849,13 @@ void D_DoomMain()
     {
         singledemo = true; // quit after one demo
         G_DeferedPlayDemo(demo.c_str());
-        D_DoomLoop(); // never returns
+        Loop(); // never returns
     }
 
     if (string demo; CommandLine::TryGetValues("-timedemo", demo))
     {
         G_TimeDemo(demo.c_str());
-        D_DoomLoop(); // never returns
+        Loop(); // never returns
     }
 
     if (int load; CommandLine::TryGetValues("-loadgame", load))
@@ -952,5 +875,5 @@ void D_DoomMain()
             D_StartTitle(); // start up intro loop
     }
 
-    D_DoomLoop(); // never returns
+    Loop(); // never returns
 }

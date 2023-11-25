@@ -193,7 +193,7 @@ void S_Start()
     // start new music for the level
     mus_paused = 0;
 
-    if (gamemode == commercial)
+    if (gamemode == GameMode::Doom2Commercial)
         mnum = mus_runnin + gamemap - 1;
     else
     {

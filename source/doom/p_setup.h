@@ -17,11 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
+class Doom;
 
 // NOT called by W_Ticker. Fixme.
 void
@@ -32,4 +28,4 @@ P_SetupLevel
     skill_t	skill);
 
 // Called by startup code.
-void P_Init();
+void P_Init(Doom* doom);
