@@ -58,6 +58,20 @@ class Video
 public:
     void Init();
 
+    // Called by Doom::Loop,
+    // called before processing any tics in a frame
+    // (just after displaying a frame).
+    // Time consuming synchronous operations
+    // are performed here (joystick reading).
+    // Can call D_PostEvent.
+    void StartFrame();
+
+    // Called by Doom::Loop,
+    // called before processing each tic in a frame.
+    // Quick synchronous operations are performed here.
+    // Can call D_PostEvent.
+    void StartTick();
+
     LRESULT HandleSystemEvent(const SystemEvent& event);
     void DeliverSystemMessages();
 

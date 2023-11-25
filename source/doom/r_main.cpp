@@ -710,15 +710,11 @@ void R_ExecuteSetViewSize()
     }
 }
 
-
-
 //
 // R_Init
 //
-extern intptr_t	detailLevel;
-extern intptr_t	screenblocks;
-
-
+extern int32	detailLevel;
+extern int32	screenblocks;
 
 void R_Init()
 {

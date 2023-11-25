@@ -75,7 +75,6 @@ void	G_DoSaveGame();
 
 
 gameaction_t    gameaction;
-gamestate_t     gamestate;
 skill_t         gameskill;
 boolean		respawnmonsters;
 int             gameepisode;
@@ -87,7 +86,6 @@ boolean         sendsave;             	// send a save event next tic
 boolean         usergame;               // ok to save / end game 
 
 boolean         timingdemo;             // if true, exit with report on completion 
-boolean         nodrawers;              // for comparative timing purposes 
 boolean         noblit;                 // for comparative timing purposes 
 int             starttime;          	// for comparative timing purposes  	 
 
@@ -136,14 +134,14 @@ int		key_use;
 int		key_strafe;
 int		key_speed;
 
-intptr_t             mousebfire;
-intptr_t             mousebstrafe;
-intptr_t             mousebforward;
+int32             mousebfire;
+int32             mousebstrafe;
+int32             mousebforward;
 
-intptr_t             joybfire;
-intptr_t             joybstrafe;
-intptr_t             joybuse;
-intptr_t             joybspeed;
+int32             joybfire;
+int32             joybstrafe;
+int32             joybuse;
+int32             joybspeed;
 
 
 
@@ -407,7 +405,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 //
 // G_DoLoadLevel 
 //
-extern  gamestate_t     wipegamestate;
+extern  GameState wipegamestate;
 
 void G_DoLoadLevel()
 {
@@ -432,10 +430,10 @@ void G_DoLoadLevel()
 
     levelstarttic = gametic;        // for time calculation
 
-    if (wipegamestate == GS_LEVEL)
-        wipegamestate = GS_FORCE_WIPE;             // force a wipe 
+    if (wipegamestate == GameState::Level)
+        wipegamestate = GameState::ForceWipe;             // force a wipe 
 
-    gamestate = GS_LEVEL;
+    g_doom->SetGameState(GameState::Level);
 
     for (int i = 0; i < MAXPLAYERS; i++)
     {
@@ -467,7 +465,7 @@ void G_DoLoadLevel()
 boolean G_Responder(event_t* ev)
 {
     // allow spy mode changes even during the demo
-    if (gamestate == GS_LEVEL && ev->type == ev_keydown
+    if (g_doom->GetGameState() == GameState::Level && ev->type == ev_keydown
         && ev->data1 == KEY_F12 && (singledemo || !deathmatch))
     {
         // spy mode 
@@ -482,7 +480,7 @@ boolean G_Responder(event_t* ev)
 
     // any other key pops up menu if in demos
     if (gameaction == ga_nothing && !singledemo &&
-        (demoplayback || gamestate == GS_DEMOSCREEN)
+        (demoplayback || g_doom->GetGameState() == GameState::Demo)
         )
     {
         if (ev->type == ev_keydown ||
@@ -495,7 +493,7 @@ boolean G_Responder(event_t* ev)
         return false;
     }
 
-    if (gamestate == GS_LEVEL)
+    if (g_doom->GetGameState() == GameState::Level)
     {
 #if 0 
         if (devparm && ev->type == ev_keydown && ev->data1 == ';')
@@ -512,7 +510,7 @@ boolean G_Responder(event_t* ev)
             return true;	// automap ate it 
     }
 
-    if (gamestate == GS_FINALE)
+    if (g_doom->GetGameState() == GameState::Finale)
     {
         if (F_Responder(ev))
             return true;	// finale ate the event 
@@ -687,24 +685,24 @@ void G_Ticker(Doom* doom)
     }
 
     // do main actions
-    switch (gamestate)
+    switch (g_doom->GetGameState())
     {
-    case GS_LEVEL:
+    case GameState::Level:
         P_Ticker();
         ST_Ticker();
         AM_Ticker();
         HU_Ticker();
         break;
 
-    case GS_INTERMISSION:
+    case GameState::Intermission:
         WI_Ticker();
         break;
 
-    case GS_FINALE:
+    case GameState::Finale:
         F_Ticker();
         break;
 
-    case GS_DEMOSCREEN:
+    case GameState::Demo:
         D_PageTicker();
         break;
     }
@@ -1092,7 +1090,7 @@ void G_DoCompleted()
             , sizeof(wminfo.plyr[i].frags));
     }
 
-    gamestate = GS_INTERMISSION;
+    g_doom->SetGameState(GameState::Intermission);
     viewactive = false;
     automapactive = false;
 
@@ -1133,7 +1131,7 @@ void G_WorldDone()
 
 void G_DoWorldDone()
 {
-    gamestate = GS_LEVEL;
+    g_doom->SetGameState(GameState::Level);
     gamemap = wminfo.next + 1;
     G_DoLoadLevel();
     gameaction = ga_nothing;
@@ -1566,20 +1564,15 @@ void G_DoPlayDemo()
     demoplayback = true;
 }
 
-//
-// G_TimeDemo 
-//
 void G_TimeDemo(const char* name)
 {
-    nodrawers = CommandLine::HasArg("-nodraw");
     noblit = CommandLine::HasArg("-noblit");
     timingdemo = true;
-    singletics = true;
+    g_doom->SetUseSingleTicks(true);
 
     defdemoname = name;
     gameaction = ga_playdemo;
 }
-
 
 /*
 ===================

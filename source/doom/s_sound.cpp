@@ -98,10 +98,10 @@ static channel_t* channels;
 // These are not used, but should be (menu).
 // Maximum volume of a sound effect.
 // Internal default is max out of 0-15.
-intptr_t 		snd_SfxVolume = 15;
+int32 		snd_SfxVolume = 15;
 
 // Maximum volume of music. Useless so far.
-intptr_t 		snd_MusicVolume = 15;
+int32 		snd_MusicVolume = 15;
 
 
 
@@ -114,7 +114,7 @@ static musicinfo_t* mus_playing = 0;
 // following is set
 //  by the defaults code in M_misc:
 // number of channels available
-intptr_t			numChannels;
+int32			numChannels;
 
 static int		nextcleanup;
 

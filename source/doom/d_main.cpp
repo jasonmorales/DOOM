@@ -57,13 +57,12 @@
 #include <errno.h>
 #include <crtdbg.h>
 
-void D_DoAdvanceDemo();
 void D_CheckNetGame();
 void G_BuildTiccmd(ticcmd_t* cmd);
 
 extern boolean inhelpscreens;
 extern boolean setsizeneeded;
-extern intptr_t showMessages;
+extern int32 showMessages;
 extern int forwardmove[2];
 extern int sidemove[2];
 extern void* statcopy;
@@ -76,8 +75,6 @@ boolean respawnparm; // checkparm of -respawn
 boolean fastparm;	 // checkparm of -fast
 
 boolean drone;
-
-boolean singletics = false; // debug flag to cancel adaptiveness
 
 // extern int soundVolume;
 // extern  int	sfxVolume;
@@ -112,448 +109,6 @@ void D_PostEvent(event_t* ev)
 {
     events[eventhead] = *ev;
     eventhead = (++eventhead) & (MAXEVENTS - 1);
-}
-
-//
-// D_ProcessEvents
-// Send all the events of the given timestamp down the responder chain
-//
-void D_ProcessEvents()
-{
-    // IF STORE DEMO, DO NOT ACCEPT INPUT
-    if (gamemode == GameMode::Doom2Commercial && (W_CheckNumForName("map01") < 0))
-        return;
-
-    for (; eventtail != eventhead; eventtail = (++eventtail) & (MAXEVENTS - 1))
-    {
-        event_t* ev = &events[eventtail];
-        if (M_Responder(ev))
-            continue; // menu ate the event
-
-        G_Responder(ev);
-    }
-}
-
-//
-// D_Display
-//  draw current display, possibly wiping it from the previous
-//
-
-// wipegamestate can be set to -1 to force a wipe on the next draw
-gamestate_t wipegamestate = GS_DEMOSCREEN;
-
-void D_Display()
-{
-    static boolean viewactivestate = false;
-    static boolean menuactivestate = false;
-    static boolean inhelpscreensstate = false;
-    static boolean fullscreen = false;
-    static gamestate_t oldgamestate = GS_FORCE_WIPE;
-    static int borderdrawcount;
-    int nowtime;
-    int tics;
-    int wipestart;
-    int y;
-    boolean done;
-    boolean wipe;
-    boolean redrawsbar;
-
-    if (nodrawers)
-        return; // for comparative timing / profiling
-
-    redrawsbar = false;
-
-    // change the view size if needed
-    if (setsizeneeded)
-    {
-        R_ExecuteSetViewSize();
-        oldgamestate = GS_FORCE_WIPE; // force background redraw
-        borderdrawcount = 3;
-    }
-
-    // save the current screen if about to wipe
-    if (gamestate != wipegamestate)
-    {
-        wipe = true;
-        wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
-    }
-    else
-        wipe = false;
-
-    if (gamestate == GS_LEVEL && gametic)
-        HU_Erase();
-
-    // do buffered drawing
-    switch (gamestate)
-    {
-    case GS_LEVEL:
-        if (!gametic)
-            break;
-        if (automapactive)
-            AM_Drawer();
-        if (wipe || (viewheight != 200 && fullscreen))
-            redrawsbar = true;
-        if (inhelpscreensstate && !inhelpscreens)
-            redrawsbar = true; // just put away the help screen
-        ST_Drawer(viewheight == 200, redrawsbar);
-        fullscreen = viewheight == 200;
-        break;
-
-    case GS_INTERMISSION:
-        WI_Drawer();
-        break;
-
-    case GS_FINALE:
-        F_Drawer();
-        break;
-
-    case GS_DEMOSCREEN:
-        D_PageDrawer();
-        break;
-    }
-
-    // draw buffered stuff to screen
-    I_UpdateNoBlit();
-
-    // draw the view directly
-    if (gamestate == GS_LEVEL && !automapactive && gametic)
-        R_RenderPlayerView(&players[displayplayer]);
-
-    if (gamestate == GS_LEVEL && gametic)
-        HU_Drawer();
-
-    // clean up border stuff
-    if (gamestate != oldgamestate && gamestate != GS_LEVEL)
-        I_SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
-
-    // see if the border needs to be initially drawn
-    if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL)
-    {
-        viewactivestate = false; // view was not active
-        R_FillBackScreen();		 // draw the pattern into the back screen
-    }
-
-    // see if the border needs to be updated to the screen
-    if (gamestate == GS_LEVEL && !automapactive && scaledviewwidth != 320)
-    {
-        if (menuactive || menuactivestate || !viewactivestate)
-            borderdrawcount = 3;
-        if (borderdrawcount)
-        {
-            R_DrawViewBorder(); // erase old menu stuff
-            borderdrawcount--;
-        }
-    }
-
-    menuactivestate = menuactive;
-    viewactivestate = viewactive;
-    inhelpscreensstate = inhelpscreens;
-    oldgamestate = wipegamestate = gamestate;
-
-    // draw pause pic
-    if (paused)
-    {
-        if (automapactive)
-            y = 4;
-        else
-            y = viewwindowy + 4;
-        V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, W_CacheLumpName<patch_t>("M_PAUSE", PU_CACHE));
-    }
-
-    // menus go directly to the screen
-    M_Drawer();	 // menu is drawn even on top of everything
-    NetUpdate(); // send out any new accumulation
-
-    // normal update
-    if (!wipe)
-    {
-        I_FinishUpdate(); // page flip or blit buffer
-        return;
-    }
-
-    // wipe update
-    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
-
-    wipestart = I_GetTime() - 1;
-
-    do
-    {
-        do
-        {
-            nowtime = I_GetTime();
-            tics = nowtime - wipestart;
-        } while (!tics);
-        wipestart = nowtime;
-        done = wipe_ScreenWipe(wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
-        I_UpdateNoBlit();
-        M_Drawer();		  // menu is drawn even on top of wipes
-        I_FinishUpdate(); // page flip or blit buffer
-    } while (!done);
-}
-
-// Doom::Loop()
-// Not a globally visible function,
-//  just included for source reference,
-//  called by Doom::Main, never exits.
-// Manages timing and IO,
-//  calls all ?_Responder, ?_Ticker, and ?_Drawer,
-//  calls I_GetTime, I_StartFrame, and I_StartTic
-void Doom::Loop()
-{
-    if (isDemoRecording)
-        G_BeginRecording();
-
-    if (CommandLine::HasArg("-debugfile"))
-    {
-        string fileName = "debug" + convert<string>(consoleplayer) + ".txt";
-        printf("debug output to: %s\n", fileName.c_str());
-        fopen_s(&debugfile, fileName.c_str(), "w");
-    }
-
-    video = new Video;
-    video->Init();
-
-    while (1)
-    {
-        video->DeliverSystemMessages();
-
-        // frame syncronous IO operations
-        I_StartFrame();
-
-        // process one or more tics
-        if (singletics)
-        {
-            I_StartTic();
-            D_ProcessEvents();
-            G_BuildTiccmd(&netcmds[consoleplayer][maketic % BACKUPTICS]);
-            if (advancedemo)
-                D_DoAdvanceDemo();
-            M_Ticker();
-            G_Ticker(this);
-            gametic++;
-            maketic++;
-        }
-        else
-        {
-            TryRunTics(); // will run at least one tic
-        }
-
-        S_UpdateSounds(players[consoleplayer].mo); // move positional sounds
-
-        // Update display, next frame, with current state.
-        D_Display();
-
-#ifndef SNDSERV
-        // Sound mixing for the buffer is snychronous.
-        I_UpdateSound();
-#endif
-        // Synchronous sound output is explicitly called.
-#ifndef SNDINTR
-        // Update sound output.
-        I_SubmitSound();
-#endif
-    }
-}
-
-//
-//  DEMO LOOP
-//
-int demosequence;
-int pagetic;
-const char* pagename;
-
-//
-// D_PageTicker
-// Handles timing for warped projection
-//
-void D_PageTicker()
-{
-    if (--pagetic < 0)
-        D_AdvanceDemo();
-}
-
-//
-// D_PageDrawer
-//
-void D_PageDrawer()
-{
-    V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>(pagename, PU_CACHE));
-}
-
-//
-// D_AdvanceDemo
-// Called after each demo or intro demosequence finishes
-//
-void D_AdvanceDemo()
-{
-    advancedemo = true;
-}
-
-//
-// This cycles through the demo sequences.
-// FIXME - version dependend demo numbers?
-//
-void D_DoAdvanceDemo()
-{
-    players[consoleplayer].playerstate = PST_LIVE; // not reborn
-    advancedemo = false;
-    usergame = false; // no save / end game here
-    paused = false;
-    gameaction = ga_nothing;
-
-    if (gamemode == GameMode::Doom1Retail)
-        demosequence = (demosequence + 1) % 7;
-    else
-        demosequence = (demosequence + 1) % 6;
-
-    switch (demosequence)
-    {
-    case 0:
-        if (gamemode == GameMode::Doom2Commercial)
-            pagetic = 35 * 11;
-        else
-            pagetic = 170;
-        gamestate = GS_DEMOSCREEN;
-        pagename = "TITLEPIC";
-        if (gamemode == GameMode::Doom2Commercial)
-            S_StartMusic(mus_dm2ttl);
-        else
-            S_StartMusic(mus_intro);
-        break;
-    case 1:
-        G_DeferedPlayDemo("demo1");
-        break;
-    case 2:
-        pagetic = 200;
-        gamestate = GS_DEMOSCREEN;
-        pagename = "CREDIT";
-        break;
-    case 3:
-        G_DeferedPlayDemo("demo2");
-        break;
-    case 4:
-        gamestate = GS_DEMOSCREEN;
-        if (gamemode == GameMode::Doom2Commercial)
-        {
-            pagetic = 35 * 11;
-            pagename = "TITLEPIC";
-            S_StartMusic(mus_dm2ttl);
-        }
-        else
-        {
-            pagetic = 200;
-
-            if (gamemode == GameMode::Doom1Retail)
-                pagename = "CREDIT";
-            else
-                pagename = "HELP2";
-        }
-        break;
-    case 5:
-        G_DeferedPlayDemo("demo3");
-        break;
-        // THE DEFINITIVE DOOM Special Edition demo
-    case 6:
-        G_DeferedPlayDemo("demo4");
-        break;
-    }
-}
-
-//
-// D_StartTitle
-//
-void D_StartTitle()
-{
-    gameaction = ga_nothing;
-    demosequence = -1;
-    D_AdvanceDemo();
-}
-
-void Doom::AddFile(const std::filesystem::path& path)
-{
-    wadFiles.push_back(path);
-}
-
-// Checks availability of IWAD files by name,
-// to determine whether registered/commercial features
-// should be executed (notably loading PWAD's).
-void Doom::IdentifyVersion()
-{
-    if (CommandLine::HasArg("-shdev"))
-    {
-        gamemode = GameMode::Doom1Shareware;
-        devparm = true;
-        AddFile(DEVDATA "doom1.wad");
-        AddFile(DEVMAPS "data_se/texture1.lmp");
-        AddFile(DEVMAPS "data_se/pnames.lmp");
-        strcpy_s(basedefault, DEVDATA "default.cfg");
-        return;
-    }
-
-    if (CommandLine::HasArg("-regdev"))
-    {
-        gamemode = GameMode::Doom1Registered;
-        devparm = true;
-        AddFile(DEVDATA "doom.wad");
-        AddFile(DEVMAPS "data_se/texture1.lmp");
-        AddFile(DEVMAPS "data_se/texture2.lmp");
-        AddFile(DEVMAPS "data_se/pnames.lmp");
-        strcpy_s(basedefault, DEVDATA "default.cfg");
-        return;
-    }
-
-    if (CommandLine::HasArg("-comdev"))
-    {
-        gamemode = GameMode::Doom2Commercial;
-        devparm = true;
-
-        AddFile(DEVDATA "doom2.wad");
-        AddFile(DEVMAPS "cdata/texture1.lmp");
-        AddFile(DEVMAPS "cdata/pnames.lmp");
-        strcpy_s(basedefault, DEVDATA "default.cfg");
-        return;
-    }
-
-    std::filesystem::path doomWadDir = "data";
-
-    // Commercial.
-    std::filesystem::path doom2Wad = doomWadDir / "doom2.wad";
-    if (std::filesystem::exists(doom2Wad))
-    {
-        gamemode = GameMode::Doom2Commercial;
-        AddFile(doom2Wad.string().c_str());
-        return;
-    }
-
-    // Retail.
-    std::filesystem::path doomUWad = doomWadDir / "doomu.wad";
-    if (std::filesystem::exists(doomUWad))
-    {
-        gamemode = GameMode::Doom1Retail;
-        AddFile(doomUWad.string().c_str());
-        return;
-    }
-
-    // Registered.
-    std::filesystem::path doomWad = doomWadDir / "doom.wad";
-    if (std::filesystem::exists(doomWad))
-    {
-        gamemode = GameMode::Doom1Registered;
-        AddFile(doomWad.string().c_str());
-        return;
-    }
-
-    // Shareware.
-    std::filesystem::path doom1Wad = doomWadDir / "doom1.wad";
-    if (std::filesystem::exists(doom1Wad))
-    {
-        gamemode = GameMode::Doom1Shareware;
-        AddFile(doom1Wad.string().c_str());
-        return;
-    }
-
-    printf("Game mode indeterminate.\n");
-    gamemode = GameMode::Unknown;
 }
 
 void Doom::Main()
@@ -645,16 +200,16 @@ void Doom::Main()
     char file[256];
 
     auto doWarp = [](int32 ep, int32 map)
-    {
-        if (gamemode == GameMode::Doom2Commercial)
-            startmap = ep;
-        else
         {
-            startepisode = ep;
-            startmap = map;
-        }
-        autostart = true;
-};
+            if (gamemode == GameMode::Doom2Commercial)
+                startmap = ep;
+            else
+            {
+                startepisode = ep;
+                startmap = map;
+            }
+            autostart = true;
+        };
 
     // add any files specified on the command line with -file wadfile
     // to the wad list
@@ -854,6 +409,7 @@ void Doom::Main()
 
     if (string demo; CommandLine::TryGetValues("-timedemo", demo))
     {
+        noDrawers = CommandLine::HasArg("-nodraw");
         G_TimeDemo(demo.c_str());
         Loop(); // never returns
     }
@@ -872,8 +428,433 @@ void Doom::Main()
         if (autostart || netgame)
             G_InitNew(startskill, startepisode, startmap);
         else
-            D_StartTitle(); // start up intro loop
+            StartTitle(); // start up intro loop
     }
 
     Loop(); // never returns
+}
+
+// Doom::Loop()
+// Not a globally visible function,
+//  just included for source reference,
+//  called by Doom::Main, never exits.
+// Manages timing and IO,
+//  calls all ?_Responder, ?_Ticker, and ?_Drawer,
+//  calls I_GetTime, Video::StartFrame, and Video::StartTic
+void Doom::Loop()
+{
+    if (isDemoRecording)
+        G_BeginRecording();
+
+    if (CommandLine::HasArg("-debugfile"))
+    {
+        string fileName = "debug" + convert<string>(consoleplayer) + ".txt";
+        printf("debug output to: %s\n", fileName.c_str());
+        fopen_s(&debugfile, fileName.c_str(), "w");
+    }
+
+    video = new Video;
+    video->Init();
+
+    while (1)
+    {
+        video->DeliverSystemMessages();
+
+        // frame syncronous IO operations
+        video->StartFrame();
+
+        // process one or more tics
+        if (useSingleTicks)
+        {
+            video->StartTick();
+            ProcessEvents();
+            G_BuildTiccmd(&netcmds[consoleplayer][maketic % BACKUPTICS]);
+            if (advancedemo)
+                DoAdvanceDemo();
+            M_Ticker();
+            G_Ticker(this);
+            gametic++;
+            maketic++;
+        }
+        else
+        {
+            TryRunTics(); // will run at least one tic
+        }
+
+        S_UpdateSounds(players[consoleplayer].mo); // move positional sounds
+
+        // Update display, next frame, with current state.
+        Display();
+
+#ifndef SNDSERV
+        // Sound mixing for the buffer is snychronous.
+        I_UpdateSound();
+#endif
+        // Synchronous sound output is explicitly called.
+#ifndef SNDINTR
+        // Update sound output.
+        I_SubmitSound();
+#endif
+    }
+}
+
+// Send all the events of the given timestamp down the responder chain
+void Doom::ProcessEvents()
+{
+    // IF STORE DEMO, DO NOT ACCEPT INPUT
+    if (gamemode == GameMode::Doom2Commercial && (W_CheckNumForName("map01") < 0))
+        return;
+
+    for (; eventtail != eventhead; eventtail = (++eventtail) & (MAXEVENTS - 1))
+    {
+        event_t* ev = &events[eventtail];
+        if (M_Responder(ev))
+            continue; // menu ate the event
+
+        G_Responder(ev);
+    }
+}
+
+int pagetic;
+const char* pagename;
+
+// This cycles through the demo sequences.
+// FIXME - version dependend demo numbers?
+void Doom::DoAdvanceDemo()
+{
+    players[consoleplayer].playerstate = PST_LIVE; // not reborn
+    advancedemo = false;
+    usergame = false; // no save / end game here
+    paused = false;
+    gameaction = ga_nothing;
+
+    if (gamemode == GameMode::Doom1Retail)
+        borderDrawCount = (borderDrawCount + 1) % 7;
+    else
+        borderDrawCount = (borderDrawCount + 1) % 6;
+
+    switch (borderDrawCount)
+    {
+    case 0:
+        if (gamemode == GameMode::Doom2Commercial)
+            pagetic = 35 * 11;
+        else
+            pagetic = 170;
+        gameState = GameState::Demo;
+        pagename = "TITLEPIC";
+        if (gamemode == GameMode::Doom2Commercial)
+            S_StartMusic(mus_dm2ttl);
+        else
+            S_StartMusic(mus_intro);
+        break;
+    case 1:
+        G_DeferedPlayDemo("demo1");
+        break;
+    case 2:
+        pagetic = 200;
+        gameState = GameState::Demo;
+        pagename = "CREDIT";
+        break;
+    case 3:
+        G_DeferedPlayDemo("demo2");
+        break;
+    case 4:
+        gameState = GameState::Demo;
+        if (gamemode == GameMode::Doom2Commercial)
+        {
+            pagetic = 35 * 11;
+            pagename = "TITLEPIC";
+            S_StartMusic(mus_dm2ttl);
+        }
+        else
+        {
+            pagetic = 200;
+
+            if (gamemode == GameMode::Doom1Retail)
+                pagename = "CREDIT";
+            else
+                pagename = "HELP2";
+        }
+        break;
+    case 5:
+        G_DeferedPlayDemo("demo3");
+        break;
+        // THE DEFINITIVE DOOM Special Edition demo
+    case 6:
+        G_DeferedPlayDemo("demo4");
+        break;
+    }
+}
+
+void Doom::StartTitle()
+{
+    gameaction = ga_nothing;
+    borderDrawCount = -1;
+    D_AdvanceDemo();
+}
+
+// Checks availability of IWAD files by name,
+// to determine whether registered/commercial features
+// should be executed (notably loading PWAD's).
+void Doom::IdentifyVersion()
+{
+    if (CommandLine::HasArg("-shdev"))
+    {
+        gamemode = GameMode::Doom1Shareware;
+        devparm = true;
+        AddFile(DEVDATA "doom1.wad");
+        AddFile(DEVMAPS "data_se/texture1.lmp");
+        AddFile(DEVMAPS "data_se/pnames.lmp");
+        strcpy_s(basedefault, DEVDATA "default.cfg");
+        return;
+    }
+
+    if (CommandLine::HasArg("-regdev"))
+    {
+        gamemode = GameMode::Doom1Registered;
+        devparm = true;
+        AddFile(DEVDATA "doom.wad");
+        AddFile(DEVMAPS "data_se/texture1.lmp");
+        AddFile(DEVMAPS "data_se/texture2.lmp");
+        AddFile(DEVMAPS "data_se/pnames.lmp");
+        strcpy_s(basedefault, DEVDATA "default.cfg");
+        return;
+    }
+
+    if (CommandLine::HasArg("-comdev"))
+    {
+        gamemode = GameMode::Doom2Commercial;
+        devparm = true;
+
+        AddFile(DEVDATA "doom2.wad");
+        AddFile(DEVMAPS "cdata/texture1.lmp");
+        AddFile(DEVMAPS "cdata/pnames.lmp");
+        strcpy_s(basedefault, DEVDATA "default.cfg");
+        return;
+    }
+
+    std::filesystem::path doomWadDir = "data";
+
+    // Commercial.
+    std::filesystem::path doom2Wad = doomWadDir / "doom2.wad";
+    if (std::filesystem::exists(doom2Wad))
+    {
+        gamemode = GameMode::Doom2Commercial;
+        AddFile(doom2Wad.string().c_str());
+        return;
+    }
+
+    // Retail.
+    std::filesystem::path doomUWad = doomWadDir / "doomu.wad";
+    if (std::filesystem::exists(doomUWad))
+    {
+        gamemode = GameMode::Doom1Retail;
+        AddFile(doomUWad.string().c_str());
+        return;
+    }
+
+    // Registered.
+    std::filesystem::path doomWad = doomWadDir / "doom.wad";
+    if (std::filesystem::exists(doomWad))
+    {
+        gamemode = GameMode::Doom1Registered;
+        AddFile(doomWad.string().c_str());
+        return;
+    }
+
+    // Shareware.
+    std::filesystem::path doom1Wad = doomWadDir / "doom1.wad";
+    if (std::filesystem::exists(doom1Wad))
+    {
+        gamemode = GameMode::Doom1Shareware;
+        AddFile(doom1Wad.string().c_str());
+        return;
+    }
+
+    printf("Game mode indeterminate.\n");
+    gamemode = GameMode::Unknown;
+}
+
+//
+// D_Display
+//  draw current display, possibly wiping it from the previous
+//
+
+// wipegamestate can be set to -1 to force a wipe on the next draw
+GameState wipegamestate = GameState::Demo;
+
+void Doom::Display()
+{
+    int tics;
+    int wipestart;
+    int y;
+    boolean done;
+    boolean wipe;
+
+    if (noDrawers)
+        return; // for comparative timing / profiling
+
+    bool redrawStatusBar = false;
+
+    // change the view size if needed
+    if (setsizeneeded)
+    {
+        R_ExecuteSetViewSize();
+        oldGameState = GameState::ForceWipe; // force background redraw
+        borderDrawCount = 3;
+    }
+
+    // save the current screen if about to wipe
+    if (gameState != wipegamestate)
+    {
+        wipe = true;
+        wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    }
+    else
+        wipe = false;
+
+    if (gameState == GameState::Level && gametic)
+        HU_Erase();
+
+    // do buffered drawing
+    switch (gameState)
+    {
+    case GameState::Level:
+        if (!gametic)
+            break;
+        if (automapactive)
+            AM_Drawer();
+        if (wipe || (viewheight != 200 && fullScreen))
+            redrawStatusBar = true;
+        if (inHelpScreensState && !inhelpscreens)
+            redrawStatusBar = true; // just put away the help screen
+        ST_Drawer(viewheight == 200, redrawStatusBar);
+        fullScreen = viewheight == 200;
+        break;
+
+    case GameState::Intermission:
+        WI_Drawer();
+        break;
+
+    case GameState::Finale:
+        F_Drawer();
+        break;
+
+    case GameState::Demo:
+        D_PageDrawer();
+        break;
+    }
+
+    // draw buffered stuff to screen
+    I_UpdateNoBlit();
+
+    // draw the view directly
+    if (gameState == GameState::Level && !automapactive && gametic)
+        R_RenderPlayerView(&players[displayplayer]);
+
+    if (gameState == GameState::Level && gametic)
+        HU_Drawer();
+
+    // clean up border stuff
+    if (gameState != oldGameState && gameState != GameState::Level)
+        I_SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+
+    // see if the border needs to be initially drawn
+    if (gameState == GameState::Level && oldGameState != GameState::Level)
+    {
+        viewActiveState = false; // view was not active
+        R_FillBackScreen();		 // draw the pattern into the back screen
+    }
+
+    // see if the border needs to be updated to the screen
+    if (gameState == GameState::Level && !automapactive && scaledviewwidth != 320)
+    {
+        if (menuactive || menuActiveState || !viewActiveState)
+            borderDrawCount = 3;
+        if (borderDrawCount)
+        {
+            R_DrawViewBorder(); // erase old menu stuff
+            borderDrawCount--;
+        }
+    }
+
+    menuActiveState = menuactive;
+    viewActiveState = viewactive;
+    inHelpScreensState = inhelpscreens;
+    oldGameState = wipegamestate = gameState;
+
+    // draw pause pic
+    if (paused)
+    {
+        if (automapactive)
+            y = 4;
+        else
+            y = viewwindowy + 4;
+        V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, W_CacheLumpName<patch_t>("M_PAUSE", PU_CACHE));
+    }
+
+    // menus go directly to the screen
+    M_Drawer();	 // menu is drawn even on top of everything
+    NetUpdate(); // send out any new accumulation
+
+    // normal update
+    if (!wipe)
+    {
+        I_FinishUpdate(); // page flip or blit buffer
+        return;
+    }
+
+    // wipe update
+    wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+
+    wipestart = I_GetTime() - 1;
+
+    do
+    {
+        int32 now = 0;
+        do
+        {
+            now = I_GetTime();
+            tics = now - wipestart;
+        }
+        while (!tics);
+
+        wipestart = now;
+        done = wipe_ScreenWipe(wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
+        I_UpdateNoBlit();
+        M_Drawer();		  // menu is drawn even on top of wipes
+        I_FinishUpdate(); // page flip or blit buffer
+    }
+    while (!done);
+}
+
+//
+//  DEMO LOOP
+//
+
+//
+// D_PageTicker
+// Handles timing for warped projection
+//
+void D_PageTicker()
+{
+    if (--pagetic < 0)
+        D_AdvanceDemo();
+}
+
+//
+// D_PageDrawer
+//
+void D_PageDrawer()
+{
+    V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>(pagename, PU_CACHE));
+}
+
+//
+// D_AdvanceDemo
+// Called after each demo or intro demosequence finishes
+//
+void D_AdvanceDemo()
+{
+    advancedemo = true;
 }

@@ -89,8 +89,8 @@ extern  int	deathmatch;
 //  Sound FX volume has default, 0 - 15
 //  Music volume has default, 0 - 15
 // These are multiplied by 8.
-extern intptr_t snd_SfxVolume;      // maximum volume for sound
-extern intptr_t snd_MusicVolume;    // maximum volume for music
+extern int32 snd_SfxVolume;      // maximum volume for sound
+extern int32 snd_MusicVolume;    // maximum volume for music
 
 // Current music/sfx card - index useless
 //  w/o a reference LUT in a sound module.
@@ -119,7 +119,6 @@ extern  boolean	paused;		// Game Pause?
 
 extern  boolean		viewactive;
 
-extern  boolean		nodrawers;
 extern  boolean		noblit;
 
 extern	int		viewwindowx;
@@ -167,17 +166,6 @@ extern  boolean	demoplayback;
 
 // Quit after playing a demo from cmdline.
 extern  boolean		singledemo;
-
-
-
-
-//?
-extern  gamestate_t     gamestate;
-
-
-
-
-
 
 //-----------------------------
 // Internal parameters, fixed.
@@ -229,15 +217,7 @@ extern  FILE* debugfile;
 // if true, load all graphics at level load
 extern  boolean         precache;
 
-
-// wipegamestate can be set to -1
-//  to force a wipe on the next draw
-extern  gamestate_t     wipegamestate;
-
-extern  intptr_t             mouseSensitivity;
-//?
-// debug flag to cancel adaptiveness
-extern  boolean         singletics;
+extern  int32             mouseSensitivity;
 
 extern  int             bodyqueslot;
 

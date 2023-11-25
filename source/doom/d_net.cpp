@@ -30,9 +30,7 @@
 extern Doom* g_doom;
 
 
-void D_ProcessEvents();
 void G_BuildTiccmd(ticcmd_t* cmd);
-void D_DoAdvanceDemo();
 
 #include <limits>
 #include <stdint.h>
@@ -379,8 +377,8 @@ void NetUpdate()
     // build new ticcmds for console player
     for (int i = 0; i < newtics; i++)
     {
-        I_StartTic();
-        D_ProcessEvents();
+        g_doom->GetVideo()->StartTick();
+        g_doom->ProcessEvents();
         if (maketic - gameticdiv >= BACKUPTICS / 2 - 1)
             break;          // can't hold any more
 
@@ -389,7 +387,7 @@ void NetUpdate()
         maketic++;
     }
 
-    if (singletics)
+    if (g_doom->UseSingleTicks())
         return;	// singletic update is syncronous
 
     // send the packet to the other nodes
@@ -434,9 +432,9 @@ void CheckAbort()
 
     stoptic = I_GetTime() + 2;
     while (I_GetTime() < stoptic)
-        I_StartTic();
+        g_doom->GetVideo()->StartTick();
 
-    I_StartTic();
+    g_doom->GetVideo()->StartTick();
     for (; eventtail != eventhead
         ; eventtail = (++eventtail) & (MAXEVENTS - 1))
     {
@@ -713,7 +711,7 @@ void TryRunTics()
             if (gametic / ticdup > lowtic)
                 I_Error("gametic>lowtic");
             if (advancedemo)
-                D_DoAdvanceDemo();
+                g_doom->DoAdvanceDemo();
             M_Ticker();
             G_Ticker(g_doom);
             gametic++;

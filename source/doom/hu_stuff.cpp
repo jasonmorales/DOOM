@@ -51,20 +51,31 @@
 #define HU_INPUTWIDTH	64
 #define HU_INPUTHEIGHT	1
 
-
+const char* DefaultChatMacros[] = {
+    "I'm ready to kick butt!",
+    "I'm OK.",
+    "I'm not looking too good!",
+    "Help!",
+    "You suck!",
+    "Next time, scumbag...",
+    "Come here!",
+    "I'll take care of it.",
+    "Yes",
+    "No",
+};
 
 const char* chat_macros[] =
 {
-    HUSTR_CHATMACRO0,
-    HUSTR_CHATMACRO1,
-    HUSTR_CHATMACRO2,
-    HUSTR_CHATMACRO3,
-    HUSTR_CHATMACRO4,
-    HUSTR_CHATMACRO5,
-    HUSTR_CHATMACRO6,
-    HUSTR_CHATMACRO7,
-    HUSTR_CHATMACRO8,
-    HUSTR_CHATMACRO9
+    DefaultChatMacros[0],
+    DefaultChatMacros[1],
+    DefaultChatMacros[2],
+    DefaultChatMacros[3],
+    DefaultChatMacros[4],
+    DefaultChatMacros[5],
+    DefaultChatMacros[6],
+    DefaultChatMacros[7],
+    DefaultChatMacros[8],
+    DefaultChatMacros[9]
 };
 
 const char* player_names[] =
@@ -93,7 +104,7 @@ static boolean		message_nottobefuckedwith;
 static hu_stext_t	w_message;
 static int		message_counter;
 
-extern intptr_t		showMessages;
+extern int32		showMessages;
 extern boolean		automapactive;
 
 static boolean		headsupactive = false;

@@ -30,8 +30,14 @@
 
 #include "doomstat.h"
 #include "r_state.h"
+#include "d_main.h"
 
 #include <ctype.h>
+
+
+extern Doom* g_doom;
+extern GameState wipegamestate;
+
 
 // ?
 //#include "doomstat.h"
@@ -87,12 +93,12 @@ void	F_CastDrawer();
 void F_StartFinale()
 {
     gameaction = ga_nothing;
-    gamestate = GS_FINALE;
+    g_doom->SetGameState(GameState::Finale);
     viewactive = false;
     automapactive = false;
 
-    // Okay - IWAD dependend stuff.
-    // This has been changed severly, and
+    // Okay - IWAD dependent stuff.
+    // This has been changed severely, and
     //  some stuff might have changed in the process.
     switch (gamemode)
     {
@@ -233,7 +239,7 @@ void F_Ticker()
     {
         finalecount = 0;
         finalestage = 1;
-        wipegamestate = GS_FORCE_WIPE;		// force a wipe
+        wipegamestate = GameState::ForceWipe;		// force a wipe
         if (gameepisode == 3)
             S_StartMusic(mus_bunny);
     }
@@ -351,16 +357,9 @@ int		castframes;
 int		castonmelee;
 boolean		castattacking;
 
-
-//
-// F_StartCast
-//
-extern	gamestate_t     wipegamestate;
-
-
 void F_StartCast()
 {
-    wipegamestate = GS_FORCE_WIPE;		// force a screen wipe
+    wipegamestate = GameState::ForceWipe;		// force a screen wipe
     castnum = 0;
     caststate = &states[mobjinfo[castorder[castnum].type].seestate];
     casttics = caststate->tics;

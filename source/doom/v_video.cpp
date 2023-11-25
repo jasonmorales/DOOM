@@ -123,26 +123,15 @@ byte gammatable[5][256] =
 
 
 
-intptr_t	usegamma;
+int32	usegamma;
 
-//
-// V_MarkRect 
-// 
-void
-V_MarkRect
-(int		x,
-    int		y,
-    int		width,
-    int		height)
+void V_MarkRect(int x, int y, int width, int height)
 {
     M_AddToBox(dirtybox, x, y);
     M_AddToBox(dirtybox, x + width - 1, y + height - 1);
 }
 
 
-//
-// V_CopyRect 
-// 
 void
 V_CopyRect
 (int		srcx,
@@ -184,19 +173,10 @@ V_CopyRect
     }
 }
 
-
-//
 // V_DrawPatch
 // Masks a column based masked pic to the screen. 
-//
-void
-V_DrawPatch
-(int		x,
-    int		y,
-    int		scrn,
-    patch_t* patch)
+void V_DrawPatch(int x, int y, int scrn, patch_t* patch)
 {
-
     int		count;
     int		col;
     column_t* column;
@@ -245,8 +225,7 @@ V_DrawPatch
                 *dest = *source++;
                 dest += SCREENWIDTH;
             }
-            column = (column_t*)((byte*)column + column->length
-                + 4);
+            column = (column_t*)((byte*)column + column->length + 4);
         }
     }
 }
@@ -316,18 +295,9 @@ V_DrawPatchFlipped
     }
 }
 
-
-
-//
 // V_DrawPatchDirect
 // Draws directly to the screen on the pc. 
-//
-void
-V_DrawPatchDirect
-(int		x,
-    int		y,
-    int		scrn,
-    patch_t* patch)
+void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch)
 {
     V_DrawPatch(x, y, scrn, patch);
 

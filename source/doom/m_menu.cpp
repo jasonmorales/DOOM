@@ -54,6 +54,10 @@
 #include <ctype.h>
 #include <io.h>
 
+
+extern Doom* g_doom;
+
+
 extern patch_t* hu_font[HU_FONTSIZE];
 extern boolean		message_dontfuckwithme;
 
@@ -62,15 +66,15 @@ extern boolean		chat_on;		// in heads-up code
 //
 // defaulted values
 //
-intptr_t			mouseSensitivity;       // has default
+int32			mouseSensitivity;       // has default
 
 // Show messages has default, 0 = off, 1 = on
-intptr_t			showMessages;
+int32			showMessages;
 
 
 // Blocky mode, has default, 0 = high, 1 = normal
-intptr_t			detailLevel;
-intptr_t			screenblocks;		// has default
+int32			detailLevel;
+int32			screenblocks;		// has default
 
 // temp for screenblocks (0-9)
 int			screenSize;
@@ -649,7 +653,7 @@ void M_SaveGame(int)
         return;
     }
 
-    if (gamestate != GS_LEVEL)
+    if (g_doom->GetGameState() != GameState::Level)
         return;
 
     M_SetupNextMenu(&SaveDef);
@@ -678,7 +682,7 @@ void M_QuickSave()
         return;
     }
 
-    if (gamestate != GS_LEVEL)
+    if (g_doom->GetGameState() != GameState::Level)
         return;
 
     if (quickSaveSlot < 0)
@@ -784,11 +788,9 @@ void M_DrawSound()
 {
     V_DrawPatchDirect(60, 38, 0, W_CacheLumpName<patch_t>("M_SVOL", PU_CACHE));
 
-    M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (sfx_vol + 1),
-        16, snd_SfxVolume);
+    M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (sfx_vol + 1), 16, snd_SfxVolume);
 
-    M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (music_vol + 1),
-        16, snd_MusicVolume);
+    M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (music_vol + 1), 16, snd_MusicVolume);
 }
 
 void M_Sound(int)
@@ -940,11 +942,9 @@ void M_DrawOptions()
     V_DrawPatchDirect(OptionsDef.x + 120, OptionsDef.y + LINEHEIGHT * messages, 0,
         W_CacheLumpName(msgNames[showMessages], PU_CACHE));
 
-    M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (mousesens + 1),
-        10, mouseSensitivity);
+    M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (mousesens + 1), 10, mouseSensitivity);
 
-    M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (scrnsize + 1),
-        9, screenSize);
+    M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (scrnsize + 1), 9, screenSize);
 }
 
 void M_Options(int)
@@ -982,7 +982,7 @@ void M_EndGameResponse(int ch)
 
     currentMenu->lastOn = itemOn;
     M_ClearMenus();
-    D_StartTitle();
+    g_doom->StartTitle();
 }
 
 void M_EndGame(int choice)
@@ -1119,7 +1119,7 @@ void M_ChangeDetail(int choice)
 
     /*R_SetViewSize (screenblocks, detailLevel);
 
-    if (!detailLevel)
+    if (detailLevel == 0)
     players[consoleplayer].message = DETAILHI;
     else
     players[consoleplayer].message = DETAILLO;*/
@@ -1151,9 +1151,6 @@ void M_SizeDisplay(int choice)
 
     R_SetViewSize(screenblocks, detailLevel);
 }
-
-
-
 
 //
 //      Menu Functions
@@ -1694,12 +1691,8 @@ void M_StartControlPanel()
     itemOn = currentMenu->lastOn;   // JDC
 }
 
-
-//
-// M_Drawer
 // Called after the view has been rendered,
 // but before it has been blitted.
-//
 void M_Drawer()
 {
     static int x = 0;
@@ -1754,14 +1747,12 @@ void M_Drawer()
     for (short i = 0;i < max;i++)
     {
         if (currentMenu->menuitems[i].name[0])
-            V_DrawPatchDirect(x, y, 0,
-                W_CacheLumpName(currentMenu->menuitems[i].name, PU_CACHE));
+            V_DrawPatchDirect(x, y, 0, W_CacheLumpName(currentMenu->menuitems[i].name, PU_CACHE));
         y += LINEHEIGHT;
     }
 
     // DRAW SKULL
-    V_DrawPatchDirect(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0,
-        W_CacheLumpName(skullName[whichSkull], PU_CACHE));
+    V_DrawPatchDirect(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0, W_CacheLumpName(skullName[whichSkull], PU_CACHE));
 }
 
 

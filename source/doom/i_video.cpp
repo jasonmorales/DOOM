@@ -127,10 +127,6 @@ void I_ShutdownGraphics()
 #endif
 }
 
-void I_StartFrame()
-{
-}
-
 static int	lastmousex = 0;
 static int	lastmousey = 0;
 boolean		mousemoved = false;
@@ -250,40 +246,6 @@ createnullcursor
     return cursor;
 }
 #endif
-
-//
-// I_StartTic
-//
-void I_StartTic()
-{
-#if 0
-    if (!X_display)
-        return;
-
-    while (XPending(X_display))
-        I_GetEvent();
-
-    // Warp the pointer back to the middle of the window
-    //  or it will wander off - that is, the game will
-    //  loose input focus within X11.
-    if (grabMouse)
-    {
-        if (!--doPointerWarp)
-        {
-            XWarpPointer(X_display,
-                None,
-                X_mainWindow,
-                0, 0,
-                0, 0,
-                X_width / 2, X_height / 2);
-
-            doPointerWarp = POINTER_WARP_COUNTDOWN;
-        }
-    }
-
-    mousemoved = false;
-#endif
-}
 
 void I_UpdateNoBlit()
 {
@@ -679,6 +641,193 @@ LRESULT CALLBACK GlobalInitWindowProc(HWND handle, UINT msg, WPARAM wParam, LPAR
 
     return DefWindowProc(handle, msg, wParam, lParam);
 }
+void Video::Init()
+{
+    if (isInitialized)
+        return;
+
+    isInitialized = true;
+
+    CommandLine::TryGetValues("-multiply", screenMultiply);
+
+    windowWidth *= screenMultiply;
+    windowHeight *= screenMultiply;
+
+    isFullScreen = CommandLine::HasArg("-fullscreen");
+    isExclusive = CommandLine::HasArg("-exclusive");
+    isBorderless = CommandLine::HasArg("-borderless");
+    isResizeable = CommandLine::HasArg("-resizeable");
+
+    if (isFullScreen && isExclusive)
+    {
+        DEVMODE mode;
+        ZeroMemory(&mode, sizeof(DEVMODE));
+        mode.dmSize = sizeof(DEVMODE);
+        mode.dmPelsWidth = windowWidth;
+        mode.dmPelsHeight = windowHeight;
+        mode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+
+        DWORD display_flags = CDS_FULLSCREEN;
+        ChangeDisplaySettings(&mode, display_flags);
+    }
+
+    if (!RegisterWindowClass())
+        I_Error("Failed to register window class");
+
+
+    // Figure out the dimensions of the window, factoring in style elements like
+    // border and caption bar
+    windowStyle = isBorderless ? WS_POPUP : WS_OVERLAPPEDWINDOW;
+    windowStyle |= WS_CAPTION;
+
+    if (isFullScreen)
+        windowStyle |= WS_MAXIMIZE;
+
+    if (isResizeable)
+        windowStyle |= WS_THICKFRAME;
+    else
+        windowStyle &= ~WS_THICKFRAME;
+
+    auto dpi = GetDpiForSystem();
+    screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
+    screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
+    //SystemParametersInfoForDpi(SPI_GETWORKAREA, 
+    windowWidth = std::min(screenWidth, windowWidth);
+    windowHeight = std::min(screenHeight, windowHeight);
+
+    if (isFullScreen)
+    {
+        RECT rec_non_client = {};
+        AdjustWindowRectExForDpi(&rec_non_client, windowStyle, FALSE, 0, dpi);
+        windowWidth = screenWidth - (rec_non_client.right - rec_non_client.left);
+        windowHeight = screenHeight - (rec_non_client.bottom - rec_non_client.top);
+    }
+
+    RECT rec;
+    rec.left = 0;
+    rec.right = windowWidth;
+    rec.top = 0;
+    rec.bottom = windowHeight;
+    AdjustWindowRectExForDpi(&rec, windowStyle, FALSE, 0, dpi);
+
+    // Create the window
+    windowHandle = ::CreateWindowExW(
+        windowStyleEx,
+        WindowClassName,
+        L"Doom",
+        windowStyle,
+        isFullScreen ? 0 : CW_USEDEFAULT,
+        isFullScreen ? 0 : CW_USEDEFAULT,
+        rec.right - rec.left,
+        rec.bottom - rec.top,
+        nullptr,
+        nullptr,
+        0,
+        this);
+
+    RECT actual = {};
+    GetClientRect(windowHandle, &actual);
+    windowWidth = actual.right - actual.left;
+    windowHeight = actual.bottom - actual.top;
+
+    if (windowHandle == nullptr)
+    {
+        auto error_core = GetLastError();
+        LPWSTR buffer = nullptr;
+        FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_core, 0, (LPWSTR)&buffer, 0, nullptr);
+        MessageBoxW(nullptr, buffer, L"Error in CreateWindowW", MB_OK);
+        LocalFree(buffer);
+        return;
+    }
+
+    // Get a device context for the window
+    deviceContext = GetDC(windowHandle);
+
+    // Set the pixel format
+    PIXELFORMATDESCRIPTOR pfd;
+    ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
+    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+    pfd.nVersion = 1;
+    pfd.dwFlags = 0
+        | PFD_DRAW_TO_WINDOW
+        | PFD_SUPPORT_OPENGL
+        | PFD_DOUBLEBUFFER
+        | PFD_DEPTH_DONTCARE
+        | PFD_TYPE_RGBA
+        ;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.cAlphaBits = 0;
+    pfd.cAccumBits = 0;
+    pfd.cDepthBits = 0;
+    pfd.cStencilBits = 8;
+    pfd.cAuxBuffers = 0;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+
+    auto pixel_format = ChoosePixelFormat(deviceContext, &pfd);
+    SetPixelFormat(deviceContext, pixel_format, &pfd);
+
+    auto dummy_context = wglCreateContext(deviceContext);
+    wglMakeCurrent(deviceContext, dummy_context);
+#if 0
+    glewInit();
+
+    // Create the render context
+    int attributes[] =
+    {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+        //WGL_CONTEXT_LAYER_PLANE_ARB, 0,
+        //WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB | WGL_CONTEXT_DEBUG_BIT_ARB,
+        //WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB | WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+        0
+    };
+
+    renderContext = wglCreateContextAttribsARB(device_context, nullptr, attributes);
+    wglMakeCurrent(nullptr, nullptr);
+    wglDeleteContext(dummy_context);
+
+    MakeCurrent();
+    display->SetDimensions(width, height);
+    display->Init();
+#endif
+    ShowWindow(windowHandle, SW_SHOWNORMAL);
+}
+
+void Video::StartFrame()
+{
+}
+
+void Video::StartTick()
+{
+#if 0
+    if (!X_display)
+        return;
+
+    while (XPending(X_display))
+        I_GetEvent();
+
+    // Warp the pointer back to the middle of the window
+    //  or it will wander off - that is, the game will
+    //  loose input focus within X11.
+    if (grabMouse)
+    {
+        if (!--doPointerWarp)
+        {
+            XWarpPointer(X_display,
+                None,
+                X_mainWindow,
+                0, 0,
+                0, 0,
+                X_width / 2, X_height / 2);
+
+            doPointerWarp = POINTER_WARP_COUNTDOWN;
+        }
+    }
+
+    mousemoved = false;
+#endif
+}
 
 LRESULT Video::HandleSystemEvent(const SystemEvent& event)
 {
@@ -771,10 +920,10 @@ LRESULT Video::HandleSystemEvent(const SystemEvent& event)
 
     case WM_DEVICECHANGE:
         /*LOG(Core, Debug, "WM_DEVICECHANGE" + "\n"
-            + "hwnd = " + std::to_string(reinterpret_cast<intptr_t>(event.handle)).c_str() + "\n"
-            + "msg = " + std::to_string(event.message).c_str() + "\n"
-            + "wparam = " + std::to_string(event.wParam).c_str() + "\n"
-            + "lparam = " + std::to_string(event.lParam).c_str() + "\n");
+        + "hwnd = " + std::to_string(reinterpret_cast<intptr_t>(event.handle)).c_str() + "\n"
+        + "msg = " + std::to_string(event.message).c_str() + "\n"
+        + "wparam = " + std::to_string(event.wParam).c_str() + "\n"
+        + "lparam = " + std::to_string(event.lParam).c_str() + "\n");
         input->ScanForDevices();*/
         break;
 
@@ -967,161 +1116,6 @@ bool Video::RegisterWindowClass()
 
     return true;
 }
-
-void Video::Init()
-{
-    if (isInitialized)
-        return;
-
-    isInitialized = true;
-
-    CommandLine::TryGetValues("-multiply", screenMultiply);
-
-    windowWidth *= screenMultiply;
-    windowHeight *= screenMultiply;
-
-    isFullScreen = CommandLine::HasArg("-fullscreen");
-    isExclusive = CommandLine::HasArg("-exclusive");
-    isBorderless = CommandLine::HasArg("-borderless");
-    isResizeable = CommandLine::HasArg("-resizeable");
-
-    if (isFullScreen && isExclusive)
-    {
-        DEVMODE mode;
-        ZeroMemory(&mode, sizeof(DEVMODE));
-        mode.dmSize = sizeof(DEVMODE);
-        mode.dmPelsWidth = windowWidth;
-        mode.dmPelsHeight = windowHeight;
-        mode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
-
-        DWORD display_flags = CDS_FULLSCREEN;
-        ChangeDisplaySettings(&mode, display_flags);
-    }
-
-    if (!RegisterWindowClass())
-        I_Error("Failed to register window class");
-
-
-    // Figure out the dimensions of the window, factoring in style elements like
-    // border and caption bar
-    windowStyle = isBorderless ? WS_POPUP : WS_OVERLAPPEDWINDOW;
-    windowStyle |= WS_CAPTION;
-
-    if (isFullScreen)
-        windowStyle |= WS_MAXIMIZE;
-
-    if (isResizeable)
-        windowStyle |= WS_THICKFRAME;
-    else
-        windowStyle &= ~WS_THICKFRAME;
-
-    auto dpi = GetDpiForSystem();
-    int32 screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
-    int32 screenHeight = GetSystemMetricsForDpi(SM_CYSCREEN, dpi);
-    //SystemParametersInfoForDpi(SPI_GETWORKAREA, 
-    windowWidth = std::min(screenWidth, windowWidth);
-    windowHeight = std::min(screenHeight, windowHeight);
-
-    if (isFullScreen)
-    {
-        RECT rec_non_client = {};
-        AdjustWindowRectExForDpi(&rec_non_client, windowStyle, FALSE, 0, dpi);
-        windowWidth = screenWidth - (rec_non_client.right - rec_non_client.left);
-        windowHeight = screenHeight - (rec_non_client.bottom - rec_non_client.top);
-    }
-
-    RECT rec;
-    rec.left = 0;
-    rec.right = windowWidth;
-    rec.top = 0;
-    rec.bottom = windowHeight;
-    AdjustWindowRectExForDpi(&rec, windowStyle, FALSE, 0, dpi);
-
-    // Create the window
-    windowHandle = ::CreateWindowExW(
-        windowStyleEx,
-        WindowClassName,
-        L"Doom",
-        windowStyle,
-        isFullScreen ? 0 : CW_USEDEFAULT,
-        isFullScreen ? 0 : CW_USEDEFAULT,
-        rec.right - rec.left,
-        rec.bottom - rec.top,
-        nullptr,
-        nullptr,
-        0,
-        this);
-
-
-    RECT actual = {};
-    GetClientRect(windowHandle, &actual);
-    windowWidth = actual.right - actual.left;
-    windowHeight = actual.bottom - actual.top;
-
-    if (windowHandle == nullptr)
-    {
-        auto error_core = GetLastError();
-        LPWSTR buffer = nullptr;
-        FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr, error_core, 0, (LPWSTR)&buffer, 0, nullptr);
-        MessageBoxW(nullptr, buffer, L"Error in CreateWindowW", MB_OK);
-        LocalFree(buffer);
-        return;
-    }
-
-    // Get a device context for the window
-    deviceContext = GetDC(windowHandle);
-
-    // Set the pixel format
-    PIXELFORMATDESCRIPTOR pfd;
-    ZeroMemory(&pfd, sizeof(PIXELFORMATDESCRIPTOR));
-    pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-    pfd.nVersion = 1;
-    pfd.dwFlags = 0
-        | PFD_DRAW_TO_WINDOW
-        | PFD_SUPPORT_OPENGL
-        | PFD_DOUBLEBUFFER
-        | PFD_DEPTH_DONTCARE
-        | PFD_TYPE_RGBA
-        ;
-    pfd.iPixelType = PFD_TYPE_RGBA;
-    pfd.cColorBits = 24;
-    pfd.cAlphaBits = 0;
-    pfd.cAccumBits = 0;
-    pfd.cDepthBits = 0;
-    pfd.cStencilBits = 8;
-    pfd.cAuxBuffers = 0;
-    pfd.iLayerType = PFD_MAIN_PLANE;
-
-    auto pixel_format = ChoosePixelFormat(deviceContext, &pfd);
-    SetPixelFormat(deviceContext, pixel_format, &pfd);
-
-    auto dummy_context = wglCreateContext(deviceContext);
-    wglMakeCurrent(deviceContext, dummy_context);
-#if 0
-    glewInit();
-
-    // Create the render context
-    int attributes[] =
-    {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-        WGL_CONTEXT_MINOR_VERSION_ARB, 6,
-        //WGL_CONTEXT_LAYER_PLANE_ARB, 0,
-        //WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB | WGL_CONTEXT_DEBUG_BIT_ARB,
-        //WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB | WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
-        0
-    };
-
-    renderContext = wglCreateContextAttribsARB(device_context, nullptr, attributes);
-    wglMakeCurrent(nullptr, nullptr);
-    wglDeleteContext(dummy_context);
-
-    MakeCurrent();
-    display->SetDimensions(width, height);
-    display->Init();
-#endif
-    ShowWindow(windowHandle, SW_SHOWNORMAL);
-}
-
 
 unsigned	exptable[256];
 

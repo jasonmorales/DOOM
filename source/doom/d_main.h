@@ -33,7 +33,19 @@ void D_PostEvent(event_t* ev);
 void D_PageTicker();
 void D_PageDrawer();
 void D_AdvanceDemo();
-void D_StartTitle();
+
+// The current state of the game: whether we are
+// playing, gazing at the intermission screen,
+// the game final animation, or a demo. 
+enum class GameState : int32
+{
+    Level,
+    Intermission,
+    Finale,
+    Demo,
+
+    ForceWipe
+};
 
 class Video;
 
@@ -45,22 +57,50 @@ public:
 
     void Main();
     void Loop();
+    void ProcessEvents();
+    void DoAdvanceDemo();
+
+    void StartTitle();
 
     bool IsModified() const { return isModified; }
     bool IsDemoRecording() const { return isDemoRecording; }
+    bool UseSingleTicks() const { return useSingleTicks; }
+    GameState GetGameState() const { return gameState; }
 
     void SetDemoRecording(bool b) { isDemoRecording = b; }
+    void SetUseSingleTicks(bool b) { useSingleTicks = b; }
+    void SetGameState(GameState state) { gameState = state; }
+
+    Video* GetVideo() const { return video; }
 
 private:
     void IdentifyVersion();
-    void AddFile(const std::filesystem::path& path);
+    void AddFile(const std::filesystem::path& path) { wadFiles.push_back(path); }
+
+    void Display();
 
     Video* video = nullptr;
+    bool viewActiveState = false;
+    bool menuActiveState = false;
+    bool inHelpScreensState = false;
+    bool fullScreen = false;
+    int32 borderDrawCount = -1;
+
+    GameState gameState = GameState::Demo;
+    GameState oldGameState = GameState::ForceWipe;
+
+    int32 demoSequence = 0;
 
     // Set if homebrew PWAD stuff has been added.
     bool isModified = false;
 
+    // for comparative timing purposes 
+    bool noDrawers = false;
+
     bool isDemoRecording = false;
+
+    // debug flag to cancel adaptiveness
+    bool useSingleTicks = false;
 
     vector<std::filesystem::path> wadFiles;
 };

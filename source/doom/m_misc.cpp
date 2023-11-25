@@ -153,8 +153,8 @@ M_ReadFile
 //
 // DEFAULTS
 //
-intptr_t		usemouse;
-intptr_t		usejoystick;
+int32		usemouse;
+int32		usejoystick;
 
 extern int	key_right;
 extern int	key_left;
@@ -169,27 +169,27 @@ extern int	key_use;
 extern int	key_strafe;
 extern int	key_speed;
 
-extern intptr_t	mousebfire;
-extern intptr_t	mousebstrafe;
-extern intptr_t	mousebforward;
+extern int32	mousebfire;
+extern int32	mousebstrafe;
+extern int32	mousebforward;
 
-extern intptr_t	joybfire;
-extern intptr_t	joybstrafe;
-extern intptr_t	joybuse;
-extern intptr_t	joybspeed;
+extern int32	joybfire;
+extern int32	joybstrafe;
+extern int32	joybuse;
+extern int32	joybspeed;
 
 extern int	viewwidth;
 extern int	viewheight;
 
-extern intptr_t	mouseSensitivity;
-extern intptr_t	showMessages;
+extern int32	mouseSensitivity;
+extern int32	showMessages;
 
-extern intptr_t	detailLevel;
+extern int32	detailLevel;
 
-extern intptr_t	screenblocks;
+extern int32	screenblocks;
 
 // machine-independent sound params
-extern	intptr_t	numChannels;
+extern	int32	numChannels;
 
 
 // UNIX hack, to be removed.
@@ -203,8 +203,8 @@ extern const char* chat_macros[];
 struct default_t
 {
     const char* name;
-    intptr_t* location;
-    intptr_t defaultvalue;
+    void* location;
+    int32 defaultvalue;
 };
 
 default_t	defaults[] =
@@ -214,63 +214,34 @@ default_t	defaults[] =
     {"music_volume",&snd_MusicVolume, 8},
     {"show_messages",&showMessages, 1},
 
+    {"use_mouse",&usemouse, 1},
+    {"mouseb_fire",&mousebfire,0},
+    {"mouseb_strafe",&mousebstrafe,1},
+    {"mouseb_forward",&mousebforward,2},
 
-#ifdef NORMALUNIX
-    {"key_right",&key_right, KEY_RIGHTARROW},
-    {"key_left",&key_left, KEY_LEFTARROW},
-    {"key_up",&key_up, KEY_UPARROW},
-    {"key_down",&key_down, KEY_DOWNARROW},
-    {"key_strafeleft",&key_strafeleft, ','},
-    {"key_straferight",&key_straferight, '.'},
+    {"use_joystick",&usejoystick, 0},
+    {"joyb_fire",&joybfire,0},
+    {"joyb_strafe",&joybstrafe,1},
+    {"joyb_use",&joybuse,3},
+    {"joyb_speed",&joybspeed,2},
 
-    {"key_fire",&key_fire, KEY_RCTRL},
-    {"key_use",&key_use, ' '},
-    {"key_strafe",&key_strafe, KEY_RALT},
-    {"key_speed",&key_speed, KEY_RSHIFT},
+    {"screenblocks",&screenblocks, 9},
+    {"detaillevel",&detailLevel, 0},
 
-    // UNIX hack, to be removed. 
-    #ifdef SNDSERV
-        {"sndserver", (int*)&sndserver_filename, (int)"sndserver"},
-        {"mb_used", &mb_used, 2},
-    #endif
+    {"snd_channels",&numChannels, 3},
 
-    #endif
+    {"usegamma",&usegamma, 0},
 
-    #ifdef LINUX
-        {"mousedev", (int*)&mousedev, (int)"/dev/ttyS0"},
-        {"mousetype", (int*)&mousetype, (int)"microsoft"},
-    #endif
-
-        {"use_mouse",&usemouse, 1},
-        {"mouseb_fire",&mousebfire,0},
-        {"mouseb_strafe",&mousebstrafe,1},
-        {"mouseb_forward",&mousebforward,2},
-
-        {"use_joystick",&usejoystick, 0},
-        {"joyb_fire",&joybfire,0},
-        {"joyb_strafe",&joybstrafe,1},
-        {"joyb_use",&joybuse,3},
-        {"joyb_speed",&joybspeed,2},
-
-        {"screenblocks",&screenblocks, 9},
-        {"detaillevel",&detailLevel, 0},
-
-        {"snd_channels",&numChannels, 3},
-
-
-
-        {"usegamma",&usegamma, 0},
-
-        {"chatmacro0", reinterpret_cast<intptr_t*>(&chat_macros[0]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO0) },
-        {"chatmacro1", reinterpret_cast<intptr_t*>(&chat_macros[1]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO1) },
-        {"chatmacro2", reinterpret_cast<intptr_t*>(&chat_macros[2]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO2) },
-        {"chatmacro3", reinterpret_cast<intptr_t*>(&chat_macros[3]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO3) },
-        {"chatmacro4", reinterpret_cast<intptr_t*>(&chat_macros[4]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO4) },
-        {"chatmacro5", reinterpret_cast<intptr_t*>(&chat_macros[5]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO5) },
-        {"chatmacro6", reinterpret_cast<intptr_t*>(&chat_macros[6]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO6) },
-        {"chatmacro7", reinterpret_cast<intptr_t*>(&chat_macros[7]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO7) },
-        {"chatmacro8", reinterpret_cast<intptr_t*>(&chat_macros[8]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO8) },
-        {"chatmacro9", reinterpret_cast<intptr_t*>(&chat_macros[9]), reinterpret_cast<intptr_t>(HUSTR_CHATMACRO9) }
+    {"chatmacro0", chat_macros + 0, 0 | 0x8000 },
+    {"chatmacro1", chat_macros + 1, 1 | 0x8000 },
+    {"chatmacro2", chat_macros + 2, 2 | 0x8000 },
+    {"chatmacro3", &chat_macros[3], 3 | 0x8000 },
+    {"chatmacro4", &chat_macros[4], 4 | 0x8000 },
+    {"chatmacro5", &chat_macros[5], 5 | 0x8000 },
+    {"chatmacro6", &chat_macros[6], 6 | 0x8000 },
+    {"chatmacro7", &chat_macros[7], 7 | 0x8000 },
+    {"chatmacro8", &chat_macros[8], 8 | 0x8000 },
+    {"chatmacro9", &chat_macros[9], 9 | 0x8000 },
 };
 
 int	numdefaults;
@@ -288,15 +259,14 @@ void M_SaveDefaults()
 
     for (int i = 0; i < numdefaults; i++)
     {
-        if (defaults[i].defaultvalue > -0xfff
-            && defaults[i].defaultvalue < 0xfff)
+        if (defaults[i].defaultvalue & 0x8000)
         {
-            int v = *defaults[i].location;
-            fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
+            fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name, *(char**)(defaults[i].location));
         }
         else
         {
-            fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name, *(char**)(defaults[i].location));
+            int v = *static_cast<int32*>(defaults[i].location);
+            fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
         }
     }
 
@@ -320,7 +290,12 @@ void M_LoadDefaults()
     // set everything to base values
     numdefaults = sizeof(defaults) / sizeof(defaults[0]);
     for (i = 0; i < numdefaults; i++)
-        *defaults[i].location = defaults[i].defaultvalue;
+    {
+        if (defaults[i].defaultvalue & 0x8000)
+            *static_cast<const char**>(defaults[i].location) = DefaultChatMacros[defaults[i].defaultvalue & 0x7fff];
+        else
+            *static_cast<int32*>(defaults[i].location) = defaults[i].defaultvalue;
+    }
 
     // check for a custom default file
     if (CommandLine::TryGetValues("-config", defaultfile))
@@ -352,14 +327,16 @@ void M_LoadDefaults()
                 else
                     sscanf_s(strparm, "%i", &parm);
                 for (i = 0; i < numdefaults; i++)
+                {
                     if (!strcmp(def, defaults[i].name))
                     {
                         if (!isstring)
-                            *defaults[i].location = parm;
+                            *static_cast<int32*>(defaults[i].location) = parm;
                         else
-                            *defaults[i].location = reinterpret_cast<intptr_t>(newstring);
+                            *static_cast<const char**>(defaults[i].location) = newstring;
                         break;
                     }
+                }
             }
         }
 

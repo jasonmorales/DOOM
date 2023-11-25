@@ -123,14 +123,9 @@ wipe_exitColorXForm
     return 0;
 }
 
+static int* wipe_y;
 
-static int* y;
-
-int
-wipe_initMelt
-(int	width,
-    int	height,
-    [[maybe_unused]] int	ticks)
+int wipe_initMelt(int width, int height, [[maybe_unused]] int ticks)
 {
     int i, r;
 
@@ -144,14 +139,16 @@ wipe_initMelt
 
     // setup initial column positions
     // (y<0 => not ready to scroll yet)
-    y = (int*)Z_Malloc(width * sizeof(int), PU_STATIC, 0);
-    y[0] = -(M_Random() % 16);
+    wipe_y = (int*)Z_Malloc(width * sizeof(int), PU_STATIC, 0);
+    wipe_y[0] = -(M_Random() % 16);
     for (i = 1;i < width;i++)
     {
         r = (M_Random() % 3) - 1;
-        y[i] = y[i - 1] + r;
-        if (y[i] > 0) y[i] = 0;
-        else if (y[i] == -16) y[i] = -15;
+        wipe_y[i] = wipe_y[i - 1] + r;
+        if (wipe_y[i] > 0)
+            wipe_y[i] = 0;
+        else if (wipe_y[i] == -16)
+            wipe_y[i] = -15;
     }
 
     return 0;
@@ -178,27 +175,27 @@ wipe_doMelt
     {
         for (i = 0;i < width;i++)
         {
-            if (y[i] < 0)
+            if (wipe_y[i] < 0)
             {
-                y[i]++; done = false;
+                wipe_y[i]++; done = false;
             }
-            else if (y[i] < height)
+            else if (wipe_y[i] < height)
             {
-                dy = (y[i] < 16) ? y[i] + 1 : 8;
-                if (y[i] + dy >= height) dy = height - y[i];
-                s = &((short*)wipe_scr_end)[i * height + y[i]];
-                d = &((short*)wipe_scr)[y[i] * width + i];
+                dy = (wipe_y[i] < 16) ? wipe_y[i] + 1 : 8;
+                if (wipe_y[i] + dy >= height) dy = height - wipe_y[i];
+                s = &((short*)wipe_scr_end)[i * height + wipe_y[i]];
+                d = &((short*)wipe_scr)[wipe_y[i] * width + i];
                 idx = 0;
                 for (j = dy;j;j--)
                 {
                     d[idx] = *(s++);
                     idx += width;
                 }
-                y[i] += dy;
+                wipe_y[i] += dy;
                 s = &((short*)wipe_scr_start)[i * height];
-                d = &((short*)wipe_scr)[y[i] * width + i];
+                d = &((short*)wipe_scr)[wipe_y[i] * width + i];
                 idx = 0;
-                for (j = height - y[i];j;j--)
+                for (j = height - wipe_y[i];j;j--)
                 {
                     d[idx] = *(s++);
                     idx += width;
@@ -218,16 +215,16 @@ wipe_exitMelt
     [[maybe_unused]] int	height,
     [[maybe_unused]] int	ticks)
 {
-    Z_Free(y);
+    Z_Free(wipe_y);
     return 0;
 }
 
 int
 wipe_StartScreen
-(int	x,
-    int	y,
-    int	width,
-    int	height)
+([[maybe_unused]] int	x,
+    [[maybe_unused]] int	y,
+    [[maybe_unused]] int	width,
+    [[maybe_unused]]  int	height)
 {
     wipe_scr_start = screens[2];
     I_ReadScreen(wipe_scr_start);
@@ -250,8 +247,8 @@ wipe_EndScreen
 int
 wipe_ScreenWipe
 (int	wipeno,
-    int	x,
-    int	y,
+    [[maybe_unused]]  int	x,
+    [[maybe_unused]] int	y,
     int	width,
     int	height,
     int	ticks)
