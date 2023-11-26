@@ -71,7 +71,7 @@ P_GiveAmmo
         return false;
 
     if (ammo < 0 || ammo > NUMAMMO)
-        I_Error("P_GiveAmmo: bad type %i", ammo);
+        I_Error("P_GiveAmmo: bad type %i", static_cast<int32>(ammo));
 
     if (player->ammo[ammo] == player->maxammo[ammo])
         return false;

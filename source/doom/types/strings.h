@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types/numbers.h"
+
 #include <assert.h>
 #include <limits>
 #include <string>

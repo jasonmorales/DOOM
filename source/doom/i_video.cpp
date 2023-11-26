@@ -26,6 +26,9 @@
 
 #include <winsock.h>
 
+#include <GL/wglew.h>
+#include <gl/gl.h>
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>
@@ -41,9 +44,74 @@
 boolean		grabMouse;
 int		doPointerWarp = POINTER_WARP_COUNTDOWN;
 
-//
+template<typename T>
+constexpr const GLenum gl_type = []{ static_assert(false, "type does not have a corresponding GL type"); return 0; }();
+template<> constexpr const GLenum gl_type<int8> = GL_BYTE;
+template<> constexpr const GLenum gl_type<uint8> = GL_UNSIGNED_BYTE;
+template<> constexpr const GLenum gl_type<int16> = GL_SHORT;
+template<> constexpr const GLenum gl_type<uint16> = GL_UNSIGNED_SHORT;
+template<> constexpr const GLenum gl_type<int32> = GL_INT;
+template<> constexpr const GLenum gl_type<uint32> = GL_UNSIGNED_INT;
+template<> constexpr const GLenum gl_type<float> = GL_FLOAT;
+template<> constexpr const GLenum gl_type<double> = GL_DOUBLE;
+
+template<typename T>
+class gl_vertex_attribute_builder
+{
+public:
+    template<typename A>
+    void add()
+    {
+        glEnableVertexAttribArray(index);
+        if (std::is_integral_v<A>)
+            glVertexAttribIPointer(index, size<A>(), gl_type<A>, sizeof(T), reinterpret_cast<GLvoid*>(offset));
+        else
+            glVertexAttribPointer(index, size<A>(), gl_type<A>, GL_FALSE, sizeof(T), reinterpret_cast<GLvoid*>(offset));
+        offset += sizeof(A);
+        ++index;
+    };
+
+private:
+    size_t offset = 0;
+    GLuint index = 0;
+
+    template<typename A> requires is_arithmetic<A> GLint size() const { return 1; }
+#if 0
+    template<typename A> requires is_same<A, v2f> || is_same<A, v2d> GLint size() const { return 2; }
+    template<typename A> requires is_same<A, v3f> || is_same<A, v3d> GLint size() const { return 3; }
+    template<typename A> requires
+        is_same<A, v4f> || is_same<A, v4> ||
+        is_same<A, rgba_f> || is_same<A, rgba_d>
+        GLint size() const { return 4; }
+#endif
+};
+
+template<typename ...Ts>
+class gl_vertex_attributes
+{
+public:
+    static constexpr const GLint size = (sizeof(Ts)+...);
+
+    static void add()
+    {
+        GLint index = 0;
+        _add<Ts...>(index);
+    }
+
+    template<typename T, typename ...Ts>
+    static void _add(GLint& index)
+    {
+        glEnableVertexAttribArray(index);
+        index += 1;
+
+        if constexpr (sizeof...(Ts) > 1)
+            _add<Ts...>(index);
+    }
+
+private:
+};
+
 //  Translates the key currently in X_event
-//
 int xlatekey()
 {
 
@@ -251,19 +319,18 @@ void I_UpdateNoBlit()
 {
 }
 
-void I_FinishUpdate()
+void Video::FinishUpdate()
 {
-    static int	lasttic;
-    int		tics;
-    int		i;
+    static time_t lasttic = 0;
+
     // UNUSED static unsigned char *bigscreen=0;
 
     // draws little dots on the bottom of the screen
     if (devparm)
     {
 
-        i = I_GetTime();
-        tics = i - lasttic;
+        auto i = I_GetTime();
+        auto tics = i - lasttic;
         lasttic = i;
         if (tics > 20) tics = 20;
 
@@ -273,6 +340,9 @@ void I_FinishUpdate()
             screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0x0;
 
     }
+
+    SwapBuffers(deviceContext);
+
 #if 0
     // scales the screen size before blitting it
     if (screenMultiply == 2)
@@ -421,19 +491,12 @@ void I_FinishUpdate()
 #endif
 }
 
-
-//
-// I_ReadScreen
-//
 void I_ReadScreen(byte* scr)
 {
     memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT);
 }
 
-
-//
 // Palette stuff.
-//
 #if 0
 static XColor	colors[256];
 
@@ -641,6 +704,47 @@ LRESULT CALLBACK GlobalInitWindowProc(HWND handle, UINT msg, WPARAM wParam, LPAR
 
     return DefWindowProc(handle, msg, wParam, lParam);
 }
+
+void GLAPIENTRY Video::GLErrorCallback(
+    [[maybe_unused]] GLenum source,
+    [[maybe_unused]] GLenum type,
+    [[maybe_unused]] GLuint id,
+    [[maybe_unused]] GLenum severity,
+    [[maybe_unused]] GLsizei length,
+    [[maybe_unused]] const GLchar* message,
+    [[maybe_unused]] const void* param)
+{
+    /*std::stringstream out;
+    switch (type)
+    {
+    case GL_DEBUG_SOURCE_API:
+        out << "[API] ";
+        break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+        out << "[WINDOW SYSTEM] ";
+        break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER:
+        out << "[SHADER COMPILER] ";
+        break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY:
+        out << "[THIRD PARTY] ";
+        break;
+    case GL_DEBUG_SOURCE_APPLICATION:
+        out << "[APPLICATION] ";
+        break;
+    case GL_DEBUG_SOURCE_OTHER:
+    default:
+        out << "[???] ";
+        break;
+    }
+    out << message;
+    Phantasus::Debug::Output(string{out.str().c_str()});
+    Phantasus::Debug::Output("\n");
+    if ((type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
+        && (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW))
+        DEBUG_BREAK();*/
+}
+
 void Video::Init()
 {
     if (isInitialized)
@@ -767,9 +871,9 @@ void Video::Init()
     auto pixel_format = ChoosePixelFormat(deviceContext, &pfd);
     SetPixelFormat(deviceContext, pixel_format, &pfd);
 
-    auto dummy_context = wglCreateContext(deviceContext);
-    wglMakeCurrent(deviceContext, dummy_context);
-#if 0
+    auto dummyContext = wglCreateContext(deviceContext);
+    wglMakeCurrent(deviceContext, dummyContext);
+
     glewInit();
 
     // Create the render context
@@ -783,19 +887,93 @@ void Video::Init()
         0
     };
 
-    renderContext = wglCreateContextAttribsARB(device_context, nullptr, attributes);
+    renderContext = wglCreateContextAttribsARB(deviceContext, nullptr, attributes);
     wglMakeCurrent(nullptr, nullptr);
-    wglDeleteContext(dummy_context);
+    wglDeleteContext(dummyContext);
 
-    MakeCurrent();
-    display->SetDimensions(width, height);
-    display->Init();
-#endif
+    wglMakeCurrent(deviceContext, renderContext);
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(GLErrorCallback, 0);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+
+    glFrontFace(GL_CCW);
+
+    glDisable(GL_MULTISAMPLE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    switch (status)
+    {
+    case GL_FRAMEBUFFER_UNDEFINED:
+        I_Error("Video::Init - framebuffer undefined");
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+        I_Error("Video::Init - framebuffer incomplete attachment\n");
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+        I_Error("Video::Init - framebuffer incomplete missing attachment\n");
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+        I_Error("Video::Init - framebuffer incomplete draw buffer\n");
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+        I_Error("Video::Init - framebuffer incomplete read buffer\n");
+        break;
+    case GL_FRAMEBUFFER_UNSUPPORTED:
+        I_Error("Video::Init - framebuffer unsupported\n");
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+        I_Error("Video::Init - framebuffer incomplete multisample\n");
+        break;
+    case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+        I_Error("Video::Init - framebuffer incomplete layer targets\n");
+        break;
+    default:
+        I_Error(string("Video::Init - error: ") + std::to_string(status).c_str() + "\n");
+        break;
+    case GL_FRAMEBUFFER_COMPLETE:
+        break;
+    }
+
+    float screenVertices[] =
+    {
+        -1.f,  1.f,  0.f, 1.f,
+        -1.f, -1.f,  0.f, 0.f,
+        1.f, -1.f,  1.f, 0.f,
+
+        -1.f,  1.f,  0.f, 1.f,
+        1.f, -1.f,  1.f, 0.f,
+        1.f,  1.f,  1.f, 1.f,
+    };
+
+    glGenVertexArrays(1, &screenVAO);
+    glBindVertexArray(screenVAO);
+
+    glGenBuffers(1, &screenVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, screenVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screenVertices), screenVertices, GL_STATIC_DRAW);
+
+    gl_vertex_attribute_builder<float[4]> screen_vertex_attribs;
+    //screen_vertex_attribs.add<v2f>();
+    //screen_vertex_attribs.add<v2f>();
+
+    constexpr auto A = gl_vertex_attributes<float, float, double, byte>::size;
+    gl_vertex_attributes<float, float, double, byte>::add();
+
+    //constexpr auto Y = gl_vertex_attributes<float>::calc();
+
     ShowWindow(windowHandle, SW_SHOWNORMAL);
 }
 
 void Video::StartFrame()
 {
+    glClearColor(1.f, 0.f, 0.f, 0.f);
+    //glClearStencil(0);
+    //glStencilMask(0xff);
+    glClear(GL_COLOR_BUFFER_BIT /*| GL_STENCIL_BUFFER_BIT*/);
 }
 
 void Video::StartTick()
@@ -1194,7 +1372,7 @@ Expand4
             xline[320] = dpixel;
             xline[480] = dpixel;
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff) << 3));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff) << 3));
             xline[1] = dpixel;
             xline[161] = dpixel;
             xline[321] = dpixel;
@@ -1202,13 +1380,13 @@ Expand4
 
             fourpixels = lineptr[1];
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff0000) >> 13));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff0000) >> 13));
             xline[2] = dpixel;
             xline[162] = dpixel;
             xline[322] = dpixel;
             xline[482] = dpixel;
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff) << 3));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff) << 3));
             xline[3] = dpixel;
             xline[163] = dpixel;
             xline[323] = dpixel;
@@ -1216,13 +1394,13 @@ Expand4
 
             fourpixels = lineptr[2];
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff0000) >> 13));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff0000) >> 13));
             xline[4] = dpixel;
             xline[164] = dpixel;
             xline[324] = dpixel;
             xline[484] = dpixel;
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff) << 3));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff) << 3));
             xline[5] = dpixel;
             xline[165] = dpixel;
             xline[325] = dpixel;
@@ -1230,13 +1408,13 @@ Expand4
 
             fourpixels = lineptr[3];
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff0000) >> 13));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff0000) >> 13));
             xline[6] = dpixel;
             xline[166] = dpixel;
             xline[326] = dpixel;
             xline[486] = dpixel;
 
-            dpixel = *(double*)((int)exp + ((fourpixels & 0xffff) << 3));
+            dpixel = *(double*)(reinterpret_cast<intptr_t>(exp) + ((fourpixels & 0xffff) << 3));
             xline[7] = dpixel;
             xline[167] = dpixel;
             xline[327] = dpixel;

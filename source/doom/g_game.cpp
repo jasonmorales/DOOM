@@ -87,7 +87,7 @@ boolean         usergame;               // ok to save / end game
 
 boolean         timingdemo;             // if true, exit with report on completion 
 boolean         noblit;                 // for comparative timing purposes 
-int             starttime;          	// for comparative timing purposes  	 
+time_t starttime;          	// for comparative timing purposes  	 
 
 boolean         viewactive;
 
@@ -1586,13 +1586,10 @@ void G_TimeDemo(const char* name)
 
 boolean G_CheckDemoStatus(Doom* doom)
 {
-    int             endtime;
-
     if (timingdemo)
     {
-        endtime = I_GetTime();
-        I_Error("timed %i gametics in %i realtics", gametic
-            , endtime - starttime);
+        auto endtime = I_GetTime();
+        I_Error("timed %i gametics in %i realtics", gametic, endtime - starttime);
     }
 
     if (demoplayback)

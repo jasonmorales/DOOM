@@ -22,13 +22,14 @@
 #include "system/windows.h"
 #include "types/numbers.h"
 
+#include <GL/glew.h>
+
 void I_ShutdownGraphics();
 
 // Takes full 8 bit values.
 void I_SetPalette(byte* palette);
 
 void I_UpdateNoBlit();
-void I_FinishUpdate();
 
 // Wait for vertical retrace or pause a bit.
 void I_WaitVBL(int count);
@@ -56,6 +57,15 @@ struct SystemEvent
 class Video
 {
 public:
+    static void GLAPIENTRY GLErrorCallback(
+        GLenum source,
+        GLenum type,
+        GLuint id,
+        GLenum severity,
+        GLsizei length,
+        const GLchar* message,
+        const void* param);
+
     void Init();
 
     // Called by Doom::Loop,
@@ -72,12 +82,13 @@ public:
     // Can call D_PostEvent.
     void StartTick();
 
+    void FinishUpdate();
+
     LRESULT HandleSystemEvent(const SystemEvent& event);
     void DeliverSystemMessages();
 
 private:
     bool RegisterWindowClass();
-
     const wchar_t* WindowClassName = L"DoomWindow";
 
     bool isInitialized = false;
@@ -106,4 +117,7 @@ private:
 
     DWORD windowStyle = 0;
     DWORD windowStyleEx = 0;
+
+    GLuint screenVBO = GL_INVALID_INDEX;
+    GLuint screenVAO = GL_INVALID_INDEX;
 };

@@ -475,11 +475,7 @@ P_FindMinSurroundingLight
 // Called every time a thing origin is about
 //  to cross a line with a non 0 special.
 //
-void
-P_CrossSpecialLine
-(int		linenum,
-    int		side,
-    mobj_t* thing)
+void P_CrossSpecialLine(intptr_t linenum, int side, mobj_t* thing)
 {
     line_t* line;
     int		ok;

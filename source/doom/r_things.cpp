@@ -463,13 +463,12 @@ void R_ProjectSprite(mobj_t* thing)
     // decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
     if (thing->sprite >= numsprites)
-        I_Error("R_ProjectSprite: invalid sprite number %i ", thing->sprite);
+        I_Error("R_ProjectSprite: invalid sprite number %i ", static_cast<int32>(thing->sprite));
 #endif
     sprdef = &sprites[thing->sprite];
 #ifdef RANGECHECK
     if ((thing->frame & FF_FRAMEMASK) >= sprdef->numframes)
-        I_Error("R_ProjectSprite: invalid sprite frame %i : %i ",
-            thing->sprite, thing->frame);
+        I_Error("R_ProjectSprite: invalid sprite frame %i : %i ", static_cast<int32>(thing->sprite), thing->frame);
 #endif
     sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
@@ -615,14 +614,12 @@ void R_DrawPSprite(pspdef_t* psp)
     // decide which patch to use
 #ifdef RANGECHECK
     if ((unsigned)psp->state->sprite >= numsprites)
-        I_Error("R_ProjectSprite: invalid sprite number %i ",
-            psp->state->sprite);
+        I_Error("R_ProjectSprite: invalid sprite number %i ", static_cast<int32>(psp->state->sprite));
 #endif
     sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
     if ((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
-        I_Error("R_ProjectSprite: invalid sprite frame %i : %i ",
-            psp->state->sprite, psp->state->frame);
+        I_Error("R_ProjectSprite: invalid sprite frame %i : %i ", static_cast<int32>(psp->state->sprite), psp->state->frame);
 #endif
     sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 

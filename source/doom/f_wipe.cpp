@@ -58,11 +58,7 @@ wipe_shittyColMajorXform
 
 }
 
-int
-wipe_initColorXForm
-(int	width,
-    int	height,
-    [[maybe_unused]] int	ticks)
+int wipe_initColorXForm(int width, int height, [[maybe_unused]] time_t ticks)
 {
     memcpy(wipe_scr, wipe_scr_start, width * height);
     return 0;
@@ -72,12 +68,11 @@ int
 wipe_doColorXForm
 (int	width,
     int	height,
-    int	ticks)
+    time_t	ticks)
 {
     boolean	changed;
     byte* w;
     byte* e;
-    int		newval;
 
     changed = false;
     w = wipe_scr;
@@ -89,7 +84,7 @@ wipe_doColorXForm
         {
             if (*w > *e)
             {
-                newval = *w - ticks;
+                auto newval = *w - ticks;
                 if (newval < *e)
                     *w = *e;
                 else
@@ -98,7 +93,7 @@ wipe_doColorXForm
             }
             else if (*w < *e)
             {
-                newval = *w + ticks;
+                auto newval = *w + ticks;
                 if (newval > *e)
                     *w = *e;
                 else
@@ -118,14 +113,14 @@ int
 wipe_exitColorXForm
 ([[maybe_unused]] int	width,
     [[maybe_unused]] int	height,
-    [[maybe_unused]] int	ticks)
+    [[maybe_unused]] time_t	ticks)
 {
     return 0;
 }
 
 static int* wipe_y;
 
-int wipe_initMelt(int width, int height, [[maybe_unused]] int ticks)
+int wipe_initMelt(int width, int height, [[maybe_unused]] time_t ticks)
 {
     int i, r;
 
@@ -158,7 +153,7 @@ int
 wipe_doMelt
 (int	width,
     int	height,
-    int	ticks)
+    time_t	ticks)
 {
     int		i;
     int		j;
@@ -213,7 +208,7 @@ int
 wipe_exitMelt
 ([[maybe_unused]] int	width,
     [[maybe_unused]] int	height,
-    [[maybe_unused]] int	ticks)
+    [[maybe_unused]] time_t	ticks)
 {
     Z_Free(wipe_y);
     return 0;
@@ -244,20 +239,16 @@ wipe_EndScreen
     return 0;
 }
 
-int
-wipe_ScreenWipe
-(int	wipeno,
-    [[maybe_unused]]  int	x,
-    [[maybe_unused]] int	y,
-    int	width,
-    int	height,
-    int	ticks)
+int wipe_ScreenWipe(int	wipeno, [[maybe_unused]] int x, [[maybe_unused]] int y, int width, int height, time_t ticks)
 {
-    int rc;
-    static int (*wipes[])(int, int, int) =
+    static int (*wipes[])(int, int, time_t) =
     {
-    wipe_initColorXForm, wipe_doColorXForm, wipe_exitColorXForm,
-    wipe_initMelt, wipe_doMelt, wipe_exitMelt
+        wipe_initColorXForm,
+        wipe_doColorXForm,
+        wipe_exitColorXForm,
+        wipe_initMelt,
+        wipe_doMelt,
+        wipe_exitMelt
     };
 
     void V_MarkRect(int, int, int, int);
@@ -273,7 +264,7 @@ wipe_ScreenWipe
 
     // do a piece of wipe-in
     V_MarkRect(0, 0, width, height);
-    rc = (*wipes[wipeno * 3 + 1])(width, height, ticks);
+    auto rc = (*wipes[wipeno * 3 + 1])(width, height, ticks);
     //  V_DrawBlock(x, y, 0, width, height, wipe_scr); // DEBUG
 
     // final stuff

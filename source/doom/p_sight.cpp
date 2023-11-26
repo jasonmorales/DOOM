@@ -286,21 +286,17 @@ boolean P_CrossBSPNode(int bspnum)
 //  if a straight line between t1 and t2 is unobstructed.
 // Uses REJECT.
 //
-boolean
-P_CheckSight
-(mobj_t* t1,
-    mobj_t* t2)
+boolean P_CheckSight(mobj_t* t1, mobj_t* t2)
 {
-    int		bytenum;
     int		bitnum;
 
     // First check for trivial rejection.
 
     // Determine subsector entries in REJECT table.
-    intptr_t s1 = (t1->subsector->sector - sectors);
-    intptr_t s2 = (t2->subsector->sector - sectors);
+    auto s1 = (t1->subsector->sector - sectors);
+    auto s2 = (t2->subsector->sector - sectors);
     auto pnum = s1 * numsectors + s2;
-    bytenum = pnum >> 3;
+    auto bytenum = static_cast<int32>(pnum >> 3);
     bitnum = 1 << (pnum & 7);
 
     // Check in REJECT table.

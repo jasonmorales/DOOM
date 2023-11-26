@@ -1310,8 +1310,8 @@ M_WriteText
 boolean M_Responder(event_t* ev)
 {
     int             ch;
-    static  int     joywait = 0;
-    static  int     mousewait = 0;
+    static  time_t joywait = 0;
+    static  time_t mousewait = 0;
     static  int     mousey = 0;
     static  int     lasty = 0;
     static  int     mousex = 0;

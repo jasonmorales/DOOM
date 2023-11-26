@@ -20,7 +20,10 @@
 #include "d_ticcmd.h"
 #include "d_event.h"
 
+#include "types/strings.h"
+
 #include <stdint.h>
+#include <format>
 
 // Called by DoomMain.
 void I_Init();
@@ -33,7 +36,7 @@ byte* I_ZoneBase(intptr_t* size);
 
 // Called by Doom::Loop,
 // returns current time in tics.
-int I_GetTime();
+time_t I_GetTime();
 
 // Asynchronous interrupt functions should maintain private queues
 // that are read by the synchronous functions
@@ -57,5 +60,9 @@ byte* I_AllocLow(int length);
 
 void I_Tactile(int on, int off, int total);
 
-
-void I_Error(const char* error, ...);
+void I_Error(const string& error);
+void I_Error(string_view error, auto&& ...args)
+{
+    string msg = std::vformat(error, std::make_format_args(args...));
+    I_Error(msg);
+}

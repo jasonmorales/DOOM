@@ -203,7 +203,7 @@ void* Z_Malloc_internal(intptr_t size, int tag, void* user)
     } while (base->user || base->size < size);
 
     // found a block big enough
-    int extra = base->size - size;
+    auto extra = base->size - size;
 
     if (extra > MINFRAGMENT)
     {
@@ -311,7 +311,7 @@ void Z_FileDumpHeap(FILE* f)
 {
     memblock_t* block;
 
-    fprintf(f, "zone size: %i  location: %p\n", mainzone->size, mainzone);
+    fprintf(f, "zone size: %Ii  location: %p\n", mainzone->size, mainzone);
 
     for (block = mainzone->blocklist.next; ; block = block->next)
     {

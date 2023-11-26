@@ -48,11 +48,9 @@ wipe_EndScreen
     int		height);
 
 
-int
-wipe_ScreenWipe
-(int		wipeno,
+int wipe_ScreenWipe(int wipeno,
     int		x,
     int		y,
     int		width,
     int		height,
-    int		ticks);
+    time_t ticks);

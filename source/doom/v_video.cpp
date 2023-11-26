@@ -295,82 +295,16 @@ V_DrawPatchFlipped
     }
 }
 
-// V_DrawPatchDirect
 // Draws directly to the screen on the pc. 
 void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch)
 {
     V_DrawPatch(x, y, scrn, patch);
-
-    /*
-    int		count;
-    int		col;
-    column_t*	column;
-    byte*	desttop;
-    byte*	dest;
-    byte*	source;
-    int		w;
-
-    y -= (patch->topoffset);
-    x -= (patch->leftoffset);
-
-#ifdef RANGECHECK
-    if (x<0
-    ||x+(patch->width) >SCREENWIDTH
-    || y<0
-    || y+(patch->height)>SCREENHEIGHT
-    || (unsigned)scrn>4)
-    {
-    I_Error ("Bad V_DrawPatchDirect");
-    }
-#endif
-
-    //	V_MarkRect (x, y, (patch->width), (patch->height));
-    desttop = destscreen + y*SCREENWIDTH/4 + (x>>2);
-
-    w = (patch->width);
-    for ( col = 0 ; col<w ; col++)
-    {
-    outp (SC_INDEX+1,1<<(x&3));
-    column = (column_t *)((byte *)patch + (patch->columnofs[col]));
-
-    // step through the posts in a column
-
-    while (column->topdelta != 0xff )
-    {
-        source = (byte *)column + 3;
-        dest = desttop + column->topdelta*SCREENWIDTH/4;
-        count = column->length;
-
-        while (count--)
-        {
-        *dest = *source++;
-        dest += SCREENWIDTH/4;
-        }
-        column = (column_t *)(  (byte *)column + column->length
-                    + 4 );
-    }
-    if ( ((++x)&3) == 0 )
-        desttop++;	// go to next byte, not next plane
-    }*/
 }
 
-
-
-//
 // V_DrawBlock
 // Draw a linear block of pixels into the view buffer.
-//
-void
-V_DrawBlock
-(int		x,
-    int		y,
-    int		scrn,
-    int		width,
-    int		height,
-    byte* src)
+void V_DrawBlock(int x, int y, int scrn, int width, int height, byte* src)
 {
-    byte* dest;
-
 #ifdef RANGECHECK 
     if (x<0
         || x + width >SCREENWIDTH
@@ -384,7 +318,7 @@ V_DrawBlock
 
     V_MarkRect(x, y, width, height);
 
-    dest = screens[scrn] + y * SCREENWIDTH + x;
+    byte* dest = screens[scrn] + y * SCREENWIDTH + x;
 
     while (height--)
     {
@@ -394,23 +328,9 @@ V_DrawBlock
     }
 }
 
-
-
-//
-// V_GetBlock
 // Gets a linear block of pixels from the view buffer.
-//
-void
-V_GetBlock
-(int		x,
-    int		y,
-    int		scrn,
-    int		width,
-    int		height,
-    byte* dest)
+void V_GetBlock(int x, int y, int scrn, int width, int height, byte* dest)
 {
-    byte* src;
-
 #ifdef RANGECHECK 
     if (x<0
         || x + width >SCREENWIDTH
@@ -422,7 +342,7 @@ V_GetBlock
     }
 #endif 
 
-    src = screens[scrn] + y * SCREENWIDTH + x;
+    byte* src = screens[scrn] + y * SCREENWIDTH + x;
 
     while (height--)
     {
@@ -432,12 +352,6 @@ V_GetBlock
     }
 }
 
-
-
-
-//
-// V_Init
-// 
 void V_Init()
 {
     int		i;

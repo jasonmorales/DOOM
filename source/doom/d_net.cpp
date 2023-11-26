@@ -71,7 +71,7 @@ int		nodeforplayer[MAXPLAYERS];
 
 int             maketic;
 int		lastnettic;
-int		skiptics;
+time_t skiptics;
 int		ticdup;
 int		maxsend;	// BACKUPTICS/(2*ticdup)-1
 
@@ -347,13 +347,13 @@ void GetPackets()
 // Builds ticcmds for console player,
 // sends out a packet
 //
-int      gametime;
+time_t      gametime;
 
 void NetUpdate()
 {
     // check time
-    int nowtime = I_GetTime() / ticdup;
-    int newtics = nowtime - gametime;
+    auto nowtime = I_GetTime() / ticdup;
+    auto newtics = nowtime - gametime;
     gametime = nowtime;
 
     int gameticdiv = gametic / ticdup;
@@ -427,10 +427,7 @@ listen:
 //
 void CheckAbort()
 {
-    event_t* ev;
-    int		stoptic;
-
-    stoptic = I_GetTime() + 2;
+    auto stoptic = I_GetTime() + 2;
     while (I_GetTime() < stoptic)
         g_doom->GetVideo()->StartTick();
 
@@ -438,7 +435,7 @@ void CheckAbort()
     for (; eventtail != eventhead
         ; eventtail = (++eventtail) & (MAXEVENTS - 1))
     {
-        ev = &events[eventtail];
+        auto* ev = &events[eventtail];
         if (ev->type == ev_keydown && ev->data1 == KEY_ESCAPE)
             I_Error("Network game synchronization aborted.");
     }
@@ -606,24 +603,19 @@ extern	boolean	advancedemo;
 
 void TryRunTics()
 {
+    static time_t oldentertics = 0;
     int		i;
-    int		lowtic;
-    int		entertic;
-    static int	oldentertics;
-    int		realtics;
-    int		availabletics;
-    int		counts;
     int		numplaying;
 
     // get real tics		
-    entertic = I_GetTime() / ticdup;
-    realtics = entertic - oldentertics;
+    auto entertic = I_GetTime() / ticdup;
+    auto realtics = entertic - oldentertics;
     oldentertics = entertic;
 
     // get available tics
     NetUpdate();
 
-    lowtic = std::numeric_limits<int>::max();
+    auto lowtic = std::numeric_limits<time_t>::max();
     numplaying = 0;
     for (i = 0; i < doomcom->numnodes; i++)
     {
@@ -634,9 +626,10 @@ void TryRunTics()
                 lowtic = nettics[i];
         }
     }
-    availabletics = lowtic - gametic / ticdup;
+    auto availabletics = lowtic - gametic / ticdup;
 
     // decide how many tics to run
+    time_t counts = 0;
     if (realtics < availabletics - 1)
         counts = realtics + 1;
     else if (realtics < availabletics)
@@ -650,9 +643,7 @@ void TryRunTics()
     frameon++;
 
     if (debugfile)
-        fprintf(debugfile,
-            "=======real: %i  avail: %i  game: %i\n",
-            realtics, availabletics, counts);
+        fprintf(debugfile, "=======real: %Ii  avail: %Ii  game: %Ii\n", realtics, availabletics, counts);
 
     if (!demoplayback)
     {

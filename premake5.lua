@@ -80,7 +80,7 @@ workspace 'Doom'
             'source/doom/**',
 		}
 
-		--[[includedirs {
+		includedirs {
 			'lib/glew-' .. glew_version .. '/include',
 		}
 
@@ -88,7 +88,6 @@ workspace 'Doom'
 		if os.host() == 'windows' then
 			os.copyfile('lib/glew-' .. glew_version .. '/bin/Release/x64/glew32.dll', 'bin/glew32.dll')
 		end
-		--]]
 
 		libdirs {
 			'lib/glew-' .. glew_version .. '/lib/Release/x64',
@@ -97,7 +96,7 @@ workspace 'Doom'
 		links {
 			'opengl32',
 			'glu32',
-			--'glew32',
+			'glew32',
 			'winmm',
 			--'dinput8',
 			--'dxguid',

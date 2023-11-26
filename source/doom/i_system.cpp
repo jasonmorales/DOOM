@@ -33,7 +33,7 @@
 #include <time.h>
 #include <chrono>
 #include <thread>
-
+#include <iostream>
 
 #include "d_main.h"
 extern Doom* g_doom;
@@ -75,17 +75,16 @@ byte* I_ZoneBase(intptr_t* size)
 // I_GetTime
 // returns time in 1/70th second tics
 //
-int  I_GetTime()
+time_t  I_GetTime()
 {
-    timespec ts;
-    time_t newtics;
     static time_t basetime = 0;
 
+    timespec ts;
     timespec_get(&ts, TIME_UTC);
     if (!basetime)
         basetime = ts.tv_sec;
-    newtics = (ts.tv_sec - basetime) * TICRATE + ts.tv_nsec * TICRATE / 1'000'000'000;
-    return newtics;
+
+    return (ts.tv_sec - basetime) * TICRATE + ts.tv_nsec * TICRATE / 1'000'000'000;
 }
 
 //
@@ -110,7 +109,7 @@ void I_Quit()
     exit(0);
 }
 
-void I_WaitVBL(int count)
+void I_WaitVBL([[maybe_unused]] int count)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(1'000 / 70));
 }
@@ -130,22 +129,10 @@ byte* I_AllocLow(int length)
     return mem;
 }
 
-
-//
-// I_Error
-//
-void I_Error(const char* error, ...)
+void I_Error(const string& error)
 {
-    va_list	argptr;
-
-    // Message first.
-    va_start(argptr, error);
-    fprintf(stderr, "Error: ");
-    vfprintf(stderr, error, argptr);
-    fprintf(stderr, "\n");
-    va_end(argptr);
-
-    fflush(stderr);
+    std::cerr << "Error: " << error << "\n";
+    std::cerr.flush();
 
     // Shutdown. Here might be other errors.
     if (g_doom->IsDemoRecording())

@@ -197,11 +197,8 @@ void R_RenderSegLoop()
     int			yl;
     int			yh;
     int			mid;
-    fixed_t		texturecolumn;
     int			top;
     int			bottom;
-
-    //texturecolumn = 0;				// shut up compiler warning
 
     for (; rw_x < rw_stopx; rw_x++)
     {
@@ -244,6 +241,8 @@ void R_RenderSegLoop()
                 floorplane->bottom[rw_x] = bottom;
             }
         }
+
+        fixed_t texturecolumn = 0;
 
         // texturecolumn and lighting are independent of wall tiers
         if (segtextured)

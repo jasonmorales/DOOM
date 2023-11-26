@@ -685,8 +685,6 @@ GameState wipegamestate = GameState::Demo;
 
 void Doom::Display()
 {
-    int tics;
-    int wipestart;
     int y;
     boolean done;
     boolean wipe;
@@ -800,18 +798,19 @@ void Doom::Display()
     // normal update
     if (!wipe)
     {
-        I_FinishUpdate(); // page flip or blit buffer
+        video->FinishUpdate(); // page flip or blit buffer
         return;
     }
 
     // wipe update
     wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
-    wipestart = I_GetTime() - 1;
+    auto wipestart = I_GetTime() - 1;
 
     do
     {
-        int32 now = 0;
+        time_t tics = 0;
+        time_t now = 0;
         do
         {
             now = I_GetTime();
@@ -823,7 +822,7 @@ void Doom::Display()
         done = wipe_ScreenWipe(wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
         I_UpdateNoBlit();
         M_Drawer();		  // menu is drawn even on top of wipes
-        I_FinishUpdate(); // page flip or blit buffer
+        video->FinishUpdate(); // page flip or blit buffer
     }
     while (!done);
 }
