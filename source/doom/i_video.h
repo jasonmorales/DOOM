@@ -21,6 +21,7 @@
 
 #include "system/windows.h"
 #include "types/numbers.h"
+#include "types/strings.h"
 
 #include <GL/glew.h>
 
@@ -89,6 +90,8 @@ public:
 
 private:
     bool RegisterWindowClass();
+    GLuint LoadShader(string_view name);
+
     const wchar_t* WindowClassName = L"DoomWindow";
 
     bool isInitialized = false;
@@ -117,6 +120,9 @@ private:
 
     DWORD windowStyle = 0;
     DWORD windowStyleEx = 0;
+
+    GLuint screenTexture = 0;
+    GLuint screenShader = 0;
 
     GLuint screenVBO = GL_INVALID_INDEX;
     GLuint screenVAO = GL_INVALID_INDEX;

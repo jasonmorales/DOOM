@@ -36,6 +36,8 @@
 #include <signal.h>
 #include <algorithm>
 #include <type_traits>
+#include <iostream>
+#include <fstream>
 
 #define POINTER_WARP_COUNTDOWN	1
 
@@ -112,7 +114,7 @@ private:
 
         offset += sizeof(T);
         index += 1;
-        if constexpr (sizeof...(Ts) > 1)
+        if constexpr (sizeof...(Ts) != 0)
             _add<Ts...>(index, offset);
     }
 };
@@ -346,6 +348,21 @@ void Video::FinishUpdate()
             screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0x0;
 
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, screenWidth, screenHeight);
+
+    //glClearColor(0.f, 0.f, 0.f, 0.f);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+    glUseProgram(screenShader);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+    //glDrawBuffer(GL_COLOR_ATTACHMENT2);
+    glBindVertexArray(screenVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     SwapBuffers(deviceContext);
 
@@ -908,7 +925,7 @@ void Video::Init()
 
     glDisable(GL_MULTISAMPLE);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     auto status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     switch (status)
@@ -944,6 +961,26 @@ void Video::Init()
         break;
     }
 
+    glGenTextures(1, &screenTexture);
+    glBindTexture(GL_TEXTURE_2D, screenTexture);
+    uint32 pixels[] =
+    {
+        0xff00'ffff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
+
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
+        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
+    };
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    screenShader = LoadShader("screen");
+
     float screenVertices[] =
     {
         -1.f,  1.f,  0.f, 1.f,
@@ -969,10 +1006,12 @@ void Video::Init()
 
 void Video::StartFrame()
 {
-    glClearColor(1.f, 0.f, 0.f, 0.f);
-    //glClearStencil(0);
-    //glStencilMask(0xff);
-    glClear(GL_COLOR_BUFFER_BIT /*| GL_STENCIL_BUFFER_BIT*/);
+    static float f = 0.f;
+    f += 0.001f;
+    if (f >= 1.f) f -= 1.f;
+
+    glClearColor(f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void Video::StartTick()
@@ -1292,6 +1331,55 @@ bool Video::RegisterWindowClass()
     }
 
     return true;
+}
+
+GLuint Video::LoadShader(string_view name)
+{
+    std::cout << "Loading shader: " << name << "\n";
+
+    auto program = glCreateProgram();
+
+    string shaderName{name};
+
+    std::filesystem::path path("data/shaders/");
+    path /= shaderName + ".glsl";
+
+    auto addShader = [&path, &shaderName, program](const string& ext, GLenum type, bool required)
+    {
+        std::ifstream file(path.replace_filename(shaderName + ext + ".glsl"), std::ios_base::binary | std::ios_base::in);
+        string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+        if (data.empty())
+        {
+            if (required)
+                std::cerr << "Missing required shader: " << shaderName + ext << "\n";
+            return;
+        }
+
+        auto shader = glCreateShader(type);
+        auto* vdata = data.c_str();
+        glShaderSource(shader, 1, &vdata, nullptr);
+        glCompileShader(shader);
+        GLint status = GL_FALSE;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+        if (status == GL_FALSE)
+        {
+            char buffer[4096] = {0};
+            int32 length = 0;
+            glGetShaderInfoLog(shader, sizeof(buffer), &length, buffer);
+            std::cerr << "Error compiling shader " << shaderName + ext << ": " << buffer << "\n";
+        }
+        glAttachShader(program, shader);
+    };
+
+    // vertex
+    addShader("_v", GL_VERTEX_SHADER, true);
+    addShader("_g", GL_GEOMETRY_SHADER, false);
+    addShader("_f", GL_FRAGMENT_SHADER, true);
+
+    glLinkProgram(program);
+
+    return program;
 }
 
 unsigned	exptable[256];

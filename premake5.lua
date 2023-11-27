@@ -78,6 +78,12 @@ workspace 'Doom'
 
 		files {
             'source/doom/**',
+			'data/shaders/**.glsl',
+		}
+
+		vpaths {
+			["source/*"] = 'source/doom/**',
+			["shaders"] = 'data/shaders/**',
 		}
 
 		includedirs {
