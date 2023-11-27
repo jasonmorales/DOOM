@@ -12,7 +12,7 @@
 // for more details.
 //
 // DESCRIPTION:
-//	DOOM graphics stuff for X11, UNIX.
+//	DOOM graphics stuff for Windows
 //
 //-----------------------------------------------------------------------------
 #include "doomstat.h"
@@ -35,6 +35,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <algorithm>
+#include <type_traits>
 
 #define POINTER_WARP_COUNTDOWN	1
 
@@ -55,60 +56,65 @@ template<> constexpr const GLenum gl_type<uint32> = GL_UNSIGNED_INT;
 template<> constexpr const GLenum gl_type<float> = GL_FLOAT;
 template<> constexpr const GLenum gl_type<double> = GL_DOUBLE;
 
-template<typename T>
-class gl_vertex_attribute_builder
-{
-public:
-    template<typename A>
-    void add()
-    {
-        glEnableVertexAttribArray(index);
-        if (std::is_integral_v<A>)
-            glVertexAttribIPointer(index, size<A>(), gl_type<A>, sizeof(T), reinterpret_cast<GLvoid*>(offset));
-        else
-            glVertexAttribPointer(index, size<A>(), gl_type<A>, GL_FALSE, sizeof(T), reinterpret_cast<GLvoid*>(offset));
-        offset += sizeof(A);
-        ++index;
-    };
-
-private:
-    size_t offset = 0;
-    GLuint index = 0;
-
-    template<typename A> requires is_arithmetic<A> GLint size() const { return 1; }
-#if 0
-    template<typename A> requires is_same<A, v2f> || is_same<A, v2d> GLint size() const { return 2; }
-    template<typename A> requires is_same<A, v3f> || is_same<A, v3d> GLint size() const { return 3; }
-    template<typename A> requires
-        is_same<A, v4f> || is_same<A, v4> ||
-        is_same<A, rgba_f> || is_same<A, rgba_d>
-        GLint size() const { return 4; }
-#endif
-};
-
 template<typename ...Ts>
 class gl_vertex_attributes
 {
 public:
-    static constexpr const GLint size = (sizeof(Ts)+...);
+    static constexpr const GLsizei size = []{
+        if constexpr (sizeof...(Ts) == 0) return 0;
+        else return static_cast<GLsizei>((sizeof(Ts)+...));
+    }();
+
+private:
+    template<typename V, size_t R = 0>
+    static constexpr GLint _array()
+    {
+        if constexpr (!std::is_array_v<V>)
+            return 1;
+        else if constexpr (R < std::rank_v<V> - 1)
+            return std::extent_v<V, R> * _array<V, R + 1>();
+        else
+            return std::extent_v<V, R>;
+    }
+
+    template<typename U, typename ...Us>
+    static constexpr GLint _count()
+    {
+        if constexpr (sizeof...(Us) == 0)
+            return _array<U>();
+        else
+            return _array<U>() + _count<Us...>();
+    }
+
+public:
+    static constexpr const GLint count = []{
+        if constexpr (sizeof...(Ts) == 0) return 0;
+        else return _count<Ts...>();
+    }();
 
     static void add()
     {
-        GLint index = 0;
-        _add<Ts...>(index);
-    }
+        GLuint index = 0;
+        intptr_t offset = 0;
 
-    template<typename T, typename ...Ts>
-    static void _add(GLint& index)
-    {
-        glEnableVertexAttribArray(index);
-        index += 1;
-
-        if constexpr (sizeof...(Ts) > 1)
-            _add<Ts...>(index);
+        _add<Ts...>(index, offset);
     }
 
 private:
+    template<typename T, typename ...Ts>
+    static void _add(GLuint& index, intptr_t& offset)
+    {
+        glEnableVertexAttribArray(index);
+        if (is_integral<T>)
+            glVertexAttribIPointer(index, count, gl_type<std::remove_all_extents_t<T>>, size, reinterpret_cast<GLvoid*>(offset));
+        else
+            glVertexAttribPointer(index, count, gl_type<std::remove_all_extents_t<T>>, GL_FALSE, size, reinterpret_cast<GLvoid*>(offset));
+
+        offset += sizeof(T);
+        index += 1;
+        if constexpr (sizeof...(Ts) > 1)
+            _add<Ts...>(index, offset);
+    }
 };
 
 //  Translates the key currently in X_event
@@ -956,14 +962,7 @@ void Video::Init()
     glBindBuffer(GL_ARRAY_BUFFER, screenVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(screenVertices), screenVertices, GL_STATIC_DRAW);
 
-    gl_vertex_attribute_builder<float[4]> screen_vertex_attribs;
-    //screen_vertex_attribs.add<v2f>();
-    //screen_vertex_attribs.add<v2f>();
-
-    constexpr auto A = gl_vertex_attributes<float, float, double, byte>::size;
-    gl_vertex_attributes<float, float, double, byte>::add();
-
-    //constexpr auto Y = gl_vertex_attributes<float>::calc();
+    gl_vertex_attributes<float[2], float[2]>::add();
 
     ShowWindow(windowHandle, SW_SHOWNORMAL);
 }
