@@ -149,7 +149,6 @@ V_CopyRect
         I_Error("Bad V_CopyRect");
     }
 #endif 
-    g_doom->GetVideo()->MarkRect(destx, desty, width, height);
 
     src = g_doom->GetVideo()->GetScreen(srcscrn) + SCREENWIDTH * srcy + srcx;
     dest = g_doom->GetVideo()->GetScreen(destscrn) + SCREENWIDTH * desty + destx;
@@ -162,75 +161,11 @@ V_CopyRect
     }
 }
 
-// Masks a column based masked pic to the screen. 
-void V_DrawPatch(int x, int y, int scrn, patch_t* patch)
-{
-    int		count;
-    int		col;
-    column_t* column;
-    byte* desttop;
-    byte* dest;
-    byte* source;
-    int		w;
-
-    y -= (patch->topoffset);
-    x -= (patch->leftoffset);
-#ifdef RANGECHECK 
-    if (x<0
-        || x + (patch->width) >SCREENWIDTH
-        || y<0
-        || y + (patch->height)>SCREENHEIGHT
-        || (unsigned)scrn > 4)
-    {
-        fprintf(stderr, "Patch at %d,%d exceeds LFB\n", x, y);
-        // No I_Error abort - what is up with TNT.WAD?
-        fprintf(stderr, "V_DrawPatch: bad patch (ignored)\n");
-        return;
-    }
-#endif 
-
-    if (!scrn)
-        g_doom->GetVideo()->MarkRect(x, y, (patch->width), (patch->height));
-
-    col = 0;
-    desttop = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
-
-    w = (patch->width);
-
-    for (; col < w; x++, col++, desttop++)
-    {
-        column = (column_t*)((byte*)patch + (patch->columnofs[col]));
-
-        // step through the posts in a column 
-        while (column->topdelta != 0xff)
-        {
-            source = (byte*)column + 3;
-            dest = desttop + column->topdelta * SCREENWIDTH;
-            count = column->length;
-
-            while (count--)
-            {
-                *dest = *source++;
-                dest += SCREENWIDTH;
-            }
-            column = (column_t*)((byte*)column + column->length + 4);
-        }
-    }
-}
-
-//
 // V_DrawPatchFlipped 
 // Masks a column based masked pic to the screen.
 // Flips horizontally, e.g. to mirror face.
-//
-void
-V_DrawPatchFlipped
-(int		x,
-    int		y,
-    int		scrn,
-    patch_t* patch)
+void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch)
 {
-
     int		count;
     int		col;
     column_t* column;
@@ -252,9 +187,6 @@ V_DrawPatchFlipped
         I_Error("Bad V_DrawPatch in V_DrawPatchFlipped");
     }
 #endif 
-
-    if (!scrn)
-        g_doom->GetVideo()->MarkRect(x, y, (patch->width), (patch->height));
 
     col = 0;
     desttop = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
@@ -283,13 +215,6 @@ V_DrawPatchFlipped
     }
 }
 
-// Draws directly to the screen on the pc. 
-void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch)
-{
-    V_DrawPatch(x, y, scrn, patch);
-}
-
-// V_DrawBlock
 // Draw a linear block of pixels into the view buffer.
 void V_DrawBlock(int x, int y, int scrn, int width, int height, byte* src)
 {
@@ -303,8 +228,6 @@ void V_DrawBlock(int x, int y, int scrn, int width, int height, byte* src)
         I_Error("Bad V_DrawBlock");
     }
 #endif 
-
-    g_doom->GetVideo()->MarkRect(x, y, width, height);
 
     byte* dest = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
 

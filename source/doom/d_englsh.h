@@ -22,15 +22,10 @@
 //	Printed strings for translation
 //
 
-//
 // D_Main.C
-//
 #define D_DEVSTR	"Development mode ON.\n"
-#define D_CDROM	"CD-ROM Version: default.cfg from c:\\doomdata\n"
 
-//
 //	M_Menu.C
-//
 #define PRESSKEY 	"press a key."
 #define PRESSYN 	"press y or n."
 #define QUITMSG	"are you sure you want to\nquit this great game?"

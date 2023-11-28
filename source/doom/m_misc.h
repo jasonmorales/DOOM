@@ -17,20 +17,11 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
 #include "doomtype.h"
-//
-// MISC
-//
 
+boolean M_WriteFile(char const* name, void* source, uint32 length);
 
-
-boolean M_WriteFile(char const* name, void* source, intptr_t length);
-
-int
-M_ReadFile
-(char const* name,
-    byte** buffer);
+int M_ReadFile(char const* name, byte** buffer);
 
 void M_ScreenShot();
 
@@ -38,10 +29,4 @@ void M_LoadDefaults();
 
 void M_SaveDefaults();
 
-
-int
-M_DrawText
-(int		x,
-    int		y,
-    boolean	direct,
-    char* string);
+int M_DrawText(int x, int y, boolean direct, char* string);

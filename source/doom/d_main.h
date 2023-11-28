@@ -25,7 +25,7 @@
 
 //
 // Called by IO functions when input is detected.
-void D_PostEvent(event_t* ev);
+void D_PostEvent(event_t ev);
 
 //
 // BASE LEVEL

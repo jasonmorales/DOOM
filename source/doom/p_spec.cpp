@@ -166,7 +166,7 @@ void P_InitPicAnims()
         lastanim->numpics = lastanim->picnum - lastanim->basepic + 1;
 
         if (lastanim->numpics < 2)
-            I_Error("P_InitPicAnims: bad cycle from %s to %s",
+            I_Error("P_InitPicAnims: bad cycle from {} to {}",
                 animdefs[i].startname,
                 animdefs[i].endname);
 

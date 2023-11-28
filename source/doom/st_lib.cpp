@@ -31,18 +31,19 @@
 #include "st_stuff.h"
 #include "st_lib.h"
 #include "r_local.h"
+#include "d_main.h"
+#include "i_video.h"
+
+
+extern Doom* g_doom;
+
 
 
 // in AM_map.c
 extern boolean		automapactive;
 
-
-
-
-//
 // Hack display negative frags.
 //  Loads and store the stminus lump.
-//
 patch_t* sttminus;
 
 void STlib_init()
@@ -122,29 +123,25 @@ STlib_drawNum
 
     // in the special case of 0, you draw 0
     if (!num)
-        V_DrawPatch(x - w, n->y, FG, n->p[0]);
+        g_doom->GetVideo()->DrawPatch(x - w, n->y, FG, n->p[0]);
 
     // draw the new number
     while (num && numdigits--)
     {
         x -= w;
-        V_DrawPatch(x, n->y, FG, n->p[num % 10]);
+        g_doom->GetVideo()->DrawPatch(x, n->y, FG, n->p[num % 10]);
         num /= 10;
     }
 
     // draw a minus sign if necessary
     if (neg)
-        V_DrawPatch(x - 8, n->y, FG, sttminus);
+        g_doom->GetVideo()->DrawPatch(x - 8, n->y, FG, sttminus);
 }
 
-
-//
-void
-STlib_updateNum
-(st_number_t* n,
-    boolean		refresh)
+void STlib_updateNum(st_number_t* n, boolean refresh)
 {
-    if (*n->on) STlib_drawNum(n, refresh);
+    if (*n->on)
+        STlib_drawNum(n, refresh);
 }
 
 
@@ -172,7 +169,7 @@ STlib_updatePercent
     int			refresh)
 {
     if (refresh && *per->n.on)
-        V_DrawPatch(per->n.x, per->n.y, FG, per->p);
+        g_doom->GetVideo()->DrawPatch(per->n.x, per->n.y, FG, per->p);
 
     STlib_updateNum(&per->n, refresh);
 }
@@ -224,7 +221,7 @@ STlib_updateMultIcon
 
             V_CopyRect(x, y - ST_Y, BG, w, h, x, y, FG);
         }
-        V_DrawPatch(mi->x, mi->y, FG, mi->p[*mi->inum]);
+        g_doom->GetVideo()->DrawPatch(mi->x, mi->y, FG, mi->p[*mi->inum]);
         mi->oldinum = *mi->inum;
     }
 }
@@ -272,7 +269,7 @@ STlib_updateBinIcon
             I_Error("updateBinIcon: y - ST_Y < 0");
 
         if (*bi->val)
-            V_DrawPatch(bi->x, bi->y, FG, bi->p);
+            g_doom->GetVideo()->DrawPatch(bi->x, bi->y, FG, bi->p);
         else
             V_CopyRect(x, y - ST_Y, BG, w, h, x, y, FG);
 

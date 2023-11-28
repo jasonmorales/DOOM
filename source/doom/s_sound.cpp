@@ -255,7 +255,7 @@ S_StartSoundAtVolume
 
          // check for bogus sound #
     if (sfx_id < 1 || sfx_id > NUMSFX)
-        I_Error("Bad sfx #: %d", sfx_id);
+        I_Error("Bad sfx #: {}", sfx_id);
 
     sfx = &S_sfx[sfx_id];
 
@@ -597,7 +597,7 @@ void S_SetMusicVolume(int volume)
 {
     if (volume < 0 || volume > 127)
     {
-        I_Error("Attempt to set music volume at %d",
+        I_Error("Attempt to set music volume at {}",
             volume);
     }
 
@@ -612,7 +612,7 @@ void S_SetSfxVolume(int volume)
 {
 
     if (volume < 0 || volume > 127)
-        I_Error("Attempt to set sfx volume at %d", volume);
+        I_Error("Attempt to set sfx volume at {}", volume);
 
     snd_SfxVolume = volume;
 
@@ -630,7 +630,7 @@ void S_ChangeMusic(int musicnum, int looping)
 {
     musicinfo_t* music = nullptr;
     if ((musicnum <= mus_None) || (musicnum >= NUMMUSIC))
-        I_Error("Bad music number %d", musicnum);
+        I_Error("Bad music number {}", musicnum);
     else
         music = &S_music[musicnum];
 

@@ -86,7 +86,6 @@ public:
 
     void SetPalette(byte* palette);
     void DrawPatch(int32 x, int32 y, int32 screen, patch_t* patch);
-    void MarkRect(int32 x, int32 y, int32 width, int32 height);
 
     byte* GetScreen(int32 n) const { return screens[n]; }
     byte* CopyScreen(int32 dest) const;

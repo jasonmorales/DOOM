@@ -456,7 +456,6 @@ EV_BuildStairs
     sector_t* sec;
     sector_t* tsec;
 
-    fixed_t		stairsize;
     fixed_t speed = 0;
 
     secnum = -1;
@@ -477,6 +476,8 @@ EV_BuildStairs
         floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
         floor->direction = 1;
         floor->sector = sec;
+
+        fixed_t stairsize = 0;
         switch (type)
         {
         case build8:

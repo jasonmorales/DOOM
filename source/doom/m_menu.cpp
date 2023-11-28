@@ -500,21 +500,14 @@ menu_t  SaveDef =
 //
 // M_ReadSaveStrings
 //  read the strings from the savegame files
-//
 void M_ReadSaveStrings()
 {
-    int             count;
-    int             i;
-    char    name[256];
-
-    for (i = 0;i < load_end;i++)
+    for (int32 i = 0;i < load_end;i++)
     {
-        if (CommandLine::HasArg("-cdrom"))
-            sprintf_s(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", i);
-        else
-            sprintf_s(name, SAVEGAMENAME"%d.dsg", i);
+        char name[256];
+        sprintf_s(name, SAVEGAMENAME "%d.dsg", i);
 
-        int handle = 0;
+        int32 handle = 0;
         _sopen_s(&handle, name, _O_RDONLY, _SH_DENYWR, _S_IREAD);
         if (handle == -1)
         {
@@ -522,57 +515,42 @@ void M_ReadSaveStrings()
             LoadMenu[i].status = 0;
             continue;
         }
-        count = _read(handle, &savegamestrings[i], SAVESTRINGSIZE);
+        _read(handle, &savegamestrings[i], SAVESTRINGSIZE);
         _close(handle);
         LoadMenu[i].status = 1;
     }
 }
 
-
-//
 // M_LoadGame & Cie.
-//
 void M_DrawLoad()
 {
-    int             i;
-
-    V_DrawPatchDirect(72, 28, 0, W_CacheLumpName("M_LOADG", PU_CACHE));
-    for (i = 0;i < load_end; i++)
+    g_doom->GetVideo()->DrawPatch(72, 28, 0, W_CacheLumpName("M_LOADG", PU_CACHE));
+    for (int32 i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x, LoadDef.y + LINEHEIGHT * i);
         M_WriteText(LoadDef.x, LoadDef.y + LINEHEIGHT * i, savegamestrings[i]);
     }
 }
 
-
-
-//
 // Draw border for the savegame description
-//
 void M_DrawSaveLoadBorder(int x, int y)
 {
-    V_DrawPatchDirect(x - 8, y + 7, 0, W_CacheLumpName<patch_t>("M_LSLEFT", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(x - 8, y + 7, 0, W_CacheLumpName<patch_t>("M_LSLEFT", PU_CACHE));
 
     for (int i = 0;i < 24;i++)
     {
-        V_DrawPatchDirect(x, y + 7, 0, W_CacheLumpName<patch_t>("M_LSCNTR", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(x, y + 7, 0, W_CacheLumpName<patch_t>("M_LSCNTR", PU_CACHE));
         x += 8;
     }
 
-    V_DrawPatchDirect(x, y + 7, 0, W_CacheLumpName<patch_t>("M_LSRGHT", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(x, y + 7, 0, W_CacheLumpName<patch_t>("M_LSRGHT", PU_CACHE));
 }
 
-//
 // User wants to load this game
-//
 void M_LoadSelect(int choice)
 {
     char    name[256];
-
-    if (CommandLine::HasArg("-cdrom"))
-        sprintf_s(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", choice);
-    else
-        sprintf_s(name, SAVEGAMENAME"%d.dsg", choice);
+    sprintf_s(name, SAVEGAMENAME "%d.dsg", choice);
     G_LoadGame(name);
     M_ClearMenus();
 }
@@ -600,7 +578,7 @@ void M_DrawSave()
 {
     int             i;
 
-    V_DrawPatchDirect(72, 28, 0, W_CacheLumpName<patch_t>("M_SAVEG", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(72, 28, 0, W_CacheLumpName<patch_t>("M_SAVEG", PU_CACHE));
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x, LoadDef.y + LINEHEIGHT * i);
@@ -742,12 +720,12 @@ void M_DrawReadThis1()
     switch (gamemode)
     {
     case GameMode::Doom2Commercial:
-        V_DrawPatchDirect(0, 0, 0, W_CacheLumpName<patch_t>("HELP", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP", PU_CACHE));
         break;
     case GameMode::Doom1Shareware:
     case GameMode::Doom1Registered:
     case GameMode::Doom1Retail:
-        V_DrawPatchDirect(0, 0, 0, W_CacheLumpName<patch_t>("HELP1", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP1", PU_CACHE));
         break;
     default:
         break;
@@ -768,11 +746,11 @@ void M_DrawReadThis2()
     case GameMode::Doom1Retail:
     case GameMode::Doom2Commercial:
         // This hack keeps us from having to change menus.
-        V_DrawPatchDirect(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
         break;
     case GameMode::Doom1Shareware:
     case GameMode::Doom1Registered:
-        V_DrawPatchDirect(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));
         break;
     default:
         break;
@@ -786,7 +764,7 @@ void M_DrawReadThis2()
 //
 void M_DrawSound()
 {
-    V_DrawPatchDirect(60, 38, 0, W_CacheLumpName<patch_t>("M_SVOL", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(60, 38, 0, W_CacheLumpName<patch_t>("M_SVOL", PU_CACHE));
 
     M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (sfx_vol + 1), 16, snd_SfxVolume);
 
@@ -832,27 +810,15 @@ void M_MusicVol(int choice)
     S_SetMusicVolume(snd_MusicVolume /* *8 */);
 }
 
-
-
-
-//
-// M_DrawMainMenu
-//
 void M_DrawMainMenu()
 {
-    V_DrawPatchDirect(94, 2, 0, W_CacheLumpName<patch_t>("M_DOOM", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(94, 2, 0, W_CacheLumpName<patch_t>("M_DOOM", PU_CACHE));
 }
 
-
-
-
-//
-// M_NewGame
-//
 void M_DrawNewGame()
 {
-    V_DrawPatchDirect(96, 14, 0, W_CacheLumpName<patch_t>("M_NEWG", PU_CACHE));
-    V_DrawPatchDirect(54, 38, 0, W_CacheLumpName<patch_t>("M_SKILL", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(96, 14, 0, W_CacheLumpName<patch_t>("M_NEWG", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(54, 38, 0, W_CacheLumpName<patch_t>("M_SKILL", PU_CACHE));
 }
 
 void M_NewGame(int)
@@ -877,7 +843,7 @@ int     epi;
 
 void M_DrawEpisode()
 {
-    V_DrawPatchDirect(54, 38, 0, W_CacheLumpName<patch_t>("M_EPISOD", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(54, 38, 0, W_CacheLumpName<patch_t>("M_EPISOD", PU_CACHE));
 }
 
 void M_VerifyNightmare(int ch)
@@ -934,13 +900,11 @@ char	msgNames[2][9] = { "M_MSGOFF","M_MSGON" };
 
 void M_DrawOptions()
 {
-    V_DrawPatchDirect(108, 15, 0, W_CacheLumpName<patch_t>("M_OPTTTL", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(108, 15, 0, W_CacheLumpName<patch_t>("M_OPTTTL", PU_CACHE));
 
-    V_DrawPatchDirect(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT * detail, 0,
-        W_CacheLumpName(detailNames[detailLevel], PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT * detail, 0, W_CacheLumpName(detailNames[detailLevel], PU_CACHE));
 
-    V_DrawPatchDirect(OptionsDef.x + 120, OptionsDef.y + LINEHEIGHT * messages, 0,
-        W_CacheLumpName(msgNames[showMessages], PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(OptionsDef.x + 120, OptionsDef.y + LINEHEIGHT * messages, 0, W_CacheLumpName(msgNames[showMessages], PU_CACHE));
 
     M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (mousesens + 1), 10, mouseSensitivity);
 
@@ -1145,17 +1109,16 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
     int		i;
 
     xx = x;
-    V_DrawPatchDirect(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE));
     xx += 8;
     for (i = 0;i < thermWidth;i++)
     {
-        V_DrawPatchDirect(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE));
         xx += 8;
     }
-    V_DrawPatchDirect(xx, y, 0, W_CacheLumpName("M_THERMR", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(xx, y, 0, W_CacheLumpName("M_THERMR", PU_CACHE));
 
-    V_DrawPatchDirect((x + 8) + thermDot * 8, y,
-        0, W_CacheLumpName("M_THERMO", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch((x + 8) + thermDot * 8, y, 0, W_CacheLumpName("M_THERMO", PU_CACHE));
 }
 
 void
@@ -1163,22 +1126,15 @@ M_DrawEmptyCell
 (menu_t* menu,
     int		item)
 {
-    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0,
-        W_CacheLumpName("M_CELL1", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, W_CacheLumpName("M_CELL1", PU_CACHE));
 }
 
-void
-M_DrawSelCell
-(menu_t* menu,
-    int		item)
+void M_DrawSelCell(menu_t* menu, int32 item)
 {
-    V_DrawPatchDirect(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0,
-        W_CacheLumpName("M_CELL2", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, W_CacheLumpName("M_CELL2", PU_CACHE));
 }
 
-
-void
-M_StartMessage(const char* string, void(*routine)(int), boolean input)
+void M_StartMessage(const char* string, void(*routine)(int), boolean input)
 {
     messageLastMenuActive = menuactive;
     messageToPrint = 1;
@@ -1270,7 +1226,8 @@ M_WriteText
         w = SHORT(hu_font[c]->width);
         if (cx + w > SCREENWIDTH)
             break;
-        V_DrawPatchDirect(cx, cy, 0, hu_font[c]);
+
+        g_doom->GetVideo()->DrawPatch(cx, cy, 0, hu_font[c]);
         cx += w;
     }
 }
@@ -1722,12 +1679,12 @@ void M_Drawer()
     for (short i = 0;i < max;i++)
     {
         if (currentMenu->menuitems[i].name[0])
-            V_DrawPatchDirect(x, y, 0, W_CacheLumpName(currentMenu->menuitems[i].name, PU_CACHE));
+            g_doom->GetVideo()->DrawPatch(x, y, 0, W_CacheLumpName(currentMenu->menuitems[i].name, PU_CACHE));
         y += LINEHEIGHT;
     }
 
     // DRAW SKULL
-    V_DrawPatchDirect(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0, W_CacheLumpName(skullName[whichSkull], PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0, W_CacheLumpName(skullName[whichSkull], PU_CACHE));
 }
 
 

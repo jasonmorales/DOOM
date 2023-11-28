@@ -645,8 +645,7 @@ void G_Ticker(Doom* doom)
                 if (gametic > BACKUPTICS
                     && consistancy[i][buf] != cmd->consistancy)
                 {
-                    I_Error("consistency failure (%i should be %i)",
-                        cmd->consistancy, consistancy[i][buf]);
+                    I_Error("consistency failure ({} should be {})", cmd->consistancy, consistancy[i][buf]);
                 }
                 if (players[i].mo)
                     consistancy[i][buf] = static_cast<short>(players[i].mo->x);
@@ -862,7 +861,7 @@ void G_DeathMatchSpawnPlayer(int playernum)
 
     auto selections = deathmatch_p - deathmatchstarts;
     if (selections < 4)
-        I_Error("Only %i deathmatch spots, 4 required", selections);
+        I_Error("Only {} deathmatch spots, 4 required", selections);
 
     for (j = 0; j < 20; j++)
     {
@@ -1221,10 +1220,7 @@ void G_DoSaveGame()
     char* description;
     int		i;
 
-    if (CommandLine::HasArg("-cdrom"))
-        sprintf_s(name, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", savegameslot);
-    else
-        sprintf_s(name, SAVEGAMENAME "%d.dsg", savegameslot);
+    sprintf_s(name, SAVEGAMENAME "%d.dsg", savegameslot);
 
     description = savedescription;
 
@@ -1253,7 +1249,7 @@ void G_DoSaveGame()
 
     *save_p++ = 0x1d;		// consistancy marker 
 
-    intptr_t length = save_p - savebuffer;
+    auto length = static_cast<uint32>(save_p - savebuffer);
     if (length > SAVEGAMESIZE)
         I_Error("Savegame buffer overrun");
 
@@ -1584,7 +1580,7 @@ boolean G_CheckDemoStatus(Doom* doom)
     if (timingdemo)
     {
         auto endtime = I_GetTime();
-        I_Error("timed %i gametics in %i realtics", gametic, endtime - starttime);
+        I_Error("timed {} gametics in {} realtics", gametic, endtime - starttime);
     }
 
     if (demoplayback)
@@ -1609,10 +1605,10 @@ boolean G_CheckDemoStatus(Doom* doom)
     if (doom->IsDemoRecording())
     {
         *demo_p++ = DEMOMARKER;
-        M_WriteFile(demoname, demobuffer, demo_p - demobuffer);
+        M_WriteFile(demoname, demobuffer, static_cast<uint32>(demo_p - demobuffer));
         Z_Free(demobuffer);
         doom->SetDemoRecording(false);
-        I_Error("Demo %s recorded", demoname);
+        I_Error("Demo {} recorded", demoname);
     }
 
     return false;

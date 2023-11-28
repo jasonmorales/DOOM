@@ -79,7 +79,7 @@ void ExtractFileBase(const char* path, char* dest)
     while (*src && *src != '.')
     {
         if (++length == 9)
-            I_Error("Filename base of %s >8 chars", path);
+            I_Error("Filename base of {} >8 chars", path);
 
         *dest++ = (char)toupper(*src++);
     }
@@ -148,7 +148,7 @@ void W_AddFile(const char* filename)
             // Homebrew levels?
             if (strncmp(header.identification, "PWAD", 4))
             {
-                I_Error("Wad file %s doesn't have IWAD "
+                I_Error("Wad file {} doesn't have IWAD "
                     "or PWAD id\n", filename);
             }
         }
@@ -196,7 +196,7 @@ void W_Reload()
 
     int handle = -1;
     if ((_sopen_s(&handle, reloadname, _O_RDONLY | _O_BINARY, _SH_DENYWR, _S_IREAD)) == -1)
-        I_Error("W_Reload: couldn't open %s", reloadname);
+        I_Error("W_Reload: couldn't open {}", reloadname);
 
     wadinfo_t header;
     _read(handle, &header, sizeof(header));
@@ -315,7 +315,7 @@ intptr_t W_GetNumForName(const char* name)
     intptr_t i = W_CheckNumForName(name);
 
     if (i == -1)
-        I_Error("W_GetNumForName: %s not found!", name);
+        I_Error("W_GetNumForName: {} not found!", name);
 
     return i;
 }
@@ -327,7 +327,7 @@ intptr_t W_GetNumForName(const char* name)
 int W_LumpLength(intptr_t lump)
 {
     if (lump >= numlumps)
-        I_Error("W_LumpLength: %d >= numlumps", lump);
+        I_Error("W_LumpLength: {} >= numlumps", lump);
 
     return lumpinfo[lump].size;
 }
@@ -340,7 +340,7 @@ int W_LumpLength(intptr_t lump)
 void W_ReadLump(intptr_t lump, void* dest)
 {
     if (lump >= numlumps)
-        I_Error("W_ReadLump: %i >= numlumps", lump);
+        I_Error("W_ReadLump: {} >= numlumps", lump);
 
     lumpinfo_t* l = lumpinfo + lump;
 
@@ -349,14 +349,14 @@ void W_ReadLump(intptr_t lump, void* dest)
     {
         // reloadable file, so use open / read / close
         if (_sopen_s(&handle, reloadname, _O_RDONLY | _O_BINARY, _SH_DENYWR, _S_IREAD) == -1)
-            I_Error("W_ReadLump: couldn't open %s", reloadname);
+            I_Error("W_ReadLump: couldn't open {}", reloadname);
     }
 
     _lseek(handle, l->position, SEEK_SET);
     int c = _read(handle, dest, l->size);
 
     if (c < l->size)
-        I_Error("W_ReadLump: only read %i of %i on lump %i", c, l->size, lump);
+        I_Error("W_ReadLump: only read {} of {} on lump {}", c, l->size, lump);
 
     if (l->handle == -1)
         _close(handle);
@@ -368,7 +368,7 @@ void W_ReadLump(intptr_t lump, void* dest)
 void* W_CacheLumpNum_internal(intptr_t lump, int tag)
 {
     if (lump >= numlumps)
-        I_Error("W_CacheLumpNum: %i >= numlumps", lump);
+        I_Error("W_CacheLumpNum: {} >= numlumps", lump);
 
     if (!lumpcache[lump])
     {

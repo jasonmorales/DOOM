@@ -335,7 +335,7 @@ void R_GenerateLookup(int texnum)
             colofs[x] = texturecompositesize[texnum];
 
             if (texturecompositesize[texnum] > 0x10000 - texture->height)
-                I_Error("R_GenerateLookup: texture %i is >64k", texnum);
+                I_Error("R_GenerateLookup: texture {} is >64k", texnum);
 
             texturecompositesize[texnum] += texture->height;
         }
@@ -478,7 +478,7 @@ void R_InitTextures()
             patch->originy = (mpatch->originy);
             patch->patch = patchlookup[(mpatch->patch)];
             if (patch->patch == -1)
-                I_Error("R_InitTextures: Missing patch in texture %s", texture->name);
+                I_Error("R_InitTextures: Missing patch in texture {}", texture->name);
         }
 
         texturecolumnlump[i] = Z_Malloc<short>(texture->width * 2, PU_STATIC, 0);
@@ -599,7 +599,7 @@ intptr_t R_FlatNumForName(const char* name)
     {
         char namet[9] = { 0 };
         memcpy(namet, name, 8);
-        I_Error("R_FlatNumForName: %s not found", namet);
+        I_Error("R_FlatNumForName: {} not found", namet);
     }
 
     return i - firstflat;
@@ -637,7 +637,7 @@ int	R_TextureNumForName(const char* name)
     int i = R_CheckTextureNumForName(name);
     if (i == -1)
     {
-        I_Error("R_TextureNumForName: %s not found", name);
+        I_Error("R_TextureNumForName: {} not found", name);
     }
     return i;
 }

@@ -716,7 +716,7 @@ void I_InitSound()
         sprintf_s(buffer, "%s", sndserver_filename);
 
     // start sound process
-    if (!_access(buffer, X_OK))
+    if (!_access(buffer, 0))
     {
         strcat_s(buffer, " -quiet");
         sndserver = _popen(buffer, "w");

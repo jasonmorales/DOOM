@@ -96,9 +96,9 @@ int eventhead;
 int eventtail;
 
 // Called by the I/O functions when input is detected
-void D_PostEvent(event_t* ev)
+void D_PostEvent(event_t ev)
 {
-    events[eventhead] = *ev;
+    events[eventhead] = ev;
     eventhead = (++eventhead) & (MAXEVENTS - 1);
 }
 
@@ -162,13 +162,6 @@ void Doom::Main()
 
     if (devparm)
         printf(D_DEVSTR);
-
-    if (CommandLine::HasArg("-cdrom"))
-    {
-        printf(D_CDROM);
-        _mkdir("c:\\doomdata");
-        strcpy_s(basedefault, "c:/doomdata/default.cfg");
-    }
 
     // turbo option
     if (CommandLine::HasArg("-turbo"))
@@ -409,10 +402,7 @@ void Doom::Main()
 
     if (int load; CommandLine::TryGetValues("-loadgame", load))
     {
-        if (CommandLine::HasArg("-cdrom"))
-            sprintf_s(file, "c:\\doomdata\\" SAVEGAMENAME "%d.dsg", load);
-        else
-            sprintf_s(file, SAVEGAMENAME "%d.dsg", load);
+        sprintf_s(file, SAVEGAMENAME "%d.dsg", load);
         G_LoadGame(file);
     }
 
@@ -427,7 +417,6 @@ void Doom::Main()
     Loop(); // never returns
 }
 
-// Doom::Loop()
 // Not a globally visible function,
 //  just included for source reference,
 //  called by Doom::Main, never exits.
@@ -448,9 +437,7 @@ void Doom::Loop()
 
     while (1)
     {
-        video->DeliverSystemMessages();
-
-        // frame syncronous IO operations
+        // frame synchronous IO operations
         video->StartFrame();
 
         // process one or more tics
@@ -769,7 +756,7 @@ void Doom::Display()
             y = 4;
         else
             y = viewwindowy + 4;
-        V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, W_CacheLumpName<patch_t>("M_PAUSE", PU_CACHE));
+        video->DrawPatch(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, W_CacheLumpName<patch_t>("M_PAUSE", PU_CACHE));
     }
 
     // menus go directly to the screen

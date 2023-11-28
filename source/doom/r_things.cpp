@@ -112,11 +112,11 @@ R_InstallSpriteLump
     {
         // the lump should be used for all rotations
         if (sprtemp[frame].rotate == false)
-            I_Error("R_InitSprites: Sprite %s frame %c has "
+            I_Error("R_InitSprites: Sprite {} frame {} has "
                 "multip rot=0 lump", spritename, 'A' + frame);
 
         if (sprtemp[frame].rotate == true)
-            I_Error("R_InitSprites: Sprite %s frame %c has rotations "
+            I_Error("R_InitSprites: Sprite {} frame {} has rotations "
                 "and a rot=0 lump", spritename, 'A' + frame);
 
         sprtemp[frame].rotate = false;
@@ -130,7 +130,7 @@ R_InstallSpriteLump
 
     // the lump is only used for one rotation
     if (sprtemp[frame].rotate == false)
-        I_Error("R_InitSprites: Sprite %s frame %c has rotations "
+        I_Error("R_InitSprites: Sprite {} frame {} has rotations "
             "and a rot=0 lump", spritename, 'A' + frame);
 
     sprtemp[frame].rotate = true;
@@ -138,7 +138,7 @@ R_InstallSpriteLump
     // make 0 based
     rotation--;
     if (sprtemp[frame].lump[rotation] != -1)
-        I_Error("R_InitSprites: Sprite %s : %c : %c "
+        I_Error("R_InitSprites: Sprite {} : {} : {} "
             "has two lumps mapped to it",
             spritename, 'A' + frame, '1' + rotation);
 
@@ -237,7 +237,7 @@ void R_InitSpriteDefs(Doom* doom, const char** namelist)
                 // must have all 8 frames
                 for (int rotation = 0; rotation < 8; rotation++)
                     if (sprtemp[frame].lump[rotation] == -1)
-                        I_Error("R_InitSprites: Sprite %s frame %c "
+                        I_Error("R_InitSprites: Sprite {} frame {} "
                             "is missing rotations",
                             namelist[i], frame + 'A');
                 break;
@@ -463,12 +463,12 @@ void R_ProjectSprite(mobj_t* thing)
     // decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
     if (thing->sprite >= numsprites)
-        I_Error("R_ProjectSprite: invalid sprite number %i ", static_cast<int32>(thing->sprite));
+        I_Error("R_ProjectSprite: invalid sprite number {}", static_cast<int32>(thing->sprite));
 #endif
     sprdef = &sprites[thing->sprite];
 #ifdef RANGECHECK
     if ((thing->frame & FF_FRAMEMASK) >= sprdef->numframes)
-        I_Error("R_ProjectSprite: invalid sprite frame %i : %i ", static_cast<int32>(thing->sprite), thing->frame);
+        I_Error("R_ProjectSprite: invalid sprite frame {} : {}", static_cast<int32>(thing->sprite), thing->frame);
 #endif
     sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
@@ -614,12 +614,12 @@ void R_DrawPSprite(pspdef_t* psp)
     // decide which patch to use
 #ifdef RANGECHECK
     if ((unsigned)psp->state->sprite >= numsprites)
-        I_Error("R_ProjectSprite: invalid sprite number %i ", static_cast<int32>(psp->state->sprite));
+        I_Error("R_ProjectSprite: invalid sprite number {} ", static_cast<int32>(psp->state->sprite));
 #endif
     sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
     if ((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
-        I_Error("R_ProjectSprite: invalid sprite frame %i : %i ", static_cast<int32>(psp->state->sprite), psp->state->frame);
+        I_Error("R_ProjectSprite: invalid sprite frame {} : {} ", static_cast<int32>(psp->state->sprite), psp->state->frame);
 #endif
     sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 

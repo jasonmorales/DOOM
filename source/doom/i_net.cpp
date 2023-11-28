@@ -70,7 +70,7 @@ SOCKET UDPsocket()
     {
         static char errorBuffer[1024];
         strerror_s(errorBuffer, errno);
-        I_Error("can't create socket: %s", errorBuffer);
+        I_Error("can't create socket: {}", errorBuffer);
     }
 
     return s;
@@ -89,7 +89,7 @@ void BindToLocalPort(SOCKET s, u_short port)
     {
         static char errorBuffer[1024];
         strerror_s(errorBuffer, errno);
-        I_Error("BindToPort: bind: %s", errorBuffer);
+        I_Error("BindToPort: bind: {}", errorBuffer);
     }
 }
 
@@ -141,7 +141,7 @@ void PacketGet()
     {
         static char errorBuffer[1024];
         if (_strerror_s(errorBuffer, nullptr) != EWOULDBLOCK)
-            I_Error("GetPacket: %s", errorBuffer);
+            I_Error("GetPacket: {}", errorBuffer);
 
         doomcom->remotenode = -1;		// no packet
         return;
@@ -199,7 +199,7 @@ int GetLocalAddress()
     // get local address
     v = gethostname(hostname, sizeof(hostname));
     if (v == -1)
-        I_Error("GetLocalAddress : gethostname: errno %d", errno);
+        I_Error("GetLocalAddress : gethostname: errno {}", errno);
 
     hostentry = gethostbyname(hostname);
     if (!hostentry)
@@ -271,7 +271,7 @@ void I_InitNetwork()
         {
             struct hostent* hostentry = gethostbyname(argStr.c_str());
             if (!hostentry)
-                I_Error("gethostbyname: couldn't find %s", argStr.c_str());
+                I_Error("gethostbyname: couldn't find {}", argStr.c_str());
             sendaddress[doomcom->numnodes].sin_addr.s_addr = *(int*)hostentry->h_addr_list[0];
         }
         doomcom->numnodes++;
@@ -295,5 +295,5 @@ void I_NetCmd()
     else if (doomcom->command == CMD_GET)
         netget();
     else
-        I_Error("Bad net cmd: %i\n", doomcom->command);
+        I_Error("Bad net cmd: {}\n", doomcom->command);
 }

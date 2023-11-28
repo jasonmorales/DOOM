@@ -280,8 +280,6 @@ void F_TextWrite()
         }
     }
 
-    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
-
     // draw some of the text onto the screen
     cx = 10;
     cy = 10;
@@ -312,7 +310,7 @@ void F_TextWrite()
         w = (hu_font[c]->width);
         if (cx + w > SCREENWIDTH)
             break;
-        V_DrawPatch(cx, cy, 0, hu_font[c]);
+        g_doom->GetVideo()->DrawPatch(cx, cy, 0, hu_font[c]);
         cx += w;
     }
 
@@ -544,7 +542,7 @@ void F_CastPrint(const char* text)
         }
 
         int w = (hu_font[c]->width);
-        V_DrawPatch(cx, 180, 0, hu_font[c]);
+        g_doom->GetVideo()->DrawPatch(cx, 180, 0, hu_font[c]);
         cx += w;
     }
 }
@@ -557,7 +555,7 @@ void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch);
 void F_CastDrawer()
 {
     // erase the entire screen to a background
-    V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("BOSSBACK", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("BOSSBACK", PU_CACHE));
 
     F_CastPrint(castorder[castnum].name);
 
@@ -571,7 +569,7 @@ void F_CastDrawer()
     if (flip)
         V_DrawPatchFlipped(160, 170, 0, patch);
     else
-        V_DrawPatch(160, 170, 0, patch);
+        g_doom->GetVideo()->DrawPatch(160, 170, 0, patch);
 }
 
 void F_DrawPatchCol(int x, patch_t* patch, int col)
@@ -607,8 +605,6 @@ void F_BunnyScroll()
     auto p1 = W_CacheLumpName<patch_t>("PFUB2", PU_LEVEL);
     auto p2 = W_CacheLumpName<patch_t>("PFUB1", PU_LEVEL);
 
-    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
-
     scrolled = 320 - (finalecount - 230) / 2;
     if (scrolled > 320)
         scrolled = 320;
@@ -627,7 +623,7 @@ void F_BunnyScroll()
         return;
     if (finalecount < 1180)
     {
-        V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, W_CacheLumpName<patch_t>("END0", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, W_CacheLumpName<patch_t>("END0", PU_CACHE));
         laststage = 0;
         return;
     }
@@ -642,7 +638,7 @@ void F_BunnyScroll()
     }
 
     sprintf_s(name, "END%i", stage);
-    V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, W_CacheLumpName<patch_t>(name, PU_CACHE));
+    g_doom->GetVideo()->DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, W_CacheLumpName<patch_t>(name, PU_CACHE));
 }
 
 //
@@ -664,18 +660,18 @@ void F_Drawer()
         {
         case 1:
             if (gamemode == GameMode::Doom1Retail)
-                V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
+                g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
             else
-                V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));
+                g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));
             break;
         case 2:
-            V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("VICTORY2", PU_CACHE));
+            g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("VICTORY2", PU_CACHE));
             break;
         case 3:
             F_BunnyScroll();
             break;
         case 4:
-            V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("ENDPIC", PU_CACHE));
+            g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("ENDPIC", PU_CACHE));
             break;
         }
     }

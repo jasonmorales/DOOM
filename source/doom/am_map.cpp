@@ -1257,7 +1257,7 @@ void AM_drawMarks()
             fx = CXMTOF(markpoints[i].x);
             fy = CYMTOF(markpoints[i].y);
             if (fx >= f_x && fx <= f_w - w && fy >= f_y && fy <= f_h - h)
-                V_DrawPatch(fx, fy, FB, marknums[i]);
+                g_doom->GetVideo()->DrawPatch(fx, fy, FB, marknums[i]);
         }
     }
 
@@ -1283,6 +1283,4 @@ void AM_Drawer()
     AM_drawCrosshair(XHAIRCOLORS);
 
     AM_drawMarks();
-
-    g_doom->GetVideo()->MarkRect(f_x, f_y, f_w, f_h);
 }

@@ -115,7 +115,7 @@ void R_DrawColumn()
     if ((unsigned)dc_x >= SCREENWIDTH
         || dc_yl < 0
         || dc_yh >= SCREENHEIGHT)
-        I_Error("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
+        I_Error("R_DrawColumn: {} to {} at {}", dc_yl, dc_yh, dc_x);
 #endif 
 
     // Framebuffer destination address.
@@ -224,7 +224,7 @@ void R_DrawColumnLow()
         || dc_yh >= SCREENHEIGHT)
     {
 
-        I_Error("R_DrawColumn: %i to %i at %i", dc_yl, dc_yh, dc_x);
+        I_Error("R_DrawColumn: {} to {} at {}", dc_yl, dc_yh, dc_x);
     }
     //	dccount++; 
 #endif 
@@ -304,7 +304,7 @@ void R_DrawFuzzColumn()
     if ((unsigned)dc_x >= SCREENWIDTH
         || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
     {
-        I_Error("R_DrawFuzzColumn: %i to %i at %i",
+        I_Error("R_DrawFuzzColumn: {} to {} at {}",
             dc_yl, dc_yh, dc_x);
     }
 #endif
@@ -394,7 +394,7 @@ void R_DrawTranslatedColumn()
         || dc_yl < 0
         || dc_yh >= SCREENHEIGHT)
     {
-        I_Error("R_DrawColumn: %i to %i at %i",
+        I_Error("R_DrawColumn: {} to {} at {}",
             dc_yl, dc_yh, dc_x);
     }
 
@@ -518,7 +518,7 @@ void R_DrawSpan()
         || ds_x2 >= SCREENWIDTH
         || (unsigned)ds_y>SCREENHEIGHT)
     {
-        I_Error("R_DrawSpan: %i to %i at %i",
+        I_Error("R_DrawSpan: {} to {} at {}",
             ds_x1, ds_x2, ds_y);
     }
     //	dscount++; 
@@ -641,7 +641,7 @@ void R_DrawSpanLow()
         || ds_x2 >= SCREENWIDTH
         || (unsigned)ds_y>SCREENHEIGHT)
     {
-        I_Error("R_DrawSpan: %i to %i at %i",
+        I_Error("R_DrawSpan: {} to {} at {}",
             ds_x1, ds_x2, ds_y);
     }
     //	dscount++; 
@@ -753,47 +753,31 @@ void R_FillBackScreen()
     patch = W_CacheLumpName("brdr_t", PU_CACHE);
 
     for (x = 0; x < scaledviewwidth; x += 8)
-        V_DrawPatch(viewwindowx + x, viewwindowy - 8, 1, patch);
+        g_doom->GetVideo()->DrawPatch(viewwindowx + x, viewwindowy - 8, 1, patch);
     patch = W_CacheLumpName("brdr_b", PU_CACHE);
 
     for (x = 0; x < scaledviewwidth; x += 8)
-        V_DrawPatch(viewwindowx + x, viewwindowy + viewheight, 1, patch);
+        g_doom->GetVideo()->DrawPatch(viewwindowx + x, viewwindowy + viewheight, 1, patch);
     patch = W_CacheLumpName("brdr_l", PU_CACHE);
 
     for (y = 0; y < viewheight; y += 8)
-        V_DrawPatch(viewwindowx - 8, viewwindowy + y, 1, patch);
+        g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + y, 1, patch);
     patch = W_CacheLumpName("brdr_r", PU_CACHE);
 
     for (y = 0; y < viewheight; y += 8)
-        V_DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + y, 1, patch);
-
+        g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + y, 1, patch);
 
     // Draw beveled edge. 
-    V_DrawPatch(viewwindowx - 8,
-        viewwindowy - 8,
-        1,
-        W_CacheLumpName("brdr_tl", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, W_CacheLumpName("brdr_tl", PU_CACHE));
 
-    V_DrawPatch(viewwindowx + scaledviewwidth,
-        viewwindowy - 8,
-        1,
-        W_CacheLumpName("brdr_tr", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, W_CacheLumpName("brdr_tr", PU_CACHE));
 
-    V_DrawPatch(viewwindowx - 8,
-        viewwindowy + viewheight,
-        1,
-        W_CacheLumpName("brdr_bl", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, W_CacheLumpName("brdr_bl", PU_CACHE));
 
-    V_DrawPatch(viewwindowx + scaledviewwidth,
-        viewwindowy + viewheight,
-        1,
-        W_CacheLumpName("brdr_br", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, W_CacheLumpName("brdr_br", PU_CACHE));
 }
 
-
-//
 // Copy a screen buffer.
-//
 void R_VideoErase(unsigned ofs, int count)
 {
     // LFB copy.
@@ -835,7 +819,4 @@ void R_DrawViewBorder()
         R_VideoErase(ofs, side);
         ofs += SCREENWIDTH;
     }
-
-    // ? 
-    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT);
 }

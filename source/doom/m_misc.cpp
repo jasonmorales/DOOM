@@ -89,9 +89,9 @@ M_DrawText
         if (x + w > SCREENWIDTH)
             break;
         if (direct)
-            V_DrawPatchDirect(x, y, 0, hu_font[c]);
+            g_doom->GetVideo()->DrawPatch(x, y, 0, hu_font[c]);
         else
-            V_DrawPatch(x, y, 0, hu_font[c]);
+            g_doom->GetVideo()->DrawPatch(x, y, 0, hu_font[c]);
         x += w;
     }
 
@@ -105,7 +105,7 @@ M_DrawText
 #define O_BINARY 0
 #endif
 
-boolean M_WriteFile(char const* name, void* source, intptr_t length)
+boolean M_WriteFile(char const* name, void* source, uint32 length)
 {
     int handle = 0;
     _sopen_s(&handle, name, _O_WRONLY | _O_CREAT | _O_TRUNC | _O_BINARY, _SH_DENYWR, _S_IREAD);
@@ -113,7 +113,7 @@ boolean M_WriteFile(char const* name, void* source, intptr_t length)
     if (handle == -1)
         return false;
 
-    auto count = _write(handle, source, length);
+    uint32 count = _write(handle, source, length);
     _close(handle);
 
     if (count < length)
@@ -136,10 +136,10 @@ M_ReadFile
 
     int handle = -1;
     if (_sopen_s(&handle, name, O_RDONLY | O_BINARY, _SH_DENYWR, _S_IREAD) != 0)
-        I_Error("Couldn't read file %s", name);
+        I_Error("Couldn't read file {}", name);
 
     if (fstat(handle, &fileinfo) == -1)
-        I_Error("Couldn't read file %s", name);
+        I_Error("Couldn't read file {}", name);
 
     length = fileinfo.st_size;
     buf = Z_Malloc(length, PU_STATIC, nullptr);
@@ -147,7 +147,7 @@ M_ReadFile
     _close(handle);
 
     if (count < length)
-        I_Error("Couldn't read file %s", name);
+        I_Error("Couldn't read file {}", name);
 
     *buffer = buf;
     return length;
@@ -428,7 +428,7 @@ WritePCXfile
         *pack++ = *palette++;
 
     // write output file
-    intptr_t length = pack - reinterpret_cast<byte*>(pcx);
+    auto length = static_cast<uint32>(pack - reinterpret_cast<byte*>(pcx));
     M_WriteFile(filename, pcx, length);
 
     Z_Free(pcx);
@@ -436,16 +436,15 @@ WritePCXfile
 
 void M_ScreenShot()
 {
-    int		i;
-    char	lbmname[12];
-
     // munge planar buffer to linear
     auto* linear = g_doom->GetVideo()->CopyScreen(2);
 
     // find a file name to save it to
+    char lbmname[12];
     strcpy_s(lbmname, "DOOM00.pcx");
 
-    for (i = 0; i <= 99; i++)
+    char i = 0;
+    for (; i <= 99; i++)
     {
         lbmname[4] = i / 10 + '0';
         lbmname[5] = i % 10 + '0';

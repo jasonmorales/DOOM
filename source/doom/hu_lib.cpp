@@ -24,6 +24,12 @@
 #include "hu_lib.h"
 #include "r_local.h"
 #include "r_draw.h"
+#include "d_main.h"
+#include "i_video.h"
+
+
+extern Doom* g_doom;
+
 
 // boolean : whether the screen is always erased
 #define noterased viewwindowx
@@ -109,7 +115,7 @@ HUlib_drawTextLine
             w = (l->f[c - l->sc]->width);
             if (x + w > SCREENWIDTH)
                 break;
-            V_DrawPatchDirect(x, l->y, FG, l->f[c - l->sc]);
+            g_doom->GetVideo()->DrawPatch(x, l->y, FG, l->f[c - l->sc]);
             x += w;
         }
         else
@@ -124,7 +130,7 @@ HUlib_drawTextLine
     if (drawcursor
         && x + (l->f['_' - l->sc]->width) <= SCREENWIDTH)
     {
-        V_DrawPatchDirect(x, l->y, FG, l->f['_' - l->sc]);
+        g_doom->GetVideo()->DrawPatch(x, l->y, FG, l->f['_' - l->sc]);
     }
 }
 
