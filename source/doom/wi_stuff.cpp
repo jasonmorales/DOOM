@@ -32,14 +32,20 @@
 #include "s_sound.h"
 
 #include "doomstat.h"
+#include "d_main.h"
 
 // Data.
 #include "sounds.h"
 
 // Needs access to LFB.
 #include "v_video.h"
+#include "i_video.h"
 
 #include "wi_stuff.h"
+
+
+extern Doom* g_doom;
+
 
 //
 // Data needed to add patches to full screen intermission pics.
@@ -396,8 +402,8 @@ static patch_t** lnames;
 
 void WI_slamBackground()
 {
-    memcpy(screens[0], screens[1], SCREENWIDTH * SCREENHEIGHT);
-    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    memcpy(g_doom->GetVideo()->GetScreen(0), g_doom->GetVideo()->GetScreen(1), SCREENWIDTH * SCREENHEIGHT);
+    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
 }
 
 // The ticker is used to detect keys

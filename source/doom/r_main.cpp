@@ -24,10 +24,15 @@
 #include "m_bbox.h"
 #include "r_local.h"
 #include "r_sky.h"
+#include "d_main.h"
 
 #include <stdlib.h>
 #include <math.h>
 #include <utility>
+
+
+extern Doom* g_doom;
+
 
 // Fineangles in the SCREENWIDTH wide window.
 #define FIELDOFVIEW		2048	
@@ -111,32 +116,6 @@ void (*fuzzcolfunc) ();
 void (*transcolfunc) ();
 void (*spanfunc) ();
 
-
-
-//
-// R_AddPointToBox
-// Expand a given bbox
-// so that it encloses a given point.
-//
-void
-R_AddPointToBox
-(int		x,
-    int		y,
-    fixed_t* box)
-{
-    if (x < box[BOXLEFT])
-        box[BOXLEFT] = x;
-    if (x > box[BOXRIGHT])
-        box[BOXRIGHT] = x;
-    if (y < box[BOXBOTTOM])
-        box[BOXBOTTOM] = y;
-    if (y > box[BOXTOP])
-        box[BOXTOP] = y;
-}
-
-
-//
-// R_PointOnSide
 // Traverse BSP (sub) tree,
 //  check point against partition plane.
 // Returns side 0 (front) or 1 (back).
@@ -591,56 +570,33 @@ void R_InitLightTables()
     }
 }
 
-
-
-//
-// R_SetViewSize
 // Do not really change anything here,
 //  because it might be in the middle of a refresh.
 // The change will take effect next refresh.
-//
-boolean		setsizeneeded;
-int		setblocks;
-int		setdetail;
-
-
-void
-R_SetViewSize
-(int		blocks,
-    int		detail)
+void Render::RequestSetViewSize(int32 inBlocks, int32 inDetail)
 {
-    setsizeneeded = true;
-    setblocks = blocks;
-    setdetail = detail;
+    isSetSizeRequested = true;
+    requestedBlocks = inBlocks;
+    requestedDetail = inDetail;
 }
 
-
-//
-// R_ExecuteSetViewSize
-//
-void R_ExecuteSetViewSize()
+bool Render::CheckSetViewSize()
 {
-    fixed_t	cosadj;
-    fixed_t	dy;
-    int		i;
-    int		j;
-    int		level;
-    int		startmap;
+    if (!isSetSizeRequested)
+        return false;
 
-    setsizeneeded = false;
-
-    if (setblocks == 11)
+    if (requestedBlocks == 11)
     {
         scaledviewwidth = SCREENWIDTH;
         viewheight = SCREENHEIGHT;
     }
     else
     {
-        scaledviewwidth = setblocks * 32;
-        viewheight = (setblocks * 168 / 10) & ~7;
+        scaledviewwidth = requestedBlocks * 32;
+        viewheight = (requestedBlocks * 168 / 10) & ~7;
     }
 
-    detailshift = setdetail;
+    detailshift = requestedDetail;
     viewwidth = scaledviewwidth >> detailshift;
 
     centery = viewheight / 2;
@@ -673,31 +629,31 @@ void R_ExecuteSetViewSize()
     pspriteiscale = FRACUNIT * SCREENWIDTH / viewwidth;
 
     // thing clipping
-    for (i = 0; i < viewwidth; i++)
+    for (int32 i = 0; i < viewwidth; i++)
         screenheightarray[i] = viewheight;
 
     // planes
-    for (i = 0; i < viewheight; i++)
+    for (int32 i = 0; i < viewheight; i++)
     {
-        dy = ((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2;
+        fixed_t dy = ((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2;
         dy = abs(dy);
         yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT, dy);
     }
 
-    for (i = 0; i < viewwidth; i++)
+    for (int32 i = 0; i < viewwidth; i++)
     {
-        cosadj = abs(finecosine[xtoviewangle[i] >> ANGLETOFINESHIFT]);
+        fixed_t cosadj = abs(finecosine[xtoviewangle[i] >> ANGLETOFINESHIFT]);
         distscale[i] = FixedDiv(FRACUNIT, cosadj);
     }
 
     // Calculate the light levels to use
     //  for each level / scale combination.
-    for (i = 0; i < LIGHTLEVELS; i++)
+    for (int32 i = 0; i < LIGHTLEVELS; i++)
     {
-        startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
-        for (j = 0; j < MAXLIGHTSCALE; j++)
+        auto startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
+        for (int32 j = 0; j < MAXLIGHTSCALE; j++)
         {
-            level = startmap - j * SCREENWIDTH / (viewwidth << detailshift) / DISTMAP;
+            auto level = startmap - j * SCREENWIDTH / (viewwidth << detailshift) / DISTMAP;
 
             if (level < 0)
                 level = 0;
@@ -708,15 +664,17 @@ void R_ExecuteSetViewSize()
             scalelight[i][j] = colormaps + level * 256;
         }
     }
+
+    isSetSizeRequested = false;
+    requestedBlocks = 0;
+    requestedDetail = 0;
+    return true;
 }
 
-//
-// R_Init
-//
 extern int32	detailLevel;
 extern int32	screenblocks;
 
-void R_Init()
+void Render::Init()
 {
     R_InitData();
     printf("\nR_InitData");
@@ -726,7 +684,7 @@ void R_Init()
     // viewwidth / viewheight / detailLevel are set by the defaults
     printf("\nR_InitTables");
 
-    R_SetViewSize(screenblocks, detailLevel);
+    RequestSetViewSize(screenblocks, detailLevel);
     R_InitPlanes();
     printf("\nR_InitPlanes");
     R_InitLightTables();

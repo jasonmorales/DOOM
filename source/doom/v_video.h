@@ -35,25 +35,10 @@
 
 // Screen 0 is the screen updated by I_Update screen.
 // Screen 1 is an extra buffer.
-
-
-
-extern	byte* screens[5];
-
-extern  int	dirtybox[4];
-
 extern	byte	gammatable[5][256];
 extern	int32	usegamma;
 
-
-
-// Allocates buffer screens, call before R_Init.
-void V_Init();
-
-
-void
-V_CopyRect
-(int		srcx,
+void V_CopyRect(int		srcx,
     int		srcy,
     int		srcscrn,
     int		width,
@@ -62,25 +47,19 @@ V_CopyRect
     int		desty,
     int		destscrn);
 
-void
-V_DrawPatch
-(int		x,
+void V_DrawPatch(int		x,
     int		y,
     int		scrn,
     patch_t* patch);
 
-void
-V_DrawPatchDirect
-(int		x,
+void V_DrawPatchDirect(int		x,
     int		y,
     int		scrn,
     patch_t* patch);
 
 
 // Draw a linear block of pixels into the view buffer.
-void
-V_DrawBlock
-(int		x,
+void V_DrawBlock(int		x,
     int		y,
     int		scrn,
     int		width,
@@ -88,19 +67,9 @@ V_DrawBlock
     byte* src);
 
 // Reads a linear block of pixels into the view buffer.
-void
-V_GetBlock
-(int		x,
+void V_GetBlock(int		x,
     int		y,
     int		scrn,
     int		width,
     int		height,
     byte* dest);
-
-
-void
-V_MarkRect
-(int		x,
-    int		y,
-    int		width,
-    int		height);

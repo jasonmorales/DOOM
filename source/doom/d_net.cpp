@@ -25,7 +25,6 @@
 #include "doomdef.h"
 #include "doomstat.h"
 
-
 #include "d_main.h"
 extern Doom* g_doom;
 
@@ -35,37 +34,35 @@ void G_BuildTiccmd(ticcmd_t* cmd);
 #include <limits>
 #include <stdint.h>
 
+int32 Net::ticks[Net::MaxNodes] = {0};
+
 #define	NCMD_EXIT		0x80000000
 #define	NCMD_RETRANSMIT		0x40000000
 #define	NCMD_SETUP		0x20000000
 #define	NCMD_KILL		0x10000000	// kill game
 #define	NCMD_CHECKSUM	 	0x0fffffff
 
-
 doomcom_t* doomcom;
 doomdata_t* netbuffer;		// points inside doomcom
 
-
-//
 // NETWORKING
-//
+
 // gametic is the tic about to (or currently being) run
 // maketic is the tick that hasn't had control made for it yet
-// nettics[] has the maketics for all players 
+// Net::ticks[] has the maketics for all players 
 //
-// a gametic cannot be run until nettics[] > gametic for all players
-//
+// a gametic cannot be run until Net::ticks[] > gametic for all players
+
 #define	RESENDCOUNT	10
 #define	PL_DRONE	0x80	// bit flag in doomdata->player
 
 ticcmd_t	localcmds[BACKUPTICS];
 
-ticcmd_t        netcmds[MAXPLAYERS][BACKUPTICS];
-int         	nettics[MAXNETNODES];
-boolean		nodeingame[MAXNETNODES];		// set false as nodes leave game
-boolean		remoteresend[MAXNETNODES];		// set when local needs tics
-int		resendto[MAXNETNODES];			// set when remote needs tics
-int		resendcount[MAXNETNODES];
+ticcmd_t netcmds[MAXPLAYERS][BACKUPTICS];
+boolean nodeingame[Net::MaxNodes];		// set false as nodes leave game
+boolean remoteresend[Net::MaxNodes];		// set when local needs tics
+int32 resendto[Net::MaxNodes];			// set when remote needs tics
+int32 resendcount[Net::MaxNodes];
 
 int		nodeforplayer[MAXPLAYERS];
 
@@ -297,10 +294,10 @@ void GetPackets()
             resendcount[netnode]--;
 
         // check for out of order / duplicated packet		
-        if (realend == nettics[netnode])
+        if (realend == Net::ticks[netnode])
             continue;
 
-        if (realend < nettics[netnode])
+        if (realend < Net::ticks[netnode])
         {
             if (debugfile)
                 fprintf(debugfile,
@@ -310,13 +307,13 @@ void GetPackets()
         }
 
         // check for a missed packet
-        if (realstart > nettics[netnode])
+        if (realstart > Net::ticks[netnode])
         {
             // stop processing until the other system resends the missed tics
             if (debugfile)
                 fprintf(debugfile,
                     "missed tics from %i (%i - %i)\n",
-                    netnode, realstart, nettics[netnode]);
+                    netnode, realstart, Net::ticks[netnode]);
             remoteresend[netnode] = true;
             continue;
         }
@@ -327,13 +324,13 @@ void GetPackets()
 
             remoteresend[netnode] = false;
 
-            start = nettics[netnode] - realstart;
+            start = Net::ticks[netnode] - realstart;
             src = &netbuffer->cmds[start];
 
-            while (nettics[netnode] < realend)
+            while (Net::ticks[netnode] < realend)
             {
-                dest = &netcmds[netconsole][nettics[netnode] % BACKUPTICS];
-                nettics[netnode]++;
+                dest = &netcmds[netconsole][Net::ticks[netnode] % BACKUPTICS];
+                Net::ticks[netnode]++;
                 *dest = *src;
                 src++;
             }
@@ -341,12 +338,9 @@ void GetPackets()
     }
 }
 
-
-//
 // NetUpdate
 // Builds ticcmds for console player,
 // sends out a packet
-//
 time_t      gametime;
 
 void NetUpdate()
@@ -388,7 +382,7 @@ void NetUpdate()
     }
 
     if (g_doom->UseSingleTicks())
-        return;	// singletic update is syncronous
+        return;	// singletic update is synchronous
 
     // send the packet to the other nodes
     for (int i = 0; i < doomcom->numnodes; i++)
@@ -407,7 +401,7 @@ void NetUpdate()
 
             if (remoteresend[i])
             {
-                netbuffer->retransmitfrom = static_cast<byte>(nettics[i]);
+                netbuffer->retransmitfrom = static_cast<byte>(Net::ticks[i]);
                 HSendPacket(i, NCMD_RETRANSMIT);
             }
             else
@@ -448,7 +442,7 @@ void CheckAbort()
 void D_ArbitrateNetStart()
 {
     int		i;
-    boolean	gotinfo[MAXNETNODES];
+    boolean	gotinfo[Net::MaxNodes];
 
     autostart = true;
     memset(gotinfo, 0, sizeof(gotinfo));
@@ -502,7 +496,7 @@ void D_ArbitrateNetStart()
 #if 1
             for (i = 10; i && HGetPacket(); --i)
             {
-                if ((netbuffer->player & 0x7f) < MAXNETNODES)
+                if ((netbuffer->player & 0x7f) < Net::MaxNodes)
                     gotinfo[netbuffer->player & 0x7f] = true;
             }
 #else
@@ -519,20 +513,13 @@ void D_ArbitrateNetStart()
     }
 }
 
-//
-// D_CheckNetGame
 // Works out player numbers among the net participants
-//
-extern	int			viewangleoffset;
-
-void D_CheckNetGame()
+void Net::CheckGame()
 {
-    int             i;
-
-    for (i = 0; i < MAXNETNODES; i++)
+    for (int i = 0; i < Net::MaxNodes; ++i)
     {
         nodeingame[i] = false;
-        nettics[i] = 0;
+        Net::ticks[i] = 0;
         remoteresend[i] = false;	// set when local needs tics
         resendto[i] = 0;		// which tic to start sending
     }
@@ -556,21 +543,17 @@ void D_CheckNetGame()
     if (maxsend < 1)
         maxsend = 1;
 
-    for (i = 0; i < doomcom->numplayers; i++)
+    for (int i = 0; i < doomcom->numplayers; i++)
         playeringame[i] = true;
-    for (i = 0; i < doomcom->numnodes; i++)
+
+    for (int i = 0; i < doomcom->numnodes; i++)
         nodeingame[i] = true;
 
-    printf("player %i of %i (%i nodes)\n",
-        consoleplayer + 1, doomcom->numplayers, doomcom->numnodes);
-
+    printf("player %i of %i (%i nodes)\n", consoleplayer + 1, doomcom->numplayers, doomcom->numnodes);
 }
 
-//
-// D_QuitNetGame
 // Called before quitting to leave a net game
 // without hanging the other players
-//
 void D_QuitNetGame()
 {
     if (debugfile)
@@ -622,8 +605,8 @@ void TryRunTics()
         if (nodeingame[i])
         {
             numplaying++;
-            if (nettics[i] < lowtic)
-                lowtic = nettics[i];
+            if (Net::ticks[i] < lowtic)
+                lowtic = Net::ticks[i];
         }
     }
     auto availabletics = lowtic - gametic / ticdup;
@@ -647,8 +630,8 @@ void TryRunTics()
 
     if (!demoplayback)
     {
-        // ideally nettics[0] should be 1 - 3 tics above lowtic
-        // if we are consistantly slower, speed up time
+        // ideally Net::ticks[0] should be 1 - 3 tics above lowtic
+        // if we are consistently slower, speed up time
         for (i = 0; i < MAXPLAYERS; i++)
             if (playeringame[i])
                 break;
@@ -658,13 +641,13 @@ void TryRunTics()
         }
         else
         {
-            if (nettics[0] <= nettics[nodeforplayer[i]])
+            if (Net::ticks[0] <= Net::ticks[nodeforplayer[i]])
             {
                 gametime--;
                 // printf ("-");
             }
-            frameskip[frameon & 3] = (oldnettics > nettics[nodeforplayer[i]]);
-            oldnettics = nettics[0];
+            frameskip[frameon & 3] = (oldnettics > Net::ticks[nodeforplayer[i]]);
+            oldnettics = Net::ticks[0];
             if (frameskip[0] && frameskip[1] && frameskip[2] && frameskip[3])
             {
                 skiptics = 1;
@@ -680,8 +663,8 @@ void TryRunTics()
         lowtic = std::numeric_limits<int>::max();
 
         for (i = 0; i < doomcom->numnodes; i++)
-            if (nodeingame[i] && nettics[i] < lowtic)
-                lowtic = nettics[i];
+            if (nodeingame[i] && Net::ticks[i] < lowtic)
+                lowtic = Net::ticks[i];
 
         if (lowtic < gametic / ticdup)
             I_Error("TryRunTics: lowtic < gametic");

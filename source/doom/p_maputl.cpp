@@ -89,22 +89,17 @@ P_PointOnLineSide
     return 1;			// back side
 }
 
-
-
-//
-// P_BoxOnLineSide
 // Considers the line to be infinite
 // Returns side 0 or 1, -1 if box crosses the line.
-//
-int P_BoxOnLineSide(fixed_t* tmbox, line_t* ld)
+int32 P_BoxOnLineSide(bbox& tmbox, line_t* ld)
 {
     int p1 = 0;
     int p2 = 0;
     switch (ld->slopetype)
     {
     case ST_HORIZONTAL:
-        p1 = tmbox[BOXTOP] > ld->v1->y;
-        p2 = tmbox[BOXBOTTOM] > ld->v1->y;
+        p1 = tmbox.top > ld->v1->y;
+        p2 = tmbox.bottom > ld->v1->y;
         if (ld->dx < 0)
         {
             p1 ^= 1;
@@ -113,8 +108,8 @@ int P_BoxOnLineSide(fixed_t* tmbox, line_t* ld)
         break;
 
     case ST_VERTICAL:
-        p1 = tmbox[BOXRIGHT] < ld->v1->x;
-        p2 = tmbox[BOXLEFT] < ld->v1->x;
+        p1 = tmbox.right < ld->v1->x;
+        p2 = tmbox.left < ld->v1->x;
         if (ld->dy < 0)
         {
             p1 ^= 1;
@@ -123,13 +118,13 @@ int P_BoxOnLineSide(fixed_t* tmbox, line_t* ld)
         break;
 
     case ST_POSITIVE:
-        p1 = P_PointOnLineSide(tmbox[BOXLEFT], tmbox[BOXTOP], ld);
-        p2 = P_PointOnLineSide(tmbox[BOXRIGHT], tmbox[BOXBOTTOM], ld);
+        p1 = P_PointOnLineSide(tmbox.left, tmbox.top, ld);
+        p2 = P_PointOnLineSide(tmbox.right, tmbox.bottom, ld);
         break;
 
     case ST_NEGATIVE:
-        p1 = P_PointOnLineSide(tmbox[BOXRIGHT], tmbox[BOXTOP], ld);
-        p2 = P_PointOnLineSide(tmbox[BOXLEFT], tmbox[BOXBOTTOM], ld);
+        p1 = P_PointOnLineSide(tmbox.right, tmbox.top, ld);
+        p2 = P_PointOnLineSide(tmbox.left, tmbox.bottom, ld);
         break;
     }
 

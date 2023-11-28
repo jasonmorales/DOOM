@@ -17,27 +17,17 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-// Screenwidth.
 #include "doomdef.h"
-
 // Some more or less basic data types
 // we depend on.
 #include "m_fixed.h"
+#include "m_bbox.h"
 
 // We rely on the thinker data struct
 // to handle sound origins in sectors.
 #include "d_think.h"
 // SECTORS do store MObjs anyway.
 #include "p_mobj.h"
-
-
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
 
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
@@ -48,11 +38,6 @@
 
 #define MAXDRAWSEGS		256
 
-
-
-
-
-//
 // INTERNAL MAP TYPES
 //  used by play and refresh
 //
@@ -109,7 +94,7 @@ typedef	struct
     mobj_t* soundtarget;
 
     // mapblock bounding box for height changes
-    int		blockbox[4];
+    bbox blockbox;
 
     // origin for any sounds played by the sector
     degenmobj_t	soundorg;
@@ -128,13 +113,7 @@ typedef	struct
 
 } sector_t;
 
-
-
-
-//
 // The SideDef.
-//
-
 typedef struct
 {
     // add this to the calculated texture column
@@ -191,7 +170,7 @@ typedef struct line_s
 
     // Neat. Another bounding box, for the extent
     //  of the LineDef.
-    fixed_t	bbox[4];
+    bbox bounds;
 
     // To aid move clipping.
     slopetype_t	slopetype;
@@ -256,7 +235,7 @@ typedef struct
 //
 // BSP node.
 //
-typedef struct
+struct node_t
 {
     // Partition line.
     fixed_t	x;
@@ -265,36 +244,22 @@ typedef struct
     fixed_t	dy;
 
     // Bounding box for each child.
-    fixed_t	bbox[2][4];
+    bbox bounds[2];
 
     // If NF_SUBSECTOR its a subsector.
     unsigned short children[2];
 
-} node_t;
-
-
-
+} ;
 
 // posts are runs of non masked source pixels
-typedef struct
+struct post_t
 {
     byte		topdelta;	// -1 is the last post in a column
     byte		length; 	// length data bytes follows
-} post_t;
+};
 
 // column_t is a list of 0 or more post_t, (byte)-1 terminated
 typedef post_t	column_t;
-
-
-
-// PC direct to screen pointers
-//B UNUSED - keep till detailshift in r_draw.c resolved
-//extern byte*	destview;
-//extern byte*	destscreen;
-
-
-
-
 
 //
 // OTHER TYPES
@@ -340,14 +305,12 @@ typedef struct drawseg_s
 
 } drawseg_t;
 
-
-
 // Patches.
 // A patch holds one or more columns.
 // Patches are used for sprites and all masked pictures,
 // and we compose textures from the TEXTURE1/2 lists
 // of patches.
-typedef struct
+struct patch_t
 {
     short		width;		// bounding box size 
     short		height;
@@ -355,13 +318,7 @@ typedef struct
     short		topoffset;	// pixels below the origin 
     int			columnofs[8];	// only [width] used
     // the [0] is &columnofs[width] 
-} patch_t;
-
-
-
-
-
-
+};
 
 // A vissprite_t is a thing
 //  that will be drawn during a refresh.

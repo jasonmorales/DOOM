@@ -233,46 +233,32 @@ void P_LoadSectors(int lump)
     Z_Free(data);
 }
 
-
-//
-// P_LoadNodes
-//
 void P_LoadNodes(intptr_t lump)
 {
-    int		i;
-    int		j;
-    int		k;
-    mapnode_t* mn;
-    node_t* no;
-
     numnodes = W_LumpLength(lump) / sizeof(mapnode_t);
     nodes = Z_Malloc<node_t>(numnodes * sizeof(node_t), PU_LEVEL, 0);
     auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
 
-    mn = (mapnode_t*)data;
-    no = nodes;
+    mapnode_t*mn = reinterpret_cast<mapnode_t*>(data);
+    auto* no = nodes;
 
-    for (i = 0; i < numnodes; i++, no++, mn++)
+    for (int32 i = 0; i < numnodes; i++, no++, mn++)
     {
         no->x = (mn->x) << FRACBITS;
         no->y = (mn->y) << FRACBITS;
         no->dx = (mn->dx) << FRACBITS;
         no->dy = (mn->dy) << FRACBITS;
-        for (j = 0; j < 2; j++)
+        for (int32 j = 0; j < 2; j++)
         {
             no->children[j] = (mn->children[j]);
-            for (k = 0; k < 4; k++)
-                no->bbox[j][k] = (mn->bbox[j][k]) << FRACBITS;
+            for (int32 k = 0; k < 4; k++)
+                no->bounds[j][k] = (mn->bounds[j][k]) << FRACBITS;
         }
     }
 
     Z_Free(data);
 }
 
-
-//
-// P_LoadThings
-//
 void P_LoadThings(intptr_t lump)
 {
     int			i;
@@ -367,24 +353,24 @@ void P_LoadLineDefs(intptr_t lump)
 
         if (v1->x < v2->x)
         {
-            ld->bbox[BOXLEFT] = v1->x;
-            ld->bbox[BOXRIGHT] = v2->x;
+            ld->bounds.left = v1->x;
+            ld->bounds.right = v2->x;
         }
         else
         {
-            ld->bbox[BOXLEFT] = v2->x;
-            ld->bbox[BOXRIGHT] = v1->x;
+            ld->bounds.left = v2->x;
+            ld->bounds.right = v1->x;
         }
 
         if (v1->y < v2->y)
         {
-            ld->bbox[BOXBOTTOM] = v1->y;
-            ld->bbox[BOXTOP] = v2->y;
+            ld->bounds.bottom = v1->y;
+            ld->bounds.top = v2->y;
         }
         else
         {
-            ld->bbox[BOXBOTTOM] = v2->y;
-            ld->bbox[BOXTOP] = v1->y;
+            ld->bounds.bottom = v2->y;
+            ld->bounds.top = v1->y;
         }
 
         ld->sidenum[0] = (mld->sidenum[0]);
@@ -404,10 +390,6 @@ void P_LoadLineDefs(intptr_t lump)
     Z_Free(data);
 }
 
-
-//
-// P_LoadSideDefs
-//
 void P_LoadSideDefs(intptr_t lump)
 {
     int			i;
@@ -476,7 +458,6 @@ void P_GroupLines()
     sector_t* sector;
     subsector_t* ss;
     seg_t* seg;
-    fixed_t		bbox[4];
     int			block;
 
     // look up sector number for each subsector
@@ -507,7 +488,7 @@ void P_GroupLines()
     sector = sectors;
     for (i = 0; i < numsectors; i++, sector++)
     {
-        M_ClearBox(bbox);
+        bbox bounds;
         sector->lines = linebuffer;
         li = lines;
         for (j = 0; j < numlines; j++, li++)
@@ -515,41 +496,36 @@ void P_GroupLines()
             if (li->frontsector == sector || li->backsector == sector)
             {
                 *linebuffer++ = li;
-                M_AddToBox(bbox, li->v1->x, li->v1->y);
-                M_AddToBox(bbox, li->v2->x, li->v2->y);
+                bounds.add(li->v1->x, li->v1->y);
+                bounds.add(li->v2->x, li->v2->y);
             }
         }
         if (linebuffer - sector->lines != sector->linecount)
             I_Error("P_GroupLines: miscounted");
 
         // set the degenmobj_t to the middle of the bounding box
-        sector->soundorg.x = (bbox[BOXRIGHT] + bbox[BOXLEFT]) / 2;
-        sector->soundorg.y = (bbox[BOXTOP] + bbox[BOXBOTTOM]) / 2;
+        sector->soundorg.x = bounds.midx();
+        sector->soundorg.y = bounds.midy();
 
         // adjust bounding box to map blocks
-        block = (bbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+        block = (bounds.top - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
         block = block >= bmapheight ? bmapheight - 1 : block;
-        sector->blockbox[BOXTOP] = block;
+        sector->blockbox.top = block;
 
-        block = (bbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+        block = (bounds.bottom - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
         block = block < 0 ? 0 : block;
-        sector->blockbox[BOXBOTTOM] = block;
+        sector->blockbox.bottom = block;
 
-        block = (bbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+        block = (bounds.right - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
         block = block >= bmapwidth ? bmapwidth - 1 : block;
-        sector->blockbox[BOXRIGHT] = block;
+        sector->blockbox.right = block;
 
-        block = (bbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+        block = (bounds.left - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
         block = block < 0 ? 0 : block;
-        sector->blockbox[BOXLEFT] = block;
+        sector->blockbox.left = block;
     }
-
 }
 
-
-//
-// P_SetupLevel
-//
 void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
 {
     int		i;

@@ -19,25 +19,13 @@
 
 #include "d_player.h"
 
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
-//
 // Network play related stuff.
 // There is a data struct that stores network
 //  communication related stuff, and another
 //  one that defines the actual packets to
 //  be transmitted.
-//
 
 #define DOOMCOM_ID		0x12345678l
-
-// Max computers/players in a game.
-#define MAXNETNODES		8
-
 
 // Networking and tick handling related.
 #define BACKUPTICS		12
@@ -49,8 +37,6 @@ typedef enum
 
 } command_t;
 
-
-//
 // Network packet data.
 //
 typedef struct
@@ -66,9 +52,6 @@ typedef struct
     ticcmd_t		cmds[BACKUPTICS];
 
 } doomdata_t;
-
-
-
 
 typedef struct
 {
@@ -120,8 +103,6 @@ typedef struct
 
 } doomcom_t;
 
-
-
 // Create any new ticcmds and broadcast to other players.
 void NetUpdate();
 
@@ -131,3 +112,12 @@ void D_QuitNetGame();
 
 //? how many ticks to run?
 void TryRunTics();
+
+class Net
+{
+public:
+    static const int32 MaxNodes = 8;
+    static int32 ticks[Net::MaxNodes];
+
+    static void CheckGame();
+};

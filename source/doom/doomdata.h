@@ -172,7 +172,7 @@ typedef struct
 // Indicate a leaf.
 #define	NF_SUBSECTOR	0x8000
 
-typedef struct
+struct mapnode_t
 {
     // Partition line from (x,y) to x+dx,y+dy)
     short		x;
@@ -182,13 +182,13 @@ typedef struct
 
     // Bounding box for each child,
     // clip against view frustum.
-    short		bbox[2][4];
+    short bounds[2][4];
 
     // If NF_SUBSECTOR its a subsector,
     // else it's a node of another subtree.
     unsigned short	children[2];
 
-} mapnode_t;
+};
 
 // Thing definition, position, orientation and type,
 // plus skill/visibility flags and attributes.

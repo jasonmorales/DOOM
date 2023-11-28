@@ -335,24 +335,13 @@ EV_DoDoor
     return rtn;
 }
 
-
-//
 // EV_VerticalDoor : open a door manually, no tag value
-//
-void
-EV_VerticalDoor
-(line_t* line,
-    mobj_t* thing)
+void EV_VerticalDoor(line_t* line, mobj_t* thing)
 {
-    player_t* player;
-    int		secnum;
-    sector_t* sec;
-    int		side;
-
-    side = 0;	// only front sides can be used
+    int32 side = 0;	// only front sides can be used
 
     //	Check for locks
-    player = thing->player;
+    player_t* player = thing->player;
 
     switch (line->special)
     {
@@ -398,9 +387,7 @@ EV_VerticalDoor
     }
 
     // if the sector has an active thinker, use it
-    sec = sides[line->sidenum[side ^ 1]].sector;
-    secnum = sec - sectors;
-
+    sector_t* sec = sides[line->sidenum[side ^ 1]].sector;
     if (sec->specialdata)
     {
         auto door = static_cast<vldoor_t*>(sec->specialdata);

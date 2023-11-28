@@ -23,6 +23,7 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "s_sound.h"
+#include "i_video.h"
 
 // Data.
 #include "dstrings.h"
@@ -263,7 +264,7 @@ void F_TextWrite()
 
     // erase the entire screen to a tiled background
     auto src = W_CacheLumpName<byte>(finaleflat, PU_CACHE);
-    byte* dest = screens[0];
+    byte* dest = g_doom->GetVideo()->GetScreen(0);
 
     for (y = 0; y < SCREENHEIGHT; y++)
     {
@@ -279,7 +280,7 @@ void F_TextWrite()
         }
     }
 
-    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     // draw some of the text onto the screen
     cx = 10;
@@ -573,30 +574,17 @@ void F_CastDrawer()
         V_DrawPatch(160, 170, 0, patch);
 }
 
-//
-// F_DrawPatchCol
-//
-void
-F_DrawPatchCol
-(int		x,
-    patch_t* patch,
-    int		col)
+void F_DrawPatchCol(int x, patch_t* patch, int col)
 {
-    column_t* column;
-    byte* source;
-    byte* dest;
-    byte* desttop;
-    int		count;
-
-    column = (column_t*)((byte*)patch + (patch->columnofs[col]));
-    desttop = screens[0] + x;
+    auto* column = (column_t*)((byte*)patch + (patch->columnofs[col]));
+    auto* desttop = g_doom->GetVideo()->GetScreen(0) + x;
 
     // step through the posts in a column
     while (column->topdelta != 0xff)
     {
-        source = (byte*)column + 3;
-        dest = desttop + column->topdelta * SCREENWIDTH;
-        count = column->length;
+        auto* source = (byte*)column + 3;
+        auto* dest = desttop + column->topdelta * SCREENWIDTH;
+        auto count = column->length;
 
         while (count--)
         {
@@ -607,10 +595,7 @@ F_DrawPatchCol
     }
 }
 
-
-//
 // F_BunnyScroll
-//
 void F_BunnyScroll()
 {
     int		scrolled;
@@ -622,7 +607,7 @@ void F_BunnyScroll()
     auto p1 = W_CacheLumpName<patch_t>("PFUB2", PU_LEVEL);
     auto p2 = W_CacheLumpName<patch_t>("PFUB1", PU_LEVEL);
 
-    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
     scrolled = 320 - (finalecount - 230) / 2;
     if (scrolled > 320)

@@ -43,6 +43,7 @@
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
+#include "i_video.h"
 
 
 extern Doom* g_doom;
@@ -1142,8 +1143,6 @@ void G_DoWorldDone()
 // G_InitFromSavegame
 // Can be called by the startup code or the menu task. 
 //
-extern boolean setsizeneeded;
-
 char	savename[256];
 
 void G_LoadGame(const char* name)
@@ -1199,19 +1198,15 @@ void G_DoLoadGame()
     // done 
     Z_Free(savebuffer);
 
-    if (setsizeneeded)
-        R_ExecuteSetViewSize();
+    g_doom->GetRender()->CheckSetViewSize();
 
     // draw the pattern into the back screen
     R_FillBackScreen();
 }
 
-
-//
 // G_SaveGame
 // Called by the menu task.
 // Description is a 24 byte text string 
-//
 void G_SaveGame(int slot, char* description)
 {
     savegameslot = slot;
@@ -1233,7 +1228,7 @@ void G_DoSaveGame()
 
     description = savedescription;
 
-    save_p = savebuffer = screens[1] + 0x4000;
+    save_p = savebuffer = g_doom->GetVideo()->GetScreen(1) + 0x4000;
 
     memcpy(save_p, description, SAVESTRINGSIZE);
     save_p += SAVESTRINGSIZE;

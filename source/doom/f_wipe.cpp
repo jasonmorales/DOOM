@@ -19,14 +19,17 @@
 #include "i_video.h"
 #include "v_video.h"
 #include "m_random.h"
+#include "d_main.h"
 
 #include "doomdef.h"
 
 #include "f_wipe.h"
 
-//
+
+extern Doom* g_doom;
+
+
 //                       SCREEN WIPE PACKAGE
-//
 
 // when zero, stop the wipe
 static boolean	go = 0;
@@ -64,19 +67,13 @@ int wipe_initColorXForm(int width, int height, [[maybe_unused]] time_t ticks)
     return 0;
 }
 
-int
-wipe_doColorXForm
-(int	width,
-    int	height,
-    time_t	ticks)
+int32 wipe_doColorXForm(int32	width, int32 height, time_t ticks)
 {
-    boolean	changed;
-    byte* w;
-    byte* e;
+    auto bticks = static_cast<byte>(ticks);
 
-    changed = false;
-    w = wipe_scr;
-    e = wipe_scr_end;
+    bool changed = false;
+    byte* w = wipe_scr;
+    byte* e = wipe_scr_end;
 
     while (w != wipe_scr + width * height)
     {
@@ -84,7 +81,7 @@ wipe_doColorXForm
         {
             if (*w > *e)
             {
-                auto newval = *w - ticks;
+                byte newval = *w - bticks;
                 if (newval < *e)
                     *w = *e;
                 else
@@ -93,7 +90,7 @@ wipe_doColorXForm
             }
             else if (*w < *e)
             {
-                auto newval = *w + ticks;
+                byte newval = *w + bticks;
                 if (newval > *e)
                     *w = *e;
                 else
@@ -106,7 +103,6 @@ wipe_doColorXForm
     }
 
     return !changed;
-
 }
 
 int
@@ -214,27 +210,21 @@ wipe_exitMelt
     return 0;
 }
 
-int
-wipe_StartScreen
-([[maybe_unused]] int	x,
+int wipe_StartScreen([[maybe_unused]] int	x,
     [[maybe_unused]] int	y,
     [[maybe_unused]] int	width,
     [[maybe_unused]]  int	height)
 {
-    wipe_scr_start = screens[2];
-    I_ReadScreen(wipe_scr_start);
+    wipe_scr_start = g_doom->GetVideo()->CopyScreen(2);
     return 0;
 }
 
-int
-wipe_EndScreen
-(int	x,
+int wipe_EndScreen(int	x,
     int	y,
     int	width,
     int	height)
 {
-    wipe_scr_end = screens[3];
-    I_ReadScreen(wipe_scr_end);
+    wipe_scr_end = g_doom->GetVideo()->CopyScreen(3);
     V_DrawBlock(x, y, 0, width, height, wipe_scr_start); // restore start scr.
     return 0;
 }
@@ -251,19 +241,17 @@ int wipe_ScreenWipe(int	wipeno, [[maybe_unused]] int x, [[maybe_unused]] int y, 
         wipe_exitMelt
     };
 
-    void V_MarkRect(int, int, int, int);
-
     // initial stuff
     if (!go)
     {
         go = 1;
         // wipe_scr = (byte *) Z_Malloc(width*height, PU_STATIC, 0); // DEBUG
-        wipe_scr = screens[0];
+        wipe_scr = g_doom->GetVideo()->GetScreen(0);
         (*wipes[wipeno * 3])(width, height, ticks);
     }
 
     // do a piece of wipe-in
-    V_MarkRect(0, 0, width, height);
+    g_doom->GetVideo()->MarkRect(0, 0, width, height);
     auto rc = (*wipes[wipeno * 3 + 1])(width, height, ticks);
     //  V_DrawBlock(x, y, 0, width, height, wipe_scr); // DEBUG
 

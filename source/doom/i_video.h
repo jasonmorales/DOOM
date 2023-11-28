@@ -25,17 +25,12 @@
 
 #include <GL/glew.h>
 
+struct patch_t;
+
 void I_ShutdownGraphics();
-
-// Takes full 8 bit values.
-void I_SetPalette(byte* palette);
-
-void I_UpdateNoBlit();
 
 // Wait for vertical retrace or pause a bit.
 void I_WaitVBL(int count);
-
-void I_ReadScreen(byte* scr);
 
 void I_BeginRead();
 void I_EndRead();
@@ -84,9 +79,17 @@ public:
     void StartTick();
 
     void FinishUpdate();
+    void UpdateNoBlit() {}
 
     LRESULT HandleSystemEvent(const SystemEvent& event);
     void DeliverSystemMessages();
+
+    void SetPalette(byte* palette);
+    void DrawPatch(int32 x, int32 y, int32 screen, patch_t* patch);
+    void MarkRect(int32 x, int32 y, int32 width, int32 height);
+
+    byte* GetScreen(int32 n) const { return screens[n]; }
+    byte* CopyScreen(int32 dest) const;
 
 private:
     bool RegisterWindowClass();
@@ -112,18 +115,23 @@ private:
     // According to Dave Taylor, it still is a bonehead thing to use ....
     int32 screenMultiply = 1;
 
-    int32 windowWidth = 320;
-    int32 windowHeight = 200;
+    uint32 windowWidth = 320;
+    uint32 windowHeight = 200;
 
-    int32 screenWidth = 0;
-    int32 screenHeight = 0;
+    uint32 screenWidth = 0;
+    uint32 screenHeight = 0;
 
     DWORD windowStyle = 0;
     DWORD windowStyleEx = 0;
 
+    uint32 screenTextureSize = 0;
+    uint32* screenBuffer = nullptr;
     GLuint screenTexture = 0;
     GLuint screenShader = 0;
 
     GLuint screenVBO = GL_INVALID_INDEX;
     GLuint screenVAO = GL_INVALID_INDEX;
+
+    byte* screens[5] = {nullptr};
+    uint32 palette[256] = {0};
 };

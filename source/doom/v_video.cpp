@@ -27,13 +27,11 @@
 #include "m_swap.h"
 
 #include "v_video.h"
+#include "i_video.h"
+#include "d_main.h"
 
 
-// Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
-byte* screens[5];
-
-int				dirtybox[4];
-
+extern Doom* g_doom;
 
 
 // Now where did these came from?
@@ -121,16 +119,7 @@ byte gammatable[5][256] =
      251,252,252,253,254,254,255,255}
 };
 
-
-
 int32	usegamma;
-
-void V_MarkRect(int x, int y, int width, int height)
-{
-    M_AddToBox(dirtybox, x, y);
-    M_AddToBox(dirtybox, x + width - 1, y + height - 1);
-}
-
 
 void
 V_CopyRect
@@ -160,10 +149,10 @@ V_CopyRect
         I_Error("Bad V_CopyRect");
     }
 #endif 
-    V_MarkRect(destx, desty, width, height);
+    g_doom->GetVideo()->MarkRect(destx, desty, width, height);
 
-    src = screens[srcscrn] + SCREENWIDTH * srcy + srcx;
-    dest = screens[destscrn] + SCREENWIDTH * desty + destx;
+    src = g_doom->GetVideo()->GetScreen(srcscrn) + SCREENWIDTH * srcy + srcx;
+    dest = g_doom->GetVideo()->GetScreen(destscrn) + SCREENWIDTH * desty + destx;
 
     for (; height > 0; height--)
     {
@@ -173,7 +162,6 @@ V_CopyRect
     }
 }
 
-// V_DrawPatch
 // Masks a column based masked pic to the screen. 
 void V_DrawPatch(int x, int y, int scrn, patch_t* patch)
 {
@@ -202,10 +190,10 @@ void V_DrawPatch(int x, int y, int scrn, patch_t* patch)
 #endif 
 
     if (!scrn)
-        V_MarkRect(x, y, (patch->width), (patch->height));
+        g_doom->GetVideo()->MarkRect(x, y, (patch->width), (patch->height));
 
     col = 0;
-    desttop = screens[scrn] + y * SCREENWIDTH + x;
+    desttop = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
 
     w = (patch->width);
 
@@ -266,10 +254,10 @@ V_DrawPatchFlipped
 #endif 
 
     if (!scrn)
-        V_MarkRect(x, y, (patch->width), (patch->height));
+        g_doom->GetVideo()->MarkRect(x, y, (patch->width), (patch->height));
 
     col = 0;
-    desttop = screens[scrn] + y * SCREENWIDTH + x;
+    desttop = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
 
     w = (patch->width);
 
@@ -316,9 +304,9 @@ void V_DrawBlock(int x, int y, int scrn, int width, int height, byte* src)
     }
 #endif 
 
-    V_MarkRect(x, y, width, height);
+    g_doom->GetVideo()->MarkRect(x, y, width, height);
 
-    byte* dest = screens[scrn] + y * SCREENWIDTH + x;
+    byte* dest = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
 
     while (height--)
     {
@@ -342,7 +330,7 @@ void V_GetBlock(int x, int y, int scrn, int width, int height, byte* dest)
     }
 #endif 
 
-    byte* src = screens[scrn] + y * SCREENWIDTH + x;
+    byte* src = g_doom->GetVideo()->GetScreen(scrn) + y * SCREENWIDTH + x;
 
     while (height--)
     {
@@ -350,17 +338,4 @@ void V_GetBlock(int x, int y, int scrn, int width, int height, byte* dest)
         src += SCREENWIDTH;
         dest += width;
     }
-}
-
-void V_Init()
-{
-    int		i;
-    byte* base;
-
-    // stick these in low dos memory on PCs
-
-    base = I_AllocLow(SCREENWIDTH * SCREENHEIGHT * 4);
-
-    for (i = 0; i < 4; i++)
-        screens[i] = base + i * SCREENWIDTH * SCREENHEIGHT;
 }

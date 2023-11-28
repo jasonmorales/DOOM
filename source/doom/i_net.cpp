@@ -49,58 +49,50 @@
 void	NetSend();
 boolean NetListen();
 
-
-//
 // NETWORKING
-//
 
 #define IPPORT_USERRESERVED 16384
 int	DOOMPORT = (IPPORT_USERRESERVED + 0x1d);
 
-int			sendsocket;
-int			insocket;
+SOCKET sendsocket;
+SOCKET insocket;
 
-struct	sockaddr_in	sendaddress[MAXNETNODES];
+struct	sockaddr_in	sendaddress[Net::MaxNodes];
 
 void	(*netget) ();
 void	(*netsend) ();
 
-
-//
-// UDPsocket
-//
-int UDPsocket()
+SOCKET UDPsocket()
 {
     // allocate a socket
     auto s = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (s < 0)
-        I_Error("can't create socket: %s", strerror(errno));
+    {
+        static char errorBuffer[1024];
+        strerror_s(errorBuffer, errno);
+        I_Error("can't create socket: %s", errorBuffer);
+    }
 
     return s;
 }
 
-//
-// BindToLocalPort
-//
-void BindToLocalPort(int s, int port)
+void BindToLocalPort(SOCKET s, u_short port)
 {
-    int			v;
     sockaddr_in	address;
-
     memset(&address, 0, sizeof(address));
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = port;
 
-    v = bind(s, reinterpret_cast<sockaddr*>(&address), sizeof(address));
+    auto v = bind(s, reinterpret_cast<sockaddr*>(&address), sizeof(address));
     if (v == -1)
-        I_Error("BindToPort: bind: %s", strerror(errno));
+    {
+        static char errorBuffer[1024];
+        strerror_s(errorBuffer, errno);
+        I_Error("BindToPort: bind: %s", errorBuffer);
+    }
 }
 
-
-//
-// PacketSend
-//
 void PacketSend()
 {
     int		c;
@@ -141,18 +133,16 @@ void PacketSend()
 //
 void PacketGet()
 {
-    int			i;
-    int			c;
     struct sockaddr_in	fromaddress;
-    int			fromlen;
-    doomdata_t		sw;
-
-    fromlen = sizeof(fromaddress);
-    c = recvfrom(insocket, reinterpret_cast<char*>(&sw), sizeof(sw), 0, (sockaddr*)&fromaddress, &fromlen);
+    int32 fromlen = sizeof(fromaddress);
+    doomdata_t sw;
+    auto c = recvfrom(insocket, reinterpret_cast<char*>(&sw), sizeof(sw), 0, (sockaddr*)&fromaddress, &fromlen);
     if (c == -1)
     {
-        if (errno != EWOULDBLOCK)
-            I_Error("GetPacket: %s", strerror(errno));
+        static char errorBuffer[1024];
+        if (_strerror_s(errorBuffer, nullptr) != EWOULDBLOCK)
+            I_Error("GetPacket: %s", errorBuffer);
+
         doomcom->remotenode = -1;		// no packet
         return;
     }
@@ -165,7 +155,8 @@ void PacketGet()
     }
 
     // find remote node number
-    for (i = 0; i < doomcom->numnodes; i++)
+    int16 i;
+    for (i = 0; i < doomcom->numnodes; ++i)
         if (fromaddress.sin_addr.s_addr == sendaddress[i].sin_addr.s_addr)
             break;
 
@@ -176,8 +167,8 @@ void PacketGet()
         return;
     }
 
-    doomcom->remotenode = i;			// good packet from a game player
-    doomcom->datalength = c;
+    doomcom->remotenode = i; // good packet from a game player
+    doomcom->datalength = static_cast<int16>(c);
 
     // byte swap
     netbuffer->checksum = ntohl(sw.checksum);
@@ -297,18 +288,12 @@ void I_InitNetwork()
     sendsocket = UDPsocket();
 }
 
-
 void I_NetCmd()
 {
     if (doomcom->command == CMD_SEND)
-    {
         netsend();
-    }
     else if (doomcom->command == CMD_GET)
-    {
         netget();
-    }
     else
         I_Error("Bad net cmd: %i\n", doomcom->command);
 }
-

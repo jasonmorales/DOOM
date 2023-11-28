@@ -41,7 +41,7 @@
 #include "dstrings.h"
 
 #include "m_misc.h"
-
+#include "d_main.h"
 
 #include "types/strings.h"
 
@@ -53,6 +53,10 @@
 
 #include <ctype.h>
 #include <io.h>
+
+
+extern Doom* g_doom;
+
 
 //
 // M_DrawText
@@ -280,16 +284,12 @@ extern byte	scantokey[128];
 
 void M_LoadDefaults()
 {
-    int		i;
     char	def[80];
     char	strparm[100];
-    char* newstring;
-    int		parm;
-    boolean	isstring;
 
     // set everything to base values
     numdefaults = sizeof(defaults) / sizeof(defaults[0]);
-    for (i = 0; i < numdefaults; i++)
+    for (int32 i = 0; i < numdefaults; i++)
     {
         if (defaults[i].defaultvalue & 0x8000)
             *static_cast<const char**>(defaults[i].location) = DefaultChatMacros[defaults[i].defaultvalue & 0x7fff];
@@ -310,30 +310,31 @@ void M_LoadDefaults()
     {
         while (!feof(f))
         {
-            isstring = false;
             if (fscanf_s(f, "%79s %[^\n]\n", def, static_cast<unsigned int>(_countof(def)), strparm, static_cast<unsigned int>(_countof(strparm))) == 2)
             {
+                int32 parm = 0;
+                char* newString = nullptr;
                 if (strparm[0] == '"')
                 {
                     // get a string default
-                    isstring = true;
                     auto len = strlen(strparm);
-                    newstring = (char*)malloc(len);
+                    newString = (char*)malloc(len);
                     strparm[len - 1] = 0;
-                    strcpy_s(newstring, len, strparm + 1);
+                    strcpy_s(newString, len, strparm + 1);
                 }
                 else if (strparm[0] == '0' && strparm[1] == 'x')
                     sscanf_s(strparm + 2, "%x", &parm);
                 else
                     sscanf_s(strparm, "%i", &parm);
-                for (i = 0; i < numdefaults; i++)
+
+                for (int32 i = 0; i < numdefaults; i++)
                 {
                     if (!strcmp(def, defaults[i].name))
                     {
-                        if (!isstring)
+                        if (newString == nullptr)
                             *static_cast<int32*>(defaults[i].location) = parm;
                         else
-                            *static_cast<const char**>(defaults[i].location) = newstring;
+                            *static_cast<const char**>(defaults[i].location) = newString;
                         break;
                     }
                 }
@@ -433,19 +434,13 @@ WritePCXfile
     Z_Free(pcx);
 }
 
-
-//
-// M_ScreenShot
-//
 void M_ScreenShot()
 {
     int		i;
-    byte* linear;
     char	lbmname[12];
 
     // munge planar buffer to linear
-    linear = screens[2];
-    I_ReadScreen(linear);
+    auto* linear = g_doom->GetVideo()->CopyScreen(2);
 
     // find a file name to save it to
     strcpy_s(lbmname, "DOOM00.pcx");
@@ -465,5 +460,3 @@ void M_ScreenShot()
 
     players[consoleplayer].message = "screen shot";
 }
-
-

@@ -50,6 +50,11 @@
 // Data.
 #include "dstrings.h"
 #include "sounds.h"
+#include "d_main.h"
+
+
+extern Doom* g_doom;
+
 
 //
 // STATUS BAR DATA
@@ -1036,7 +1041,7 @@ void ST_doPaletteStuff()
     {
         st_palette = palette;
         pal = W_CacheLumpNum<byte>(lu_palette, PU_CACHE) + palette * 768;
-        I_SetPalette(pal);
+        g_doom->GetVideo()->SetPalette(pal);
     }
 
 }
@@ -1448,7 +1453,7 @@ void ST_Stop()
     if (st_stopped)
         return;
 
-    I_SetPalette(W_CacheLumpNum<byte>(lu_palette, PU_CACHE));
+    g_doom->GetVideo()->SetPalette(W_CacheLumpNum<byte>(lu_palette, PU_CACHE));
 
     st_stopped = true;
 }
@@ -1457,5 +1462,4 @@ void ST_Init()
 {
     veryfirsttime = 0;
     ST_loadData();
-    screens[4] = (byte*)Z_Malloc(ST_WIDTH * ST_HEIGHT, PU_STATIC, 0);
 }

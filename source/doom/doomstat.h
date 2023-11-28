@@ -127,11 +127,6 @@ extern	int		viewheight;
 extern	int		viewwidth;
 extern	int		scaledviewwidth;
 
-
-
-
-
-
 // This one is related to the 3-screen display mode.
 // ANG90 = left side, ANG270 = right
 extern  int	viewangleoffset;
@@ -228,8 +223,6 @@ extern  int             bodyqueslot;
 //  as well as tracking projectiles etc.
 extern intptr_t skyflatnum;
 
-
-
 // Netgame stuff (buffers and pointers, i.e. indices).
 
 // This is ???
@@ -243,7 +236,6 @@ extern  ticcmd_t	localcmds[BACKUPTICS];
 extern	int		rndindex;
 
 extern	int		maketic;
-extern  int             nettics[MAXNETNODES];
 
 extern  ticcmd_t        netcmds[MAXPLAYERS][BACKUPTICS];
 extern	int		ticdup;

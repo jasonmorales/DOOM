@@ -34,7 +34,6 @@
 #include "sounds.h"
 
 
-fixed_t		tmbbox[4];
 mobj_t* tmthing;
 int		tmflags;
 fixed_t		tmx;
@@ -98,15 +97,9 @@ boolean PIT_StompThing(mobj_t* thing)
     return true;
 }
 
+bbox tmbbox;
 
-//
-// P_TeleportMove
-//
-boolean
-P_TeleportMove
-(mobj_t* thing,
-    fixed_t	x,
-    fixed_t	y)
+boolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y)
 {
     int			xl;
     int			xh;
@@ -124,10 +117,10 @@ P_TeleportMove
     tmx = x;
     tmy = y;
 
-    tmbbox[BOXTOP] = y + tmthing->radius;
-    tmbbox[BOXBOTTOM] = y - tmthing->radius;
-    tmbbox[BOXRIGHT] = x + tmthing->radius;
-    tmbbox[BOXLEFT] = x - tmthing->radius;
+    tmbbox.top = y + tmthing->radius;
+    tmbbox.bottom = y - tmthing->radius;
+    tmbbox.right = x + tmthing->radius;
+    tmbbox.left = x - tmthing->radius;
 
     newsubsec = R_PointInSubsector(x, y);
     ceilingline = nullptr;
@@ -143,10 +136,10 @@ P_TeleportMove
     numspechit = 0;
 
     // stomp on any things contacted
-    xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
-    xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
-    yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
-    yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+    xl = (tmbbox.left - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+    xh = (tmbbox.right - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+    yl = (tmbbox.bottom - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+    yh = (tmbbox.top - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
     for (bx = xl; bx <= xh; bx++)
         for (by = yl; by <= yh; by++)
@@ -172,17 +165,10 @@ P_TeleportMove
 // MOVEMENT ITERATOR FUNCTIONS
 //
 
-
-//
-// PIT_CheckLine
 // Adjusts tmfloorz and tmceilingz as lines are contacted
-//
 boolean PIT_CheckLine(line_t* ld)
 {
-    if (tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
-        || tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
-        || tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
-        || tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP])
+    if (!tmbbox.overlaps(ld->bounds))
         return true;
 
     if (P_BoxOnLineSide(tmbbox, ld) != -1)
@@ -237,9 +223,6 @@ boolean PIT_CheckLine(line_t* ld)
     return true;
 }
 
-//
-// PIT_CheckThing
-//
 boolean PIT_CheckThing(mobj_t* thing)
 {
     fixed_t		blockdist;
@@ -362,32 +345,20 @@ boolean PIT_CheckThing(mobj_t* thing)
 //  speciallines[]
 //  numspeciallines
 //
-boolean
-P_CheckPosition
-(mobj_t* thing,
-    fixed_t	x,
-    fixed_t	y)
+boolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 {
-    int			xl;
-    int			xh;
-    int			yl;
-    int			yh;
-    int			bx;
-    int			by;
-    subsector_t* newsubsec;
-
     tmthing = thing;
     tmflags = thing->flags;
 
     tmx = x;
     tmy = y;
 
-    tmbbox[BOXTOP] = y + tmthing->radius;
-    tmbbox[BOXBOTTOM] = y - tmthing->radius;
-    tmbbox[BOXRIGHT] = x + tmthing->radius;
-    tmbbox[BOXLEFT] = x - tmthing->radius;
+    tmbbox.top = y + tmthing->radius;
+    tmbbox.bottom = y - tmthing->radius;
+    tmbbox.right = x + tmthing->radius;
+    tmbbox.left = x - tmthing->radius;
 
-    newsubsec = R_PointInSubsector(x, y);
+    subsector_t* newsubsec = R_PointInSubsector(x, y);
     ceilingline = nullptr;
 
     // The base floor / ceiling is from the subsector
@@ -408,41 +379,33 @@ P_CheckPosition
     // because mobj_ts are grouped into mapblocks
     // based on their origin point, and can overlap
     // into adjacent blocks by up to MAXRADIUS units.
-    xl = (tmbbox[BOXLEFT] - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
-    xh = (tmbbox[BOXRIGHT] - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
-    yl = (tmbbox[BOXBOTTOM] - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
-    yh = (tmbbox[BOXTOP] - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32 xl = (tmbbox.left - bmaporgx - MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32 xh = (tmbbox.right - bmaporgx + MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32 yl = (tmbbox.bottom - bmaporgy - MAXRADIUS) >> MAPBLOCKSHIFT;
+    int32 yh = (tmbbox.top - bmaporgy + MAXRADIUS) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (int32 bx = xl; bx <= xh; bx++)
+        for (int32 by = yl; by <= yh; by++)
             if (!P_BlockThingsIterator(bx, by, PIT_CheckThing))
                 return false;
 
     // check lines
-    xl = (tmbbox[BOXLEFT] - bmaporgx) >> MAPBLOCKSHIFT;
-    xh = (tmbbox[BOXRIGHT] - bmaporgx) >> MAPBLOCKSHIFT;
-    yl = (tmbbox[BOXBOTTOM] - bmaporgy) >> MAPBLOCKSHIFT;
-    yh = (tmbbox[BOXTOP] - bmaporgy) >> MAPBLOCKSHIFT;
+    xl = (tmbbox.left - bmaporgx) >> MAPBLOCKSHIFT;
+    xh = (tmbbox.right - bmaporgx) >> MAPBLOCKSHIFT;
+    yl = (tmbbox.bottom - bmaporgy) >> MAPBLOCKSHIFT;
+    yh = (tmbbox.top - bmaporgy) >> MAPBLOCKSHIFT;
 
-    for (bx = xl; bx <= xh; bx++)
-        for (by = yl; by <= yh; by++)
+    for (int32 bx = xl; bx <= xh; bx++)
+        for (int32 by = yl; by <= yh; by++)
             if (!P_BlockLinesIterator(bx, by, PIT_CheckLine))
                 return false;
 
     return true;
 }
 
-
-//
-// P_TryMove
 // Attempt to move to a new position,
 // crossing special lines unless MF_TELEPORT is set.
-//
-boolean
-P_TryMove
-(mobj_t* thing,
-    fixed_t	x,
-    fixed_t	y)
+boolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 {
     fixed_t	oldx;
     fixed_t	oldy;
@@ -1303,27 +1266,16 @@ boolean PIT_ChangeSector(mobj_t* thing)
     return true;
 }
 
-
-
-//
 // P_ChangeSector
-//
-boolean
-P_ChangeSector
-(sector_t* sector,
-    boolean	crunch)
+boolean P_ChangeSector(sector_t* sector, boolean crunch)
 {
-    int		x;
-    int		y;
-
     nofit = false;
     crushchange = crunch;
 
     // re-check heights for all things near the moving sector
-    for (x = sector->blockbox[BOXLEFT]; x <= sector->blockbox[BOXRIGHT]; x++)
-        for (y = sector->blockbox[BOXBOTTOM];y <= sector->blockbox[BOXTOP]; y++)
+    for (int32 x = sector->blockbox.left; x <= sector->blockbox.right; x++)
+        for (int32 y = sector->blockbox.bottom;y <= sector->blockbox.top; y++)
             P_BlockThingsIterator(x, y, PIT_ChangeSector);
-
 
     return nofit;
 }

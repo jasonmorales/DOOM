@@ -1104,9 +1104,6 @@ void M_ChangeSensitivity(int choice)
     }
 }
 
-
-
-
 void M_ChangeDetail(int choice)
 {
     choice = 0;
@@ -1116,17 +1113,7 @@ void M_ChangeDetail(int choice)
     fprintf(stderr, "M_ChangeDetail: low detail mode n.a.\n");
 
     return;
-
-    /*R_SetViewSize (screenblocks, detailLevel);
-
-    if (detailLevel == 0)
-    players[consoleplayer].message = DETAILHI;
-    else
-    players[consoleplayer].message = DETAILLO;*/
 }
-
-
-
 
 void M_SizeDisplay(int choice)
 {
@@ -1148,19 +1135,11 @@ void M_SizeDisplay(int choice)
         break;
     }
 
-
-    R_SetViewSize(screenblocks, detailLevel);
+    g_doom->GetRender()->RequestSetViewSize(screenblocks, detailLevel);
 }
 
-//
 //      Menu Functions
-//
-void
-M_DrawThermo
-(int	x,
-    int	y,
-    int	thermWidth,
-    int	thermDot)
+void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
 {
     int		xx;
     int		i;
@@ -1178,8 +1157,6 @@ M_DrawThermo
     V_DrawPatchDirect((x + 8) + thermDot * 8, y,
         0, W_CacheLumpName("M_THERMO", PU_CACHE));
 }
-
-
 
 void
 M_DrawEmptyCell
@@ -1559,11 +1536,9 @@ boolean M_Responder(event_t* ev)
             if (usegamma > 4)
                 usegamma = 0;
             players[consoleplayer].message = gammamsg[usegamma];
-            I_SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+            g_doom->GetVideo()->SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
             return true;
-
         }
-
 
     // Pop-up menu?
     if (!menuactive)

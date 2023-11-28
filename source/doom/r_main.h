@@ -131,26 +131,21 @@ R_PointInSubsector
 (fixed_t	x,
     fixed_t	y);
 
-void
-R_AddPointToBox
-(int		x,
-    int		y,
-    fixed_t* box);
-
-
-
-//
 // REFRESH - the actual rendering functions.
-//
 
 // Called by G_Drawer.
 void R_RenderPlayerView(player_t* player);
 
-// Called by startup code.
-void R_Init();
+class Render
+{
+public:
+    void Init();
 
-// Called by M_Responder.
-void R_SetViewSize(int blocks, int detail);
+    void RequestSetViewSize(int32 inBlocks, int32 inDetail);
+    bool CheckSetViewSize();
 
-
-void R_ExecuteSetViewSize();
+private:
+    bool isSetSizeRequested = false;
+    int32 requestedBlocks = 0;
+    int32 requestedDetail = 0;
+};

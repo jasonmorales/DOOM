@@ -484,6 +484,7 @@ void HU_Ticker()
         {
             if (!playeringame[i])
                 continue;
+
             if (i != consoleplayer
                 && (c = players[i].cmd.chatchar))
             {

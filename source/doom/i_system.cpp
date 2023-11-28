@@ -120,15 +120,6 @@ void I_BeginRead()
 void I_EndRead()
 {}
 
-byte* I_AllocLow(int length)
-{
-    byte* mem;
-
-    mem = (byte*)malloc(length);
-    memset(mem, 0, length);
-    return mem;
-}
-
 void I_Error(const string& error)
 {
     std::cerr << "Error: " << error << "\n";

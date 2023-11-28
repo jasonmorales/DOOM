@@ -27,9 +27,16 @@
 
 // Needs access to LFB (guess what).
 #include "v_video.h"
+#include "i_video.h"
 
 // State.
 #include "doomstat.h"
+
+#include "d_main.h"
+
+
+extern Doom* g_doom;
+
 
 
 // ?
@@ -696,22 +703,15 @@ R_InitBuffer
 
     // Preclaculate all row offsets.
     for (i = 0; i < height; i++)
-        ylookup[i] = screens[0] + (i + viewwindowy) * SCREENWIDTH;
+        ylookup[i] = g_doom->GetVideo()->GetScreen(0) + (i + viewwindowy) * SCREENWIDTH;
 }
 
-
-
-
-//
-// R_FillBackScreen
 // Fills the back screen with a pattern
 //  for variable screen sizes
 // Also draws a beveled edge.
 //
 void R_FillBackScreen()
 {
-    byte* src;
-    byte* dest;
     int		x;
     int		y;
     patch_t* patch;
@@ -732,8 +732,8 @@ void R_FillBackScreen()
     else
         name = name1;
 
-    src = W_CacheLumpName<byte>(name, PU_CACHE);
-    dest = screens[1];
+    auto* src = W_CacheLumpName<byte>(name, PU_CACHE);
+    auto* dest = g_doom->GetVideo()->GetScreen(1);
 
     for (y = 0; y < SCREENHEIGHT - SBARHEIGHT; y++)
     {
@@ -794,32 +794,18 @@ void R_FillBackScreen()
 //
 // Copy a screen buffer.
 //
-void
-R_VideoErase
-(unsigned	ofs,
-    int		count)
+void R_VideoErase(unsigned ofs, int count)
 {
     // LFB copy.
     // This might not be a good idea if memcpy
     //  is not optiomal, e.g. byte by byte on
     //  a 32bit CPU, as GNU GCC/Linux libc did
     //  at one point.
-    memcpy(screens[0] + ofs, screens[1] + ofs, count);
+    memcpy(g_doom->GetVideo()->GetScreen(0) + ofs, g_doom->GetVideo()->GetScreen(1) + ofs, count);
 }
 
-
-//
-// R_DrawViewBorder
 // Draws the border around the view
 //  for different size windows?
-//
-void
-V_MarkRect
-(int		x,
-    int		y,
-    int		width,
-    int		height);
-
 void R_DrawViewBorder()
 {
     int		top;
@@ -851,7 +837,5 @@ void R_DrawViewBorder()
     }
 
     // ? 
-    V_MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT);
+    g_doom->GetVideo()->MarkRect(0, 0, SCREENWIDTH, SCREENHEIGHT - SBARHEIGHT);
 }
-
-

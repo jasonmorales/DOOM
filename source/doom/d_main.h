@@ -31,7 +31,6 @@ void D_PostEvent(event_t* ev);
 // BASE LEVEL
 //
 void D_PageTicker();
-void D_PageDrawer();
 void D_AdvanceDemo();
 
 // The current state of the game: whether we are
@@ -48,6 +47,7 @@ enum class GameState : int32
 };
 
 class Video;
+class Render;
 
 class Doom
 {
@@ -72,12 +72,14 @@ public:
     void SetGameState(GameState state) { gameState = state; }
 
     Video* GetVideo() const { return video; }
+    Render* GetRender() const { return render; }
 
 private:
     void IdentifyVersion();
     void AddFile(const std::filesystem::path& path) { wadFiles.push_back(path); }
 
     void Display();
+    void PageDraw();
 
     Video* video = nullptr;
     bool viewActiveState = false;
@@ -85,6 +87,8 @@ private:
     bool inHelpScreensState = false;
     bool fullScreen = false;
     int32 borderDrawCount = -1;
+
+    Render* render = nullptr;
 
     GameState gameState = GameState::Demo;
     GameState oldGameState = GameState::ForceWipe;

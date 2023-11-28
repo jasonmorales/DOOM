@@ -57,11 +57,9 @@
 #include <errno.h>
 #include <crtdbg.h>
 
-void D_CheckNetGame();
 void G_BuildTiccmd(ticcmd_t* cmd);
 
 extern boolean inhelpscreens;
-extern boolean setsizeneeded;
 extern int32 showMessages;
 extern int forwardmove[2];
 extern int sidemove[2];
@@ -75,10 +73,6 @@ boolean respawnparm; // checkparm of -respawn
 boolean fastparm;	 // checkparm of -fast
 
 boolean drone;
-
-// extern int soundVolume;
-// extern  int	sfxVolume;
-// extern  int	musicVolume;
 
 skill_t startskill;
 int startepisode;
@@ -101,10 +95,7 @@ event_t events[MAXEVENTS];
 int eventhead;
 int eventtail;
 
-//
-// D_PostEvent
 // Called by the I/O functions when input is detected
-//
 void D_PostEvent(event_t* ev)
 {
     events[eventhead] = *ev;
@@ -288,14 +279,15 @@ void Doom::Main()
         doWarp(ep,map);
 
     // init subsystems
-    printf("V_Init: allocate screens.\n");
-    V_Init();
+    printf("Z_Init: Init zone memory allocation daemon. \n");
+    Z_Init();
+
+    printf("Video::Init: allocate screens.\n");
+    video = new Video;
+    video->Init();
 
     printf("M_LoadDefaults: Load system defaults.\n");
     M_LoadDefaults(); // load before initing other systems
-
-    printf("Z_Init: Init zone memory allocation daemon. \n");
-    Z_Init();
 
     printf("W_Init: Init WADfiles.\n");
     W_InitMultipleFiles(wadFiles);
@@ -364,8 +356,9 @@ void Doom::Main()
     printf("M_Init: Init miscellaneous info.\n");
     M_Init();
 
-    printf("R_Init: Init DOOM refresh daemon - ");
-    R_Init();
+    printf("Render::Init: Init DOOM refresh daemon - ");
+    render = new Render;
+    render->Init();
 
     printf("\nP_Init: Init Playloop state.\n");
     P_Init(this);
@@ -373,8 +366,8 @@ void Doom::Main()
     printf("I_Init: Setting up machine state.\n");
     I_Init();
 
-    printf("D_CheckNetGame: Checking network game status.\n");
-    D_CheckNetGame();
+    printf("Net::CheckGame: Checking network game status.\n");
+    Net::CheckGame();
 
     printf("S_Init: Setting up sound.\n");
     S_Init(snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/);
@@ -452,9 +445,6 @@ void Doom::Loop()
         printf("debug output to: %s\n", fileName.c_str());
         fopen_s(&debugfile, fileName.c_str(), "w");
     }
-
-    video = new Video;
-    video->Init();
 
     while (1)
     {
@@ -675,44 +665,34 @@ void Doom::IdentifyVersion()
     gamemode = GameMode::Unknown;
 }
 
-//
-// D_Display
 //  draw current display, possibly wiping it from the previous
-//
-
 // wipegamestate can be set to -1 to force a wipe on the next draw
 GameState wipegamestate = GameState::Demo;
 
 void Doom::Display()
 {
-    int y;
-    boolean done;
-    boolean wipe;
-
     if (noDrawers)
         return; // for comparative timing / profiling
 
-    bool redrawStatusBar = false;
-
     // change the view size if needed
-    if (setsizeneeded)
+    if (render->CheckSetViewSize())
     {
-        R_ExecuteSetViewSize();
         oldGameState = GameState::ForceWipe; // force background redraw
         borderDrawCount = 3;
     }
 
     // save the current screen if about to wipe
+    bool wipe = false;
     if (gameState != wipegamestate)
     {
         wipe = true;
         wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
     }
-    else
-        wipe = false;
 
     if (gameState == GameState::Level && gametic)
         HU_Erase();
+
+    bool redrawStatusBar = false;
 
     // do buffered drawing
     switch (gameState)
@@ -739,12 +719,12 @@ void Doom::Display()
         break;
 
     case GameState::Demo:
-        D_PageDrawer();
+        PageDraw();
         break;
     }
 
     // draw buffered stuff to screen
-    I_UpdateNoBlit();
+    video->UpdateNoBlit();
 
     // draw the view directly
     if (gameState == GameState::Level && !automapactive && gametic)
@@ -755,7 +735,7 @@ void Doom::Display()
 
     // clean up border stuff
     if (gameState != oldGameState && gameState != GameState::Level)
-        I_SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+        video->SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
 
     // see if the border needs to be initially drawn
     if (gameState == GameState::Level && oldGameState != GameState::Level)
@@ -784,6 +764,7 @@ void Doom::Display()
     // draw pause pic
     if (paused)
     {
+        int32 y = 0;
         if (automapactive)
             y = 4;
         else
@@ -807,6 +788,7 @@ void Doom::Display()
 
     auto wipestart = I_GetTime() - 1;
 
+    bool done = false;
     do
     {
         time_t tics = 0;
@@ -820,39 +802,28 @@ void Doom::Display()
 
         wipestart = now;
         done = wipe_ScreenWipe(wipe_Melt, 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
-        I_UpdateNoBlit();
+        video->UpdateNoBlit();
         M_Drawer();		  // menu is drawn even on top of wipes
         video->FinishUpdate(); // page flip or blit buffer
     }
     while (!done);
 }
 
-//
-//  DEMO LOOP
-//
+void Doom::PageDraw()
+{
+    video->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>(pagename, PU_CACHE));
+}
 
-//
-// D_PageTicker
+//  DEMO LOOP
+
 // Handles timing for warped projection
-//
 void D_PageTicker()
 {
     if (--pagetic < 0)
         D_AdvanceDemo();
 }
 
-//
-// D_PageDrawer
-//
-void D_PageDrawer()
-{
-    V_DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>(pagename, PU_CACHE));
-}
-
-//
-// D_AdvanceDemo
 // Called after each demo or intro demosequence finishes
-//
 void D_AdvanceDemo()
 {
     advancedemo = true;

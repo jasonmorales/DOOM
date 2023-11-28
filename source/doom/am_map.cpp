@@ -30,9 +30,14 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "d_main.h"
+#include "i_video.h"
 
 #include <stdio.h>
 #include <limits>
+
+
+extern Doom* g_doom;
 
 
 // For use if I do walls with outsides/insides
@@ -284,16 +289,6 @@ static cheatseq_t cheat_amap = { cheat_amap_seq, 0 };
 static boolean stopped = true;
 
 extern boolean viewactive;
-//extern byte screens[][SCREENWIDTH*SCREENHEIGHT];
-
-
-
-void
-V_MarkRect
-(int	x,
-    int	y,
-    int	width,
-    int	height);
 
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so
@@ -443,16 +438,12 @@ void AM_changeWindowLoc()
     m_y2 = m_y + m_h;
 }
 
-//
-//
-//
 void AM_initVariables()
 {
-    int pnum;
     static event_t st_notify = { ev_keyup, AM_MSGENTERED };
 
     automapactive = true;
-    fb = screens[0];
+    fb = g_doom->GetVideo()->GetScreen(0);
 
     f_oldloc.x = std::numeric_limits<decltype(f_oldloc.x)>::max();
     amclock = 0;
@@ -465,6 +456,7 @@ void AM_initVariables()
     m_w = FTOM(f_w);
     m_h = FTOM(f_h);
 
+    int32 pnum = 0;
     // find player to center on initially
     if (!playeringame[pnum = consoleplayer])
         for (pnum = 0; pnum < MAXPLAYERS; pnum++)
@@ -484,7 +476,6 @@ void AM_initVariables()
 
     // inform the status bar of the change
     ST_Responder(&st_notify);
-
 }
 
 //
@@ -1293,6 +1284,5 @@ void AM_Drawer()
 
     AM_drawMarks();
 
-    V_MarkRect(f_x, f_y, f_w, f_h);
-
+    g_doom->GetVideo()->MarkRect(f_x, f_y, f_w, f_h);
 }

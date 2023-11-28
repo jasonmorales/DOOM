@@ -53,11 +53,6 @@ ticcmd_t* I_BaseTiccmd();
 // Clean exit, displays sell blurb.
 void I_Quit();
 
-
-// Allocates from low memory under dos,
-// just mallocs under unix
-byte* I_AllocLow(int length);
-
 void I_Tactile(int on, int off, int total);
 
 void I_Error(const string& error);

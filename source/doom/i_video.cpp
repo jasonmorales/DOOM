@@ -21,8 +21,10 @@
 #include "v_video.h"
 #include "m_argv.h"
 #include "d_main.h"
-
+#include "m_bbox.h"
+#include "st_stuff.h"
 #include "doomdef.h"
+#include "z_zone.h"
 
 #include <winsock.h>
 
@@ -67,33 +69,6 @@ public:
         else return static_cast<GLsizei>((sizeof(Ts)+...));
     }();
 
-private:
-    template<typename V, size_t R = 0>
-    static constexpr GLint _array()
-    {
-        if constexpr (!std::is_array_v<V>)
-            return 1;
-        else if constexpr (R < std::rank_v<V> - 1)
-            return std::extent_v<V, R> * _array<V, R + 1>();
-        else
-            return std::extent_v<V, R>;
-    }
-
-    template<typename U, typename ...Us>
-    static constexpr GLint _count()
-    {
-        if constexpr (sizeof...(Us) == 0)
-            return _array<U>();
-        else
-            return _array<U>() + _count<Us...>();
-    }
-
-public:
-    static constexpr const GLint count = []{
-        if constexpr (sizeof...(Ts) == 0) return 0;
-        else return _count<Ts...>();
-    }();
-
     static void add()
     {
         GLuint index = 0;
@@ -103,14 +78,25 @@ public:
     }
 
 private:
+    template<typename V, size_t R = 0>
+    static constexpr GLint count()
+    {
+        if constexpr (!std::is_array_v<V>)
+            return 1;
+        else if constexpr (R < std::rank_v<V> - 1)
+            return std::extent_v<V, R> * count<V, R + 1>();
+        else
+            return std::extent_v<V, R>;
+    }
+
     template<typename T, typename ...Ts>
     static void _add(GLuint& index, intptr_t& offset)
     {
         glEnableVertexAttribArray(index);
         if (is_integral<T>)
-            glVertexAttribIPointer(index, count, gl_type<std::remove_all_extents_t<T>>, size, reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribIPointer(index, count<T>(), gl_type<std::remove_all_extents_t<T>>, size, reinterpret_cast<GLvoid*>(offset));
         else
-            glVertexAttribPointer(index, count, gl_type<std::remove_all_extents_t<T>>, GL_FALSE, size, reinterpret_cast<GLvoid*>(offset));
+            glVertexAttribPointer(index, count<T>(), gl_type<std::remove_all_extents_t<T>>, GL_FALSE, size, reinterpret_cast<GLvoid*>(offset));
 
         offset += sizeof(T);
         index += 1;
@@ -323,15 +309,9 @@ createnullcursor
 }
 #endif
 
-void I_UpdateNoBlit()
-{
-}
-
 void Video::FinishUpdate()
 {
     static time_t lasttic = 0;
-
-    // UNUSED static unsigned char *bigscreen=0;
 
     // draws little dots on the bottom of the screen
     if (devparm)
@@ -343,22 +323,27 @@ void Video::FinishUpdate()
         if (tics > 20) tics = 20;
 
         for (i = 0; i < tics * 2; i += 2)
-            screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0xff;
+            screenBuffer[((windowHeight/screenMultiply- 1)*screenTextureSize)  + i] = 0xff'ff'ff'ff;
         for (; i < 20 * 2; i += 2)
-            screens[0][(SCREENHEIGHT - 1) * SCREENWIDTH + i] = 0x0;
+            screenBuffer[((windowHeight/screenMultiply- 1)*screenTextureSize)  + i] = 0xff'00'00'00;
 
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, screenWidth, screenHeight);
-
-    //glClearColor(0.f, 0.f, 0.f, 0.f);
-    //glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glViewport(0, 0, windowWidth, windowHeight);
 
     glUseProgram(screenShader);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
+
+    for (uint32 y = 0; y < windowHeight / screenMultiply; ++y)
+    for (uint32 x = 0; x < windowWidth / screenMultiply; ++x)
+    {
+        screenBuffer[y * screenTextureSize + x] = palette[screens[0][y * SCREENWIDTH + x]];
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, screenTextureSize, screenTextureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, screenBuffer);
 
     //glDrawBuffer(GL_COLOR_ATTACHMENT2);
     glBindVertexArray(screenVAO);
@@ -377,7 +362,7 @@ void Video::FinishUpdate()
         unsigned int twomoreopixels;
         unsigned int fouripixels;
 
-        ilineptr = (unsigned int*)(screens[0]);
+        ilineptr = (unsigned int*)(g_doom->GetVideo()->GetScreen(0));
         for (i = 0; i < 2; i++)
             olineptrs[i] = (unsigned int*)&image->data[i * X_width];
 
@@ -394,17 +379,10 @@ void Video::FinishUpdate()
                 twomoreopixels = ((fouripixels << 16) & 0xff000000)
                     | ((fouripixels << 8) & 0xffff00)
                     | (fouripixels & 0xff);
-#ifdef __BIG_ENDIAN__
-                * olineptrs[0]++ = twoopixels;
-                *olineptrs[1]++ = twoopixels;
-                *olineptrs[0]++ = twomoreopixels;
-                *olineptrs[1]++ = twomoreopixels;
-#else
                 * olineptrs[0]++ = twomoreopixels;
                 *olineptrs[1]++ = twomoreopixels;
                 *olineptrs[0]++ = twoopixels;
                 *olineptrs[1]++ = twoopixels;
-#endif
             } while (x -= 4);
             olineptrs[0] += X_width / 4;
             olineptrs[1] += X_width / 4;
@@ -419,7 +397,7 @@ void Video::FinishUpdate()
         unsigned int fouropixels[3];
         unsigned int fouripixels;
 
-        ilineptr = (unsigned int*)(screens[0]);
+        ilineptr = (unsigned int*)(g_doom->GetVideo()->GetScreen(0));
         for (i = 0; i < 3; i++)
             olineptrs[i] = (unsigned int*)&image->data[i * X_width];
 
@@ -439,17 +417,6 @@ void Video::FinishUpdate()
                 fouropixels[2] = ((fouripixels << 16) & 0xffff0000)
                     | ((fouripixels << 8) & 0xff00)
                     | (fouripixels & 0xff);
-#ifdef __BIG_ENDIAN__
-                * olineptrs[0]++ = fouropixels[0];
-                *olineptrs[1]++ = fouropixels[0];
-                *olineptrs[2]++ = fouropixels[0];
-                *olineptrs[0]++ = fouropixels[1];
-                *olineptrs[1]++ = fouropixels[1];
-                *olineptrs[2]++ = fouropixels[1];
-                *olineptrs[0]++ = fouropixels[2];
-                *olineptrs[1]++ = fouropixels[2];
-                *olineptrs[2]++ = fouropixels[2];
-#else
                 * olineptrs[0]++ = fouropixels[2];
                 *olineptrs[1]++ = fouropixels[2];
                 *olineptrs[2]++ = fouropixels[2];
@@ -459,7 +426,6 @@ void Video::FinishUpdate()
                 *olineptrs[0]++ = fouropixels[0];
                 *olineptrs[1]++ = fouropixels[0];
                 *olineptrs[2]++ = fouropixels[0];
-#endif
             } while (x -= 4);
             olineptrs[0] += 2 * X_width / 4;
             olineptrs[1] += 2 * X_width / 4;
@@ -471,7 +437,7 @@ void Video::FinishUpdate()
     {
         // Broken. Gotta fix this some day.
         void Expand4(unsigned*, double*);
-        Expand4((unsigned*)(screens[0]), (double*)(image->data));
+        Expand4((unsigned*)(g_doom->GetVideo()->GetScreen(0)), (double*)(image->data));
     }
 
     if (doShm)
@@ -514,170 +480,14 @@ void Video::FinishUpdate()
 #endif
 }
 
-void I_ReadScreen(byte* scr)
+void Video::SetPalette(byte* inPalette)
 {
-    memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT);
-}
-
-// Palette stuff.
-#if 0
-static XColor	colors[256];
-
-void UploadNewPalette(Colormap cmap, byte* palette)
-{
-
-    register int	i;
-    register int	c;
-    static boolean	firstcall = true;
-
-#ifdef __cplusplus
-    if (X_visualinfo.c_class == PseudoColor && X_visualinfo.depth == 8)
-#else
-    if (X_visualinfo.class == PseudoColor && X_visualinfo.depth == 8)
-#endif
+    byte* p = inPalette;
+    for (int32 n = 0; n < 256; ++n, p += 3)
     {
-        // initialize the colormap
-        if (firstcall)
-        {
-            firstcall = false;
-            for (i = 0; i < 256; i++)
-            {
-                colors[i].pixel = i;
-                colors[i].flags = DoRed | DoGreen | DoBlue;
-            }
-        }
-
-        // set the X colormap entries
-        for (i = 0; i < 256; i++)
-        {
-            c = gammatable[usegamma][*palette++];
-            colors[i].red = (c << 8) + c;
-            c = gammatable[usegamma][*palette++];
-            colors[i].green = (c << 8) + c;
-            c = gammatable[usegamma][*palette++];
-            colors[i].blue = (c << 8) + c;
-        }
-
-        // store the colors to the current colormap
-        XStoreColors(X_display, cmap, colors, 256);
-
+        palette[n] = 0xff'00'00'00 | (*(p + 2) << 16) | (*(p + 1) << 8) | (*(p + 0) << 0);
     }
 }
-#endif
-
-//
-// I_SetPalette
-//
-void I_SetPalette([[maybe_unused]] byte* palette)
-{
-    //UploadNewPalette(X_cmap, palette);
-}
-
-#if 0
-//
-// This function is probably redundant,
-//  if XShmDetach works properly.
-// ddt never detached the XShm memory,
-//  thus there might have been stale
-//  handles accumulating.
-//
-void grabsharedmemory(int size)
-{
-
-    int			key = ('d' << 24) | ('o' << 16) | ('o' << 8) | 'm';
-    struct shmid_ds	shminfo;
-    int			minsize = 320 * 200;
-    int			id;
-    int			rc;
-    // UNUSED int done=0;
-    int			pollution = 5;
-
-    // try to use what was here before
-    do
-    {
-        id = shmget((key_t)key, minsize, 0777); // just get the id
-        if (id != -1)
-        {
-            rc = shmctl(id, IPC_STAT, &shminfo); // get stats on it
-            if (!rc)
-            {
-                if (shminfo.shm_nattch)
-                {
-                    fprintf(stderr, "User %d appears to be running "
-                        "DOOM.  Is that wise?\n", shminfo.shm_cpid);
-                    key++;
-                }
-                else
-                {
-                    if (getuid() == shminfo.shm_perm.cuid)
-                    {
-                        rc = shmctl(id, IPC_RMID, 0);
-                        if (!rc)
-                            fprintf(stderr,
-                                "Was able to kill my old shared memory\n");
-                        else
-                            I_Error("Was NOT able to kill my old shared memory");
-
-                        id = shmget((key_t)key, size, IPC_CREAT | 0777);
-                        if (id == -1)
-                            I_Error("Could not get shared memory");
-
-                        rc = shmctl(id, IPC_STAT, &shminfo);
-
-                        break;
-
-                    }
-                    if (size >= shminfo.shm_segsz)
-                    {
-                        fprintf(stderr,
-                            "will use %d's stale shared memory\n",
-                            shminfo.shm_cpid);
-                        break;
-                    }
-                    else
-                    {
-                        fprintf(stderr,
-                            "warning: can't use stale "
-                            "shared memory belonging to id %d, "
-                            "key=0x%x\n",
-                            shminfo.shm_cpid, key);
-                        key++;
-                    }
-                }
-            }
-            else
-            {
-                I_Error("could not get stats on key=%d", key);
-            }
-        }
-        else
-        {
-            id = shmget((key_t)key, size, IPC_CREAT | 0777);
-            if (id == -1)
-            {
-                extern int errno;
-                fprintf(stderr, "errno=%d\n", errno);
-                I_Error("Could not get any shared memory");
-            }
-            break;
-        }
-    } while (--pollution);
-
-    if (!pollution)
-    {
-        I_Error("Sorry, system too polluted with stale "
-            "shared memory segments.\n");
-    }
-
-    X_shminfo.shmid = id;
-
-    // attach to the shared memory segment
-    image->data = X_shminfo.shmaddr = shmat(id, 0, 0);
-
-    fprintf(stderr, "shared memory id=%d, addr=0x%x\n", id,
-        (int)(image->data));
-}
-#endif
 
 // This is the default window proc that all windows use after being initialized. It
 // simply looks up the associated Window class and then passes the event parameters
@@ -737,7 +547,7 @@ void GLAPIENTRY Video::GLErrorCallback(
     [[maybe_unused]] const GLchar* message,
     [[maybe_unused]] const void* param)
 {
-    /*std::stringstream out;
+    std::stringstream out;
     switch (type)
     {
     case GL_DEBUG_SOURCE_API:
@@ -761,11 +571,12 @@ void GLAPIENTRY Video::GLErrorCallback(
         break;
     }
     out << message;
-    Phantasus::Debug::Output(string{out.str().c_str()});
-    Phantasus::Debug::Output("\n");
+
+    std::cout << message << "\n";
+
     if ((type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
         && (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM || severity == GL_DEBUG_SEVERITY_LOW))
-        DEBUG_BREAK();*/
+        DebugBreak();
 }
 
 void Video::Init()
@@ -774,6 +585,11 @@ void Video::Init()
         return;
 
     isInitialized = true;
+
+    byte* base = new byte[SCREENWIDTH * SCREENHEIGHT * 4];
+    for (int32 i = 0; i < 4; ++i)
+        screens[i] = base + i * SCREENWIDTH * SCREENHEIGHT;
+    screens[4] = (byte*)Z_Malloc(ST_WIDTH * ST_HEIGHT, PU_STATIC, 0);
 
     CommandLine::TryGetValues("-multiply", screenMultiply);
 
@@ -857,6 +673,8 @@ void Video::Init()
     windowWidth = actual.right - actual.left;
     windowHeight = actual.bottom - actual.top;
 
+    std::cout << "Created window " << windowWidth << "x" << windowHeight << "\n";
+
     if (windowHandle == nullptr)
     {
         auto error_core = GetLastError();
@@ -898,6 +716,14 @@ void Video::Init()
     wglMakeCurrent(deviceContext, dummyContext);
 
     glewInit();
+
+    auto* glUnknown = "????";
+    auto* glVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    auto* glVendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+    std::cout << "OpenGL version: " << (glVersion ? glVersion : glUnknown) << "\n";
+    std::cout << "OpenGL vendor: " <<  (glVendor ? glVendor : glUnknown) << "\n";
+    std::cout << "OpenGL renderer: " << reinterpret_cast<const char*>(glGetString(GL_RENDERER)) << "\n";
+    std::cout << "OpenGL shader version: " << reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION)) << "\n";
 
     // Create the render context
     int attributes[] =
@@ -963,33 +789,41 @@ void Video::Init()
 
     glGenTextures(1, &screenTexture);
     glBindTexture(GL_TEXTURE_2D, screenTexture);
-    uint32 pixels[] =
-    {
-        0xff00'ffff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00, 0xff00'ff00,
 
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
-        0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xff00'00ff, 0xffff'0000, 0xffff'0000, 0xffff'0000, 0xffff'0000,
-    };
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    screenTextureSize = 512u; //std::min(std::bit_ceil(std::max(windowWidth, windowHeight)), 4096u);
+    screenBuffer = new uint32[screenTextureSize * screenTextureSize];
+    for (uint32 n = 0; n < screenTextureSize * screenTextureSize; ++n)
+    {
+        uint32 x = n % screenTextureSize;
+        uint32 y = n / screenTextureSize;
+
+        screenBuffer[n] =
+            (y==(windowHeight/screenMultiply)-1) ? 0xff'00'ff'ff :
+            (x==(windowWidth/screenMultiply)-1) ? 0xff'ff'00'ff :
+            (y%20==0) ? 0xff'00'ff'00 :
+            (x%20==0) ? 0xff'ff'00'00 :
+            0;
+    }
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, screenTextureSize, screenTextureSize, 0, GL_RGBA, GL_UNSIGNED_BYTE, screenBuffer);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
     screenShader = LoadShader("screen");
 
+    float s = 1.f - ((screenTextureSize - windowWidth / screenMultiply) / static_cast<float>(screenTextureSize));
+    float t = 1.f - ((screenTextureSize - windowHeight / screenMultiply) / static_cast<float>(screenTextureSize));
     float screenVertices[] =
     {
-        -1.f,  1.f,  0.f, 1.f,
-        -1.f, -1.f,  0.f, 0.f,
-        1.f, -1.f,  1.f, 0.f,
+        -1.f,  -1.f,  0.f, t,
+        -1.f, 1.f,  0.f, 0.f,
+        1.f, 1.f,  s, 0.f,
 
-        -1.f,  1.f,  0.f, 1.f,
-        1.f, -1.f,  1.f, 0.f,
-        1.f,  1.f,  1.f, 1.f,
+        -1.f,  -1.f,  0.f, t,
+        1.f, 1.f,  s, 0.f,
+        1.f,  -1.f,  s, t,
     };
 
     glGenVertexArrays(1, &screenVAO);
@@ -1006,11 +840,7 @@ void Video::Init()
 
 void Video::StartFrame()
 {
-    static float f = 0.f;
-    f += 0.001f;
-    if (f >= 1.f) f -= 1.f;
-
-    glClearColor(f, 0.f, 0.f, 0.f);
+    glClearColor(0.f, 1.f, 1.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -1297,6 +1127,66 @@ void Video::DeliverSystemMessages()
     }
 }
 
+// Masks a column based masked pic to the screen. 
+void Video::DrawPatch(int32 x, int32 y, int32 screen, patch_t* patch)
+{
+    y -= patch->topoffset;
+    x -= patch->leftoffset;
+#ifdef RANGECHECK 
+    if (x<0
+        || x + (patch->width) >SCREENWIDTH
+        || y<0
+        || y + (patch->height)>SCREENHEIGHT
+        || screen > 4)
+    {
+        fprintf(stderr, "Patch at %d,%d exceeds LFB\n", x, y);
+        // No I_Error abort - what is up with TNT.WAD?
+        fprintf(stderr, "V_DrawPatch: bad patch (ignored)\n");
+        return;
+    }
+#endif 
+
+    if (screen == 0)
+        MarkRect(x, y, patch->width, patch->height);
+
+    auto* desttop = screens[screen] + y * SCREENWIDTH + x;
+    auto w = patch->width;
+    for (int32 col = 0; col < w; x++, col++, desttop++)
+    {
+        auto* column = (column_t*)((byte*)patch + (patch->columnofs[col]));
+
+        // step through the posts in a column 
+        while (column->topdelta != 0xff)
+        {
+            auto* source = (byte*)column + 3;
+            auto* dest = desttop + column->topdelta * SCREENWIDTH;
+            auto count = column->length;
+
+            while (count--)
+            {
+                *dest = *source++;
+                dest += SCREENWIDTH;
+            }
+            column = (column_t*)((byte*)column + column->length + 4);
+        }
+    }
+}
+
+void Video::MarkRect(int32 x, int32 y, int32 width, int32 height)
+{
+    bbox dirtybox;
+
+    dirtybox.add(x, y);
+    dirtybox.add(x + width - 1, y + height - 1);
+}
+
+byte* Video::CopyScreen(int32 dest) const
+{
+    assert(dest > 0 && dest < std::size(screens));
+    memcpy(screens[dest], screens[0], SCREENWIDTH * SCREENHEIGHT);
+    return screens[dest];
+}
+
 bool Video::RegisterWindowClass()
 {
     // TODO: Build this from non OS specific data passed into the function, then check
@@ -1382,13 +1272,10 @@ GLuint Video::LoadShader(string_view name)
     return program;
 }
 
-unsigned	exptable[256];
-
 void InitExpand()
 {
-    int		i;
-
-    for (i = 0; i < 256; i++)
+    uint32 exptable[256] = {0};
+    for (int i = 0; i < 256; ++i)
         exptable[i] = i | (i << 8) | (i << 16) | (i << 24);
 }
 
