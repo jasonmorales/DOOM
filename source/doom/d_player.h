@@ -110,9 +110,9 @@ struct player_t
     // Is wp_nochange if not changing.
     weapontype_t	pendingweapon;
 
-    boolean		weaponowned[NUMWEAPONS];
-    int			ammo[NUMAMMO];
-    int			maxammo[NUMAMMO];
+    int32 weaponowned[NUMWEAPONS];
+    int32 ammo[NUMAMMO];
+    int32 maxammo[NUMAMMO];
 
     // True if button down last tic.
     int			attackdown;
@@ -156,15 +156,12 @@ struct player_t
 
     // True if secret level has been done.
     boolean		didsecret;
-
 };
 
-
-//
 // INTERMISSION
 // Structure passed e.g. to WI_Start(wb)
-//
-typedef struct
+
+struct wbplayerstruct_t
 {
     boolean	in;	// whether the player is in game
 
@@ -176,7 +173,7 @@ typedef struct
     int		frags[4];
     int		score;	// current score on entry, modified on return
 
-} wbplayerstruct_t;
+};
 
 typedef struct
 {

@@ -78,35 +78,30 @@ typedef struct
 
 } st_percent_t;
 
-
-
 // Multiple Icon widget
-typedef struct
+struct st_multicon_t
 {
     // center-justified location of icons
-    int			x;
-    int			y;
+    int32 x = 0;
+    int32 y = 0;
 
     // last icon number
-    int			oldinum;
+    int32 oldinum = -1;
 
     // pointer to current icon
-    int* inum;
+    int32* inum = nullptr;
 
     // pointer to boolean stating
     //  whether to update icon
-    boolean* on;
+    bool* on = nullptr;
 
     // list of icons
-    patch_t** p;
+    patch_t** p = nullptr;
 
     // user data
-    int			data;
+    int32 data = 0;
 
-} st_multicon_t;
-
-
-
+};
 
 // Binary Icon widget
 
@@ -182,16 +177,6 @@ STlib_updatePercent
 
 
 // Multiple Icon widget routines
-void
-STlib_initMultIcon
-(st_multicon_t* mi,
-    int			x,
-    int			y,
-    patch_t** il,
-    int* inum,
-    boolean* on);
-
-
 void
 STlib_updateMultIcon
 (st_multicon_t* mi,

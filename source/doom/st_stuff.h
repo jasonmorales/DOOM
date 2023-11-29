@@ -28,13 +28,10 @@
 #define ST_WIDTH	SCREENWIDTH
 #define ST_Y		(SCREENHEIGHT - ST_HEIGHT)
 
-
-//
 // STATUS BAR
-//
 
 // Called by main loop.
-boolean ST_Responder(event_t* ev);
+bool ST_Responder(const event_t& event);
 
 // Called by main loop.
 void ST_Ticker();
@@ -67,6 +64,3 @@ typedef enum
     GetChatState
 
 } st_chatstateenum_t;
-
-
-boolean ST_Responder(event_t* ev);

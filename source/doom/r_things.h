@@ -17,6 +17,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include "containers/vector.h"
+#include "types/strings.h"
+
 class Doom;
 
 #define MAXVISSPRITES  	128
@@ -25,10 +28,9 @@ extern vissprite_t	vissprites[MAXVISSPRITES];
 extern vissprite_t* vissprite_p;
 extern vissprite_t	vsprsortedhead;
 
-// Constant arrays used for psprite clipping
-//  and initializing clipping.
-extern short		negonearray[SCREENWIDTH];
-extern short		screenheightarray[SCREENWIDTH];
+// Constant arrays used for psprite clipping and initializing clipping.
+extern int16 negonearray[SCREENWIDTH];
+extern int16 screenheightarray[SCREENWIDTH];
 
 // vars for R_DrawMaskedColumn
 extern short* mfloorclip;
@@ -48,7 +50,7 @@ void R_SortVisSprites();
 void R_AddSprites(sector_t* sec);
 void R_AddPSprites();
 void R_DrawSprites();
-void R_InitSprites(Doom* doom, const char** namelist);
+void R_InitSprites(Doom* doom, const vector<string_view>& names);
 void R_ClearSprites();
 void R_DrawMasked();
 

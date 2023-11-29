@@ -19,8 +19,8 @@ public:
     using iterator = super::iterator;
     using const_iterator = super::const_iterator;
 
-    template<typename... Ts>
-    vector(Ts... in) : super(in...) {}
+    vector() : super() {}
+    vector(std::initializer_list<T> list) : super(list) {}
 
     inline int32 size() const
     {
@@ -33,9 +33,7 @@ public:
     inline iterator find(const T& value) { return std::find(super::begin(), super::end(), value); }
 
     inline bool has(const T& value) const { return std::find(super::begin(), super::end(), value) != super::end(); }
-    template<typename F>
-    requires std::predicate<F, T>
-    inline bool has(const F& test) const { return std::any_of(super::begin(), super::end(), test); }
+    inline bool has(std::predicate<T> auto test) const { return std::any_of(super::begin(), super::end(), test); }
 };
 
 }

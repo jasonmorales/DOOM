@@ -59,6 +59,6 @@ void G_SecretExitLevel();
 void G_WorldDone();
 
 void G_Ticker(Doom* doom);
-boolean G_Responder(event_t* ev);
+bool G_Responder(const event_t& ev);
 
 void G_ScreenShot();

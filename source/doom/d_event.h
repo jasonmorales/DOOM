@@ -16,31 +16,33 @@
 
 #include "doomtype.h"
 
+#include "types/numbers.h"
 
-//
 // Event handling.
-//
 
 // Input event types.
-typedef enum
+enum evtype_t
 {
     ev_keydown,
     ev_keyup,
     ev_mouse,
-    ev_joystick
-} evtype_t;
+    ev_joystick,
+
+    ev_invalid
+};
 
 // Event structure.
 struct event_t
 {
-    evtype_t	type;
-    int		data1;		// keys / mouse/joystick buttons
-    int		data2;		// mouse/joystick x move
-    int		data3;		// mouse/joystick y move
+    bool operator==(const event_t& other) const = default;
+
+    evtype_t type = ev_invalid;
+    int32 data1 = 0; // keys / mouse/joystick buttons
+    int32 data2 = 0; // mouse/joystick x move
+    int32 data3 = 0; // mouse/joystick y move
 };
 
-
-typedef enum
+enum gameaction_t
 {
     ga_nothing,
     ga_loadlevel,
@@ -52,14 +54,10 @@ typedef enum
     ga_victory,
     ga_worlddone,
     ga_screenshot
-} gameaction_t;
+};
 
-
-
-//
 // Button/action code definitions.
-//
-typedef enum
+enum buttoncode_t
 {
     // Press "Fire".
     BT_ATTACK = 1,
@@ -87,15 +85,8 @@ typedef enum
     BTS_SAVEMASK = (4 + 8 + 16),
     BTS_SAVESHIFT = 2,
 
-} buttoncode_t;
+};
 
-//
 // GLOBAL VARIABLES
-//
-#define MAXEVENTS		64
-
-extern  event_t		events[MAXEVENTS];
-extern  int             eventhead;
-extern	int		eventtail;
 
 extern  gameaction_t    gameaction;

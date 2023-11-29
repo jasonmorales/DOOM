@@ -174,16 +174,7 @@ STlib_updatePercent
     STlib_updateNum(&per->n, refresh);
 }
 
-
-
-void
-STlib_initMultIcon
-(st_multicon_t* i,
-    int			x,
-    int			y,
-    patch_t** il,
-    int* inum,
-    boolean* on)
+void STlib_initMultIcon(st_multicon_t* i, int x, int y, patch_t** il, int* inum, bool* on)
 {
     i->x = x;
     i->y = y;
@@ -193,28 +184,18 @@ STlib_initMultIcon
     i->p = il;
 }
 
-
-
-void
-STlib_updateMultIcon
-(st_multicon_t* mi,
-    boolean		refresh)
+void STlib_updateMultIcon(st_multicon_t* mi, boolean refresh)
 {
-    int			w;
-    int			h;
-    int			x;
-    int			y;
-
     if (*mi->on
         && (mi->oldinum != *mi->inum || refresh)
         && (*mi->inum != -1))
     {
         if (mi->oldinum != -1)
         {
-            x = mi->x - (mi->p[mi->oldinum]->leftoffset);
-            y = mi->y - (mi->p[mi->oldinum]->topoffset);
-            w = (mi->p[mi->oldinum]->width);
-            h = (mi->p[mi->oldinum]->height);
+            auto x = mi->x - (mi->p[mi->oldinum]->leftoffset);
+            auto y = mi->y - (mi->p[mi->oldinum]->topoffset);
+            auto w = (mi->p[mi->oldinum]->width);
+            auto h = (mi->p[mi->oldinum]->height);
 
             if (y - ST_Y < 0)
                 I_Error("updateMultIcon: y - ST_Y < 0");
@@ -225,8 +206,6 @@ STlib_updateMultIcon
         mi->oldinum = *mi->inum;
     }
 }
-
-
 
 void
 STlib_initBinIcon

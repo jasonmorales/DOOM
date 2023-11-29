@@ -122,13 +122,7 @@ boolean M_WriteFile(char const* name, void* source, uint32 length)
     return true;
 }
 
-//
-// M_ReadFile
-//
-int
-M_ReadFile
-(char const* name,
-    byte** buffer)
+int M_ReadFile(char const* name, byte** buffer)
 {
     int	count, length;
     struct stat	fileinfo;
@@ -153,12 +147,10 @@ M_ReadFile
     return length;
 }
 
-
-//
 // DEFAULTS
-//
-int32		usemouse;
-int32		usejoystick;
+
+int32 usemouse;
+int32 usejoystick;
 
 extern int	key_right;
 extern int	key_left;
@@ -217,6 +209,18 @@ default_t	defaults[] =
     {"sfx_volume",&snd_SfxVolume, 8},
     {"music_volume",&snd_MusicVolume, 8},
     {"show_messages",&showMessages, 1},
+
+    {"key_right",&key_right, KEY_RIGHTARROW},
+    {"key_left",&key_left, KEY_LEFTARROW},
+    {"key_up",&key_up, KEY_UPARROW},
+    {"key_down",&key_down, KEY_DOWNARROW},
+    {"key_strafeleft",&key_strafeleft, ','},
+    {"key_straferight",&key_straferight, '.'},
+
+    {"key_fire",&key_fire, KEY_RCTRL},
+    {"key_use",&key_use, ' '},
+    {"key_strafe",&key_strafe, KEY_RALT},
+    {"key_speed",&key_speed, KEY_RSHIFT},
 
     {"use_mouse",&usemouse, 1},
     {"mouseb_fire",&mousebfire,0},

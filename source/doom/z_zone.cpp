@@ -176,7 +176,7 @@ void* Z_Malloc_internal(intptr_t size, int tag, void* user)
         if (rover == start)
         {
             // scanned all the way around the list
-            I_Error("Z_Malloc: failed on allocation of {} bytes", size);
+            I_Error("Z_Malloc: failed on allocation of {} bytes", static_cast<int64>(size));
         }
 
         if (rover->user)
@@ -303,17 +303,11 @@ Z_DumpHeap
     }
 }
 
-
-//
-// Z_FileDumpHeap
-//
 void Z_FileDumpHeap(FILE* f)
 {
-    memblock_t* block;
-
     fprintf(f, "zone size: %Ii  location: %p\n", mainzone->size, mainzone);
 
-    for (block = mainzone->blocklist.next; ; block = block->next)
+    for (auto* block = mainzone->blocklist.next; ; block = block->next)
     {
         fprintf(f, "block:%p    size:%7Ii    user:%p    tag:%3i\n",
             block, block->size, block->user, block->tag);
@@ -335,22 +329,12 @@ void Z_FileDumpHeap(FILE* f)
     }
 }
 
-
-
-//
-// Z_CheckHeap
-//
 void Z_CheckHeap()
 {
-    memblock_t* block;
-
-    for (block = mainzone->blocklist.next; ; block = block->next)
+    for (auto* block = mainzone->blocklist.next; ; block = block->next)
     {
         if (block->next == &mainzone->blocklist)
-        {
-            // all blocks have been hit
-            break;
-        }
+            break;  // all blocks have been hit
 
         if ((byte*)block + block->size != (byte*)block->next)
             I_Error("Z_CheckHeap: block size does not touch the next block\n");
@@ -363,20 +347,9 @@ void Z_CheckHeap()
     }
 }
 
-
-
-
-//
-// Z_ChangeTag
-//
-void
-Z_ChangeTag2
-(void* ptr,
-    int		tag)
+void Z_ChangeTag2(void* ptr, int32 tag)
 {
-    memblock_t* block;
-
-    block = (memblock_t*)((byte*)ptr - sizeof(memblock_t));
+    auto* block = reinterpret_cast<memblock_t*>((byte*)ptr - sizeof(memblock_t));
 
     if (block->id != ZONEID)
         I_Error("Z_ChangeTag: freed a pointer without ZONEID");
@@ -387,18 +360,13 @@ Z_ChangeTag2
     block->tag = tag;
 }
 
-//
-// Z_FreeMemory
-//
 intptr_t Z_FreeMemory()
 {
     intptr_t free = 0;
-
-    for (memblock_t* block = mainzone->blocklist.next; block != &mainzone->blocklist; block = block->next)
+    for (auto* block = mainzone->blocklist.next; block != &mainzone->blocklist; block = block->next)
     {
         if (!block->user || block->tag >= PU_PURGELEVEL)
             free += block->size;
     }
     return free;
 }
-

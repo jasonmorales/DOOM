@@ -25,6 +25,7 @@
 
 #include <GL/glew.h>
 
+class Doom;
 struct patch_t;
 
 void I_ShutdownGraphics();
@@ -62,6 +63,9 @@ public:
         const GLchar* message,
         const void* param);
 
+    Video() = delete;
+    Video(Doom* doom) : doom{doom} {}
+
     void Init();
 
     // Called by Doom::Loop,
@@ -69,13 +73,13 @@ public:
     // (just after displaying a frame).
     // Time consuming synchronous operations
     // are performed here (joystick reading).
-    // Can call D_PostEvent.
+    // Can call Doom::PostEvent.
     void StartFrame();
 
     // Called by Doom::Loop,
     // called before processing each tic in a frame.
     // Quick synchronous operations are performed here.
-    // Can call D_PostEvent.
+    // Can call Doom::PostEvent.
     void StartTick();
 
     void FinishUpdate();
@@ -93,6 +97,8 @@ public:
 private:
     bool RegisterWindowClass();
     GLuint LoadShader(string_view name);
+
+    Doom* doom = nullptr;
 
     const wchar_t* WindowClassName = L"DoomWindow";
 

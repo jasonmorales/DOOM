@@ -40,11 +40,6 @@ extern Doom* g_doom;
 extern GameState wipegamestate;
 
 
-// ?
-//#include "doomstat.h"
-//#include "r_local.h"
-//#include "f_finale.h"
-
 // Stage of animation:
 //  0 = text, 1 = art screen, 2 = character cast
 int		finalestage;
@@ -83,14 +78,49 @@ const char* t6text = T6TEXT;
 const char* finaletext;
 const char* finaleflat;
 
+int		castnum;
+int		casttics;
+state_t* caststate;
+bool castdeath;
+int		castframes;
+int		castonmelee;
+bool castattacking;
+
+// Final DOOM 2 animation
+// Casting by id Software.
+//   in order of appearance
+struct castinfo_t
+{
+    const char* name;
+    mobjtype_t type;
+};
+
+castinfo_t	castorder[] = {
+    {CC_ZOMBIE, MT_POSSESSED},
+    {CC_SHOTGUN, MT_SHOTGUY},
+    {CC_HEAVY, MT_CHAINGUY},
+    {CC_IMP, MT_TROOP},
+    {CC_DEMON, MT_SERGEANT},
+    {CC_LOST, MT_SKULL},
+    {CC_CACO, MT_HEAD},
+    {CC_HELL, MT_KNIGHT},
+    {CC_BARON, MT_BRUISER},
+    {CC_ARACH, MT_BABY},
+    {CC_PAIN, MT_PAIN},
+    {CC_REVEN, MT_UNDEAD},
+    {CC_MANCU, MT_FATSO},
+    {CC_ARCH, MT_VILE},
+    {CC_SPIDER, MT_SPIDER},
+    {CC_CYBER, MT_CYBORG},
+    {CC_HERO, MT_PLAYER},
+
+    {nullptr, MT_INVALID}
+};
+
 void	F_StartCast();
 void	F_CastTicker();
-boolean F_CastResponder(event_t* ev);
 void	F_CastDrawer();
 
-//
-// F_StartFinale
-//
 void F_StartFinale()
 {
     gameaction = ga_nothing;
@@ -173,8 +203,6 @@ void F_StartFinale()
         }
         break;
     }
-
-
     // Indeterminate.
     default:
         S_ChangeMusic(mus_read_m, true);
@@ -188,9 +216,27 @@ void F_StartFinale()
 
 }
 
+bool F_CastResponder(const event_t& event)
+{
+    if (event.type != ev_keydown)
+        return false;
 
+    if (castdeath)
+        return true;			// already in dying frames
 
-boolean F_Responder(event_t* event)
+    // go into death frame
+    castdeath = true;
+    caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
+    casttics = caststate->tics;
+    castframes = 0;
+    castattacking = false;
+    if (mobjinfo[castorder[castnum].type].deathsound)
+        S_StartSound(nullptr, mobjinfo[castorder[castnum].type].deathsound);
+
+    return true;
+}
+
+bool F_Responder(const event_t& event)
 {
     if (finalestage == 2)
         return F_CastResponder(event);
@@ -198,10 +244,6 @@ boolean F_Responder(event_t* event)
     return false;
 }
 
-
-//
-// F_Ticker
-//
 void F_Ticker()
 {
     int		i;
@@ -316,46 +358,6 @@ void F_TextWrite()
 
 }
 
-//
-// Final DOOM 2 animation
-// Casting by id Software.
-//   in order of appearance
-struct castinfo_t
-{
-    const char* name;
-    mobjtype_t type;
-};
-
-castinfo_t	castorder[] = {
-    {CC_ZOMBIE, MT_POSSESSED},
-    {CC_SHOTGUN, MT_SHOTGUY},
-    {CC_HEAVY, MT_CHAINGUY},
-    {CC_IMP, MT_TROOP},
-    {CC_DEMON, MT_SERGEANT},
-    {CC_LOST, MT_SKULL},
-    {CC_CACO, MT_HEAD},
-    {CC_HELL, MT_KNIGHT},
-    {CC_BARON, MT_BRUISER},
-    {CC_ARACH, MT_BABY},
-    {CC_PAIN, MT_PAIN},
-    {CC_REVEN, MT_UNDEAD},
-    {CC_MANCU, MT_FATSO},
-    {CC_ARCH, MT_VILE},
-    {CC_SPIDER, MT_SPIDER},
-    {CC_CYBER, MT_CYBORG},
-    {CC_HERO, MT_PLAYER},
-
-    {nullptr, MT_INVALID}
-};
-
-int		castnum;
-int		casttics;
-state_t* caststate;
-boolean		castdeath;
-int		castframes;
-int		castonmelee;
-boolean		castattacking;
-
 void F_StartCast()
 {
     wipegamestate = GameState::ForceWipe;		// force a screen wipe
@@ -370,10 +372,6 @@ void F_StartCast()
     S_ChangeMusic(mus_evil, true);
 }
 
-
-//
-// F_CastTicker
-//
 void F_CastTicker()
 {
     int		st;
@@ -475,32 +473,6 @@ void F_CastTicker()
     if (casttics == -1)
         casttics = 15;
 }
-
-
-//
-// F_CastResponder
-//
-
-boolean F_CastResponder(event_t* ev)
-{
-    if (ev->type != ev_keydown)
-        return false;
-
-    if (castdeath)
-        return true;			// already in dying frames
-
-    // go into death frame
-    castdeath = true;
-    caststate = &states[mobjinfo[castorder[castnum].type].deathstate];
-    casttics = caststate->tics;
-    castframes = 0;
-    castattacking = false;
-    if (mobjinfo[castorder[castnum].type].deathsound)
-        S_StartSound(nullptr, mobjinfo[castorder[castnum].type].deathsound);
-
-    return true;
-}
-
 
 void F_CastPrint(const char* text)
 {

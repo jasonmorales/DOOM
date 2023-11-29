@@ -820,7 +820,7 @@ LRESULT Video::HandleSystemEvent(const SystemEvent& event)
 
         for (int32 i = 0; i < count; ++i)
         {
-            D_PostEvent({ev_keydown, key});
+            doom->PostEvent({ev_keydown, key});
         }
     }
     return 0;
@@ -837,7 +837,7 @@ LRESULT Video::HandleSystemEvent(const SystemEvent& event)
             | (X_event.xbutton.button == Button2 ? 2 : 0)
             | (X_event.xbutton.button == Button3 ? 4 : 0);
         event.data2 = event.data3 = 0;
-        D_PostEvent(&event);
+        doom->PostEvent(&event);
         // fprintf(stderr, "b");
         break;
     case ButtonRelease:
@@ -853,7 +853,7 @@ LRESULT Video::HandleSystemEvent(const SystemEvent& event)
             ^ (X_event.xbutton.button == Button2 ? 2 : 0)
             ^ (X_event.xbutton.button == Button3 ? 4 : 0);
         event.data2 = event.data3 = 0;
-        D_PostEvent(&event);
+        doom->PostEvent(&event);
         // fprintf(stderr, "bu");
         break;
     case MotionNotify:
@@ -872,7 +872,7 @@ LRESULT Video::HandleSystemEvent(const SystemEvent& event)
             if (X_event.xmotion.x != X_width / 2 &&
                 X_event.xmotion.y != X_height / 2)
             {
-                D_PostEvent(&event);
+                doom->PostEvent(&event);
                 // fprintf(stderr, "m");
                 mousemoved = false;
             }
@@ -901,7 +901,7 @@ LRESULT Video::HandleSystemEvent(const SystemEvent& event)
         /**/
 
         //input->AddEvent(Input::Device::Keyboard, key, Input::Event::Flag::Up | Input::Event::Flag::Changed);
-        D_PostEvent({ev_keyup, key});
+        doom->PostEvent({ev_keyup, key});
     }
     return 0;
 

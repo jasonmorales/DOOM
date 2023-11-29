@@ -36,12 +36,7 @@
 #define MINZ				(FRACUNIT*4)
 #define BASEYCENTER			100
 
-//void R_DrawColumn ();
-//void R_DrawFuzzColumn ();
-
-
-
-typedef struct
+struct maskdraw_t
 {
     int		x1;
     int		x2;
@@ -49,61 +44,34 @@ typedef struct
     int		column;
     int		topclip;
     int		bottomclip;
+};
 
-} maskdraw_t;
-
-
-
-//
-// Sprite rotation 0 is facing the viewer,
-//  rotation 1 is one angle turn CLOCKWISE around the axis.
-// This is not the same as the angle,
-//  which increases counter clockwise (protractor).
+// Sprite rotation 0 is facing the viewer, rotation 1 is one angle turn CLOCKWISE around the axis.
+// This is not the same as the angle, which increases counter clockwise (protractor).
 // There was a lot of stuff grabbed wrong, so I changed it...
-//
-fixed_t		pspritescale;
-fixed_t		pspriteiscale;
+int32 pspritescale;
+int32 pspriteiscale;
 
 lighttable_t** spritelights;
 
-// constant arrays
-//  used for psprite clipping and initializing clipping
-short		negonearray[SCREENWIDTH];
-short		screenheightarray[SCREENWIDTH];
+// constant arrays used for psprite clipping and initializing clipping
+int16 negonearray[SCREENWIDTH];
+int16 screenheightarray[SCREENWIDTH];
 
-
-//
 // INITIALIZATION FUNCTIONS
-//
 
-// variables used to look up
-//  and range check thing_t sprites patches
+// variables used to look up and range check thing_t sprites patches
 spritedef_t* sprites;
-int		numsprites;
+int32 numsprites;
 
-spriteframe_t	sprtemp[29];
-int		maxframe;
-const char* spritename;
+spriteframe_t sprtemp[29];
+int32 maxframe;
 
-
-
-
-//
-// R_InstallSpriteLump
 // Local function for R_InitSprites.
-//
-void
-R_InstallSpriteLump
-(int		lump,
-    unsigned	frame,
-    unsigned	rotation,
-    boolean	flipped)
+void R_InstallSpriteLump(string_view name, int32 lump, uint32 frame, uint32 rotation, bool flipped)
 {
-    int		r;
-
     if (frame >= 29 || rotation > 8)
-        I_Error("R_InstallSpriteLump: "
-            "Bad frame characters in lump %i", lump);
+        I_Error("R_InstallSpriteLump: Bad frame characters in lump %i", lump);
 
     if ((int)frame > maxframe)
         maxframe = frame;
@@ -112,15 +80,13 @@ R_InstallSpriteLump
     {
         // the lump should be used for all rotations
         if (sprtemp[frame].rotate == false)
-            I_Error("R_InitSprites: Sprite {} frame {} has "
-                "multip rot=0 lump", spritename, 'A' + frame);
+            I_Error("R_InstallSpriteLump: Sprite {} frame {} has multip rot=0 lump", std::string(name), 'A' + frame);
 
         if (sprtemp[frame].rotate == true)
-            I_Error("R_InitSprites: Sprite {} frame {} has rotations "
-                "and a rot=0 lump", spritename, 'A' + frame);
+            I_Error("R_InstallSpriteLump: Sprite {} frame {} has rotations and a rot=0 lump", std::string(name), 'A' + frame);
 
         sprtemp[frame].rotate = false;
-        for (r = 0; r < 8; r++)
+        for (int32 r = 0; r < 8; r++)
         {
             sprtemp[frame].lump[r] = lump - firstspritelump;
             sprtemp[frame].flip[r] = (byte)flipped;
@@ -130,82 +96,63 @@ R_InstallSpriteLump
 
     // the lump is only used for one rotation
     if (sprtemp[frame].rotate == false)
-        I_Error("R_InitSprites: Sprite {} frame {} has rotations "
-            "and a rot=0 lump", spritename, 'A' + frame);
+        I_Error("R_InstallSpriteLump: Sprite {} frame {} has rotations and a rot=0 lump", std::string(name), 'A' + frame);
 
     sprtemp[frame].rotate = true;
 
     // make 0 based
     rotation--;
     if (sprtemp[frame].lump[rotation] != -1)
-        I_Error("R_InitSprites: Sprite {} : {} : {} "
-            "has two lumps mapped to it",
-            spritename, 'A' + frame, '1' + rotation);
+        I_Error("R_InitSprites: Sprite {} : {} : {} has two lumps mapped to it", std::string(name), 'A' + frame, '1' + rotation);
 
     sprtemp[frame].lump[rotation] = lump - firstspritelump;
     sprtemp[frame].flip[rotation] = (byte)flipped;
 }
 
-//
-// R_InitSpriteDefs
-// Pass a null terminated list of sprite names
-//  (4 chars exactly) to be used.
-// Builds the sprite rotation matrixes to account
-//  for horizontally flipped sprites.
-// Will report an error if the lumps are inconsistant. 
+// Pass a null terminated list of sprite names (4 chars exactly) to be used.
+// Builds the sprite rotation matrices to account for horizontally flipped sprites.
+// Will report an error if the lumps are inconsistent. 
 // Only called at startup.
 //
-// Sprite lump names are 4 characters for the actor,
-//  a letter for the frame, and a number for the rotation.
-// A sprite that is flippable will have an additional
-//  letter/number appended.
+// Sprite lump names are 4 characters for the actor, a letter for the frame, and a number for the rotation.
+// A sprite that is flippable will have an additional letter/number appended.
 // The rotation character can be 0 to signify no rotations.
-//
-void R_InitSpriteDefs(Doom* doom, const char** namelist)
+void R_InitSpriteDefs(Doom* doom, const vector<string_view>& names)
 {
-    // count the number of sprite names
-    const char** check = namelist;
-    while (*check != nullptr)
-        check++;
-
-    numsprites = check - namelist;
-
-    if (!numsprites)
+    if (names.empty())
         return;
 
+    numsprites = names.size();
     sprites = Z_Malloc<spritedef_t>(numsprites * sizeof(spritedef_t), PU_STATIC, nullptr);
 
     int start = firstspritelump - 1;
     int end = lastspritelump + 1;
 
-    // scan all the lump names for each of the names,
-    //  noting the highest frame letter.
+    // scan all the lump names for each of the names, noting the highest frame letter.
     // Just compare 4 characters as ints
     for (int i = 0; i < numsprites; ++i)
     {
-        spritename = namelist[i];
+        auto name = names[i];
         memset(sprtemp, -1, sizeof(sprtemp));
 
         maxframe = -1;
-        intptr_t intname = *(intptr_t*)namelist[i];
 
-        // scan the lumps,
-        //  filling in the frames for whatever is found
+        // scan the lumps, filling in the frames for whatever is found
         for (int l = start + 1; l < end; ++l)
         {
-            if (*(intptr_t*)lumpinfo[l].name == intname)
+            if (string_view(lumpinfo[l].name, 4) == name)
             {
                 int frame = lumpinfo[l].name[4] - 'A';
                 int rotation = lumpinfo[l].name[5] - '0';
                 int patched = doom->IsModified() ? W_GetNumForName(lumpinfo[l].name) : l;
 
-                R_InstallSpriteLump(patched, frame, rotation, false);
+                R_InstallSpriteLump(name, patched, frame, rotation, false);
 
                 if (lumpinfo[l].name[6])
                 {
                     frame = lumpinfo[l].name[6] - 'A';
                     rotation = lumpinfo[l].name[7] - '0';
-                    R_InstallSpriteLump(l, frame, rotation, true);
+                    R_InstallSpriteLump(name, l, frame, rotation, true);
                 }
             }
         }
@@ -225,8 +172,7 @@ void R_InitSpriteDefs(Doom* doom, const char** namelist)
             {
             case -1:
                 // no rotations were found for that frame at all
-                I_Error("R_InitSprites: No patches found "
-                    "for %s frame %c", namelist[i], frame + 'A');
+                I_Error("R_InitSpriteDefs: No patches found for %s frame %c", std::string(name), frame + 'A');
                 break;
 
             case 0:
@@ -237,9 +183,7 @@ void R_InitSpriteDefs(Doom* doom, const char** namelist)
                 // must have all 8 frames
                 for (int rotation = 0; rotation < 8; rotation++)
                     if (sprtemp[frame].lump[rotation] == -1)
-                        I_Error("R_InitSprites: Sprite {} frame {} "
-                            "is missing rotations",
-                            namelist[i], frame + 'A');
+                        I_Error("R_InitSpriteDefs: Sprite {} frame {} is missing rotations", std::string(name), frame + 'A');
                 break;
             }
         }
@@ -258,26 +202,18 @@ vissprite_t	vissprites[MAXVISSPRITES];
 vissprite_t* vissprite_p;
 int		newvissprite;
 
-//
-// R_InitSprites
 // Called at program start.
-//
-void R_InitSprites(Doom* doom, const char** namelist)
+void R_InitSprites(Doom* doom, const vector<string_view>& names)
 {
     for (int i = 0; i < SCREENWIDTH; i++)
     {
         negonearray[i] = -1;
     }
 
-    R_InitSpriteDefs(doom, namelist);
+    R_InitSpriteDefs(doom, names);
 }
 
-
-
-//
-// R_ClearSprites
 // Called at frame start.
-//
 void R_ClearSprites()
 {
     vissprite_p = vissprites;
@@ -400,61 +336,27 @@ void R_DrawVisSprite(vissprite_t* vis, [[maybe_unused]] int x1, [[maybe_unused]]
     colfunc = basecolfunc;
 }
 
-
-
-//
-// R_ProjectSprite
-// Generates a vissprite for a thing
-//  if it might be visible.
-//
+// Generates a vissprite for a thing if it might be visible.
 void R_ProjectSprite(mobj_t* thing)
 {
-    fixed_t		tr_x;
-    fixed_t		tr_y;
-
-    fixed_t		gxt;
-    fixed_t		gyt;
-
-    fixed_t		tx;
-    fixed_t		tz;
-
-    fixed_t		xscale;
-
-    int			x1;
-    int			x2;
-
-    spritedef_t* sprdef;
-    spriteframe_t* sprframe;
-    int			lump;
-
-    unsigned		rot;
-    boolean		flip;
-
-    int			index;
-
-    vissprite_t* vis;
-
-    angle_t		ang;
-    fixed_t		iscale;
-
     // transform the origin point
-    tr_x = thing->x - viewx;
-    tr_y = thing->y - viewy;
+    auto tr_x = thing->x - viewx;
+    auto tr_y = thing->y - viewy;
 
-    gxt = FixedMul(tr_x, viewcos);
-    gyt = -FixedMul(tr_y, viewsin);
+    auto gxt = FixedMul(tr_x, viewcos);
+    auto gyt = -FixedMul(tr_y, viewsin);
 
-    tz = gxt - gyt;
+    auto tz = gxt - gyt;
 
     // thing is behind view plane?
     if (tz < MINZ)
         return;
 
-    xscale = FixedDiv(projection, tz);
+    auto xscale = FixedDiv(projection, tz);
 
     gxt = -FixedMul(tr_x, viewsin);
     gyt = FixedMul(tr_y, viewcos);
-    tx = -(gyt + gxt);
+    auto tx = -(gyt + gxt);
 
     // too far off the side?
     if (abs(tx) > (tz << 2))
@@ -465,45 +367,47 @@ void R_ProjectSprite(mobj_t* thing)
     if (thing->sprite >= numsprites)
         I_Error("R_ProjectSprite: invalid sprite number {}", static_cast<int32>(thing->sprite));
 #endif
-    sprdef = &sprites[thing->sprite];
+    auto sprdef = &sprites[thing->sprite];
 #ifdef RANGECHECK
     if ((thing->frame & FF_FRAMEMASK) >= sprdef->numframes)
         I_Error("R_ProjectSprite: invalid sprite frame {} : {}", static_cast<int32>(thing->sprite), thing->frame);
 #endif
-    sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
+    auto sprframe = &sprdef->spriteframes[thing->frame & FF_FRAMEMASK];
 
+    int32 lump = 0;
+    bool flip = false;
     if (sprframe->rotate)
     {
         // choose a different rotation based on player view
-        ang = R_PointToAngle(thing->x, thing->y);
-        rot = (ang - thing->angle + (unsigned)(ANG45 / 2) * 9) >> 29;
+        auto ang = R_PointToAngle(thing->x, thing->y);
+        auto rot = (ang - thing->angle + (unsigned)(ANG45 / 2) * 9) >> 29;
         lump = sprframe->lump[rot];
-        flip = (boolean)sprframe->flip[rot];
+        flip = sprframe->flip[rot];
     }
     else
     {
         // use single rotation for all views
         lump = sprframe->lump[0];
-        flip = (boolean)sprframe->flip[0];
+        flip = sprframe->flip[0];
     }
 
     // calculate edges of the shape
     tx -= spriteoffset[lump];
-    x1 = (centerxfrac + FixedMul(tx, xscale)) >> FRACBITS;
+    auto x1 = (centerxfrac + FixedMul(tx, xscale)) >> FRACBITS;
 
     // off the right side?
     if (x1 > viewwidth)
         return;
 
     tx += spritewidth[lump];
-    x2 = ((centerxfrac + FixedMul(tx, xscale)) >> FRACBITS) - 1;
+    auto x2 = ((centerxfrac + FixedMul(tx, xscale)) >> FRACBITS) - 1;
 
     // off the left side
     if (x2 < 0)
         return;
 
     // store information in a vissprite
-    vis = R_NewVisSprite();
+    auto* vis = R_NewVisSprite();
     vis->mobjflags = thing->flags;
     vis->scale = xscale << detailshift;
     vis->gx = thing->x;
@@ -513,7 +417,7 @@ void R_ProjectSprite(mobj_t* thing)
     vis->texturemid = vis->gzt - viewz;
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth - 1 : x2;
-    iscale = FixedDiv(FRACUNIT, xscale);
+    auto iscale = FixedDiv(FRACUNIT, xscale);
 
     if (flip)
     {
@@ -546,11 +450,10 @@ void R_ProjectSprite(mobj_t* thing)
         // full bright
         vis->colormap = colormaps;
     }
-
     else
     {
         // diminished light
-        index = xscale >> (LIGHTSCALESHIFT - detailshift);
+        auto index = xscale >> (LIGHTSCALESHIFT - detailshift);
 
         if (index >= MAXLIGHTSCALE)
             index = MAXLIGHTSCALE - 1;
@@ -559,13 +462,7 @@ void R_ProjectSprite(mobj_t* thing)
     }
 }
 
-
-
-
-//
-// R_AddSprites
 // During BSP traversal, this adds sprites by sector.
-//
 void R_AddSprites(sector_t* sec)
 {
     mobj_t* thing;
@@ -595,56 +492,43 @@ void R_AddSprites(sector_t* sec)
         R_ProjectSprite(thing);
 }
 
-
-//
-// R_DrawPSprite
-//
 void R_DrawPSprite(pspdef_t* psp)
 {
-    fixed_t		tx;
-    int			x1;
-    int			x2;
-    spritedef_t* sprdef;
-    spriteframe_t* sprframe;
-    int			lump;
-    boolean		flip;
-    vissprite_t* vis;
-    vissprite_t		avis;
-
     // decide which patch to use
 #ifdef RANGECHECK
     if ((unsigned)psp->state->sprite >= numsprites)
         I_Error("R_ProjectSprite: invalid sprite number {} ", static_cast<int32>(psp->state->sprite));
 #endif
-    sprdef = &sprites[psp->state->sprite];
+    auto* sprdef = &sprites[psp->state->sprite];
 #ifdef RANGECHECK
     if ((psp->state->frame & FF_FRAMEMASK) >= sprdef->numframes)
         I_Error("R_ProjectSprite: invalid sprite frame {} : {} ", static_cast<int32>(psp->state->sprite), psp->state->frame);
 #endif
-    sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
+    auto sprframe = &sprdef->spriteframes[psp->state->frame & FF_FRAMEMASK];
 
-    lump = sprframe->lump[0];
-    flip = (boolean)sprframe->flip[0];
+    auto lump = sprframe->lump[0];
+    bool flip = sprframe->flip[0];
 
     // calculate edges of the shape
-    tx = psp->sx - 160 * FRACUNIT;
+    auto tx = psp->sx - 160 * FRACUNIT;
 
     tx -= spriteoffset[lump];
-    x1 = (centerxfrac + FixedMul(tx, pspritescale)) >> FRACBITS;
+    auto x1 = (centerxfrac + FixedMul(tx, pspritescale)) >> FRACBITS;
 
     // off the right side
     if (x1 > viewwidth)
         return;
 
     tx += spritewidth[lump];
-    x2 = ((centerxfrac + FixedMul(tx, pspritescale)) >> FRACBITS) - 1;
+    auto x2 = ((centerxfrac + FixedMul(tx, pspritescale)) >> FRACBITS) - 1;
 
     // off the left side
     if (x2 < 0)
         return;
 
     // store information in a vissprite
-    vis = &avis;
+    vissprite_t avis;
+    auto vis = &avis;
     vis->mobjflags = 0;
     vis->texturemid = (BASEYCENTER << FRACBITS) + FRACUNIT / 2 - (psp->sy - spritetopoffset[lump]);
     vis->x1 = x1 < 0 ? 0 : x1;
@@ -692,11 +576,6 @@ void R_DrawPSprite(pspdef_t* psp)
     R_DrawVisSprite(vis, vis->x1, vis->x2);
 }
 
-
-
-//
-// R_DrawPlayerSprites
-//
 void R_DrawPlayerSprites()
 {
     int		i;

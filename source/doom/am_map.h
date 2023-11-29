@@ -22,10 +22,8 @@
 #define AM_MSGENTERED (AM_MSGHEADER | ('e'<<8))
 #define AM_MSGEXITED (AM_MSGHEADER | ('x'<<8))
 
-struct event_t;
-
 // Called by main loop.
-boolean AM_Responder(event_t* ev);
+bool AM_Responder(const struct event_t& event);
 
 // Called by main loop.
 void AM_Ticker();

@@ -49,7 +49,7 @@ typedef struct
 //
 struct lumpinfo_t
 {
-    char name[9] /*= {0}*/;
+    char name[9] = {0};
     int handle;
     int position;
     int size;
@@ -62,8 +62,8 @@ extern intptr_t numlumps;
 void W_InitMultipleFiles(const vector<std::filesystem::path>& files);
 void W_Reload();
 
-intptr_t W_CheckNumForName(const char* name);
-intptr_t W_GetNumForName(const char* name);
+int32 W_CheckNumForName(const char* name);
+int32 W_GetNumForName(const char* name);
 
 int	W_LumpLength(intptr_t lump);
 void W_ReadLump(intptr_t lump, void* dest);

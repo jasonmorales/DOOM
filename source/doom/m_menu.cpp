@@ -1232,18 +1232,10 @@ M_WriteText
     }
 }
 
-
-
-//
 // CONTROL PANEL
-//
 
-//
-// M_Responder
-//
-boolean M_Responder(event_t* ev)
+bool M_Responder(const event_t& event)
 {
-    int             ch;
     static  time_t joywait = 0;
     static  time_t mousewait = 0;
     static  int     mousey = 0;
@@ -1251,38 +1243,38 @@ boolean M_Responder(event_t* ev)
     static  int     mousex = 0;
     static  int     lastx = 0;
 
-    ch = -1;
+    int32 ch = -1;
 
-    if (ev->type == ev_joystick && joywait < I_GetTime())
+    if (event.type == ev_joystick && joywait < I_GetTime())
     {
-        if (ev->data3 == -1)
+        if (event.data3 == -1)
         {
             ch = KEY_UPARROW;
             joywait = I_GetTime() + 5;
         }
-        else if (ev->data3 == 1)
+        else if (event.data3 == 1)
         {
             ch = KEY_DOWNARROW;
             joywait = I_GetTime() + 5;
         }
 
-        if (ev->data2 == -1)
+        if (event.data2 == -1)
         {
             ch = KEY_LEFTARROW;
             joywait = I_GetTime() + 2;
         }
-        else if (ev->data2 == 1)
+        else if (event.data2 == 1)
         {
             ch = KEY_RIGHTARROW;
             joywait = I_GetTime() + 2;
         }
 
-        if (ev->data1 & 1)
+        if (event.data1 & 1)
         {
             ch = KEY_ENTER;
             joywait = I_GetTime() + 5;
         }
-        if (ev->data1 & 2)
+        if (event.data1 & 2)
         {
             ch = KEY_BACKSPACE;
             joywait = I_GetTime() + 5;
@@ -1290,9 +1282,9 @@ boolean M_Responder(event_t* ev)
     }
     else
     {
-        if (ev->type == ev_mouse && mousewait < I_GetTime())
+        if (event.type == ev_mouse && mousewait < I_GetTime())
         {
-            mousey += ev->data3;
+            mousey += event.data3;
             if (mousey < lasty - 30)
             {
                 ch = KEY_DOWNARROW;
@@ -1306,7 +1298,7 @@ boolean M_Responder(event_t* ev)
                 mousey = lasty += 30;
             }
 
-            mousex += ev->data2;
+            mousex += event.data2;
             if (mousex < lastx - 30)
             {
                 ch = KEY_LEFTARROW;
@@ -1320,28 +1312,27 @@ boolean M_Responder(event_t* ev)
                 mousex = lastx += 30;
             }
 
-            if (ev->data1 & 1)
+            if (event.data1 & 1)
             {
                 ch = KEY_ENTER;
                 mousewait = I_GetTime() + 15;
             }
 
-            if (ev->data1 & 2)
+            if (event.data1 & 2)
             {
                 ch = KEY_BACKSPACE;
                 mousewait = I_GetTime() + 15;
             }
         }
         else
-            if (ev->type == ev_keydown)
+            if (event.type == ev_keydown)
             {
-                ch = ev->data1;
+                ch = event.data1;
             }
     }
 
     if (ch == -1)
         return false;
-
 
     // Save Game string input
     if (saveStringEnter)
@@ -1408,9 +1399,9 @@ boolean M_Responder(event_t* ev)
         return true;
     }
 
-
     // F-Keys
     if (!menuactive)
+    {
         switch (ch)
         {
         case KEY_MINUS:         // Screen size down
@@ -1496,6 +1487,7 @@ boolean M_Responder(event_t* ev)
             g_doom->GetVideo()->SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
             return true;
         }
+    }
 
     // Pop-up menu?
     if (!menuactive)
@@ -1508,7 +1500,6 @@ boolean M_Responder(event_t* ev)
         }
         return false;
     }
-
 
     // Keys usable within menu
     switch (ch)
@@ -1607,11 +1598,6 @@ boolean M_Responder(event_t* ev)
     return false;
 }
 
-
-
-//
-// M_StartControlPanel
-//
 void M_StartControlPanel()
 {
     // intro might call this repeatedly

@@ -485,8 +485,8 @@ void HU_Ticker()
             if (!playeringame[i])
                 continue;
 
-            if (i != consoleplayer
-                && (c = players[i].cmd.chatchar))
+            c = players[i].cmd.chatchar;
+            if (i != consoleplayer && c)
             {
                 if (c <= HU_BROADCAST)
                     chat_dest[i] = c;
@@ -560,54 +560,52 @@ char HU_dequeueChatChar()
     return c;
 }
 
-boolean HU_Responder(event_t* ev)
+bool HU_Responder(const event_t& event)
 {
-
-    static char		lastmessage[HU_MAXLINELENGTH + 1];
+    static char lastmessage[HU_MAXLINELENGTH + 1];
     const char* macromessage;
-    boolean		eatkey = false;
-    static boolean	shiftdown = false;
-    static boolean	altdown = false;
-    unsigned char 	c;
-    int			numplayers;
+    bool eatkey = false;
+    static bool shiftdown = false;
+    static bool altdown = false;
+    unsigned char c;
+    int32 numplayers;
 
-    static char		destination_keys[MAXPLAYERS] =
+    static char destination_keys[MAXPLAYERS] =
     {
-    HUSTR_KEYGREEN,
-    HUSTR_KEYINDIGO,
-    HUSTR_KEYBROWN,
-    HUSTR_KEYRED
+        HUSTR_KEYGREEN,
+        HUSTR_KEYINDIGO,
+        HUSTR_KEYBROWN,
+        HUSTR_KEYRED
     };
 
-    static int		num_nobrainers = 0;
-
+    static int32 num_nobrainers = 0;
     numplayers = 0;
-    for (int i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; i++)
         numplayers += playeringame[i];
 
-    if (ev->data1 == KEY_RSHIFT)
+    if (event.data1 == KEY_RSHIFT)
     {
-        shiftdown = ev->type == ev_keydown;
+        shiftdown = event.type == ev_keydown;
         return false;
     }
-    else if (ev->data1 == KEY_RALT || ev->data1 == KEY_LALT)
+    else if (event.data1 == KEY_RALT || event.data1 == KEY_LALT)
     {
-        altdown = ev->type == ev_keydown;
+        altdown = event.type == ev_keydown;
         return false;
     }
 
-    if (ev->type != ev_keydown)
+    if (event.type != ev_keydown)
         return false;
 
     if (!chat_on)
     {
-        if (ev->data1 == HU_MSGREFRESH)
+        if (event.data1 == HU_MSGREFRESH)
         {
             message_on = true;
             message_counter = HU_MSGTIMEOUT;
             eatkey = true;
         }
-        else if (netgame && ev->data1 == HU_INPUTTOGGLE)
+        else if (netgame && event.data1 == HU_INPUTTOGGLE)
         {
             eatkey = chat_on = true;
             HUlib_resetIText(&w_chat);
@@ -617,7 +615,7 @@ boolean HU_Responder(event_t* ev)
         {
             for (char i = 0; i < MAXPLAYERS; i++)
             {
-                if (ev->data1 == destination_keys[i])
+                if (event.data1 == destination_keys[i])
                 {
                     if (playeringame[i] && i != consoleplayer)
                     {
@@ -646,7 +644,7 @@ boolean HU_Responder(event_t* ev)
     }
     else
     {
-        c = static_cast<unsigned char>(ev->data1);
+        c = static_cast<unsigned char>(event.data1);
         // send a macro
         if (altdown)
         {
@@ -680,7 +678,7 @@ boolean HU_Responder(event_t* ev)
                 // static unsigned char buf[20]; // DEBUG
                 HU_queueChatChar(c);
 
-                // sprintf(buf, "KEY: %d => %d", ev->data1, c);
+                // sprintf(buf, "KEY: %d => %d", event.data1, c);
                 //      plr->message = buf;
             }
             if (c == KEY_ENTER)
@@ -698,5 +696,4 @@ boolean HU_Responder(event_t* ev)
     }
 
     return eatkey;
-
 }

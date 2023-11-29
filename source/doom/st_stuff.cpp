@@ -56,10 +56,15 @@
 extern Doom* g_doom;
 
 
-//
 // STATUS BAR DATA
-//
 
+struct IconBox
+{
+    int32 x = 0;
+    int32 y = 0;
+    int32 width = 0;
+    int32 height = 0;
+};
 
 // Palette indices.
 // For damage/bonus red-/gold-shifts
@@ -109,8 +114,7 @@ extern Doom* g_doom;
 #define ST_GODFACE			(ST_NUMPAINFACES*ST_FACESTRIDE)
 #define ST_DEADFACE			(ST_GODFACE+1)
 
-#define ST_FACESX			143
-#define ST_FACESY			168
+static const IconBox FacesBox = {.x = 143, .y = 168};
 
 #define ST_EVILGRINCOUNT		(2*TICRATE)
 #define ST_STRAIGHTFACECOUNT	(TICRATE/2)
@@ -140,12 +144,10 @@ extern Doom* g_doom;
 #define ST_HEALTHY			171
 
 // Weapon pos.
-#define ST_ARMSX			111
-#define ST_ARMSY			172
 #define ST_ARMSBGX			104
 #define ST_ARMSBGY			168
-#define ST_ARMSXSPACE		12
-#define ST_ARMSYSPACE		10
+
+static const IconBox ArmsIconBox = {.x = 111, .y = 172, .width = 12, .height = 10};
 
 // Frags pos.
 #define ST_FRAGSX			138
@@ -158,16 +160,12 @@ extern Doom* g_doom;
 #define ST_ARMORY			171
 
 // Key icon positions.
-#define ST_KEY0WIDTH		8
-#define ST_KEY0HEIGHT		5
-#define ST_KEY0X			239
-#define ST_KEY0Y			171
-#define ST_KEY1WIDTH		ST_KEY0WIDTH
-#define ST_KEY1X			239
-#define ST_KEY1Y			181
-#define ST_KEY2WIDTH		ST_KEY0WIDTH
-#define ST_KEY2X			239
-#define ST_KEY2Y			191
+static const IconBox KeyIconBoxes[] =
+{
+    {.x = 239, .y = 171, .width = 8, .height = 5},
+    {.x = 239, .y = 181, .width = 8, .height = 5},
+    {.x = 239, .y = 191, .width = 8, .height = 5},
+};
 
 // Ammunition counter.
 #define ST_AMMO0WIDTH		3
@@ -347,7 +345,7 @@ static st_binicon_t	w_armsbg;
 
 
 // weapon ownership widgets
-static st_multicon_t	w_arms[6];
+static st_multicon_t w_arms[6] = {};
 
 // face status widget
 static st_multicon_t	w_faces;
@@ -503,22 +501,16 @@ void ST_refreshBackground()
 
         V_CopyRect(ST_X, 0, BG, ST_WIDTH, ST_HEIGHT, ST_X, ST_Y, FG);
     }
-
 }
 
-
-// Respond to keyboard input events,
-//  intercept cheats.
-boolean
-ST_Responder(event_t* ev)
+// Respond to keyboard input events, intercept cheats.
+bool ST_Responder(const event_t& event)
 {
-    int		i;
-
     // Filter automap on/off.
-    if (ev->type == ev_keyup
-        && ((ev->data1 & 0xffff0000) == AM_MSGHEADER))
+    if (event.type == ev_keyup
+        && ((event.data1 & 0xffff0000) == AM_MSGHEADER))
     {
-        switch (ev->data1)
+        switch (event.data1)
         {
         case AM_MSGENTERED:
             st_gamestate = AutomapState;
@@ -533,15 +525,12 @@ ST_Responder(event_t* ev)
     }
 
     // if a user keypress...
-    else if (ev->type == ev_keydown)
+    else if (event.type == ev_keydown)
     {
         if (!netgame)
         {
-            // b. - enabled for more debug fun.
-            // if (gameskill != sk_nightmare) {
-
             // 'dqd' cheat for toggleable god mode
-            if (cht_CheckCheat(&cheat_god, ev->data1))
+            if (cht_CheckCheat(&cheat_god, event.data1))
             {
                 plyr->cheats ^= CF_GODMODE;
                 if (plyr->cheats & CF_GODMODE)
@@ -556,49 +545,46 @@ ST_Responder(event_t* ev)
                     plyr->message = STSTR_DQDOFF;
             }
             // 'fa' cheat for killer fucking arsenal
-            else if (cht_CheckCheat(&cheat_ammonokey, ev->data1))
+            else if (cht_CheckCheat(&cheat_ammonokey, event.data1))
             {
                 plyr->armorpoints = 200;
                 plyr->armortype = 2;
 
-                for (i = 0;i < NUMWEAPONS;i++)
+                for (int32 i = 0;i < NUMWEAPONS;i++)
                     plyr->weaponowned[i] = true;
 
-                for (i = 0;i < NUMAMMO;i++)
+                for (int32 i = 0;i < NUMAMMO;i++)
                     plyr->ammo[i] = plyr->maxammo[i];
 
                 plyr->message = STSTR_FAADDED;
             }
             // 'kfa' cheat for key full ammo
-            else if (cht_CheckCheat(&cheat_ammo, ev->data1))
+            else if (cht_CheckCheat(&cheat_ammo, event.data1))
             {
                 plyr->armorpoints = 200;
                 plyr->armortype = 2;
 
-                for (i = 0;i < NUMWEAPONS;i++)
+                for (int32 i = 0;i < NUMWEAPONS;i++)
                     plyr->weaponowned[i] = true;
 
-                for (i = 0;i < NUMAMMO;i++)
+                for (int32 i = 0;i < NUMAMMO;i++)
                     plyr->ammo[i] = plyr->maxammo[i];
 
-                for (i = 0;i < NUMCARDS;i++)
+                for (int32 i = 0;i < NUMCARDS;i++)
                     plyr->cards[i] = true;
 
                 plyr->message = STSTR_KFAADDED;
             }
             // 'mus' cheat for changing music
-            else if (cht_CheckCheat(&cheat_mus, ev->data1))
+            else if (cht_CheckCheat(&cheat_mus, event.data1))
             {
-
-                char	buf[3];
-                int		musnum;
-
+                char buf[3];
                 plyr->message = STSTR_MUS;
                 cht_GetParam(&cheat_mus, buf);
 
                 if (gamemode == GameMode::Doom2Commercial)
                 {
-                    musnum = mus_runnin + (buf[0] - '0') * 10 + buf[1] - '0' - 1;
+                    auto musnum = mus_runnin + (buf[0] - '0') * 10 + buf[1] - '0' - 1;
 
                     if (((buf[0] - '0') * 10 + buf[1] - '0') > 35)
                         plyr->message = STSTR_NOMUS;
@@ -607,7 +593,7 @@ ST_Responder(event_t* ev)
                 }
                 else
                 {
-                    musnum = mus_e1m1 + (buf[0] - '1') * 9 + (buf[1] - '1');
+                    auto musnum = mus_e1m1 + (buf[0] - '1') * 9 + (buf[1] - '1');
 
                     if (((buf[0] - '1') * 9 + buf[1] - '1') > 31)
                         plyr->message = STSTR_NOMUS;
@@ -617,8 +603,8 @@ ST_Responder(event_t* ev)
             }
             // Simplified, accepting both "noclip" and "idspispopd".
             // no clipping mode cheat
-            else if (cht_CheckCheat(&cheat_noclip, ev->data1)
-                || cht_CheckCheat(&cheat_commercial_noclip, ev->data1))
+            else if (cht_CheckCheat(&cheat_noclip, event.data1)
+                || cht_CheckCheat(&cheat_commercial_noclip, event.data1))
             {
                 plyr->cheats ^= CF_NOCLIP;
 
@@ -628,9 +614,9 @@ ST_Responder(event_t* ev)
                     plyr->message = STSTR_NCOFF;
             }
             // 'behold?' power-up cheats
-            for (i = 0;i < 6;i++)
+            for (int32 i = 0;i < 6;i++)
             {
-                if (cht_CheckCheat(&cheat_powerup[i], ev->data1))
+                if (cht_CheckCheat(&cheat_powerup[i], event.data1))
                 {
                     if (!plyr->powers[i])
                         P_GivePower(plyr, i);
@@ -644,19 +630,19 @@ ST_Responder(event_t* ev)
             }
 
             // 'behold' power-up menu
-            if (cht_CheckCheat(&cheat_powerup[6], ev->data1))
+            if (cht_CheckCheat(&cheat_powerup[6], event.data1))
             {
                 plyr->message = STSTR_BEHOLD;
             }
             // 'choppers' invulnerability & chainsaw
-            else if (cht_CheckCheat(&cheat_choppers, ev->data1))
+            else if (cht_CheckCheat(&cheat_choppers, event.data1))
             {
                 plyr->weaponowned[wp_chainsaw] = true;
                 plyr->powers[pw_invulnerability] = true;
                 plyr->message = STSTR_CHOPPERS;
             }
             // 'mypos' for player position
-            else if (cht_CheckCheat(&cheat_mypos, ev->data1))
+            else if (cht_CheckCheat(&cheat_mypos, event.data1))
             {
                 static char	buf[ST_MSGWIDTH];
                 sprintf_s(buf, "ang=0x%x;x,y=(0x%x,0x%x)",
@@ -668,7 +654,7 @@ ST_Responder(event_t* ev)
         }
 
         // 'clev' change-level cheat
-        if (cht_CheckCheat(&cheat_clev, ev->data1))
+        if (cht_CheckCheat(&cheat_clev, event.data1))
         {
             char		buf[3];
             int		epsd;
@@ -718,8 +704,6 @@ ST_Responder(event_t* ev)
     }
     return false;
 }
-
-
 
 int ST_calcPainOffset()
 {
@@ -1272,13 +1256,8 @@ void ST_initData()
 
 }
 
-
-
 void ST_createWidgets()
 {
-
-    int i;
-
     // ready weapon ammo
     STlib_initNum(&w_ready,
         ST_AMMOX,
@@ -1309,13 +1288,16 @@ void ST_createWidgets()
         &st_statusbaron);
 
     // weapons owned
-    for (i = 0;i < 6;i++)
+    static_assert(std::size(w_arms) == std::size(arms));
+    for (int32 i = 0; i < std::size(w_arms); ++i)
     {
-        STlib_initMultIcon(&w_arms[i],
-            ST_ARMSX + (i % 3) * ST_ARMSXSPACE,
-            ST_ARMSY + (i / 3) * ST_ARMSYSPACE,
-            arms[i], (int*)&plyr->weaponowned[i + 1],
-            &st_armson);
+        w_arms[i] = {
+            .x = ArmsIconBox.x + (i % 3) * ArmsIconBox.width,
+            .y = ArmsIconBox.y + (i / 3) * ArmsIconBox.height,
+            .inum = &plyr->weaponowned[i + 1],
+            .on = &st_armson,
+            .p = arms[i],
+        };
     }
 
     // frags sum
@@ -1328,12 +1310,13 @@ void ST_createWidgets()
         ST_FRAGSWIDTH);
 
     // faces
-    STlib_initMultIcon(&w_faces,
-        ST_FACESX,
-        ST_FACESY,
-        faces,
-        &st_faceindex,
-        &st_statusbaron);
+    w_faces = {
+        .x = FacesBox.x,
+        .y = FacesBox.y,
+        .inum = &st_faceindex,
+        .on = &st_statusbaron,
+        .p = faces,
+    };
 
     // armor percentage - should be colored later
     STlib_initPercent(&w_armor,
@@ -1344,26 +1327,19 @@ void ST_createWidgets()
         &st_statusbaron, tallpercent);
 
     // keyboxes 0-2
-    STlib_initMultIcon(&w_keyboxes[0],
-        ST_KEY0X,
-        ST_KEY0Y,
-        keys,
-        &keyboxes[0],
-        &st_statusbaron);
+    static_assert(std::size(keyboxes) == std::size(KeyIconBoxes));
+    static_assert(std::size(keyboxes) == std::size(w_keyboxes));
 
-    STlib_initMultIcon(&w_keyboxes[1],
-        ST_KEY1X,
-        ST_KEY1Y,
-        keys,
-        &keyboxes[1],
-        &st_statusbaron);
-
-    STlib_initMultIcon(&w_keyboxes[2],
-        ST_KEY2X,
-        ST_KEY2Y,
-        keys,
-        &keyboxes[2],
-        &st_statusbaron);
+    for (int32 i = 0; i < std::size(KeyIconBoxes); ++i)
+    {
+        w_keyboxes[i] = {
+            .x = KeyIconBoxes[i].x,
+            .y = KeyIconBoxes[i].y,
+            .inum = &keyboxes[i],
+            .on = &st_statusbaron,
+            .p = keys,
+        };
+    }
 
     // ammo count (all four kinds)
     STlib_initNum(&w_ammo[0],

@@ -45,7 +45,7 @@
 void HU_Init();
 void HU_Start();
 
-boolean HU_Responder(event_t* ev);
+bool HU_Responder(const event_t& event);
 
 void HU_Ticker();
 void HU_Drawer();

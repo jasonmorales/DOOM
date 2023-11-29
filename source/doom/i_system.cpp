@@ -69,13 +69,8 @@ byte* I_ZoneBase(intptr_t* size)
     return (byte*)malloc(*size);
 }
 
-
-
-//
-// I_GetTime
 // returns time in 1/70th second tics
-//
-time_t  I_GetTime()
+time_t I_GetTime()
 {
     static time_t basetime = 0;
 
@@ -84,7 +79,11 @@ time_t  I_GetTime()
     if (!basetime)
         basetime = ts.tv_sec;
 
-    return (ts.tv_sec - basetime) * TICRATE + ts.tv_nsec * TICRATE / 1'000'000'000;
+    static time_t last = 0;
+    time_t now = (ts.tv_sec - basetime) * TICRATE + static_cast<int64>(ts.tv_nsec) * TICRATE / 1'000'000'000;
+    assert(now >= last);
+    last = now;
+    return now;
 }
 
 //

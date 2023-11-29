@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-//
+#include "types/numbers.h"
+
 // CHEAT SEQUENCE PACKAGE
-//
 
 #define SCRAMBLE(a) \
 ((((a)&1)<<7) + (((a)&2)<<5) + ((a)&4) + (((a)&8)<<1) \
@@ -32,13 +32,5 @@ typedef struct
 
 } cheatseq_t;
 
-int
-cht_CheckCheat
-(cheatseq_t* cht,
-    char			key);
-
-
-void
-cht_GetParam
-(cheatseq_t* cht,
-    char* buffer);
+int32 cht_CheckCheat(cheatseq_t* cht, char key);
+void cht_GetParam(cheatseq_t* cht, char* buffer);

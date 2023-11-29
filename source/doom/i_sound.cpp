@@ -140,13 +140,10 @@ int		vol_lookup[128 * 256];
 int* channelleftvol_lookup[NUM_CHANNELS];
 int* channelrightvol_lookup[NUM_CHANNELS];
 
-//
 // Safe ioctl, convenience.
-//
-void
-myioctl(int, int command, int*)
+void myioctl(int, int command, int*)
 {
-    int		rc;
+    int rc = 0;
     extern int	errno;
 
     //rc = ioctl(fd, command, arg);  

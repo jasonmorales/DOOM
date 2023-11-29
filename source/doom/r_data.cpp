@@ -37,70 +37,54 @@
 
 #include "r_data.h"
 
-//
 // Graphics.
 // DOOM graphics for walls and sprites
 // is stored in vertical runs of opaque pixels (posts).
 // A column is composed of zero or more posts,
 // a patch or sprite is composed of zero or more columns.
-// 
 
-
-
-//
 // Texture definition.
 // Each texture is composed of one or more patches,
 // with patches being lumps stored in the WAD.
 // The lumps are referenced by number, and patched
 // into the rectangular texture space using origin
 // and possibly other attributes.
-//
-typedef struct
+struct mappatch_t
 {
     short	originx;
     short	originy;
     short	patch;
     short	stepdir;
     short	colormap;
-} mappatch_t;
+};
 
-
-//
 // Texture definition.
-// A DOOM wall texture is a list of patches
-// which are to be combined in a predefined order.
-//
-typedef struct
+// A DOOM wall texture is a list of patches which are to be combined in a predefined order.
+struct maptexture_t
 {
     char		name[8];
-    boolean		masked;
+    int32		masked;
     short		width;
     short		height;
     //void		**columndirectory;	// OBSOLETE
     int32_t _dummy;
     short		patchcount;
     mappatch_t	patches[1];
-} maptexture_t;
+};
 
-
-// A single patch from a texture definition,
-//  basically a rectangular area within
-//  the texture rectangle.
-typedef struct
+// A single patch from a texture definition, basically a rectangular area within the texture
+// rectangle.
+struct texpatch_t
 {
-    // Block origin (allways UL),
-    // which has allready accounted
-    // for the internal origin of the patch.
+    // Block origin (always UL), which has already accounted for the internal origin of the patch.
     int		originx;
     int		originy;
     int		patch;
-} texpatch_t;
+};
 
-
-// A maptexturedef_t describes a rectangular texture,
-//  which is composed of one or more mappatch_t structures
-//  that arrange graphic patches.
-typedef struct
+// A maptexturedef_t describes a rectangular texture, which is composed of one or more mappatch_t
+// structures that arrange graphic patches.
+struct texture_t
 {
     // Keep name for switch changing, etc.
     char	name[8];
@@ -111,10 +95,7 @@ typedef struct
     //  are drawn back to front into the cached texture.
     short	patchcount;
     texpatch_t	patches[1];
-
-} texture_t;
-
-
+};
 
 int		firstflat;
 int		lastflat;
@@ -363,26 +344,15 @@ byte* R_GetColumn(int tex, int col)
     return texturecomposite[tex] + ofs;
 }
 
-//
-// R_InitTextures
 // Initializes the texture list
 //  with the textures from the world map.
-//
 void R_InitTextures()
 {
-    int			totalwidth;
-    int			offset;
-    int			maxoff;
-    int			maxoff2;
-    int			numtextures2;
-
-    int* directory;
-
     // Load the patch names from pnames.lmp.
     char* names = W_CacheLumpName<char>("PNAMES", PU_STATIC);
     int nummappatches = *((int*)names);
     char* name_p = names + 4;
-    intptr_t* patchlookup = static_cast<intptr_t*>(alloca(nummappatches * sizeof(*patchlookup)));
+    auto* patchlookup = static_cast<int32*>(_malloca(nummappatches * sizeof(int32*)));
 
     char name[9] = { 0 };
     for (int i = 0; i < nummappatches; i++)
@@ -398,10 +368,12 @@ void R_InitTextures()
     int* maptex1 = nullptr;
     int* maptex = maptex1 = W_CacheLumpName<int>("TEXTURE1", PU_STATIC);
     int numtextures1 = *maptex;
-    maxoff = W_LumpLength(W_GetNumForName("TEXTURE1"));
-    directory = maptex + 1;
+    int32 maxoff = W_LumpLength(W_GetNumForName("TEXTURE1"));
+    auto* directory = maptex + 1;
 
     int* maptex2 = nullptr;
+    int32  numtextures2 = 0;
+    int32 maxoff2 = 0;
     if (W_CheckNumForName("TEXTURE2") != -1)
     {
         maptex2 = W_CacheLumpName<int>("TEXTURE2", PU_STATIC);
@@ -424,7 +396,7 @@ void R_InitTextures()
     texturewidthmask = Z_Malloc<int>(numtextures * sizeof(int), PU_STATIC, 0);
     textureheight = Z_Malloc<fixed_t>(numtextures * sizeof(fixed_t), PU_STATIC, 0);
 
-    totalwidth = 0;
+    int32 totalwidth = 0;
 
     //	Really complex printing shit...
     intptr_t temp1 = W_GetNumForName("S_START");  // P_???????
@@ -438,7 +410,7 @@ void R_InitTextures()
         printf("\x8");
     printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");
 
-    for (int i = 0; i < numtextures; i++, directory++)
+    for (int32 i = 0; i < numtextures; i++, directory++)
     {
         if (!(i & 63))
             printf(".");
@@ -451,7 +423,7 @@ void R_InitTextures()
             directory = maptex + 1;
         }
 
-        offset = (*directory);
+        int32 offset = (*directory);
 
         if (offset > maxoff)
             I_Error("R_InitTextures: bad texture directory");
@@ -494,6 +466,8 @@ void R_InitTextures()
         totalwidth += texture->width;
     }
 
+    _freea(patchlookup);
+
     Z_Free(maptex1);
     if (maptex2)
         Z_Free(maptex2);
@@ -509,9 +483,6 @@ void R_InitTextures()
         texturetranslation[i] = i;
 }
 
-//
-// R_InitFlats
-//
 void R_InitFlats()
 {
     firstflat = W_GetNumForName("F_START") + 1;
@@ -655,15 +626,6 @@ int		spritememory;
 
 void R_PrecacheLevel()
 {
-    char* flatpresent;
-    char* texturepresent;
-    char* spritepresent;
-
-    int			i;
-    int			j;
-    int			k;
-    int			lump;
-
     texture_t* texture;
     thinker_t* th;
     spriteframe_t* sf;
@@ -672,10 +634,10 @@ void R_PrecacheLevel()
         return;
 
     // Precache flats.
-    flatpresent = static_cast<char*>(alloca(numflats));
+    auto* flatpresent = static_cast<char*>(_malloca(numflats));
     memset(flatpresent, 0, numflats);
 
-    for (i = 0; i < numsectors; i++)
+    for (int32 i = 0; i < numsectors; i++)
     {
         flatpresent[sectors[i].floorpic] = 1;
         flatpresent[sectors[i].ceilingpic] = 1;
@@ -683,7 +645,8 @@ void R_PrecacheLevel()
 
     flatmemory = 0;
 
-    for (i = 0; i < numflats; i++)
+    int32 lump = 0;
+    for (int32 i = 0; i < numflats; i++)
     {
         if (flatpresent[i])
         {
@@ -693,11 +656,13 @@ void R_PrecacheLevel()
         }
     }
 
+    _freea(flatpresent);
+
     // Precache textures.
-    texturepresent = static_cast<char*>(alloca(numtextures));
+    auto* texturepresent = static_cast<char*>(_malloca(numtextures));
     memset(texturepresent, 0, numtextures);
 
-    for (i = 0; i < numsides; i++)
+    for (int32 i = 0; i < numsides; i++)
     {
         texturepresent[sides[i].toptexture] = 1;
         texturepresent[sides[i].midtexture] = 1;
@@ -705,32 +670,37 @@ void R_PrecacheLevel()
     }
 
     // Sky texture is always present.
-    // Note that F_SKY1 is the name used to
-    //  indicate a sky floor/ceiling as a flat,
-    //  while the sky texture is stored like
-    //  a wall texture, with an episode dependend
-    //  name.
+    // Note that F_SKY1 is the name used to indicate a sky floor/ceiling as a flat, while the sky
+    // texture is stored like a wall texture, with an episode dependent name.
     texturepresent[skytexture] = 1;
 
     texturememory = 0;
-    for (i = 0; i < numtextures; i++)
+    for (int32 i = 0; i < numtextures; i++)
     {
         if (!texturepresent[i])
             continue;
 
         texture = textures[i];
 
-        for (j = 0; j < texture->patchcount; j++)
+        for (int32 j = 0; j < texture->patchcount; j++)
         {
             lump = texture->patches[j].patch;
             texturememory += lumpinfo[lump].size;
             W_CacheLumpNum(lump, PU_CACHE);
         }
     }
+    _freea(texturepresent);
 
     // Precache sprites.
-    spritepresent = static_cast<char*>(alloca(numsprites));
-    memset(spritepresent, 0, numsprites);
+    char* spritepresent = nullptr;
+    if (numsprites > 0)
+    {
+        spritepresent = static_cast<char*>(_malloca(numsprites));
+        memset(spritepresent, 0, numsprites);
+    }
+
+    if (!spritepresent)
+        return;
 
     for (th = thinkercap.next; th != &thinkercap; th = th->next)
     {
@@ -739,15 +709,15 @@ void R_PrecacheLevel()
     }
 
     spritememory = 0;
-    for (i = 0; i < numsprites; i++)
+    for (int32 i = 0; i < numsprites; i++)
     {
         if (!spritepresent[i])
             continue;
 
-        for (j = 0; j < sprites[i].numframes; j++)
+        for (int32 j = 0; j < sprites[i].numframes; j++)
         {
             sf = &sprites[i].spriteframes[j];
-            for (k = 0; k < 8; k++)
+            for (int32 k = 0; k < 8; k++)
             {
                 lump = firstspritelump + sf->lump[k];
                 spritememory += lumpinfo[lump].size;
@@ -755,6 +725,8 @@ void R_PrecacheLevel()
             }
         }
     }
+
+    _freea(spritepresent);
 }
 
 

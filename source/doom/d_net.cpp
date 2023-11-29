@@ -416,9 +416,6 @@ listen:
     GetPackets();
 }
 
-//
-// CheckAbort
-//
 void CheckAbort()
 {
     auto stoptic = I_GetTime() + 2;
@@ -426,19 +423,10 @@ void CheckAbort()
         g_doom->GetVideo()->StartTick();
 
     g_doom->GetVideo()->StartTick();
-    for (; eventtail != eventhead
-        ; eventtail = (++eventtail) & (MAXEVENTS - 1))
-    {
-        auto* ev = &events[eventtail];
-        if (ev->type == ev_keydown && ev->data1 == KEY_ESCAPE)
-            I_Error("Network game synchronization aborted.");
-    }
+    if (g_doom->HasEventInQueue({ev_keydown, KEY_ESCAPE}))
+        I_Error("Network game synchronization aborted.");
 }
 
-
-//
-// D_ArbitrateNetStart
-//
 void D_ArbitrateNetStart()
 {
     int		i;

@@ -11,21 +11,16 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
-//    
 //-----------------------------------------------------------------------------
 #pragma once
 
-
 #include "doomtype.h"
 #include "d_event.h"
-//
+
 // FINALE
-//
 
 // Called by main loop.
-boolean F_Responder(event_t* ev);
+bool F_Responder(const event_t& event);
 
 // Called by main loop.
 void F_Ticker();

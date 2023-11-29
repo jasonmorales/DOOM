@@ -475,7 +475,7 @@ void AM_initVariables()
     old_m_h = m_h;
 
     // inform the status bar of the change
-    ST_Responder(&st_notify);
+    ST_Responder(st_notify);
 }
 
 //
@@ -530,22 +530,16 @@ void AM_LevelInit()
     scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
 }
 
-//
-//
-//
 void AM_Stop()
 {
     static event_t st_notify = { ev_keyup, 0, AM_MSGEXITED };
 
     AM_unloadPics();
     automapactive = false;
-    ST_Responder(&st_notify);
+    ST_Responder(st_notify);
     stopped = true;
 }
 
-//
-//
-//
 void AM_Start()
 {
     static int lastlevel = -1, lastepisode = -1;
@@ -582,21 +576,18 @@ void AM_maxOutWindowScale()
     AM_activateNewScale();
 }
 
-
-//
 // Handle events (user inputs) in automap mode
-//
-boolean AM_Responder(event_t* ev)
+bool AM_Responder(const event_t& event)
 {
     static int cheatstate = 0;
     static int bigstate = 0;
     static char buffer[20];
 
-    int rc = false;
+    bool rc = false;
 
     if (!automapactive)
     {
-        if (ev->type == ev_keydown && ev->data1 == AM_STARTKEY)
+        if (event.type == ev_keydown && event.data1 == AM_STARTKEY)
         {
             AM_Start();
             viewactive = false;
@@ -604,11 +595,11 @@ boolean AM_Responder(event_t* ev)
         }
     }
 
-    else if (ev->type == ev_keydown)
+    else if (event.type == ev_keydown)
     {
 
         rc = true;
-        switch (ev->data1)
+        switch (event.data1)
         {
         case AM_PANRIGHTKEY: // pan right
             if (!followplayer) m_paninc.x = FTOM(F_PANINC);
@@ -670,17 +661,17 @@ boolean AM_Responder(event_t* ev)
             cheatstate = 0;
             rc = false;
         }
-        if (!deathmatch && cht_CheckCheat(&cheat_amap, static_cast<char>(ev->data1)))
+        if (!deathmatch && cht_CheckCheat(&cheat_amap, static_cast<char>(event.data1)))
         {
             rc = false;
             cheating = (cheating + 1) % 3;
         }
     }
 
-    else if (ev->type == ev_keyup)
+    else if (event.type == ev_keyup)
     {
         rc = false;
-        switch (ev->data1)
+        switch (event.data1)
         {
         case AM_PANRIGHTKEY:
             if (!followplayer) m_paninc.x = 0;
@@ -703,13 +694,9 @@ boolean AM_Responder(event_t* ev)
     }
 
     return rc;
-
 }
 
-
-//
 // Zooming
-//
 void AM_changeWindowScale()
 {
 

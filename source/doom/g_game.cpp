@@ -205,25 +205,18 @@ int G_CmdChecksum(ticcmd_t* cmd)
     return sum;
 }
 
-
-//
-// G_BuildTiccmd
 // Builds a ticcmd from all of the available inputs
 // or reads it from the demo buffer. 
 // If recording a demo, write it out 
-// 
 void G_BuildTiccmd(ticcmd_t* cmd)
 {
-    int		i;
-    boolean	strafe;
-
     ticcmd_t* base = I_BaseTiccmd();		// empty, or external driver
     memcpy(cmd, base, sizeof(*cmd));
 
     cmd->consistancy = consistancy[consoleplayer][maketic % BACKUPTICS];
 
-    strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] || joybuttons[joybstrafe];
-    int speed = gamekeydown[key_speed] || joybuttons[joybspeed];
+    auto strafe = gamekeydown[key_strafe] || mousebuttons[mousebstrafe] || joybuttons[joybstrafe];
+    auto speed = gamekeydown[key_speed] || joybuttons[joybspeed];
 
     // use two stage accelerative turning
     // on the keyboard and joystick
@@ -235,7 +228,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
     else
         turnheld = 0;
 
-    int tspeed = (turnheld < SLOWTURNTICS) ? 2 : speed; // slow turn 
+    auto tspeed = (turnheld < SLOWTURNTICS) ? 2 : speed; // slow turn 
 
     fixed_t side = 0;
 
@@ -306,7 +299,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
     }
 
     // chainsaw overrides 
-    for (i = 0; i < NUMWEAPONS - 1; i++)
+    for (int32 i = 0; i < NUMWEAPONS - 1; i++)
         if (gamekeydown['1' + i])
         {
             cmd->buttons |= BT_CHANGE;
@@ -402,10 +395,6 @@ void G_BuildTiccmd(ticcmd_t* cmd)
     }
 }
 
-
-//
-// G_DoLoadLevel 
-//
 extern  GameState wipegamestate;
 
 void G_DoLoadLevel()
@@ -458,16 +447,12 @@ void G_DoLoadLevel()
     memset(joybuttons, 0, sizeof(joybuttons));
 }
 
-
-//
-// G_Responder  
 // Get info needed to make ticcmd_ts for the players.
-// 
-boolean G_Responder(event_t* ev)
+bool G_Responder(const event_t& event)
 {
     // allow spy mode changes even during the demo
-    if (g_doom->GetGameState() == GameState::Level && ev->type == ev_keydown
-        && ev->data1 == KEY_F12 && (singledemo || !deathmatch))
+    if (g_doom->GetGameState() == GameState::Level && event.type == ev_keydown
+        && event.data1 == KEY_F12 && (singledemo || !deathmatch))
     {
         // spy mode 
         do
@@ -484,9 +469,9 @@ boolean G_Responder(event_t* ev)
         (demoplayback || g_doom->GetGameState() == GameState::Demo)
         )
     {
-        if (ev->type == ev_keydown ||
-            (ev->type == ev_mouse && ev->data1) ||
-            (ev->type == ev_joystick && ev->data1))
+        if (event.type == ev_keydown ||
+            (event.type == ev_mouse && event.data1) ||
+            (event.type == ev_joystick && event.data1))
         {
             M_StartControlPanel();
             return true;
@@ -497,58 +482,58 @@ boolean G_Responder(event_t* ev)
     if (g_doom->GetGameState() == GameState::Level)
     {
 #if 0 
-        if (devparm && ev->type == ev_keydown && ev->data1 == ';')
+        if (devparm && event.type == ev_keydown && event.data1 == ';')
         {
             G_DeathMatchSpawnPlayer(0);
             return true;
         }
 #endif 
-        if (HU_Responder(ev))
+        if (HU_Responder(event))
             return true;	// chat ate the event 
-        if (ST_Responder(ev))
+        if (ST_Responder(event))
             return true;	// status window ate it 
-        if (AM_Responder(ev))
+        if (AM_Responder(event))
             return true;	// automap ate it 
     }
 
     if (g_doom->GetGameState() == GameState::Finale)
     {
-        if (F_Responder(ev))
+        if (F_Responder(event))
             return true;	// finale ate the event 
     }
 
-    switch (ev->type)
+    switch (event.type)
     {
     case ev_keydown:
-        if (ev->data1 == KEY_PAUSE)
+        if (event.data1 == KEY_PAUSE)
         {
             sendpause = true;
             return true;
         }
-        if (ev->data1 < NUMKEYS)
-            gamekeydown[ev->data1] = true;
+        if (event.data1 < NUMKEYS)
+            gamekeydown[event.data1] = true;
         return true;    // eat key down events 
 
     case ev_keyup:
-        if (ev->data1 < NUMKEYS)
-            gamekeydown[ev->data1] = false;
+        if (event.data1 < NUMKEYS)
+            gamekeydown[event.data1] = false;
         return false;   // always let key up events filter down 
 
     case ev_mouse:
-        mousebuttons[0] = ev->data1 & 1;
-        mousebuttons[1] = ev->data1 & 2;
-        mousebuttons[2] = ev->data1 & 4;
-        mousex = ev->data2 * (mouseSensitivity + 5) / 10;
-        mousey = ev->data3 * (mouseSensitivity + 5) / 10;
+        mousebuttons[0] = event.data1 & 1;
+        mousebuttons[1] = event.data1 & 2;
+        mousebuttons[2] = event.data1 & 4;
+        mousex = event.data2 * (mouseSensitivity + 5) / 10;
+        mousey = event.data3 * (mouseSensitivity + 5) / 10;
         return true;    // eat events 
 
     case ev_joystick:
-        joybuttons[0] = ev->data1 & 1;
-        joybuttons[1] = ev->data1 & 2;
-        joybuttons[2] = ev->data1 & 4;
-        joybuttons[3] = ev->data1 & 8;
-        joyxmove = ev->data2;
-        joyymove = ev->data3;
+        joybuttons[0] = event.data1 & 1;
+        joybuttons[1] = event.data1 & 2;
+        joybuttons[2] = event.data1 & 4;
+        joybuttons[3] = event.data1 & 8;
+        joyxmove = event.data2;
+        joyymove = event.data3;
         return true;    // eat events 
 
     default:
@@ -558,12 +543,7 @@ boolean G_Responder(event_t* ev)
     return false;
 }
 
-
-
-//
-// G_Ticker
 // Make ticcmd_ts for the players.
-//
 void G_Ticker(Doom* doom)
 {
     int		i;

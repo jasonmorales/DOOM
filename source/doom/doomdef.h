@@ -154,12 +154,10 @@ typedef enum
 
 } card_t;
 
-
-
 // The defined weapons,
 //  including a marker indicating
 //  user has not changed weapon.
-typedef enum
+enum weapontype_t
 {
     wp_fist,
     wp_pistol,
@@ -176,8 +174,7 @@ typedef enum
     // No pending weapon change.
     wp_nochange
 
-} weapontype_t;
-
+};
 
 // Ammunition types defined.
 typedef enum

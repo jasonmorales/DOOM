@@ -266,11 +266,9 @@ uint64_t W_NumLumps()
     return numlumps;
 }
 
-//
 // W_CheckNumForName
 // Returns -1 if name not found.
-//
-intptr_t W_CheckNumForName(const char* name)
+int32 W_CheckNumForName(const char* name)
 {
     union
     {
@@ -298,7 +296,7 @@ intptr_t W_CheckNumForName(const char* name)
         if (*(int*)lump_p->name == v1
             && *(int*)&lump_p->name[4] == v2)
         {
-            return lump_p - lumpinfo;
+            return static_cast<int32>(lump_p - lumpinfo);
         }
     }
 
@@ -306,13 +304,10 @@ intptr_t W_CheckNumForName(const char* name)
     return -1;
 }
 
-//
-// W_GetNumForName
 // Calls W_CheckNumForName, but bombs out if not found.
-//
-intptr_t W_GetNumForName(const char* name)
+int32 W_GetNumForName(const char* name)
 {
-    intptr_t i = W_CheckNumForName(name);
+    auto i = W_CheckNumForName(name);
 
     if (i == -1)
         I_Error("W_GetNumForName: {} not found!", name);

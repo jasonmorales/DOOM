@@ -24,10 +24,6 @@
 #include <filesystem>
 
 //
-// Called by IO functions when input is detected.
-void D_PostEvent(event_t ev);
-
-//
 // BASE LEVEL
 //
 void D_PageTicker();
@@ -74,6 +70,9 @@ public:
     Video* GetVideo() const { return video; }
     Render* GetRender() const { return render; }
 
+    void PostEvent(const event_t& event);
+    bool HasEventInQueue(const event_t& event);
+
 private:
     void IdentifyVersion();
     void AddFile(const std::filesystem::path& path) { wadFiles.push_back(path); }
@@ -94,6 +93,11 @@ private:
     GameState oldGameState = GameState::ForceWipe;
 
     int32 demoSequence = 0;
+
+    static const int32 MaxEvents = 64;
+    event_t events[MaxEvents];
+    int32 eventHead = 0;
+    int32 eventTail = 0;
 
     // Set if homebrew PWAD stuff has been added.
     bool isModified = false;
