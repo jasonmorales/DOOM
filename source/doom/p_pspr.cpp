@@ -16,18 +16,18 @@
 //	Action functions for weapons.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "doomdef.h"
 #include "d_event.h"
-
 
 #include "m_random.h"
 #include "p_local.h"
 #include "s_sound.h"
 
-// State.
 #include "doomstat.h"
 
-// Data.
 #include "sounds.h"
 
 #include "p_pspr.h"
@@ -42,15 +42,7 @@
 // plasma cells for a bfg attack
 #define BFGCELLS		40		
 
-
-//
-// P_SetPsprite
-//
-void
-P_SetPsprite
-(player_t* player,
-    int		position,
-    statenum_t	stnum)
+void P_SetPsprite(player_t* player, int32 position, statenum_t	stnum)
 {
     pspdef_t* psp;
     state_t* state;

@@ -16,6 +16,9 @@
 //	Shooting and aiming.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdlib.h>
 
 #include "m_bbox.h"

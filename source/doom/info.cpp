@@ -17,12 +17,15 @@
 //	This one is the original DOOM version, preserved.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 // Data.
 #include "sounds.h"
 #include "m_fixed.h"
 #include "info.h"
 #include "p_mobj.h"
+
 
 struct player_t;
 struct pspdef_t;

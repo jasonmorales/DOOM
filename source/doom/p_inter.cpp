@@ -15,7 +15,9 @@
 //	Handling interactions (i.e., collisions).
 //
 //-----------------------------------------------------------------------------
-// Data.
+import std;
+#define __STD_MODULE__
+
 #include "doomdef.h"
 #include "dstrings.h"
 #include "sounds.h"
@@ -30,40 +32,23 @@
 #include "p_local.h"
 
 #include "s_sound.h"
-
-#ifdef __GNUG__
-#pragma implementation "p_inter.h"
-#endif
 #include "p_inter.h"
 
 
 #define BONUSADD	6
-
-
-
 
 // a weapon is found with two clip loads,
 // a big item has five clip loads
 int	maxammo[NUMAMMO] = { 200, 50, 300, 50 };
 int	clipammo[NUMAMMO] = { 10, 4, 20, 1 };
 
-
-//
 // GET STUFF
-//
 
-//
 // P_GiveAmmo
 // Num is the number of clip loads,
 // not the individual count (0= 1/2 clip).
 // Returns false if the ammo can't be picked up at all
-//
-
-boolean
-P_GiveAmmo
-(player_t* player,
-    ammotype_t	ammo,
-    int		num)
+boolean P_GiveAmmo(player_t* player, ammotype_t ammo, int32 num)
 {
     int		oldammo;
 

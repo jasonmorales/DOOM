@@ -68,11 +68,9 @@ struct memblock_t
     memblock_t* prev;
 };
 
-//
 // This is used to get the local FILE:LINE info from CPP
 // prior to really call the function in question.
-//
-#define Z_ChangeTag(p,t) \
+#define Z_ChangeTag(p, t) \
 { \
       if (( (memblock_t*)((intptr_t)(p) - sizeof(memblock_t)))->id!=0x1d4a11) \
 	  I_Error("Z_CT at " __FILE__ ":{}",__LINE__); \

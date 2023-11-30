@@ -15,17 +15,19 @@
 //	LineOfSight/Visibility checks, uses REJECT Lookup Table.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "doomdef.h"
 
 #include "i_system.h"
 #include "p_local.h"
 
-// State.
 #include "r_state.h"
 
-//
+
 // P_CheckSight
-//
+
 fixed_t		sightzstart;		// eye z of looker
 fixed_t		topslope;
 fixed_t		bottomslope;		// slopes to top and bottom of target

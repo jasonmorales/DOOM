@@ -55,6 +55,7 @@ workspace 'Doom'
 		rtti 'Off'
 		dpiawareness 'HighPerMonitor'
 		usestandardpreprocessor 'On'
+		buildstlmodules 'On'
 		flags {}
 
 		location 'project'

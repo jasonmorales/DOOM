@@ -11,9 +11,10 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:  none
-//
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdio.h>
 #include <stdlib.h>
 

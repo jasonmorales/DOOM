@@ -15,6 +15,9 @@
 //	Mission begin melt/wipe screen special effect.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "z_zone.h"
 #include "i_video.h"
 #include "v_video.h"
@@ -262,5 +265,4 @@ int wipe_ScreenWipe(int	wipeno, [[maybe_unused]] int x, [[maybe_unused]] int y, 
     }
 
     return !go;
-
 }

@@ -11,9 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 #include "m_misc.h"
@@ -24,6 +24,7 @@
 #include "g_game.h"
 
 #include "i_system.h"
+#include "d_main.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,11 +32,8 @@
 
 #include <stdarg.h>
 #include <time.h>
-#include <chrono>
-#include <thread>
-#include <iostream>
 
-#include "d_main.h"
+
 extern Doom* g_doom;
 
 int	mb_used = 6;

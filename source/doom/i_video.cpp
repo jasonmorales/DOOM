@@ -15,6 +15,9 @@
 //	DOOM graphics stuff for Windows
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "doomstat.h"
 #include "i_system.h"
 #include "i_video.h"
@@ -36,10 +39,6 @@
 #include <time.h>
 #include <sys/types.h>
 #include <signal.h>
-#include <algorithm>
-#include <type_traits>
-#include <iostream>
-#include <fstream>
 
 #include "utility/bits.h"
 

@@ -12,6 +12,9 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

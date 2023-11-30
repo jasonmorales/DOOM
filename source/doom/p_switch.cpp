@@ -16,6 +16,9 @@
 //	Switches, buttons. Two-state animation. Exits.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "i_system.h"
 #include "doomdef.h"
 #include "p_local.h"

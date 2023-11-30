@@ -15,6 +15,8 @@
 //	Refresh of things, i.e. objects represented by sprites.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 #include "m_swap.h"
@@ -30,7 +32,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits>
 
 
 #define MINZ				(FRACUNIT*4)

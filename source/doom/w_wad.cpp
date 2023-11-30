@@ -15,6 +15,8 @@
 //	Handles WAD file header, directory, lump I/O.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomtype.h"
 
@@ -258,17 +260,13 @@ void W_InitMultipleFiles(const vector<std::filesystem::path>& files)
     memset(lumpcache, 0, size);
 }
 
-//
-// W_NumLumps
-//
 uint64_t W_NumLumps()
 {
     return numlumps;
 }
 
-// W_CheckNumForName
 // Returns -1 if name not found.
-int32 W_CheckNumForName(const char* name)
+int32 W_CheckNumForName(string_view name)
 {
     union
     {
@@ -277,7 +275,7 @@ int32 W_CheckNumForName(const char* name)
     } name8;
 
     // make the name into two integers for easy compares
-    strncpy_s(name8.s, name, 8);
+    strncpy_s(name8.s, name.data(), 8);
 
     // in case the name was a fill 8 chars
     name8.s[8] = 0;
@@ -305,7 +303,7 @@ int32 W_CheckNumForName(const char* name)
 }
 
 // Calls W_CheckNumForName, but bombs out if not found.
-int32 W_GetNumForName(const char* name)
+int32 W_GetNumForName(string_view name)
 {
     auto i = W_CheckNumForName(name);
 
@@ -315,10 +313,7 @@ int32 W_GetNumForName(const char* name)
     return i;
 }
 
-//
-// W_LumpLength
 // Returns the buffer size needed to load the given lump.
-//
 int W_LumpLength(intptr_t lump)
 {
     if (lump >= numlumps)

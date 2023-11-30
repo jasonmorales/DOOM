@@ -15,6 +15,9 @@
 //	Intermission screens.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdio.h>
 
 #include "z_zone.h"
@@ -370,7 +373,7 @@ static patch_t* items;
 static patch_t* frags;
 
 // Time sucks.
-static patch_t* _time;
+static patch_t* time;
 static patch_t* par;
 static patch_t* sucks;
 
@@ -1432,7 +1435,7 @@ void WI_drawStats()
     g_doom->GetVideo()->DrawPatch(SP_STATSX, SP_STATSY + 2 * lh, FB, sp_secret);
     WI_drawPercent(SCREENWIDTH - SP_STATSX, SP_STATSY + 2 * lh, cnt_secret[0]);
 
-    g_doom->GetVideo()->DrawPatch(SP_TIMEX, SP_TIMEY, FB, _time);
+    g_doom->GetVideo()->DrawPatch(SP_TIMEX, SP_TIMEY, FB, time);
     WI_drawTime(SCREENWIDTH / 2 - SP_TIMEX, SP_TIMEY, cnt_time);
 
     if (wbs->epsd < 3)
@@ -1515,55 +1518,39 @@ void WI_loadData()
 {
     int		i;
     int		j;
-    char	name[9];
     anim_t* a;
 
+    string name;
     if (gamemode == GameMode::Doom2Commercial)
-        strcpy_s(name, "INTERPIC");
+        name = "INTERPIC";
     else
-        sprintf_s(name, "WIMAP%d", wbs->epsd);
+        name = std::format("WIMAP{}", wbs->epsd);
 
     if (gamemode == GameMode::Doom1Retail)
     {
         if (wbs->epsd == 3)
-            strcpy_s(name, "INTERPIC");
+            name = "INTERPIC";
     }
 
     // background
-    bg = W_CacheLumpName(name, PU_CACHE);
+    bg = W_CacheLumpName(name.c_str(), PU_CACHE);
     g_doom->GetVideo()->DrawPatch(0, 0, 1, bg);
-
-
-    // UNUSED unsigned char *pic = screens[1];
-    // if (gamemode == commercial)
-    // {
-    // darken the background image
-    // while (pic != screens[1] + SCREENHEIGHT*SCREENWIDTH)
-    // {
-    //   *pic = colormaps[256*25 + *pic];
-    //   pic++;
-    // }
-    //}
 
     if (gamemode == GameMode::Doom2Commercial)
     {
         NUMCMAPS = 32;
-        lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMCMAPS,
-            PU_STATIC, 0);
+        lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMCMAPS, PU_STATIC, 0);
         for (i = 0; i < NUMCMAPS; i++)
         {
-            sprintf_s(name, "CWILV%2.2d", i);
-            lnames[i] = W_CacheLumpName(name, PU_STATIC);
+            lnames[i] = W_CacheLumpName(std::format("CWILV{:2}", i), PU_STATIC);
         }
     }
     else
     {
-        lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMMAPS,
-            PU_STATIC, 0);
+        lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMMAPS, PU_STATIC, 0);
         for (i = 0; i < NUMMAPS; i++)
         {
-            sprintf_s(name, "WILV%d%d", wbs->epsd, i);
-            lnames[i] = W_CacheLumpName(name, PU_STATIC);
+            lnames[i] = W_CacheLumpName(std::format("WILV{}{}", wbs->epsd, i), PU_STATIC);
         }
 
         // you are here
@@ -1586,8 +1573,7 @@ void WI_loadData()
                     if (wbs->epsd != 1 || j != 8)
                     {
                         // animations
-                        sprintf_s(name, "WIA%d%.2d%.2d", wbs->epsd, j, i);
-                        a->p[i] = W_CacheLumpName(name, PU_STATIC);
+                        a->p[i] = W_CacheLumpName(std::format("WIA{}{:2}{:2}", wbs->epsd, j, i), PU_STATIC);
                     }
                     else
                     {
@@ -1605,8 +1591,7 @@ void WI_loadData()
     for (i = 0;i < 10;i++)
     {
         // numbers 0-9
-        sprintf_s(name, "WINUM%d", i);
-        num[i] = W_CacheLumpName(name, PU_STATIC);
+        num[i] = W_CacheLumpName(std::format("WINUM{}", i).c_str(), PU_STATIC);
     }
 
     // percent sign
@@ -1636,7 +1621,7 @@ void WI_loadData()
     colon = W_CacheLumpName("WICOLON", PU_STATIC);
 
     // "time"
-    _time = W_CacheLumpName("WITIME", PU_STATIC);
+    time = W_CacheLumpName("WITIME", PU_STATIC);
 
     // "sucks"
     sucks = W_CacheLumpName("WISUCKS", PU_STATIC);
@@ -1662,14 +1647,11 @@ void WI_loadData()
     for (i = 0; i < MAXPLAYERS; i++)
     {
         // "1,2,3,4"
-        sprintf_s(name, "STPB%d", i);
-        p[i] = W_CacheLumpName(name, PU_STATIC);
+        p[i] = W_CacheLumpName(std::format("STPB{}", i), PU_STATIC);
 
         // "1,2,3,4"
-        sprintf_s(name, "WIBP%d", i + 1);
-        bp[i] = W_CacheLumpName(name, PU_STATIC);
+        bp[i] = W_CacheLumpName(std::format("WIBP%d", i + 1), PU_STATIC);
     }
-
 }
 
 void WI_unloadData()

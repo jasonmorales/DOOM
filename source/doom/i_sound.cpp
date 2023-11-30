@@ -15,6 +15,8 @@
 //	System interface for sound.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "z_zone.h"
 

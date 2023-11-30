@@ -15,8 +15,9 @@
 //	Game completion, final screen animation.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
-// Functions.
 #include "i_system.h"
 #include "m_swap.h"
 #include "z_zone.h"

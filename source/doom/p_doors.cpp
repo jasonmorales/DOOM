@@ -14,18 +14,18 @@
 // DESCRIPTION: Door animation code (opening/closing)
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "z_zone.h"
 #include "doomdef.h"
 #include "p_local.h"
 
 #include "s_sound.h"
 
-
-// State.
 #include "doomstat.h"
 #include "r_state.h"
 
-// Data.
 #include "dstrings.h"
 #include "sounds.h"
 

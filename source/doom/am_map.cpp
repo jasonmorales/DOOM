@@ -15,6 +15,8 @@
 // DESCRIPTION:  the automap code
 //
 //-----------------------------------------------------------------------------
+import std;
+#define  __STD_MODULE__
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -32,9 +34,6 @@
 #include "z_zone.h"
 #include "d_main.h"
 #include "i_video.h"
-
-#include <stdio.h>
-#include <limits>
 
 
 extern Doom* g_doom;
@@ -478,16 +477,12 @@ void AM_initVariables()
     ST_Responder(st_notify);
 }
 
-//
-// 
-//
 void AM_loadPics()
 {
     for (int i = 0; i < 10; i++)
     {
-        char namebuf[9];
-        sprintf_s(namebuf, "AMMNUM%d", i);
-        marknums[i] = W_CacheLumpName<patch_t>(namebuf, PU_STATIC);
+        auto name = std::format("AMMNUM{}", i);
+        marknums[i] = W_CacheLumpName<patch_t>(name.c_str(), PU_STATIC);
     }
 }
 

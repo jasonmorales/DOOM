@@ -11,13 +11,14 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-//
 // DESCRIPTION:
 //	Main loop menu stuff.
 //	Default Config File.
 //	PCX Screenshots.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 
@@ -44,7 +45,6 @@
 #include "d_main.h"
 
 #include "types/strings.h"
-
 
 #include <sys/stat.h>
 #include <sys/types.h>

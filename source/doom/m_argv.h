@@ -19,8 +19,10 @@
 #include "containers/vector.h"
 #include "utility/convert.h"
 
+#ifndef __STD_MODULE__
 #include <filesystem>
 #include <functional>
+#endif
 
 class CommandLine
 {

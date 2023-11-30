@@ -18,9 +18,8 @@
 //	and call the startup functions.
 //
 //-----------------------------------------------------------------------------
-
-#define BGCOLOR 7
-#define FGCOLOR 8
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -49,13 +48,10 @@
 #include "wi_stuff.h"
 #include "z_zone.h"
 
-#include <malloc.h>
-#include <string.h>
-#include <stdlib.h>
-#include <direct.h>
-#include <io.h>
-#include <errno.h>
-#include <crtdbg.h>
+
+#define BGCOLOR 7
+#define FGCOLOR 8
+
 
 void G_BuildTiccmd(ticcmd_t* cmd);
 

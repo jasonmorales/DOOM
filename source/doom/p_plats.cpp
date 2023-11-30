@@ -15,6 +15,9 @@
 //	Plats (i.e. elevator platforms) code, raising/lowering.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "i_system.h"
 #include "z_zone.h"
 #include "m_random.h"
@@ -34,11 +37,7 @@
 
 plat_t* activeplats[MAXPLATS];
 
-
-
-//
 // Move a plat up and down
-//
 void T_PlatRaise(plat_t* plat)
 {
     result_e	res;

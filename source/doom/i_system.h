@@ -22,8 +22,11 @@
 
 #include "types/strings.h"
 
-#include <stdint.h>
+#ifndef __STD_MODULE__
 #include <format>
+#endif
+
+#include <stdint.h>
 
 // Called by DoomMain.
 void I_Init();

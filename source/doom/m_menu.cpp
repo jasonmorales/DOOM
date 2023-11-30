@@ -16,6 +16,8 @@
 //	Sliders and icons. Kinda widget stuff.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 #include "dstrings.h"

@@ -17,6 +17,8 @@
 //	See tables.c, too.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 
@@ -28,7 +30,6 @@
 
 #include <stdlib.h>
 #include <math.h>
-#include <utility>
 
 
 extern Doom* g_doom;

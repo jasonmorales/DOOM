@@ -15,6 +15,8 @@
 //	All the clipping: columns, horizontal spans, sky columns.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "i_system.h"
 
@@ -25,7 +27,7 @@
 #include "r_sky.h"
 
 #include <stdlib.h>
-#include <limits>
+
 
 // OPTIMIZE: closed two sided lines as single sided
 

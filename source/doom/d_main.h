@@ -21,7 +21,9 @@
 
 #include "containers/vector.h"
 
+#ifndef __STD_MODULE__
 #include <filesystem>
+#endif
 
 //
 // BASE LEVEL

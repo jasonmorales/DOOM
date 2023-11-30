@@ -16,23 +16,20 @@
 //	Muzzle flash?
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "z_zone.h"
 #include "m_random.h"
 
 #include "doomdef.h"
 #include "p_local.h"
 
-
-// State.
 #include "r_state.h"
 
-//
-// FIRELIGHT FLICKER
-//
 
-//
-// T_FireFlicker
-//
+// FIRELIGHT FLICKER
+
 void T_FireFlicker(fireflicker_t* flick)
 {
     int	amount;
@@ -50,11 +47,6 @@ void T_FireFlicker(fireflicker_t* flick)
     flick->count = 4;
 }
 
-
-
-//
-// P_SpawnFireFlicker
-//
 void P_SpawnFireFlicker(sector_t* sector)
 {
     // Note that we are resetting sector attributes.

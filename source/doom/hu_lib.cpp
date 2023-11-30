@@ -14,6 +14,9 @@
 // DESCRIPTION:  heads-up text and input code
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <ctype.h>
 
 #include "doomdef.h"

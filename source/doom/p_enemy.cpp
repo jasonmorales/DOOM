@@ -17,6 +17,9 @@
 //	that are associated with states/frames. 
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdlib.h>
 
 #include "m_random.h"
@@ -29,14 +32,10 @@
 
 #include "g_game.h"
 
-// State.
 #include "doomstat.h"
 #include "r_state.h"
 
-// Data.
 #include "sounds.h"
-
-
 
 
 typedef enum

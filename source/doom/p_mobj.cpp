@@ -15,6 +15,9 @@
 //	Moving object handling. Spawn functions.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "i_system.h"
 #include "z_zone.h"
 #include "m_random.h"
@@ -34,17 +37,10 @@
 void G_PlayerReborn(int player);
 void P_SpawnMapThing(mapthing_t* mthing);
 
-
-//
-// P_SetMobjState
 // Returns true if the mobj is still present.
-//
 int test;
 
-boolean
-P_SetMobjState
-(mobj_t* mobj,
-    statenum_t	state)
+boolean P_SetMobjState(mobj_t* mobj, statenum_t state)
 {
     state_t* st;
 
@@ -74,10 +70,6 @@ P_SetMobjState
     return true;
 }
 
-
-//
-// P_ExplodeMissile  
-//
 void P_ExplodeMissile(mobj_t* mo)
 {
     mo->momx = mo->momy = mo->momz = 0;

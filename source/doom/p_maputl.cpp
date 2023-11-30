@@ -18,23 +18,20 @@
 //	and some PIT_* functions to use for iteration.
 //
 //-----------------------------------------------------------------------------
-#include <stdlib.h>
+import std;
+#define __STD_MODULE__
 
+#include <stdlib.h>
 
 #include "m_bbox.h"
 
 #include "doomdef.h"
 #include "p_local.h"
 
-
-// State.
 #include "r_state.h"
 
-//
-// P_AproxDistance
-// Gives an estimation of distance (not exact)
-//
 
+// Gives an estimation of distance (not exact)
 fixed_t
 P_AproxDistance
 (fixed_t	dx,

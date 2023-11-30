@@ -17,6 +17,9 @@
 //	Functions to blit a block to the screen.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "i_system.h"
 #include "r_local.h"
 

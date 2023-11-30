@@ -2,7 +2,9 @@
 
 #include "types/numbers.h"
 
+#ifndef __STD_MODULE__
 #include <bit>
+#endif
 
 template<typename T>
 constexpr const size_t bit_size = []{ return sizeof(T) * CHAR_BIT; }();

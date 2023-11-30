@@ -19,7 +19,9 @@
 
 #include "r_local.h"
 
+#ifndef __STD_MODULE__
 #include <limits>
+#endif
 
 #define FLOATSPEED		(FRACUNIT*4)
 

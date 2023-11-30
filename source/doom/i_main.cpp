@@ -15,11 +15,15 @@
 //	Main program, simply calls Doom::Main high level loop.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "m_argv.h"
 #include "d_main.h"
 
 #include "system/windows.h"
+
+//#include <crtdbg.h>
 
 Doom* g_doom = nullptr;
 
@@ -27,7 +31,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {
     CommandLine::Initialize(args);
 
-    _CrtSetDebugFillThreshold(0);
+    //_CrtSetDebugFillThreshold(0);
 
     g_doom = new Doom;
     g_doom->Main();

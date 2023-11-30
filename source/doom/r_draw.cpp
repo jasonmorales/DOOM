@@ -17,6 +17,9 @@
 //	 e.g. inline assembly, different algorithms.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "doomdef.h"
 
 #include "i_system.h"

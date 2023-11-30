@@ -12,11 +12,12 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "i_system.h"
 #include "m_argv.h"
 
-#include <fstream>
 
 string_view CommandLine::commandLine;
 vector<string_view> CommandLine::args;

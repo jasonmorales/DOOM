@@ -17,6 +17,9 @@
 //	Does palette indicators as well (red pain/berserk, bright pickup)
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdio.h>
 
 #include "i_system.h"

@@ -15,14 +15,16 @@
 //	Zone Memory Allocation. Neat.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "z_zone.h"
 #include "i_system.h"
 #include "doomdef.h"
 
-//
+
 // ZONE MEMORY ALLOCATION
-//
+
 // There is never any space between memblocks,
 //  and there will never be two contiguous free memblocks.
 // The rover can be left pointing at a non-empty block.

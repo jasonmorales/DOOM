@@ -14,6 +14,9 @@
 // DESCRIPTION:  Heads-up displays
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <ctype.h>
 
 #include "doomdef.h"
@@ -30,13 +33,11 @@
 
 #include "doomstat.h"
 
-// Data.
 #include "dstrings.h"
 #include "sounds.h"
 
-//
+
 // Locally used constants, shortcuts.
-//
 #define HU_TITLE	(mapnames[(gameepisode-1)*9+gamemap-1])
 #define HU_TITLE2	(mapnames2[gamemap-1])
 #define HU_TITLEP	(mapnamesp[gamemap-1])

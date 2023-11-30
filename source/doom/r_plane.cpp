@@ -17,6 +17,9 @@
 //	Moreover, the sky areas have to be determined.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <stdlib.h>
 
 #include "i_system.h"

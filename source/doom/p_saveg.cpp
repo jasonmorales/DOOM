@@ -15,6 +15,9 @@
 //	Archiving: SaveGame I/O.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "i_system.h"
 #include "z_zone.h"
 #include "p_local.h"
@@ -22,6 +25,7 @@
 // State.
 #include "doomstat.h"
 #include "r_state.h"
+
 
 byte* save_p;
 

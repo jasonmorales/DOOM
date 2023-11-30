@@ -2,11 +2,13 @@
 
 #include "types/numbers.h"
 
-#include <assert.h>
+#ifndef __STD_MODULE__
 #include <vector>
 #include <algorithm>
 #include <functional>
 #include <concepts>
+#endif
+#include <assert.h>
 
 namespace nonstd
 {

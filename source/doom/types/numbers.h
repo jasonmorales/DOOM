@@ -1,10 +1,12 @@
 #pragma once
 
-#include <stdint.h>
+#ifndef __STD_MODULE__
 #include <type_traits>
 #include <concepts>
 #include <cmath>
 #include <limits>
+#endif
+#include <stdint.h>
 #include <assert.h>
 
 using int8 = int8_t;

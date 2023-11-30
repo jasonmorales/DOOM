@@ -16,6 +16,8 @@
 //	all OS independend parts.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "m_menu.h"
 #include "i_system.h"
@@ -26,12 +28,13 @@
 #include "doomstat.h"
 
 #include "d_main.h"
+
+
 extern Doom* g_doom;
 
 
 void G_BuildTiccmd(ticcmd_t* cmd);
 
-#include <limits>
 #include <stdint.h>
 
 int32 Net::ticks[Net::MaxNodes] = {0};

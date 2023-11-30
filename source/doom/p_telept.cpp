@@ -15,29 +15,21 @@
 //	Teleportation.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "doomdef.h"
-
 #include "s_sound.h"
-
 #include "p_local.h"
 
-
-// Data.
 #include "sounds.h"
 
-// State.
 #include "r_state.h"
 
 
-
-//
 // TELEPORTATION
-//
-int
-EV_Teleport
-(line_t* line,
-    int		side,
-    mobj_t* thing)
+
+int EV_Teleport(line_t* line, int side, mobj_t* thing)
 {
     int		i;
     int		tag;

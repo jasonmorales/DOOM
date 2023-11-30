@@ -19,6 +19,8 @@
 //	Line Tag handling. Line and Sector triggers.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -43,10 +45,8 @@
 #include "sounds.h"
 
 #include <stdlib.h>
-#include <limits>
 
 
-//
 // Animating textures and planes
 // There is another anim_t used in wi_stuff, unrelated.
 //

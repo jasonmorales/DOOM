@@ -15,6 +15,8 @@
 //	Floor animation: raising stairs.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "z_zone.h"
 #include "doomdef.h"
@@ -22,21 +24,15 @@
 
 #include "s_sound.h"
 
-// State.
 #include "doomstat.h"
 #include "r_state.h"
-// Data.
+
 #include "sounds.h"
 
-#include <limits>
 
-//
 // FLOORS
-//
 
-//
 // Move a plane (floor or ceiling) and check for crushing
-//
 result_e
 T_MovePlane
 (sector_t* sector,

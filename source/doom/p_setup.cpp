@@ -16,6 +16,9 @@
 //	set up initial state and misc. LUTs.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include <math.h>
 
 #include "d_main.h"

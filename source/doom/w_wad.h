@@ -17,11 +17,14 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include <stdint.h>
-
 #include "containers/vector.h"
+#include "types/strings.h"
 
+#ifndef __STD_MODULE__
 #include <filesystem>
+#endif
+
+#include <stdint.h>
 
 //
 // TYPES
@@ -62,8 +65,8 @@ extern intptr_t numlumps;
 void W_InitMultipleFiles(const vector<std::filesystem::path>& files);
 void W_Reload();
 
-int32 W_CheckNumForName(const char* name);
-int32 W_GetNumForName(const char* name);
+int32 W_CheckNumForName(string_view name);
+int32 W_GetNumForName(string_view name);
 
 int	W_LumpLength(intptr_t lump);
 void W_ReadLump(intptr_t lump, void* dest);
@@ -77,7 +80,7 @@ T* W_CacheLumpNum(intptr_t lump, int tag)
 }
 
 template<typename T = patch_t>
-T* W_CacheLumpName(const char* name, int tag)
+T* W_CacheLumpName(string_view name, int tag)
 {
     return W_CacheLumpNum<T>(W_GetNumForName(name), tag);
 }
