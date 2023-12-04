@@ -19,7 +19,8 @@
 
 #include "d_event.h"
 
-//
+#include "types/strings.h"
+
 // MENUS
 //
 // Called by main loop,
@@ -38,9 +39,18 @@ void M_Ticker();
 // draws the menus directly into the screen buffer.
 void M_Drawer();
 
-// loads the config file.
-void M_Init();
-
 // Called by intro code to force menu up upon a keypress,
 // does nothing if menu is already up.
 void M_StartControlPanel();
+
+class Menu
+{
+public:
+    static void Init();
+
+    static void StartMessage(string_view message, void(*routine)(int), bool input);
+
+    static string messageString;
+
+private:
+};

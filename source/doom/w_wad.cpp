@@ -236,7 +236,7 @@ void W_Reload()
 // The name searcher looks backwards, so a later file
 //  does override all earlier ones.
 //
-void W_InitMultipleFiles(const vector<std::filesystem::path>& files)
+void W_InitMultipleFiles(const vector<filesys::path>& files)
 {
     // open all the files, load headers, and count lumps
     numlumps = 0;
@@ -386,11 +386,11 @@ void W_Profile()
 
     for (int i = 0; i < numlumps; i++)
     {
-        void* ptr = lumpcache[i];
-        if (!ptr)
+        void* lump = lumpcache[i];
+        if (!lump)
             continue;
 
-        memblock_t* block = (memblock_t*)((byte*)ptr - sizeof(memblock_t));
+        memblock_t* block = (memblock_t*)((byte*)lump - sizeof(memblock_t));
         char ch = (block->tag < PU_PURGELEVEL) ? 'S' : 'P';
         info[i][profilecount] = ch;
     }

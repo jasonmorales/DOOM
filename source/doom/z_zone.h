@@ -42,19 +42,19 @@
 
 void Z_Init();
 
-void* Z_Malloc_internal(intptr_t size, int tag, void* ptr);
+void* Z_Malloc_internal(intptr_t size, int tag, void* p);
 template<typename T = byte>
-T* Z_Malloc(intptr_t size, int tag, void* ptr)
+T* Z_Malloc(intptr_t size, int tag, void* p)
 {
-    return static_cast<T*>(Z_Malloc_internal(size, tag, ptr));
+    return static_cast<T*>(Z_Malloc_internal(size, tag, p));
 }
 
-void Z_Free(void* ptr);
+void Z_Free(void* p);
 void Z_FreeTags(int lowtag, int hightag);
 void Z_DumpHeap(int lowtag, int hightag);
 void Z_FileDumpHeap(FILE* f);
 void Z_CheckHeap();
-void Z_ChangeTag2(void* ptr, int tag);
+void Z_ChangeTag2(void* p, int tag);
 intptr_t Z_FreeMemory();
 
 

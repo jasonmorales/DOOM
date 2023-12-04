@@ -26,8 +26,6 @@
 #include "doomdef.h"
 
 
-
-//
 // Map level types.
 // The following data structures define the persistent format
 // used in the lumps of the WAD files.

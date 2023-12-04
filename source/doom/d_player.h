@@ -13,10 +13,8 @@
 //
 // DESCRIPTION:
 //
-//
 //-----------------------------------------------------------------------------
 #pragma once
-
 
 // The player data structure depends on a number
 // of other structs: items (internal inventory),
@@ -149,6 +147,20 @@ struct player_t
 
     // True if secret level has been done.
     boolean		didsecret;
+
+    byte* GetSaveData() const
+    {
+        auto* out = new player_t;
+        memcpy(out, this, sizeof(player_t));
+
+        for (int32 n = 0; n < NUMSPRITES; ++n)
+        {
+            if (out->psprites[n].state)
+                *reinterpret_cast<intptr_t*>(out->psprites[n].state) = out->psprites[n].state - states;
+        }
+
+        return reinterpret_cast<byte*>(out);
+    }
 };
 
 // INTERMISSION

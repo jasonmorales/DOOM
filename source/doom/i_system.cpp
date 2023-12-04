@@ -101,7 +101,7 @@ void I_Quit()
     D_QuitNetGame();
     I_ShutdownSound();
     I_ShutdownMusic();
-    M_SaveDefaults();
+    Settings::Save();
     I_ShutdownGraphics();
     exit(0);
 }

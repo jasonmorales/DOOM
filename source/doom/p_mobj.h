@@ -34,14 +34,6 @@
 #include "info.h"
 
 
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
-
-//
 // NOTES: mobj_t
 //
 // mobj_ts are used to tell the refresh where to draw an image,
@@ -277,4 +269,5 @@ struct mobj_t
     // Thing being chased/attacked for tracers.
     mobj_t* tracer;
 
+    byte* GetSaveData() const;
 };

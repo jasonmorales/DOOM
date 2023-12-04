@@ -1,18 +1,19 @@
 #pragma once
 
+#include "types/info.h"
 #include "types/numbers.h"
 
 #ifndef __STD_MODULE__
 #include <bit>
 #endif
+#include <limits.h>
+
 
 template<typename T>
 constexpr const size_t bit_size = []{ return sizeof(T) * CHAR_BIT; }();
 
-template<typename T>
-requires is_integral<T>
+template<integral T>
 constexpr T bit(uint32 n) { static_assert(n < bit_size<T>); return T(1) << n; }
 
-template<size_t bit, typename T>
-requires is_integral<T>
+template<size_t bit, integral T>
 constexpr bool is_bit_set(T n) { static_assert(bit < bit_size<T>); return (n & (1 << bit)) != 0; }

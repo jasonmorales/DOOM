@@ -198,9 +198,8 @@ void Video::FinishUpdate()
     static time_t lasttic = 0;
 
     // draws little dots on the bottom of the screen
-    if (devparm)
+    if (doom->IsDevMode())
     {
-
         auto i = I_GetTime();
         auto tics = i - lasttic;
         lasttic = i;
@@ -210,7 +209,6 @@ void Video::FinishUpdate()
             screenBuffer[((windowHeight/screenMultiply- 1)*screenTextureSize)  + i] = 0xff'ff'ff'ff;
         for (; i < 20 * 2; i += 2)
             screenBuffer[((windowHeight/screenMultiply- 1)*screenTextureSize)  + i] = 0xff'00'00'00;
-
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -953,9 +951,9 @@ void Video::DrawPatch(int32 x, int32 y, int32 screen, patch_t* patch)
         || y + (patch->height)>SCREENHEIGHT
         || screen > 4)
     {
-        fprintf(stderr, "Patch at %d,%d exceeds LFB\n", x, y);
+        std::cerr << std::format("Patch at {},{} exceeds LFB\n", x, y);
         // No I_Error abort - what is up with TNT.WAD?
-        fprintf(stderr, "Video::DrawPatch: bad patch (ignored)\n");
+        std::cerr << "Video::DrawPatch: bad patch (ignored)\n";
         return;
     }
 #endif 

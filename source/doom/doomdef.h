@@ -25,10 +25,6 @@
 
 //
 // Global parameters/defines.
-//
-// DOOM version
-enum { VERSION = 110 };
-
 
 // Game mode handling - identify IWAD version
 //  to handle IWAD dependent animations etc.
@@ -51,17 +47,6 @@ typedef enum
     none
 
 } GameMission_t;
-
-
-// Identify language to use, software localization.
-typedef enum
-{
-    english,
-    german,
-    unknown
-
-} Language_t;
-
 
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled
@@ -128,11 +113,13 @@ typedef enum
 
 typedef enum
 {
-    sk_baby,
+    sk_zero,
+
+    sk_baby = sk_zero,
     sk_easy,
     sk_medium,
     sk_hard,
-    sk_nightmare
+    sk_nightmare,
 } skill_t;
 
 

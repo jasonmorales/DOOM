@@ -37,8 +37,6 @@ extern  boolean	nomonsters;	// checkparm of -nomonsters
 extern  boolean	respawnparm;	// checkparm of -respawn
 extern  boolean	fastparm;	// checkparm of -fast
 
-extern  boolean	devparm;	// DEBUG: launched with -devparm
-
 
 
 // -----------------------------------------------------
@@ -46,11 +44,6 @@ extern  boolean	devparm;	// DEBUG: launched with -devparm
 //
 extern GameMode	gamemode;
 extern GameMission_t	gamemission;
-
-// -------------------------------------------
-// Language.
-extern  Language_t   language;
-
 
 // -------------------------------------------
 // Selected skill type, map etc.
@@ -177,7 +170,7 @@ extern	int		gametic;
 extern	player_t	players[MAXPLAYERS];
 
 // Alive? Disconnected?
-extern  boolean		playeringame[MAXPLAYERS];
+extern bool playeringame[MAXPLAYERS];
 
 
 // Player spawn spots for deathmatch.
@@ -197,16 +190,11 @@ extern  wbstartstruct_t		wminfo;
 // This doubles with BackPack powerup item.
 extern  int		maxammo[NUMAMMO];
 
-
-
-
-
 //-----------------------------------------
 // Internal parameters, used for engine.
 //
 
 // File handling stuff.
-extern	char		basedefault[1024];
 extern  FILE* debugfile;
 
 // if true, load all graphics at level load
@@ -215,8 +203,6 @@ extern  boolean         precache;
 extern  int32             mouseSensitivity;
 
 extern  int             bodyqueslot;
-
-
 
 // Needed to store the number of the dummy sky flat.
 // Used for rendering,

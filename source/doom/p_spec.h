@@ -20,17 +20,22 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-//
 // End-level timer (-TIMER option)
-//
 extern	boolean levelTimer;
 extern	int	levelTimeCount;
-
 
 //      Define values for map objects
 #define MO_TELEPORTMAN          14
 
+template<typename T>
+byte* GetSaveData(const T* object)
+{
+    auto* out = new T;
+    memcpy(out, object, sizeof(T));
+
+    *reinterpret_cast<intptr_t*>(out->sector) = out->sector - sectors;
+    return reinterpret_cast<byte*>(out);
+}
 
 // at game start
 void    P_InitPicAnims();
@@ -328,9 +333,7 @@ typedef enum
 
 } vldoor_e;
 
-
-
-typedef struct
+struct vldoor_t
 {
     thinker_t	thinker;
     vldoor_e	type;
@@ -346,10 +349,7 @@ typedef struct
     // (keep in case a door going down is reset)
     // when it reaches 0, start going down
     int             topcountdown;
-
-} vldoor_t;
-
-
+};
 
 #define VDOORSPEED		FRACUNIT*2
 #define VDOORWAIT		150
@@ -462,11 +462,8 @@ EV_SlidingDoor
     mobj_t* thing);
 #endif
 
-
-
-//
 // P_CEILNG
-//
+
 typedef enum
 {
     lowerToFloor,
@@ -478,9 +475,7 @@ typedef enum
 
 } ceiling_e;
 
-
-
-typedef struct
+struct ceiling_t
 {
     thinker_t	thinker;
     ceiling_e	type;
@@ -496,12 +491,7 @@ typedef struct
     // ID
     int		tag;
     int		olddirection;
-
-} ceiling_t;
-
-
-
-
+};
 
 #define CEILSPEED		FRACUNIT
 #define CEILWAIT		150
@@ -569,9 +559,7 @@ typedef enum
 
 } stair_e;
 
-
-
-typedef struct
+struct floormove_t
 {
     thinker_t	thinker;
     floor_e	type;
@@ -582,10 +570,7 @@ typedef struct
     short	texture;
     fixed_t	floordestheight;
     fixed_t	speed;
-
-} floormove_t;
-
-
+};
 
 #define FLOORSPEED		FRACUNIT
 

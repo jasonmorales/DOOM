@@ -17,21 +17,47 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include "utility/convert.h"
 
-#ifdef __GNUG__
-#pragma interface
+#ifndef __STD_MODULE__
+#include <format>
 #endif
 
+enum class SaveFileMarker : uint8
+{
+    ThinkersEnd = 0,
+    MapObject,
+
+    Ceiling = 0,
+    Door,
+    Floor,
+    Plat,
+    Flash,
+    Strobe,
+    Glow,
+    End,
+
+    EndSave = 0x1d,
+
+    Invalid = 0xff
+};
+
+template<>
+struct std::formatter<SaveFileMarker> : std::formatter<string>
+{
+    auto format(SaveFileMarker mark, std::format_context& ctx) const
+    {
+        return formatter<string>::format(std::format("{}", to_underlying(mark)), ctx);
+    }
+};
 
 // Persistent storage/archiving.
 // These are the load / save game routines.
-void P_ArchivePlayers();
-void P_UnArchivePlayers();
-void P_ArchiveWorld();
-void P_UnArchiveWorld();
-void P_ArchiveThinkers();
-void P_UnArchiveThinkers();
-void P_ArchiveSpecials();
-void P_UnArchiveSpecials();
-
-extern byte* save_p;
+void P_ArchivePlayers(std::ofstream& outFile);
+void P_UnArchivePlayers(std::ifstream& inFile);
+void P_ArchiveWorld(std::ofstream& outFile);
+void P_UnArchiveWorld(std::ifstream& inFile);
+void P_ArchiveThinkers(std::ofstream& outFile);
+void P_UnArchiveThinkers(std::ifstream& inFile);
+void P_ArchiveSpecials(std::ofstream& outFile);
+void P_UnArchiveSpecials(std::ifstream& inFile);

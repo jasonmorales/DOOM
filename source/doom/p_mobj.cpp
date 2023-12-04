@@ -964,3 +964,16 @@ P_SpawnPlayerMissile
     P_CheckMissileSpawn(th);
 }
 
+byte* mobj_t::GetSaveData() const
+{
+	auto* out = new mobj_t;
+	memcpy(out, this, sizeof(mobj_t));
+
+	if (out->state)
+		*reinterpret_cast<intptr_t*>(out->state) = out->state - states;
+
+	if (out->player)
+		*reinterpret_cast<intptr_t*>(out->player) = (out->player - players) + 1;
+
+	return reinterpret_cast<byte*>(out);
+}

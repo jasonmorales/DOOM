@@ -11,9 +11,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//   Duh.
-// 
 //-----------------------------------------------------------------------------
 #pragma once
 
@@ -22,9 +19,8 @@
 
 class Doom;
 
-//
 // GAME
-//
+
 void G_DeathMatchSpawnPlayer(int playernum);
 
 void G_InitNew(skill_t skill, int episode, int map);
@@ -35,12 +31,6 @@ void G_InitNew(skill_t skill, int episode, int map);
 void G_DeferedInitNew(skill_t skill, int episode, int map);
 
 void G_DeferedPlayDemo(const char* demo);
-
-// Can be called by the startup code or M_Responder,
-// calls P_SetupLevel or W_EnterWorld.
-void G_LoadGame(const char* name);
-
-void G_DoLoadGame();
 
 // Called by M_Responder.
 void G_SaveGame(int slot, char* description);
@@ -58,7 +48,37 @@ void G_SecretExitLevel();
 
 void G_WorldDone();
 
-void G_Ticker(Doom* doom);
 bool G_Responder(const event_t& ev);
 
 void G_ScreenShot();
+
+class Game
+{
+public:
+    static filesys::path GetSaveFilePath(int32 n)
+    {
+        return SavePath / std::format("{}{:02}.dsg", SaveFileName, n);
+    }
+
+    static const int32 SaveStringSize = 24;
+
+    Game(Doom* doom) : doom{doom} {}
+
+    void Ticker();
+
+    // Can be called by the startup code or M_Responder, calls P_SetupLevel or W_EnterWorld.
+    void LoadGame(const filesys::path& fileName);
+
+private:
+    static const filesys::path SavePath;
+    static constexpr const char* SaveFileName = "doomsav";
+
+    static const int32 VersionSize = 16;
+
+    void DoSaveGame();
+    void DoLoadGame();
+
+    Doom* doom = nullptr;
+
+    filesys::path loadFileName;
+};

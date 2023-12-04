@@ -1,11 +1,17 @@
 #pragma once
 
+#include "types/info.h"
+
 #ifndef __STD_MODULE__
 #include <type_traits>
 #include <concepts>
 #include <cmath>
 #include <limits>
+#include <utility>
+#include <numeric>
+#include <memory>
 #endif
+
 #include <stdint.h>
 #include <assert.h>
 
@@ -20,30 +26,37 @@ using uint16 = uint16_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
 
-template<typename T>
-constexpr bool is_integral = std::is_integral_v<T>;
+using std::in_range;
 
-template<typename T>
-constexpr bool is_signed = std::is_signed_v<T>;
+using std::to_underlying;
 
-template<typename T>
-constexpr bool is_unsigned = std::is_unsigned_v<T>;
+template<number T> const T zero = 0;
 
-template<typename T>
-constexpr bool is_floating_point = std::is_floating_point_v<T>;
+template<typename TO, typename FROM>
+constexpr TO saturate_cast(FROM in) noexcept
+{
+    if constexpr (is_same<FROM, TO>)
+        return in;
 
-template<typename T>
-constexpr bool is_arithmetic = std::is_arithmetic_v<T>;
+    if constexpr (
+        std::cmp_less_equal(std::numeric_limits<TO>::min(), std::numeric_limits<FROM>::min()) &&
+        std::cmp_greater_equal(std::numeric_limits<TO>::max(), std::numeric_limits<FROM>::max()))
+        return static_cast<TO>(in);
 
-template<typename T>
-constexpr bool is_scalar = std::is_scalar_v<T>;
+    if (std::cmp_greater(in, std::numeric_limits<TO>::max()))
+        return std::numeric_limits<TO>::max();
+
+    if (std::cmp_less(in, std::numeric_limits<TO>::min()))
+        return std::numeric_limits<TO>::min();
+
+    return static_cast<TO>(in);
+}
 
 namespace nonstd
 {
 
-template<typename B, typename E>
-requires std::integral<B> && std::integral<E>
-inline constexpr std::common_type_t<B, E> pow(B b, E e)
+template<integral B, integral E>
+constexpr std::common_type_t<B, E> pow(B b, E e)
 {
     using R = std::common_type_t<B, E>;
 
@@ -64,9 +77,8 @@ inline constexpr std::common_type_t<B, E> pow(B b, E e)
     return static_cast<R>(out);
 }
 
-template<typename B, typename E>
-requires std::floating_point<B> || std::floating_point<E>
-inline constexpr std::common_type<B, E> pow(B b, E e)
+template<floating_point B, floating_point E>
+constexpr std::common_type<B, E> pow(B b, E e)
 {
     return std::pow(b, e);
 }

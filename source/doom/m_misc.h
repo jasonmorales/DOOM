@@ -11,22 +11,145 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
-//    
 //-----------------------------------------------------------------------------
 #pragma once
+
+#include "types/strings.h"
+#include "types/numbers.h"
+#include "containers/vector.h"
 
 #include "doomtype.h"
 
 boolean M_WriteFile(char const* name, void* source, uint32 length);
-
-int M_ReadFile(char const* name, byte** buffer);
+vector<byte> M_ReadFile(const filesys::path& path);
 
 void M_ScreenShot();
 
-void M_LoadDefaults();
+class SettingBase
+{
+public:
+    SettingBase(string_view name);
 
-void M_SaveDefaults();
+    string_view Name() const { return name; }
 
-int M_DrawText(int x, int y, boolean direct, char* string);
+    virtual void Set(const std::variant<int32, float, string, bool>& in) = 0;
+
+    virtual void Reset() = 0;
+
+protected:
+    string name;
+    bool isSet = false;
+};
+
+template<typename T>
+class Setting : public SettingBase
+{
+public:
+    Setting(string_view name, T defaultValue)
+        : SettingBase{name}
+        , value{defaultValue}
+        , defaultValue{defaultValue}
+    {}
+
+    Setting() = delete;
+    Setting(const Setting&) = delete;
+    Setting(Setting&&) = delete;
+    Setting& operator=(const Setting&) = delete;
+
+    template<typename AS>
+    AS GetAs() const { return covert<AS>(value); }
+
+    T Get() const { return value; }
+
+    void Set(const std::variant<int32, float, string, bool>& in) override
+    {
+        auto* inVal = get_if<T>(&in);
+        if (inVal)
+            value = *inVal;
+    }
+
+    void Set(T in)
+    {
+        value = in;
+        isSet = true;
+    }
+
+    void Set(string_view in)
+    {
+        value = convert<T>(in);
+        isSet = true;
+    }
+
+    void Reset() override { value = defaultValue; isSet = false; }
+
+    operator T() { return value; }
+
+    T operator=(const T&& other) { value = other; return value; }
+
+    Setting<T>& operator++() { static_assert(is_integral<T>); value += 1; return *this; }
+    Setting<T>& operator--() { static_assert(is_integral<T>); value -= 1; return *this; }
+    T operator++(int) { static_assert(is_integral<T>); auto out = value; value += 1; return out; }
+    T operator--(int) { static_assert(is_integral<T>); auto out = value; value -= 1; return out; }
+
+private:
+    T value;
+    T defaultValue;
+};
+
+template<typename T>
+T operator-(const T&& a, const Setting<T>& b) { return a - b.Get(); }
+
+class Settings
+{
+public:
+    static const std::filesystem::path DevDataPath;
+
+    static void Save(const filesys::path& path = DefaultConfigFile);
+    static void Load();
+
+    template<typename T>
+    static std::optional<T> Get(string_view name)
+    {
+        auto it = settings.find(name);
+        return (it == settings.end()) ? std::nullopt : it->get_if<T>();
+    }
+
+    static void Register(SettingBase* setting)
+    {
+        Directory().insert({setting->Name(), setting});
+    }
+
+private:
+    using DirectoryType = std::map<string_view, SettingBase*>;
+
+    static DirectoryType& Directory()
+    {
+        if (!settings)
+            settings = new DirectoryType;
+
+        return *settings;
+    }
+
+    static const filesys::path DefaultConfigFile;
+
+    filesys::path fileName;
+
+    static DirectoryType* settings;
+};
+
+extern Setting<int32> screenBlocks;
+extern Setting<int32> detailLevel;
+
+extern Setting<int32> key_right;
+extern Setting<int32> key_right;
+extern Setting<int32> key_left;
+extern Setting<int32> key_up;
+extern Setting<int32> key_down;
+
+extern Setting<int32> key_strafeleft;
+extern Setting<int32> key_straferight;
+
+extern Setting<int32> key_fire;
+extern Setting<int32> key_use;
+extern Setting<int32> key_strafe;
+extern Setting<int32> key_speed;

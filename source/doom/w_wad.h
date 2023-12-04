@@ -62,7 +62,7 @@ extern	void** lumpcache;
 extern	lumpinfo_t* lumpinfo;
 extern intptr_t numlumps;
 
-void W_InitMultipleFiles(const vector<std::filesystem::path>& files);
+void W_InitMultipleFiles(const vector<filesys::path>& files);
 void W_Reload();
 
 int32 W_CheckNumForName(string_view name);

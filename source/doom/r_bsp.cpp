@@ -229,11 +229,6 @@ R_ClipPassWallSegment
     R_StoreWallRange(start->last + 1, last);
 }
 
-
-
-//
-// R_ClearClipSegs
-//
 void R_ClearClipSegs()
 {
     solidsegs[0].first = -0x7fffffff;
@@ -243,11 +238,8 @@ void R_ClearClipSegs()
     newend = solidsegs + 2;
 }
 
-//
-// R_AddLine
 // Clips the given segment
 // and adds any visible pieces to the line list.
-//
 void R_AddLine(seg_t* line)
 {
     int			x1;

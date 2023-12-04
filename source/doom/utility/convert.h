@@ -132,26 +132,14 @@ T parse_number(string_view str)
     return static_cast<T>(out);
 }
 
-template<typename TO, typename FROM>
-TO convert(FROM in) = delete;
+template<typename TO>
+TO convert(same_as<TO> auto from) { return from; }
 
-template<typename TO, typename FROM>
-requires is_stringlike<FROM> && is_arithmetic<TO>
-TO convert(FROM in)
-{
-    return parse_number<TO>(in);
-}
+template<number TO>
+TO convert(string_t auto&& from) { return parse_number<TO>(from); }
 
-template<typename TO, typename FROM>
-requires is_stringlike<FROM> && is_stringlike<TO>
-TO convert(FROM in)
-{
-    return in;
-}
+template<same_as<string> TO>
+TO convert(number auto in) { return std::to_string(in); }
 
-template<typename TO, typename FROM>
-requires is_arithmetic<FROM> && is_same<TO, string>
-TO convert(FROM in)
-{
-    return std::to_string(in);
-}
+template<same_as<string> TO>
+TO convert(string_view in) { return string(in); }

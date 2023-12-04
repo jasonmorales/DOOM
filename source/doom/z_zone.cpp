@@ -96,9 +96,9 @@ void Z_Init()
 //
 // Z_Free
 //
-void Z_Free(void* ptr)
+void Z_Free(void* p)
 {
-    memblock_t* block = (memblock_t*)((intptr_t)ptr - sizeof(memblock_t));
+    memblock_t* block = (memblock_t*)((intptr_t)p - sizeof(memblock_t));
 
     if (block->id != ZONEID)
         I_Error("Z_Free: freed a pointer without ZONEID");
@@ -349,9 +349,9 @@ void Z_CheckHeap()
     }
 }
 
-void Z_ChangeTag2(void* ptr, int32 tag)
+void Z_ChangeTag2(void* p, int32 tag)
 {
-    auto* block = reinterpret_cast<memblock_t*>((byte*)ptr - sizeof(memblock_t));
+    auto* block = reinterpret_cast<memblock_t*>((byte*)p - sizeof(memblock_t));
 
     if (block->id != ZONEID)
         I_Error("Z_ChangeTag: freed a pointer without ZONEID");

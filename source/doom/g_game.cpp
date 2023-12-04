@@ -11,8 +11,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:  none
-//
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
@@ -54,10 +52,7 @@ extern Doom* g_doom;
 #include <string.h>
 #include <stdlib.h>
 
-#define SAVEGAMESIZE	0x2c000
-#define SAVESTRINGSIZE	24
-
-
+const filesys::path Game::SavePath = "./saves";
 
 boolean	G_CheckDemoStatus(Doom* doom);
 void	G_ReadDemoTiccmd(ticcmd_t* cmd);
@@ -69,12 +64,10 @@ void	G_DoReborn(int playernum);
 
 void	G_DoLoadLevel();
 void	G_DoNewGame();
-void	G_DoLoadGame();
 void	G_DoPlayDemo();
 void	G_DoCompleted();
 void	G_DoVictory();
 void	G_DoWorldDone();
-void	G_DoSaveGame();
 
 
 gameaction_t    gameaction;
@@ -96,7 +89,7 @@ boolean         viewactive;
 
 int deathmatch;           	// only if started as net death 
 boolean         netgame;                // only true if packets are broadcast 
-boolean         playeringame[MAXPLAYERS];
+bool playeringame[MAXPLAYERS];
 player_t        players[MAXPLAYERS];
 
 int             consoleplayer;          // player taking events and displaying 
@@ -119,24 +112,7 @@ wbstartstruct_t wminfo;               	// parms for world map / intermission
 
 short		consistancy[MAXPLAYERS][BACKUPTICS];
 
-byte* savebuffer;
-
-
-// 
 // controls (have defaults) 
-// 
-int             key_right;
-int		key_left;
-
-int		key_up;
-int		key_down;
-int             key_strafeleft;
-int		key_straferight;
-int             key_fire;
-int		key_use;
-int		key_strafe;
-int		key_speed;
-
 int32             mousebfire;
 int32             mousebstrafe;
 int32             mousebforward;
@@ -184,7 +160,7 @@ boolean         joyarray[5];
 boolean* joybuttons = &joyarray[1];		// allow [-1] 
 
 int		savegameslot;
-char		savedescription[32];
+string saveDescription(24, '\0');
 
 
 #define	BODYQUESIZE	32
@@ -483,13 +459,6 @@ bool G_Responder(const event_t& event)
 
     if (g_doom->GetGameState() == GameState::Level)
     {
-#if 0 
-        if (devparm && event.type == ev_keydown && event.data1 == ';')
-        {
-            G_DeathMatchSpawnPlayer(0);
-            return true;
-        }
-#endif 
         if (HU_Responder(event))
             return true;	// chat ate the event 
         if (ST_Responder(event))
@@ -546,14 +515,10 @@ bool G_Responder(const event_t& event)
 }
 
 // Make ticcmd_ts for the players.
-void G_Ticker(Doom* doom)
+void Game::Ticker()
 {
-    int		i;
-    int		buf;
-    ticcmd_t* cmd;
-
     // do player reborns if needed
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
         if (playeringame[i] && players[i].playerstate == PST_REBORN)
             G_DoReborn(i);
 
@@ -569,10 +534,10 @@ void G_Ticker(Doom* doom)
             G_DoNewGame();
             break;
         case ga_loadgame:
-            G_DoLoadGame();
+            DoLoadGame();
             break;
         case ga_savegame:
-            G_DoSaveGame();
+            DoSaveGame();
             break;
         case ga_playdemo:
             G_DoPlayDemo();
@@ -597,13 +562,13 @@ void G_Ticker(Doom* doom)
 
     // get commands, check consistancy,
     // and build new consistancy check
-    buf = (gametic / ticdup) % BACKUPTICS;
+    int32 buf = (gametic / ticdup) % BACKUPTICS;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
     {
         if (playeringame[i])
         {
-            cmd = &players[i].cmd;
+            auto cmd = &players[i].cmd;
 
             memcpy(cmd, &netcmds[i][buf], sizeof(ticcmd_t));
 
@@ -638,7 +603,7 @@ void G_Ticker(Doom* doom)
     }
 
     // check for special buttons
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; i++)
     {
         if (playeringame[i])
         {
@@ -655,10 +620,9 @@ void G_Ticker(Doom* doom)
                     break;
 
                 case BTS_SAVEGAME:
-                    if (!savedescription[0])
-                        strcpy_s(savedescription, "NET GAME");
-                    savegameslot =
-                        (players[i].cmd.buttons & BTS_SAVEMASK) >> BTS_SAVESHIFT;
+                    if (!saveDescription[0])
+                        saveDescription = "NET GAME";
+                    savegameslot = (players[i].cmd.buttons & BTS_SAVEMASK) >> BTS_SAVESHIFT;
                     gameaction = ga_savegame;
                     break;
                 }
@@ -667,7 +631,7 @@ void G_Ticker(Doom* doom)
     }
 
     // do main actions
-    switch (g_doom->GetGameState())
+    switch (doom->GetGameState())
     {
     case GameState::Level:
         P_Ticker();
@@ -690,40 +654,21 @@ void G_Ticker(Doom* doom)
     }
 }
 
-
-//
 // PLAYER STRUCTURE FUNCTIONS
 // also see P_SpawnPlayer in P_Things
-//
 
-//
-// G_InitPlayer 
 // Called at the start.
 // Called by the game initialization functions.
-//
 void G_InitPlayer(int player)
 {
-    player_t* p;
-
-    // set up the saved info         
-    p = &players[player];
-
     // clear everything else to defaults 
     G_PlayerReborn(player);
-
 }
 
-
-
-//
-// G_PlayerFinishLevel
 // Can when a player completes a level.
-//
 void G_PlayerFinishLevel(int player)
 {
-    player_t* p;
-
-    p = &players[player];
+    auto* p = &players[player];
 
     memset(p->powers, 0, sizeof(p->powers));
     memset(p->cards, 0, sizeof(p->cards));
@@ -734,15 +679,10 @@ void G_PlayerFinishLevel(int player)
     p->bonuscount = 0;
 }
 
-
-//
-// G_PlayerReborn
 // Called after a player dies 
 // almost everything is cleared and initialized 
-//
 void G_PlayerReborn(int player)
 {
-    player_t* p;
     int		i;
     int		frags[MAXPLAYERS];
     int		killcount;
@@ -754,7 +694,7 @@ void G_PlayerReborn(int player)
     itemcount = players[player].itemcount;
     secretcount = players[player].secretcount;
 
-    p = &players[player];
+    auto* p = &players[player];
     memset(p, 0, sizeof(*p));
 
     memcpy(players[player].frags, frags, sizeof(players[player].frags));
@@ -772,24 +712,15 @@ void G_PlayerReborn(int player)
 
     for (i = 0; i < NUMAMMO; i++)
         p->maxammo[i] = maxammo[i];
-
 }
 
-//
-// G_CheckSpot  
 // Returns false if the player cannot be respawned
 // at the given mapthing_t spot  
 // because something is occupying it 
-//
 void P_SpawnPlayer(mapthing_t* mthing);
 
-boolean
-G_CheckSpot
-(int		playernum,
-    mapthing_t* mthing)
+boolean G_CheckSpot(int32 playernum, mapthing_t* mthing)
 {
-    fixed_t		x;
-    fixed_t		y;
     subsector_t* ss;
     unsigned		an;
     mobj_t* mo;
@@ -805,8 +736,8 @@ G_CheckSpot
         return true;
     }
 
-    x = mthing->x << FRACBITS;
-    y = mthing->y << FRACBITS;
+    int32 x = mthing->x << FRACBITS;
+    int32 y = mthing->y << FRACBITS;
 
     if (!P_CheckPosition(players[playernum].mo, x, y))
         return false;
@@ -831,23 +762,17 @@ G_CheckSpot
     return true;
 }
 
-
-//
-// G_DeathMatchSpawnPlayer 
 // Spawns a player at one of the random death match spots 
 // called at level load and each death 
-//
 void G_DeathMatchSpawnPlayer(int playernum)
 {
-    int             i, j;
-
     auto selections = deathmatch_p - deathmatchstarts;
     if (selections < 4)
         I_Error("Only {} deathmatch spots, 4 required", selections);
 
-    for (j = 0; j < 20; j++)
+    for (int32 j = 0; j < 20; j++)
     {
-        i = P_Random() % selections;
+        int32 i = P_Random() % selections;
         if (G_CheckSpot(playernum, &deathmatchstarts[i]))
         {
             deathmatchstarts[i].type = static_cast<short>(playernum + 1);
@@ -860,13 +785,8 @@ void G_DeathMatchSpawnPlayer(int playernum)
     P_SpawnPlayer(&playerstarts[playernum]);
 }
 
-//
-// G_DoReborn 
-// 
 void G_DoReborn(int playernum)
 {
-    int                             i;
-
     if (!netgame)
     {
         // reload the level from scratch
@@ -893,7 +813,7 @@ void G_DoReborn(int playernum)
         }
 
         // try to spawn at one of the other players spots 
-        for (i = 0; i < MAXPLAYERS; i++)
+        for (int32 i = 0; i < MAXPLAYERS; ++i)
         {
             if (G_CheckSpot(playernum, &playerstarts[i]))
             {
@@ -908,13 +828,10 @@ void G_DoReborn(int playernum)
     }
 }
 
-
 void G_ScreenShot()
 {
     gameaction = ga_screenshot;
 }
-
-
 
 // DOOM Par Times
 int pars[4][10] =
@@ -934,10 +851,8 @@ int cpars[32] =
     120,30					// 31-32
 };
 
-
-//
 // G_DoCompleted 
-//
+
 boolean		secretexit;
 extern char* pagename;
 
@@ -961,11 +876,9 @@ void G_SecretExitLevel()
 
 void G_DoCompleted()
 {
-    int             i;
-
     gameaction = ga_nothing;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
         if (playeringame[i])
             G_PlayerFinishLevel(i);        // take away cards and stuff 
 
@@ -973,35 +886,32 @@ void G_DoCompleted()
         AM_Stop();
 
     if (gamemode != GameMode::Doom2Commercial)
+    {
         switch (gamemap)
         {
         case 8:
             gameaction = ga_victory;
             return;
         case 9:
-            for (i = 0; i < MAXPLAYERS; i++)
+            for (int32 i = 0; i < MAXPLAYERS; i++)
                 players[i].didsecret = true;
             break;
         }
+    }
 
-    //#if 0  Hmmm - why?
-    if ((gamemap == 8)
-        && (gamemode != GameMode::Doom2Commercial))
+    if ((gamemap == 8) && (gamemode != GameMode::Doom2Commercial))
     {
         // victory 
         gameaction = ga_victory;
         return;
     }
 
-    if ((gamemap == 9)
-        && (gamemode != GameMode::Doom2Commercial))
+    if ((gamemap == 9) && (gamemode != GameMode::Doom2Commercial))
     {
         // exit secret level 
-        for (i = 0; i < MAXPLAYERS; i++)
+        for (int32 i = 0; i < MAXPLAYERS; ++i)
             players[i].didsecret = true;
     }
-    //#endif
-
 
     wminfo.didsecret = players[consoleplayer].didsecret;
     wminfo.epsd = gameepisode - 1;
@@ -1061,15 +971,14 @@ void G_DoCompleted()
         wminfo.partime = 35 * pars[gameepisode][gamemap];
     wminfo.pnum = consoleplayer;
 
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
     {
         wminfo.plyr[i].in = playeringame[i];
         wminfo.plyr[i].skills = players[i].killcount;
         wminfo.plyr[i].sitems = players[i].itemcount;
         wminfo.plyr[i].ssecret = players[i].secretcount;
         wminfo.plyr[i].stime = leveltime;
-        memcpy(wminfo.plyr[i].frags, players[i].frags
-            , sizeof(wminfo.plyr[i].frags));
+        memcpy(wminfo.plyr[i].frags, players[i].frags, sizeof(wminfo.plyr[i].frags));
     }
 
     g_doom->SetGameState(GameState::Intermission);
@@ -1082,10 +991,6 @@ void G_DoCompleted()
     WI_Start(&wminfo);
 }
 
-
-//
-// G_WorldDone 
-//
 void G_WorldDone()
 {
     gameaction = ga_worlddone;
@@ -1120,64 +1025,63 @@ void G_DoWorldDone()
     viewactive = true;
 }
 
-//
-// G_InitFromSavegame
-// Can be called by the startup code or the menu task. 
-//
-char	savename[256];
-
-void G_LoadGame(const char* name)
+void Game::LoadGame(const filesys::path& fileName)
 {
-    strcpy_s(savename, name);
+    loadFileName = fileName;
     gameaction = ga_loadgame;
 }
 
-#define VERSIONSIZE		16 
-
-
-void G_DoLoadGame()
+void Game::DoLoadGame()
 {
-    int		i;
-    char	vcheck[VERSIONSIZE];
-
     gameaction = ga_nothing;
 
-    M_ReadFile(savename, &savebuffer);
-    save_p = savebuffer + SAVESTRINGSIZE;
+    auto inFile = std::ifstream{loadFileName, std::ifstream::binary};
+    if (!inFile.is_open())
+    {
+        std::cerr << "Failed to open load file: " << loadFileName << "\n";
+        return;
+    }
 
-    // skip the description field 
-    memset(vcheck, 0, sizeof(vcheck));
-    sprintf_s(vcheck, "version %i", VERSION);
-    if (strcmp(reinterpret_cast<char*>(save_p), vcheck))
-        return;				// bad version 
-    save_p += VERSIONSIZE;
+    // skip the description field
+    inFile.seekg(SaveStringSize, std::ios_base::beg);
 
-    gameskill = static_cast<decltype(gameskill)>(*save_p++);
-    gameepisode = *save_p++;
-    gamemap = *save_p++;
-    for (i = 0; i < MAXPLAYERS; i++)
-        playeringame[i] = *save_p++;
+    string versionCheck(VersionSize, '\0');
+    inFile.read(versionCheck.data(), VersionSize);
+    if (versionCheck != std::format("version {}", Doom::Version))
+        return;
+
+    auto read_byte = [&inFile](auto* val){
+        using T = int_rep<x_ptr<decltype(val)>>;
+        *reinterpret_cast<T*>(val) = zero<T>;
+        inFile.read(reinterpret_cast<char*>(val), 1);
+    };
+
+    read_byte(&gameskill);
+    read_byte(&gameepisode);
+    read_byte(&gamemap);
+
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
+        read_byte(playeringame + i);
 
     // load a base level 
     G_InitNew(gameskill, gameepisode, gamemap);
 
-    // get the times 
-    int a = *save_p++;
-    int b = *save_p++;
-    int c = *save_p++;
-    leveltime = (a << 16) + (b << 8) + c;
+    // get the times
+    leveltime = 0;
+    inFile.read(reinterpret_cast<char*>(&leveltime) + 2, 1);
+    inFile.read(reinterpret_cast<char*>(&leveltime) + 1, 1);
+    inFile.read(reinterpret_cast<char*>(&leveltime) + 0, 1);
 
     // dearchive all the modifications
-    P_UnArchivePlayers();
-    P_UnArchiveWorld();
-    P_UnArchiveThinkers();
-    P_UnArchiveSpecials();
+    P_UnArchivePlayers(inFile);
+    P_UnArchiveWorld(inFile);
+    P_UnArchiveThinkers(inFile);
+    P_UnArchiveSpecials(inFile);
 
-    if (*save_p != 0x1d)
+    SaveFileMarker check;
+    read_byte(&check);
+    if (check != SaveFileMarker::End)
         I_Error("Bad savegame");
-
-    // done 
-    Z_Free(savebuffer);
 
     g_doom->GetRender()->CheckSetViewSize();
 
@@ -1185,59 +1089,49 @@ void G_DoLoadGame()
     R_FillBackScreen();
 }
 
-// G_SaveGame
 // Called by the menu task.
 // Description is a 24 byte text string 
 void G_SaveGame(int slot, char* description)
 {
     savegameslot = slot;
-    strcpy_s(savedescription, description);
+    saveDescription = description;
     sendsave = true;
 }
 
-void G_DoSaveGame()
+void Game::DoSaveGame()
 {
-    char	name[100];
-    char	name2[VERSIONSIZE];
-    char* description;
-    int		i;
+    auto fileName = Game::GetSaveFilePath(savegameslot);
+    std::ofstream outFile(fileName, std::ofstream::binary);
+    if (!outFile.is_open())
+    {
+        std::cerr << "Failed to open save file: " << fileName << "\n";
+        return;
+    }
 
-    sprintf_s(name, SAVEGAMENAME "%d.dsg", savegameslot);
+    outFile << std::setfill('\0')
+        << std::setw(SaveStringSize) << saveDescription
+        << std::setw(VersionSize) << std::format("version {}", Doom::Version)
 
-    description = savedescription;
+        << static_cast<byte>(gameskill)
+        <<static_cast<byte>(gameepisode)
+        << static_cast<byte>(gamemap);
 
-    save_p = savebuffer = g_doom->GetVideo()->GetScreen(1) + 0x4000;
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
+        outFile << playeringame[i];
 
-    memcpy(save_p, description, SAVESTRINGSIZE);
-    save_p += SAVESTRINGSIZE;
-    memset(name2, 0, sizeof(name2));
-    sprintf_s(name2, "version %i", VERSION);
-    memcpy(save_p, name2, VERSIONSIZE);
-    save_p += VERSIONSIZE;
+    outFile << static_cast<byte>(leveltime >> 16)
+        << static_cast<byte>(leveltime >> 8)
+        << static_cast<byte>(leveltime);
 
-    *save_p++ = static_cast<byte>(gameskill);
-    *save_p++ = static_cast<byte>(gameepisode);
-    *save_p++ = static_cast<byte>(gamemap);
-    for (i = 0; i < MAXPLAYERS; i++)
-        *save_p++ = playeringame[i];
-    *save_p++ = static_cast<byte>(leveltime >> 16);
-    *save_p++ = static_cast<byte>(leveltime >> 8);
-    *save_p++ = static_cast<byte>(leveltime);
+    P_ArchivePlayers(outFile);
+    P_ArchiveWorld(outFile);
+    P_ArchiveThinkers(outFile);
+    P_ArchiveSpecials(outFile);
 
-    P_ArchivePlayers();
-    P_ArchiveWorld();
-    P_ArchiveThinkers();
-    P_ArchiveSpecials();
+    outFile << static_cast<uint8>(SaveFileMarker::End);
 
-    *save_p++ = 0x1d;		// consistancy marker 
-
-    auto length = static_cast<uint32>(save_p - savebuffer);
-    if (length > SAVEGAMESIZE)
-        I_Error("Savegame buffer overrun");
-
-    M_WriteFile(name, savebuffer, length);
     gameaction = ga_nothing;
-    savedescription[0] = 0;
+    saveDescription = "";
 
     players[consoleplayer].message = GGSAVED;
 
@@ -1245,18 +1139,13 @@ void G_DoSaveGame()
     R_FillBackScreen();
 }
 
-//
-// G_InitNew
 // Can be called by the startup code or the menu task,
 // consoleplayer, displayplayer, playeringame[] should be set. 
-//
 skill_t	d_skill;
 int     d_episode;
 int     d_map;
 
-void
-G_DeferedInitNew
-(skill_t	skill,
+void G_DeferedInitNew(skill_t	skill,
     int		episode,
     int		map)
 {
@@ -1273,7 +1162,7 @@ void G_DoNewGame()
     netdemo = false;
     netgame = false;
     deathmatch = false;
-    playeringame[1] = playeringame[2] = playeringame[3] = 0;
+    playeringame[1] = playeringame[2] = playeringame[3] = false;
     respawnparm = false;
     fastparm = false;
     nomonsters = false;
@@ -1285,12 +1174,7 @@ void G_DoNewGame()
 // The sky texture to be used instead of the F_SKY1 dummy.
 extern  int	skytexture;
 
-
-void
-G_InitNew
-(skill_t	skill,
-    int		episode,
-    int		map)
+void G_InitNew(skill_t skill, int32 episode, int32 map)
 {
     int             i;
 
@@ -1406,10 +1290,8 @@ G_InitNew
     G_DoLoadLevel();
 }
 
-
-//
 // DEMO RECORDING 
-// 
+
 #define DEMOMARKER		0x80
 
 
@@ -1470,7 +1352,7 @@ void G_BeginRecording()
 {
     demo_p = demobuffer;
 
-    *demo_p++ = VERSION;
+    *demo_p++ = Doom::Version;
     *demo_p++ = static_cast<byte>(gameskill);
     *demo_p++ = static_cast<byte>(gameepisode);
     *demo_p++ = static_cast<byte>(gamemap);
@@ -1504,7 +1386,7 @@ void G_DoPlayDemo()
 
     gameaction = ga_nothing;
     demobuffer = demo_p = W_CacheLumpName<byte>(defdemoname, PU_STATIC);
-    if (*demo_p++ != VERSION)
+    if (*demo_p++ != Doom::Version)
     {
         fprintf(stderr, "Demo is from a different game version!\n");
         gameaction = ga_nothing;
@@ -1575,7 +1457,7 @@ boolean G_CheckDemoStatus(Doom* doom)
         netdemo = false;
         netgame = false;
         deathmatch = false;
-        playeringame[1] = playeringame[2] = playeringame[3] = 0;
+        playeringame[1] = playeringame[2] = playeringame[3] = false;
         respawnparm = false;
         fastparm = false;
         nomonsters = false;

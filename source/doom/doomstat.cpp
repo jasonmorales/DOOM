@@ -15,13 +15,9 @@
 //	Put all global state variables here.
 //
 //-----------------------------------------------------------------------------
-
 #include "doomstat.h"
 
 // Game Mode - identify IWAD as shareware, retail etc.
 GameMode gamemode = GameMode::Unknown;
 
 GameMission_t	gamemission = doom;
-
-// Language.
-Language_t   language = english;

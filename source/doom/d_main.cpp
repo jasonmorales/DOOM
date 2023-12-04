@@ -63,7 +63,6 @@ extern void* statcopy;
 
 boolean advancedemo;
 
-boolean devparm;	 // started game with -devparm
 boolean nomonsters;	 // checkparm of -nomonsters
 boolean respawnparm; // checkparm of -respawn
 boolean fastparm;	 // checkparm of -fast
@@ -79,7 +78,6 @@ FILE* debugfile;
 
 char wadfile[1024];		// primary wad file
 char mapdir[1024];		// directory of development maps
-char basedefault[1024]; // default file
 
 // EVENT HANDLING
 //
@@ -104,6 +102,14 @@ bool Doom::HasEventInQueue(const event_t& event)
     return false;
 }
 
+const char* fA() { return "asdffsdf"; }
+std::string fB() { return string("cccc"); }
+std::string_view fC() { static const char* s = "...."; return s; }
+std::filesystem::path fD() { return std::filesystem::path("adfgfghghh"); }
+nonstd::string fE() { return string("ccccxx"); }
+nonstd::string_view fF() { static const char* s = "....xx"; return s; }
+nonstd::filesystem::path fG() { return nonstd::filesystem::path("axxxxdfgfghghh"); }
+
 void Doom::Main()
 {
     IdentifyVersion();
@@ -113,7 +119,7 @@ void Doom::Main()
     nomonsters = CommandLine::HasArg("-nomonsters");
     respawnparm = CommandLine::HasArg("-respawn");
     fastparm = CommandLine::HasArg("-fast");
-    devparm = CommandLine::HasArg("-devparm");
+    isDevMode = CommandLine::HasArg("-devparm");
 
     if (CommandLine::HasArg("-altdeath"))
         deathmatch = 2;
@@ -128,41 +134,41 @@ void Doom::Main()
             "                         "
             "The Ultimate DOOM Startup v%i.%i"
             "                           ",
-            VERSION / 100, VERSION % 100);
+            Version / 100, Version % 100);
         break;
     case GameMode::Doom1Shareware:
         sprintf_s(title,
             "                            "
             "DOOM Shareware Startup v%i.%i"
             "                           ",
-            VERSION / 100, VERSION % 100);
+            Version / 100, Version % 100);
         break;
     case GameMode::Doom1Registered:
         sprintf_s(title,
             "                            "
             "DOOM Registered Startup v%i.%i"
             "                           ",
-            VERSION / 100, VERSION % 100);
+            Version / 100, Version % 100);
         break;
     case GameMode::Doom2Commercial:
         sprintf_s(title,
             "                         "
             "DOOM 2: Hell on Earth v%i.%i"
             "                           ",
-            VERSION / 100, VERSION % 100);
+            Version / 100, Version % 100);
         break;
     default:
         sprintf_s(title,
             "                     "
             "Public DOOM - v%i.%i"
             "                           ",
-            VERSION / 100, VERSION % 100);
+            Version / 100, Version % 100);
         break;
     }
 
     printf("%s\n", title);
 
-    if (devparm)
+    if (isDevMode)
         printf(D_DEVSTR);
 
     // turbo option
@@ -197,11 +203,8 @@ void Doom::Main()
             autostart = true;
         };
 
-    // add any files specified on the command line with -file wadfile
-    // to the wad list
-    //
-    // convenience hack to allow -wart e m to add a wad file
-    // prepend a tilde to the filename so wadfile will be reloadable
+    // add any files specified on the command line with -file wadfile to the wad list
+    // convenience hack to allow -wart e m to add a wad file prepend a tilde to the filename so wadfile will be reloadable
     if (int32 ep = 0, map = 0; CommandLine::TryGetValues("-wart", ep, map))
     {
         // Map name handling.
@@ -228,7 +231,7 @@ void Doom::Main()
     {
         isModified = true; // homebrew levels
         for (auto fileName : fileList)
-            AddFile(string(fileName).c_str());
+            AddFile(fileName);
     }
 
     if (string_view name;
@@ -237,7 +240,7 @@ void Doom::Main()
     {
         string fileName(name);
         fileName += ".lmp";
-        AddFile(fileName.c_str());
+        AddFile(fileName);
         printf("Playing demo %s.\n", fileName.c_str());
     }
 
@@ -281,11 +284,14 @@ void Doom::Main()
     video = new Video(this);
     video->Init();
 
-    printf("M_LoadDefaults: Load system defaults.\n");
-    M_LoadDefaults(); // load before initing other systems
+    printf("Settings::Load: Load system defaults.\n");
+    Settings::Load(); // load before initing other systems
 
     printf("W_Init: Init WADfiles.\n");
     W_InitMultipleFiles(wadFiles);
+
+    std::cout << "Init Game\n";
+    game = new Game(this);
 
     // Check for -file in shareware
     if (isModified)
@@ -348,8 +354,8 @@ void Doom::Main()
         break;
     }
 
-    printf("M_Init: Init miscellaneous info.\n");
-    M_Init();
+    printf("Menu::Init: Init miscellaneous info.\n");
+    Menu::Init();
 
     printf("Render::Init: Init DOOM refresh daemon - ");
     render = new Render;
@@ -402,11 +408,8 @@ void Doom::Main()
         Loop(); // never returns
     }
 
-    if (int load; CommandLine::TryGetValues("-loadgame", load))
-    {
-        sprintf_s(file, SAVEGAMENAME "%d.dsg", load);
-        G_LoadGame(file);
-    }
+    if (int32 load; CommandLine::TryGetValues("-loadgame", load))
+        game->LoadGame(Game::GetSaveFilePath(load));
 
     if (gameaction != ga_loadgame)
     {
@@ -451,7 +454,7 @@ void Doom::Loop()
             if (advancedemo)
                 DoAdvanceDemo();
             M_Ticker();
-            G_Ticker(this);
+            game->Ticker();
             gametic++;
             maketic++;
         }
@@ -579,35 +582,34 @@ void Doom::IdentifyVersion()
     if (CommandLine::HasArg("-shdev"))
     {
         gamemode = GameMode::Doom1Shareware;
-        devparm = true;
-        AddFile(DEVDATA "doom1.wad");
+        isDevMode = true;
+
+        AddFile(Settings::DevDataPath / "doom1.wad");
         AddFile(DEVMAPS "data_se/texture1.lmp");
         AddFile(DEVMAPS "data_se/pnames.lmp");
-        strcpy_s(basedefault, DEVDATA "default.cfg");
         return;
     }
 
     if (CommandLine::HasArg("-regdev"))
     {
         gamemode = GameMode::Doom1Registered;
-        devparm = true;
-        AddFile(DEVDATA "doom.wad");
+        isDevMode = true;
+
+        AddFile(Settings::DevDataPath /"doom.wad");
         AddFile(DEVMAPS "data_se/texture1.lmp");
         AddFile(DEVMAPS "data_se/texture2.lmp");
         AddFile(DEVMAPS "data_se/pnames.lmp");
-        strcpy_s(basedefault, DEVDATA "default.cfg");
         return;
     }
 
     if (CommandLine::HasArg("-comdev"))
     {
         gamemode = GameMode::Doom2Commercial;
-        devparm = true;
+        isDevMode = true;
 
-        AddFile(DEVDATA "doom2.wad");
+        AddFile(Settings::DevDataPath /"doom2.wad");
         AddFile(DEVMAPS "cdata/texture1.lmp");
         AddFile(DEVMAPS "cdata/pnames.lmp");
-        strcpy_s(basedefault, DEVDATA "default.cfg");
         return;
     }
 

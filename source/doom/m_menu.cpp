@@ -48,6 +48,7 @@ import std;
 #include "sounds.h"
 
 #include "m_menu.h"
+#include "m_misc.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -73,11 +74,6 @@ int32			mouseSensitivity;       // has default
 // Show messages has default, 0 = off, 1 = on
 int32			showMessages;
 
-
-// Blocky mode, has default, 0 = high, 1 = normal
-int32			detailLevel;
-int32			screenblocks;		// has default
-
 // temp for screenblocks (0-9)
 int			screenSize;
 
@@ -86,8 +82,6 @@ int			quickSaveSlot;
 
 // 1 = message to be printed
 int			messageToPrint;
-// ...and here is the message string!
-const char* messageString;
 
 // message x & y
 int			messx;
@@ -98,8 +92,6 @@ int			messageLastMenuActive;
 boolean			messageNeedsInput;
 
 void    (*messageRoutine)(int response);
-
-#define SAVESTRINGSIZE 	24
 
 char gammamsg[5][26] =
 {
@@ -115,7 +107,7 @@ int			saveStringEnter;
 int             	saveSlot;	// which slot to save in
 size_t saveCharIndex;	// which char we're editing
 // old save description before edit
-char			saveOldString[SAVESTRINGSIZE];
+char			saveOldString[Game::SaveStringSize];
 
 boolean			inhelpscreens;
 boolean			menuactive;
@@ -124,7 +116,7 @@ boolean			menuactive;
 #define LINEHEIGHT		16
 
 extern boolean		sendpause;
-char			savegamestrings[10][SAVESTRINGSIZE];
+char			savegamestrings[10][Game::SaveStringSize];
 
 char	endstring[160];
 
@@ -196,7 +188,7 @@ void M_StartGame(int choice);
 void M_Sound(int choice);
 
 void M_FinishReadThis(int choice);
-void M_LoadSelect(int choice);
+void M_LoadSelect(int32 choice);
 void M_SaveSelect(int choice);
 void M_ReadSaveStrings();
 void M_QuickSave();
@@ -217,20 +209,14 @@ void M_SetupNextMenu(menu_t* menudef);
 void M_DrawThermo(int x, int y, int thermWidth, int thermDot);
 void M_DrawEmptyCell(menu_t* menu, int item);
 void M_DrawSelCell(menu_t* menu, int item);
-void M_WriteText(int x, int y, const char* string);
-int  M_StringWidth(char* string);
-int  M_StringHeight(const char* string);
+void M_WriteText(int32 x, int32 y, string_view text);
+int32  M_StringWidth(string_view str);
+int32  M_StringHeight(string_view str);
 void M_StartControlPanel();
-void M_StartMessage(const char* string, void(*routine)(int), boolean input);
 void M_StopMessage();
 void M_ClearMenus();
 
-
-
-
-//
 // DOOM MENU
-//
 enum
 {
     newgame = 0,
@@ -498,32 +484,25 @@ menu_t  SaveDef =
     0
 };
 
-
-//
-// M_ReadSaveStrings
 //  read the strings from the savegame files
 void M_ReadSaveStrings()
 {
-    for (int32 i = 0;i < load_end;i++)
+    for (int32 i = 0;i < load_end; ++i)
     {
-        char name[256];
-        sprintf_s(name, SAVEGAMENAME "%d.dsg", i);
+        LoadMenu[i].status = 0;
+        memset(&savegamestrings[i], 0, Game::SaveStringSize);
 
-        int32 handle = 0;
-        _sopen_s(&handle, name, _O_RDONLY, _SH_DENYWR, _S_IREAD);
-        if (handle == -1)
-        {
-            strcpy_s(savegamestrings[i], EMPTYSTRING);
-            LoadMenu[i].status = 0;
+        auto path = Game::GetSaveFilePath(i);
+        std::ifstream file(path);
+
+        if (!file.is_open())
             continue;
-        }
-        _read(handle, &savegamestrings[i], SAVESTRINGSIZE);
-        _close(handle);
+
+        file.read(reinterpret_cast<char*>(&savegamestrings[i]), Game::SaveStringSize);
         LoadMenu[i].status = 1;
     }
 }
 
-// M_LoadGame & Cie.
 void M_DrawLoad()
 {
     g_doom->GetVideo()->DrawPatch(72, 28, 0, W_CacheLumpName("M_LOADG", PU_CACHE));
@@ -549,22 +528,18 @@ void M_DrawSaveLoadBorder(int x, int y)
 }
 
 // User wants to load this game
-void M_LoadSelect(int choice)
+void M_LoadSelect(int32 choice)
 {
-    char    name[256];
-    sprintf_s(name, SAVEGAMENAME "%d.dsg", choice);
-    G_LoadGame(name);
+    g_doom->GetGame()->LoadGame(Game::GetSaveFilePath(choice));
     M_ClearMenus();
 }
 
-//
 // Selected from DOOM menu
-//
 void M_LoadGame(int)
 {
     if (netgame)
     {
-        M_StartMessage(LOADNET, nullptr, false);
+        Menu::StartMessage(LOADNET, nullptr, false);
         return;
     }
 
@@ -572,10 +547,6 @@ void M_LoadGame(int)
     M_ReadSaveStrings();
 }
 
-
-//
-//  M_SaveGame & Cie.
-//
 void M_DrawSave()
 {
     int             i;
@@ -629,7 +600,7 @@ void M_SaveGame(int)
 {
     if (!usergame)
     {
-        M_StartMessage(SAVEDEAD, nullptr, false);
+        Menu::StartMessage(SAVEDEAD, nullptr, false);
         return;
     }
 
@@ -674,14 +645,9 @@ void M_QuickSave()
         return;
     }
     sprintf_s(tempstring, QSPROMPT, savegamestrings[quickSaveSlot]);
-    M_StartMessage(tempstring, M_QuickSaveResponse, true);
+    Menu::StartMessage(tempstring, M_QuickSaveResponse, true);
 }
 
-
-
-//
-// M_QuickLoad
-//
 void M_QuickLoadResponse(int ch)
 {
     if (ch == 'y')
@@ -696,17 +662,17 @@ void M_QuickLoad()
 {
     if (netgame)
     {
-        M_StartMessage(QLOADNET, nullptr, false);
+        Menu::StartMessage(QLOADNET, nullptr, false);
         return;
     }
 
     if (quickSaveSlot < 0)
     {
-        M_StartMessage(QSAVESPOT, nullptr, false);
+        Menu::StartMessage(QSAVESPOT, nullptr, false);
         return;
     }
     sprintf_s(tempstring, QLPROMPT, savegamestrings[quickSaveSlot]);
-    M_StartMessage(tempstring, M_QuickLoadResponse, true);
+    Menu::StartMessage(tempstring, M_QuickLoadResponse, true);
 }
 
 
@@ -827,7 +793,7 @@ void M_NewGame(int)
 {
     if (netgame && !demoplayback)
     {
-        M_StartMessage(NEWGAME, nullptr, false);
+        Menu::StartMessage(NEWGAME, nullptr, false);
         return;
     }
 
@@ -861,7 +827,7 @@ void M_ChooseSkill(int choice)
 {
     if (choice == nightmare)
     {
-        M_StartMessage(NIGHTMARE, M_VerifyNightmare, true);
+        Menu::StartMessage(NIGHTMARE, M_VerifyNightmare, true);
         return;
     }
 
@@ -873,7 +839,7 @@ void M_Episode(int choice)
 {
     if ((gamemode == GameMode::Doom1Shareware) && choice)
     {
-        M_StartMessage(SWSTRING, nullptr, false);
+        Menu::StartMessage(SWSTRING, nullptr, false);
         M_SetupNextMenu(&ReadDef1);
         return;
     }
@@ -962,11 +928,11 @@ void M_EndGame(int choice)
 
     if (netgame)
     {
-        M_StartMessage(NETEND, nullptr, false);
+        Menu::StartMessage(NETEND, nullptr, false);
         return;
     }
 
-    M_StartMessage(ENDGAME, M_EndGameResponse, true);
+    Menu::StartMessage(ENDGAME, M_EndGameResponse, true);
 }
 
 //
@@ -1037,23 +1003,10 @@ void M_QuitResponse(int ch)
     I_Quit();
 }
 
-
-
-
 void M_QuitDOOM(int)
 {
-    // We pick index 0 which is language sensitive,
-    //  or one at random, between 1 and maximum number.
-    if (language != english)
-        sprintf_s(endstring, "%s\n\n" DOSY, endmsg[0]);
-    else
-        sprintf_s(endstring, "%s\n\n" DOSY, endmsg[(gametic % (NUM_QUITMESSAGES - 2)) + 1]);
-
-    M_StartMessage(endstring, M_QuitResponse, true);
+    Menu::StartMessage(std::format("{}\n\n" DOSY, endmsg[(gametic % (NUM_QUITMESSAGES - 2)) + 1]), M_QuitResponse, true);
 }
-
-
-
 
 void M_ChangeSensitivity(int choice)
 {
@@ -1088,20 +1041,20 @@ void M_SizeDisplay(int choice)
     case 0:
         if (screenSize > 0)
         {
-            screenblocks--;
+            screenBlocks--;
             screenSize--;
         }
         break;
     case 1:
         if (screenSize < 8)
         {
-            screenblocks++;
+            screenBlocks++;
             screenSize++;
         }
         break;
     }
 
-    g_doom->GetRender()->RequestSetViewSize(screenblocks, detailLevel);
+    g_doom->GetRender()->RequestSetViewSize(screenBlocks, detailLevel);
 }
 
 //      Menu Functions
@@ -1136,81 +1089,51 @@ void M_DrawSelCell(menu_t* menu, int32 item)
     g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, W_CacheLumpName("M_CELL2", PU_CACHE));
 }
 
-void M_StartMessage(const char* string, void(*routine)(int), boolean input)
-{
-    messageLastMenuActive = menuactive;
-    messageToPrint = 1;
-    messageString = string;
-    messageRoutine = routine;
-    messageNeedsInput = input;
-    menuactive = true;
-    return;
-}
-
 void M_StopMessage()
 {
     menuactive = messageLastMenuActive;
     messageToPrint = 0;
 }
 
-
-
-//
 // Find string width from hu_font chars
-//
-int M_StringWidth(char* string)
+int32 M_StringWidth(string_view str)
 {
-    int             i;
-    int             w = 0;
-    int             c;
-
-    for (i = 0;i < strlen(string);i++)
+    int32 width = 0;
+    for (auto c : str)
     {
-        c = toupper(string[i]) - HU_FONTSTART;
+        c = toupper(c) - HU_FONTSTART;
         if (c < 0 || c >= HU_FONTSIZE)
-            w += 4;
+            width += 4;
         else
-            w += SHORT(hu_font[c]->width);
+            width += hu_font[c]->width;
     }
 
-    return w;
+    return width;
 }
 
-//
-//      Find string height from hu_font chars
-//
-int M_StringHeight(const char* string)
+// Find string height from hu_font chars
+int32 M_StringHeight(string_view str)
 {
-    int height = SHORT(hu_font[0]->height);
-    auto h = height;
-    for (int i = 0;i < strlen(string);i++)
-        if (string[i] == '\n')
-            h += height;
+    int32 height = hu_font[0]->height;
 
-    return h;
+    auto out = height;
+    for (auto c : str)
+    {
+        if (c == '\n')
+            out += height;
+    }
+
+    return out;
 }
 
-//
-//      Write a string using the hu_font
-//
-void
-M_WriteText
-(int		x,
-    int		y,
-    const char* string)
+// Write a string using the hu_font
+void M_WriteText(int32 x, int32 y, string_view text)
 {
-    int		w;
-    int		c;
-
-    auto* ch = string;
     auto cx = x;
     auto cy = y;
 
-    while (1)
+    for (auto c : text)
     {
-        c = *ch++;
-        if (!c)
-            break;
         if (c == '\n')
         {
             cx = x;
@@ -1225,7 +1148,7 @@ M_WriteText
             continue;
         }
 
-        w = SHORT(hu_font[c]->width);
+        auto w = hu_font[c]->width;
         if (cx + w > SCREENWIDTH)
             break;
 
@@ -1366,9 +1289,9 @@ bool M_Responder(const event_t& event)
                 if (ch - HU_FONTSTART < 0 || ch - HU_FONTSTART >= HU_FONTSIZE)
                     break;
             if (ch >= 32 && ch <= 127 &&
-                saveCharIndex < SAVESTRINGSIZE - 1 &&
+                saveCharIndex < Game::SaveStringSize - 1 &&
                 M_StringWidth(savegamestrings[saveSlot]) <
-                (SAVESTRINGSIZE - 2) * 8)
+                (Game::SaveStringSize - 2) * 8)
             {
                 savegamestrings[saveSlot][saveCharIndex++] = static_cast<char>(ch);
                 savegamestrings[saveSlot][saveCharIndex] = 0;
@@ -1395,7 +1318,7 @@ bool M_Responder(const event_t& event)
         return true;
     }
 
-    if (devparm && ch == KEY_F1)
+    if (g_doom->IsDevMode() && ch == KEY_F1)
     {
         G_ScreenShot();
         return true;
@@ -1618,38 +1541,33 @@ void M_Drawer()
     static int x = 0;
     static int y = 0;
 
-    char		string[40];
-    int			start;
-
-    inhelpscreens = false;
-
     // Horiz. & Vertically center string and print it.
     if (messageToPrint)
     {
-        start = 0;
-        y = 100 - M_StringHeight(messageString) / 2;
-        while (*(messageString + start))
+        string_view drawString = Menu::messageString;
+        string_view::size_type start = 0;
+        y = 100 - M_StringHeight(drawString) / 2;
+        while (start != string_view::npos && start < Menu::messageString.length())
         {
-            short i = 0;
-            for (;i < strlen(messageString + start);i++)
-                if (*(messageString + start + i) == '\n')
-                {
-                    memset(string, 0, 40);
-                    strncpy_s(string, messageString + start, i);
-                    start += i + 1;
-                    break;
-                }
+            drawString = Menu::messageString;
 
-            if (i == strlen(messageString + start))
+            auto end = drawString.find('\n', start);
+            if (end != string::npos)
             {
-                strcpy_s(string, messageString + start);
-                start += i;
+                drawString = drawString.substr(start, end - start);
+                start = end + 1;
+            }
+            else
+            {
+                drawString = drawString.substr(start);
+                start = end;
             }
 
-            x = 160 - M_StringWidth(string) / 2;
-            M_WriteText(x, y, string);
-            y += SHORT(hu_font[0]->height);
+            x = 160 - M_StringWidth(drawString) / 2;
+            M_WriteText(x, y, drawString);
+            y += hu_font[0]->height;
         }
+
         return;
     }
 
@@ -1675,10 +1593,6 @@ void M_Drawer()
     g_doom->GetVideo()->DrawPatch(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0, W_CacheLumpName(skullName[whichSkull], PU_CACHE));
 }
 
-
-//
-// M_ClearMenus
-//
 void M_ClearMenus()
 {
     menuactive = 0;
@@ -1686,22 +1600,12 @@ void M_ClearMenus()
     //       sendpause = true;
 }
 
-
-
-
-//
-// M_SetupNextMenu
-//
 void M_SetupNextMenu(menu_t* menudef)
 {
     currentMenu = menudef;
     itemOn = currentMenu->lastOn;
 }
 
-
-//
-// M_Ticker
-//
 void M_Ticker()
 {
     if (--skullAnimCounter <= 0)
@@ -1711,20 +1615,18 @@ void M_Ticker()
     }
 }
 
+string Menu::messageString;
 
-//
-// M_Init
-//
-void M_Init()
+void Menu::Init()
 {
     currentMenu = &MainDef;
     menuactive = 0;
     itemOn = currentMenu->lastOn;
     whichSkull = 0;
     skullAnimCounter = 10;
-    screenSize = screenblocks - 3;
+    screenSize = screenBlocks - 3;
     messageToPrint = 0;
-    messageString = nullptr;
+    messageString = "";
     messageLastMenuActive = menuactive;
     quickSaveSlot = -1;
 
@@ -1760,5 +1662,15 @@ void M_Init()
         break;
     }
 
+}
+
+void Menu::StartMessage(string_view message, void(*routine)(int), bool input)
+{
+    messageLastMenuActive = menuactive;
+    messageToPrint = 1;
+    messageString = message;
+    messageRoutine = routine;
+    messageNeedsInput = input;
+    menuactive = true;
 }
 

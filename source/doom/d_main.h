@@ -20,6 +20,7 @@
 #include "d_event.h"
 
 #include "containers/vector.h"
+#include "types/strings.h"
 
 #ifndef __STD_MODULE__
 #include <filesystem>
@@ -46,10 +47,13 @@ enum class GameState : int32
 
 class Video;
 class Render;
+class Game;
 
 class Doom
 {
 public:
+    static const int32 Version = 110;
+
     Doom() = default;
     ~Doom() = default;
 
@@ -61,6 +65,7 @@ public:
     void StartTitle();
 
     bool IsModified() const { return isModified; }
+    bool IsDevMode() const { return isDevMode; }
     bool IsDemoRecording() const { return isDemoRecording; }
     bool UseSingleTicks() const { return useSingleTicks; }
     GameState GetGameState() const { return gameState; }
@@ -71,13 +76,14 @@ public:
 
     Video* GetVideo() const { return video; }
     Render* GetRender() const { return render; }
+    Game* GetGame() const { return game; }
 
     void PostEvent(const event_t& event);
     bool HasEventInQueue(const event_t& event);
 
 private:
     void IdentifyVersion();
-    void AddFile(const std::filesystem::path& path) { wadFiles.push_back(path); }
+    void AddFile(const filesys::path& in) { wadFiles.push_back(in); }
 
     void Display();
     void PageDraw();
@@ -91,6 +97,7 @@ private:
 
     Render* render = nullptr;
 
+    Game* game = nullptr;
     GameState gameState = GameState::Demo;
     GameState oldGameState = GameState::ForceWipe;
 
@@ -101,8 +108,8 @@ private:
     int32 eventHead = 0;
     int32 eventTail = 0;
 
-    // Set if homebrew PWAD stuff has been added.
-    bool isModified = false;
+    bool isModified = false; // Set if homebrew PWAD stuff has been added.
+    bool isDevMode = false;	// DEBUG: launched with -devparm
 
     // for comparative timing purposes 
     bool noDrawers = false;
@@ -112,5 +119,5 @@ private:
     // debug flag to cancel adaptiveness
     bool useSingleTicks = false;
 
-    vector<std::filesystem::path> wadFiles;
+    vector<filesys::path> wadFiles;
 };

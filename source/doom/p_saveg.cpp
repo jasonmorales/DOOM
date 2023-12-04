@@ -21,254 +21,184 @@ import std;
 #include "i_system.h"
 #include "z_zone.h"
 #include "p_local.h"
-
-// State.
 #include "doomstat.h"
 #include "r_state.h"
+#include "p_saveg.h"
 
+#include "utility/bits.h"
+#include "utility/memory.h"
+#include "types/numbers.h"
 
-byte* save_p;
-
-
-// Pads save_p to a 4-byte boundary
-//  so that the load/save works on SGI&Gecko.
-#define PADSAVEP()	save_p += (4 - ((int) save_p & 3)) & 3
-
-
-
-//
-// P_ArchivePlayers
-//
-void P_ArchivePlayers()
+void P_ArchivePlayers(std::ofstream& outFile)
 {
-    int		i;
-    int		j;
-    player_t* dest;
-
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
     {
         if (!playeringame[i])
             continue;
 
-        PADSAVEP();
+        nonstd::align(4, outFile);
 
-        dest = (player_t*)save_p;
-        memcpy(dest, &players[i], sizeof(player_t));
-        save_p += sizeof(player_t);
-        for (j = 0; j < NUMPSPRITES; j++)
-        {
-            if (dest->psprites[j].state)
-            {
-                dest->psprites[j].state
-                    = (state_t*)(dest->psprites[j].state - states);
-            }
-        }
+        auto* player = players[i].GetSaveData();
+        outFile.write(reinterpret_cast<char*>(player), sizeof(player_t));
+        delete player;
     }
 }
 
-
-
-//
-// P_UnArchivePlayers
-//
-void P_UnArchivePlayers()
+void P_UnArchivePlayers(std::ifstream& inFile)
 {
-    int		i;
-    int		j;
-
-    for (i = 0; i < MAXPLAYERS; i++)
+    for (int32 i = 0; i < MAXPLAYERS; ++i)
     {
         if (!playeringame[i])
             continue;
 
-        PADSAVEP();
+        auto* player = &players[i];
 
-        memcpy(&players[i], save_p, sizeof(player_t));
-        save_p += sizeof(player_t);
+        nonstd::align(4, inFile);
+        inFile.read(reinterpret_cast<char*>(player), sizeof(player_t));
 
         // will be set when unarc thinker
-        players[i].mo = nullptr;
-        players[i].message = nullptr;
-        players[i].attacker = nullptr;
+        player->mo = nullptr;
+        player->message = nullptr;
+        player->attacker = nullptr;
 
-        for (j = 0; j < NUMPSPRITES; j++)
+        for (int32 j = 0; j < NUMPSPRITES; j++)
         {
-            if (players[i].psprites[j].state)
+            if (player->psprites[j].state)
             {
-                players[i].psprites[j].state
-                    = &states[(int)players[i].psprites[j].state];
+                player->psprites[j].state = states + reinterpret_cast<intptr_t>(player->psprites[j].state);
             }
         }
     }
 }
 
-
-//
-// P_ArchiveWorld
-//
-void P_ArchiveWorld()
+void P_ArchiveWorld(std::ofstream& outFile)
 {
-    int			i;
-    int			j;
-    sector_t* sec;
-    line_t* li;
-    side_t* si;
-    short* put;
-
-    put = (short*)save_p;
-
     // do sectors
-    for (i = 0, sec = sectors; i < numsectors; i++, sec++)
+    auto* sector = sectors;
+    for (int32 i = 0; i < numsectors; ++i, ++sector)
     {
-        *put++ = sec->floorheight >> FRACBITS;
-        *put++ = sec->ceilingheight >> FRACBITS;
-        *put++ = sec->floorpic;
-        *put++ = sec->ceilingpic;
-        *put++ = sec->lightlevel;
-        *put++ = sec->special;		// needed?
-        *put++ = sec->tag;		// needed?
-    }
-
-
-    // do lines
-    for (i = 0, li = lines; i < numlines; i++, li++)
-    {
-        *put++ = li->flags;
-        *put++ = li->special;
-        *put++ = li->tag;
-        for (j = 0; j < 2; j++)
-        {
-            if (li->sidenum[j] == -1)
-                continue;
-
-            si = &sides[li->sidenum[j]];
-
-            *put++ = si->textureoffset >> FRACBITS;
-            *put++ = si->rowoffset >> FRACBITS;
-            *put++ = si->toptexture;
-            *put++ = si->bottomtexture;
-            *put++ = si->midtexture;
-        }
-    }
-
-    save_p = (byte*)put;
-}
-
-
-
-//
-// P_UnArchiveWorld
-//
-void P_UnArchiveWorld()
-{
-    int			i;
-    int			j;
-    sector_t* sec;
-    line_t* li;
-    side_t* si;
-    short* get;
-
-    get = (short*)save_p;
-
-    // do sectors
-    for (i = 0, sec = sectors; i < numsectors; i++, sec++)
-    {
-        sec->floorheight = *get++ << FRACBITS;
-        sec->ceilingheight = *get++ << FRACBITS;
-        sec->floorpic = *get++;
-        sec->ceilingpic = *get++;
-        sec->lightlevel = *get++;
-        sec->special = *get++;		// needed?
-        sec->tag = *get++;		// needed?
-        sec->specialdata = 0;
-        sec->soundtarget = 0;
+        outFile << static_cast<int16>(sector->floorheight >> FRACBITS);
+        outFile << static_cast<int16>(sector->ceilingheight >> FRACBITS);
+        outFile << sector->floorpic;
+        outFile << sector->ceilingpic;
+        outFile << sector->lightlevel;
+        outFile << sector->special;		// needed?
+        outFile << sector->tag;		// needed?
     }
 
     // do lines
-    for (i = 0, li = lines; i < numlines; i++, li++)
+    for (int32 i = 0; i < numlines; ++i)
     {
-        li->flags = *get++;
-        li->special = *get++;
-        li->tag = *get++;
-        for (j = 0; j < 2; j++)
+        auto* line = lines + i;
+        outFile
+            << line->flags
+            << line->special
+            << line->tag;
+
+        for (int32 j = 0; j < 2; ++j)
         {
-            if (li->sidenum[j] == -1)
+            if (line->sidenum[j] == -1)
                 continue;
-            si = &sides[li->sidenum[j]];
-            si->textureoffset = *get++ << FRACBITS;
-            si->rowoffset = *get++ << FRACBITS;
-            si->toptexture = *get++;
-            si->bottomtexture = *get++;
-            si->midtexture = *get++;
+
+            auto* side = sides + line->sidenum[j];
+            outFile
+                << static_cast<int16>(side->textureoffset >> FRACBITS)
+                << static_cast<int16>(side->rowoffset >> FRACBITS)
+                << side->toptexture
+                << side->bottomtexture
+                << side->midtexture;
         }
     }
-    save_p = (byte*)get;
 }
 
+void P_UnArchiveWorld(std::ifstream& inFile)
+{
+    // do sectors
+    for (int32 i = 0; i < numsectors; ++i)
+    {
+        auto* sector = sectors + i;
 
+        sector->floorheight = 0;
+        inFile.read(reinterpret_cast<char*>(&sector->floorheight), 2);
+        sector->floorheight <<= FRACBITS;
 
+        sector->ceilingheight = 0;
+        inFile.read(reinterpret_cast<char*>(&sector->ceilingheight), 2);
+        sector->ceilingheight <<= FRACBITS;
 
+        inFile.read(reinterpret_cast<char*>(&sector->floorpic), 2);
+        inFile.read(reinterpret_cast<char*>(&sector->ceilingpic), 2);
+        inFile.read(reinterpret_cast<char*>(&sector->lightlevel), 2);
+        inFile.read(reinterpret_cast<char*>(&sector->special), 2);
+        inFile.read(reinterpret_cast<char*>(&sector->tag), 2);
 
-//
+        sector->specialdata = nullptr;
+        sector->soundtarget = nullptr;
+    }
+
+    // do lines
+    for (int32 i = 0; i < numlines; ++i)
+    {
+        auto* line = lines + i;
+
+        inFile.read(reinterpret_cast<char*>(&line->flags), 2);
+        inFile.read(reinterpret_cast<char*>(&line->special), 2);
+        inFile.read(reinterpret_cast<char*>(&line->tag), 2);
+
+        for (int32 j = 0; j < 2; ++j)
+        {
+            if (line->sidenum[j] == -1)
+                continue;
+
+            auto* side = sides + line->sidenum[j];
+
+            side->textureoffset = 0;
+            inFile.read(reinterpret_cast<char*>(&side->textureoffset), 2);
+            side->textureoffset <<= FRACBITS;
+
+            side->rowoffset = 0;
+            inFile.read(reinterpret_cast<char*>(&side->rowoffset), 2);
+            side->rowoffset <<= FRACBITS;
+
+            inFile.read(reinterpret_cast<char*>(&side->toptexture), 2);
+            inFile.read(reinterpret_cast<char*>(&side->bottomtexture), 2);
+            inFile.read(reinterpret_cast<char*>(&side->midtexture), 2);
+        }
+    }
+}
+
 // Thinkers
-//
-typedef enum
+
+void P_ArchiveThinkers(std::ofstream& outFile)
 {
-    tc_end,
-    tc_mobj
-
-} thinkerclass_t;
-
-
-
-//
-// P_ArchiveThinkers
-//
-void P_ArchiveThinkers()
-{
-    thinker_t* th;
-    mobj_t* mobj;
-
     // save off the current thinkers
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (auto* th = thinkercap.next; th != &thinkercap; th = th->next)
     {
         if (th->function.acp1 == (actionf_p1)P_MobjThinker)
         {
-            *save_p++ = tc_mobj;
-            PADSAVEP();
-            mobj = (mobj_t*)save_p;
-            memcpy(mobj, th, sizeof(*mobj));
-            save_p += sizeof(*mobj);
-            mobj->state = (state_t*)(mobj->state - states);
+            outFile << static_cast<uint8>(SaveFileMarker::MapObject);
 
-            if (mobj->player)
-                mobj->player = (player_t*)((mobj->player - players) + 1);
+            nonstd::align(4, outFile);
+
+            auto* mobj = reinterpret_cast<mobj_t*>(th)->GetSaveData();
+            outFile.write(reinterpret_cast<char*>(mobj), sizeof(mobj_t));
+            delete mobj;
+
             continue;
         }
-
-        // I_Error ("P_ArchiveThinkers: Unknown thinker function");
     }
 
     // add a terminating marker
-    *save_p++ = tc_end;
+    outFile << static_cast<uint8>(SaveFileMarker::ThinkersEnd);
 }
 
-
-
-//
-// P_UnArchiveThinkers
-//
-void P_UnArchiveThinkers()
+void P_UnArchiveThinkers(std::ifstream& inFile)
 {
-    byte		tclass;
-    thinker_t* currentthinker;
-    thinker_t* next;
-
     // remove all the current thinkers
-    currentthinker = thinkercap.next;
+    auto* currentthinker = thinkercap.next;
     while (currentthinker != &thinkercap)
     {
-        next = currentthinker->next;
+        auto* next = currentthinker->next;
 
         if (currentthinker->function.acp1 == (actionf_p1)P_MobjThinker)
             P_RemoveMobj((mobj_t*)currentthinker);
@@ -280,61 +210,44 @@ void P_UnArchiveThinkers()
     P_InitThinkers();
 
     // read in saved thinkers
-    while (1)
+    for (;;)
     {
-        tclass = *save_p++;
+        SaveFileMarker tclass;
+        inFile.get(reinterpret_cast<char*>(&tclass), 1);
 
-        mobj_t* mobj = nullptr;
-        switch (tclass)
-        {
-        case tc_end:
-            return; 	// end of list
-
-        case tc_mobj:
-            PADSAVEP();
-            mobj = Z_Malloc<mobj_t>(sizeof(*mobj), PU_LEVEL, nullptr);
-            memcpy(mobj, save_p, sizeof(*mobj));
-            save_p += sizeof(*mobj);
-            mobj->state = &states[(int)mobj->state];
-            mobj->target = nullptr;
-            if (mobj->player)
-            {
-                mobj->player = &players[(int)mobj->player - 1];
-                mobj->player->mo = mobj;
-            }
-            P_SetThingPosition(mobj);
-            mobj->info = &mobjinfo[mobj->type];
-            mobj->floorz = mobj->subsector->sector->floorheight;
-            mobj->ceilingz = mobj->subsector->sector->ceilingheight;
-            mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
-            P_AddThinker(&mobj->thinker);
+        if (tclass == SaveFileMarker::ThinkersEnd)
             break;
 
-        default:
+        if (tclass != SaveFileMarker::MapObject)
             I_Error("Unknown tclass {} in savegame", tclass);
+
+        nonstd::align(4, inFile);
+
+        auto* mobj = Z_Malloc<mobj_t>(sizeof(mobj_t), PU_LEVEL, nullptr);
+        inFile.read(reinterpret_cast<char*>(mobj), sizeof(mobj_t));
+
+        mobj->state = states + reinterpret_cast<intptr_t>(mobj->state);
+        mobj->target = nullptr;
+        if (mobj->player)
+        {
+            mobj->player = players + reinterpret_cast<intptr_t>(mobj->player - 1);
+            mobj->player->mo = mobj;
         }
+        P_SetThingPosition(mobj);
+        mobj->info = &mobjinfo[mobj->type];
+        mobj->floorz = mobj->subsector->sector->floorheight;
+        mobj->ceilingz = mobj->subsector->sector->ceilingheight;
+        mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
+        P_AddThinker(&mobj->thinker);
     }
 }
 
-//
-// P_ArchiveSpecials
-//
-enum
+std::ostream& operator<<(std::ostream& os, SaveFileMarker sp)
 {
-    tc_ceiling,
-    tc_door,
-    tc_floor,
-    tc_plat,
-    tc_flash,
-    tc_strobe,
-    tc_glow,
-    tc_endspecials
+    os << to_underlying(sp);
+    return os;
+}
 
-} specials_e;
-
-
-
-//
 // Things to handle:
 //
 // T_MoveCeiling, (ceiling_t: sector_t * swizzle), - active list
@@ -344,234 +257,130 @@ enum
 // T_StrobeFlash, (strobe_t: sector_t *),
 // T_Glow, (glow_t: sector_t *),
 // T_PlatRaise, (plat_t: sector_t *), - active list
-//
-void P_ArchiveSpecials()
+template<typename T>
+inline void writeObject(std::ofstream& outFile, thinker_t* object, SaveFileMarker marker)
 {
-    thinker_t* th;
-    ceiling_t* ceiling;
-    vldoor_t* door;
-    floormove_t* floor;
-    plat_t* plat;
-    lightflash_t* flash;
-    strobe_t* strobe;
-    glow_t* glow;
-    int			i;
+    outFile << marker;
+    nonstd::align(4, outFile);
 
+    auto* data = GetSaveData(reinterpret_cast<T*>(object));
+    outFile.write(reinterpret_cast<char*>(data), sizeof(T));
+    delete data;
+}
+
+void P_ArchiveSpecials(std::ofstream& outFile)
+{
     // save off the current thinkers
-    for (th = thinkercap.next; th != &thinkercap; th = th->next)
+    for (auto* th = thinkercap.next; th != &thinkercap; th = th->next)
     {
         if (th->function.acv == (actionf_v)nullptr)
         {
-            for (i = 0; i < MAXCEILINGS;i++)
+            int32 i = 0;
+            for (; i < MAXCEILINGS; ++i)
+            {
                 if (activeceilings[i] == (ceiling_t*)th)
                     break;
+            }
 
             if (i < MAXCEILINGS)
-            {
-                *save_p++ = tc_ceiling;
-                PADSAVEP();
-                ceiling = (ceiling_t*)save_p;
-                memcpy(ceiling, th, sizeof(*ceiling));
-                save_p += sizeof(*ceiling);
-                ceiling->sector = (sector_t*)(ceiling->sector - sectors);
-            }
+                writeObject<ceiling_t>(outFile, th, SaveFileMarker::Ceiling);
+
             continue;
         }
 
         if (th->function.acp1 == (actionf_p1)T_MoveCeiling)
-        {
-            *save_p++ = tc_ceiling;
-            PADSAVEP();
-            ceiling = (ceiling_t*)save_p;
-            memcpy(ceiling, th, sizeof(*ceiling));
-            save_p += sizeof(*ceiling);
-            ceiling->sector = (sector_t*)(ceiling->sector - sectors);
-            continue;
-        }
-
-        if (th->function.acp1 == (actionf_p1)T_VerticalDoor)
-        {
-            *save_p++ = tc_door;
-            PADSAVEP();
-            door = (vldoor_t*)save_p;
-            memcpy(door, th, sizeof(*door));
-            save_p += sizeof(*door);
-            door->sector = (sector_t*)(door->sector - sectors);
-            continue;
-        }
-
-        if (th->function.acp1 == (actionf_p1)T_MoveFloor)
-        {
-            *save_p++ = tc_floor;
-            PADSAVEP();
-            floor = (floormove_t*)save_p;
-            memcpy(floor, th, sizeof(*floor));
-            save_p += sizeof(*floor);
-            floor->sector = (sector_t*)(floor->sector - sectors);
-            continue;
-        }
-
-        if (th->function.acp1 == (actionf_p1)T_PlatRaise)
-        {
-            *save_p++ = tc_plat;
-            PADSAVEP();
-            plat = (plat_t*)save_p;
-            memcpy(plat, th, sizeof(*plat));
-            save_p += sizeof(*plat);
-            plat->sector = (sector_t*)(plat->sector - sectors);
-            continue;
-        }
-
-        if (th->function.acp1 == (actionf_p1)T_LightFlash)
-        {
-            *save_p++ = tc_flash;
-            PADSAVEP();
-            flash = (lightflash_t*)save_p;
-            memcpy(flash, th, sizeof(*flash));
-            save_p += sizeof(*flash);
-            flash->sector = (sector_t*)(flash->sector - sectors);
-            continue;
-        }
-
-        if (th->function.acp1 == (actionf_p1)T_StrobeFlash)
-        {
-            *save_p++ = tc_strobe;
-            PADSAVEP();
-            strobe = (strobe_t*)save_p;
-            memcpy(strobe, th, sizeof(*strobe));
-            save_p += sizeof(*strobe);
-            strobe->sector = (sector_t*)(strobe->sector - sectors);
-            continue;
-        }
-
-        if (th->function.acp1 == (actionf_p1)T_Glow)
-        {
-            *save_p++ = tc_glow;
-            PADSAVEP();
-            glow = (glow_t*)save_p;
-            memcpy(glow, th, sizeof(*glow));
-            save_p += sizeof(*glow);
-            glow->sector = (sector_t*)(glow->sector - sectors);
-            continue;
-        }
+            writeObject<ceiling_t>(outFile, th, SaveFileMarker::Ceiling);
+        else if (th->function.acp1 == (actionf_p1)T_VerticalDoor)
+            writeObject<vldoor_t>(outFile, th, SaveFileMarker::Door);
+        else if (th->function.acp1 == (actionf_p1)T_MoveFloor)
+            writeObject<floormove_t>(outFile, th, SaveFileMarker::Door);
+        else if (th->function.acp1 == (actionf_p1)T_PlatRaise)
+            writeObject<plat_t>(outFile, th, SaveFileMarker::Plat);
+        else if (th->function.acp1 == (actionf_p1)T_LightFlash)
+            writeObject<lightflash_t>(outFile, th, SaveFileMarker::Flash);
+        else if (th->function.acp1 == (actionf_p1)T_StrobeFlash)
+            writeObject<strobe_t>(outFile, th, SaveFileMarker::Strobe);
+        else if (th->function.acp1 == (actionf_p1)T_Glow)
+            writeObject<glow_t>(outFile, th, SaveFileMarker::Glow);
     }
 
     // add a terminating marker
-    *save_p++ = tc_endspecials;
-
+    outFile << SaveFileMarker::End;
 }
 
-
-//
-// P_UnArchiveSpecials
-//
-void P_UnArchiveSpecials()
+template<typename T>
+T* ReadThinker(std::ifstream& inFile, actionf_p1 action)
 {
-    byte		tclass;
-    floormove_t* floor;
-    plat_t* plat;
-    lightflash_t* flash;
-    strobe_t* strobe;
-    glow_t* glow;
+    nonstd::align(4, inFile);
+    auto* object = Z_Malloc<T>(sizeof(T), PU_LEVEL, nullptr);
+    inFile.read(reinterpret_cast<char*>(object), sizeof(T));
+    object->sector = sectors + reinterpret_cast<intptr_t>(object->sector);
+    object->sector->specialdata = object;
+    object->thinker.function.acp1 = action;
+    P_AddThinker(&object->thinker);
+    return object;
+}
 
+void P_UnArchiveSpecials(std::ifstream& inFile)
+{
     // read in saved thinkers
-    while (1)
+    while (!inFile.eof())
     {
-        tclass = *save_p++;
+        SaveFileMarker tclass = SaveFileMarker::Invalid;
+        inFile.get(reinterpret_cast<char*>(&tclass), 1);
+
+        if (tclass == SaveFileMarker::ThinkersEnd)
+            break;
+
         switch (tclass)
         {
-        case tc_endspecials:
+        case SaveFileMarker::End:
             return;	// end of list
 
-        case tc_ceiling:
+        case SaveFileMarker::Ceiling:
         {
-            PADSAVEP();
-            auto* ceiling = Z_Malloc<ceiling_t>(sizeof(ceiling_t), PU_LEVEL, nullptr);
-            memcpy(ceiling, save_p, sizeof(*ceiling));
-            save_p += sizeof(*ceiling);
-            ceiling->sector = &sectors[(int)ceiling->sector];
-            ceiling->sector->specialdata = ceiling;
+            auto* ceiling = ReadThinker<ceiling_t>(inFile, nullptr);
 
             if (ceiling->thinker.function.acp1)
                 ceiling->thinker.function.acp1 = (actionf_p1)T_MoveCeiling;
 
-            P_AddThinker(&ceiling->thinker);
             P_AddActiveCeiling(ceiling);
             break;
         }
 
-        case tc_door:
+        case SaveFileMarker::Door:
+            ReadThinker<ceiling_t>(inFile, (actionf_p1)T_VerticalDoor);
+            break;
+
+        case SaveFileMarker::Floor:
+            ReadThinker<floormove_t>(inFile, (actionf_p1)T_MoveFloor);
+            break;
+
+        case SaveFileMarker::Plat:
         {
-            PADSAVEP();
-            auto* door = Z_Malloc<vldoor_t>(sizeof(vldoor_t), PU_LEVEL, nullptr);
-            memcpy(door, save_p, sizeof(*door));
-            save_p += sizeof(*door);
-            door->sector = &sectors[(int)door->sector];
-            door->sector->specialdata = door;
-            door->thinker.function.acp1 = (actionf_p1)T_VerticalDoor;
-            P_AddThinker(&door->thinker);
+            auto* platform = ReadThinker<plat_t>(inFile, nullptr);
+
+            if (platform->thinker.function.acp1)
+                platform->thinker.function.acp1 = (actionf_p1)T_PlatRaise;
+
+            P_AddActivePlat(platform);
             break;
         }
 
-        case tc_floor:
-            PADSAVEP();
-            floor = Z_Malloc<floormove_t>(sizeof(*floor), PU_LEVEL, nullptr);
-            memcpy(floor, save_p, sizeof(*floor));
-            save_p += sizeof(*floor);
-            floor->sector = &sectors[(int)floor->sector];
-            floor->sector->specialdata = floor;
-            floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
-            P_AddThinker(&floor->thinker);
+        case SaveFileMarker::Flash:
+            ReadThinker<lightflash_t>(inFile, (actionf_p1)T_LightFlash);
             break;
 
-        case tc_plat:
-            PADSAVEP();
-            plat = Z_Malloc<plat_t>(sizeof(*plat), PU_LEVEL, nullptr);
-            memcpy(plat, save_p, sizeof(*plat));
-            save_p += sizeof(*plat);
-            plat->sector = &sectors[(int)plat->sector];
-            plat->sector->specialdata = plat;
-
-            if (plat->thinker.function.acp1)
-                plat->thinker.function.acp1 = (actionf_p1)T_PlatRaise;
-
-            P_AddThinker(&plat->thinker);
-            P_AddActivePlat(plat);
+        case SaveFileMarker::Strobe:
+            ReadThinker<strobe_t>(inFile, (actionf_p1)T_StrobeFlash);
             break;
 
-        case tc_flash:
-            PADSAVEP();
-            flash = Z_Malloc<lightflash_t>(sizeof(*flash), PU_LEVEL, nullptr);
-            memcpy(flash, save_p, sizeof(*flash));
-            save_p += sizeof(*flash);
-            flash->sector = &sectors[(int)flash->sector];
-            flash->thinker.function.acp1 = (actionf_p1)T_LightFlash;
-            P_AddThinker(&flash->thinker);
-            break;
-
-        case tc_strobe:
-            PADSAVEP();
-            strobe = Z_Malloc<strobe_t>(sizeof(*strobe), PU_LEVEL, nullptr);
-            memcpy(strobe, save_p, sizeof(*strobe));
-            save_p += sizeof(*strobe);
-            strobe->sector = &sectors[(int)strobe->sector];
-            strobe->thinker.function.acp1 = (actionf_p1)T_StrobeFlash;
-            P_AddThinker(&strobe->thinker);
-            break;
-
-        case tc_glow:
-            PADSAVEP();
-            glow = Z_Malloc<glow_t>(sizeof(*glow), PU_LEVEL, nullptr);
-            memcpy(glow, save_p, sizeof(*glow));
-            save_p += sizeof(*glow);
-            glow->sector = &sectors[(int)glow->sector];
-            glow->thinker.function.acp1 = (actionf_p1)T_Glow;
-            P_AddThinker(&glow->thinker);
+        case SaveFileMarker::Glow:
+            ReadThinker<glow_t>(inFile, (actionf_p1)T_Glow);
             break;
 
         default:
-            I_Error("P_UnarchiveSpecials:Unknown tclass {} "
-                "in savegame", tclass);
+            I_Error("P_UnarchiveSpecials:Unknown tclass {} in savegame", tclass);
         }
     }
 }

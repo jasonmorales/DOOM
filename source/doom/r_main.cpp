@@ -27,6 +27,7 @@ import std;
 #include "r_local.h"
 #include "r_sky.h"
 #include "d_main.h"
+#include "m_misc.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -672,9 +673,6 @@ bool Render::CheckSetViewSize()
     return true;
 }
 
-extern int32	detailLevel;
-extern int32	screenblocks;
-
 void Render::Init()
 {
     R_InitData();
@@ -685,7 +683,7 @@ void Render::Init()
     // viewwidth / viewheight / detailLevel are set by the defaults
     printf("\nR_InitTables");
 
-    RequestSetViewSize(screenblocks, detailLevel);
+    RequestSetViewSize(screenBlocks, detailLevel);
     R_InitPlanes();
     printf("\nR_InitPlanes");
     R_InitLightTables();
@@ -698,14 +696,7 @@ void Render::Init()
     framecount = 0;
 }
 
-
-//
-// R_PointInSubsector
-//
-subsector_t*
-R_PointInSubsector
-(fixed_t	x,
-    fixed_t	y)
+subsector_t* R_PointInSubsector(fixed_t x, fixed_t	y)
 {
     node_t* node;
     int		side;

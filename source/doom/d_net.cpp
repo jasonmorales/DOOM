@@ -449,7 +449,7 @@ void D_ArbitrateNetStart()
                 continue;
             if (netbuffer->checksum & NCMD_SETUP)
             {
-                if (netbuffer->player != VERSION)
+                if (netbuffer->player != Doom::Version)
                     I_Error("Different DOOM versions cannot play a net game!");
 
                 startskill = static_cast<skill_t>(netbuffer->retransmitfrom & 15);
@@ -479,7 +479,7 @@ void D_ArbitrateNetStart()
                 if (respawnparm)
                     netbuffer->retransmitfrom |= 0x10;
                 netbuffer->starttic = static_cast<byte>(startepisode * 64 + startmap);
-                netbuffer->player = VERSION;
+                netbuffer->player = Doom::Version;
                 netbuffer->numtics = 0;
                 HSendPacket(i, NCMD_SETUP);
             }
@@ -678,7 +678,7 @@ void TryRunTics()
             if (advancedemo)
                 g_doom->DoAdvanceDemo();
             M_Ticker();
-            G_Ticker(g_doom);
+            g_doom->GetGame()->Ticker();
             gametic++;
 
             // modify command for duplicated tics

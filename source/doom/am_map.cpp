@@ -11,7 +11,6 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-//
 // DESCRIPTION:  the automap code
 //
 //-----------------------------------------------------------------------------

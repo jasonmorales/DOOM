@@ -58,52 +58,7 @@ import std;
 extern Doom* g_doom;
 
 
-//
-// M_DrawText
-// Returns the final X coordinate
-// HU_Init must have been called to init the font
-//
-extern patch_t* hu_font[HU_FONTSIZE];
-
-int
-M_DrawText
-(int		x,
-    int		y,
-    boolean	direct,
-    char* string)
-{
-    int 	c;
-    int		w;
-
-    while (*string)
-    {
-        c = toupper(*string) - HU_FONTSTART;
-        string++;
-        if (c < 0 || c> HU_FONTSIZE)
-        {
-            x += 4;
-            continue;
-        }
-
-        w = SHORT(hu_font[c]->width);
-        if (x + w > SCREENWIDTH)
-            break;
-        if (direct)
-            g_doom->GetVideo()->DrawPatch(x, y, 0, hu_font[c]);
-        else
-            g_doom->GetVideo()->DrawPatch(x, y, 0, hu_font[c]);
-        x += w;
-    }
-
-    return x;
-}
-
-//
-// M_WriteFile
-//
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
+Settings::DirectoryType* Settings::settings = nullptr;
 
 boolean M_WriteFile(char const* name, void* source, uint32 length)
 {
@@ -122,48 +77,39 @@ boolean M_WriteFile(char const* name, void* source, uint32 length)
     return true;
 }
 
-int M_ReadFile(char const* name, byte** buffer)
+vector<byte> M_ReadFile(const filesys::path& path)
 {
-    int	count, length;
-    struct stat	fileinfo;
-    byte* buf;
+    auto file = std::ifstream{path, std::ifstream::binary | std::ifstream::ate};
+    if (!file.is_open())
+        return {};
 
-    int handle = -1;
-    if (_sopen_s(&handle, name, O_RDONLY | O_BINARY, _SH_DENYWR, _S_IREAD) != 0)
-        I_Error("Couldn't read file {}", name);
+    auto size = file.tellg();
+    vector<byte> contents(size);
+    file.seekg(0);
+    file.read(reinterpret_cast<char*>(contents.data()), size);
 
-    if (fstat(handle, &fileinfo) == -1)
-        I_Error("Couldn't read file {}", name);
-
-    length = fileinfo.st_size;
-    buf = Z_Malloc(length, PU_STATIC, nullptr);
-    count = _read(handle, buf, length);
-    _close(handle);
-
-    if (count < length)
-        I_Error("Couldn't read file {}", name);
-
-    *buffer = buf;
-    return length;
+    return contents;
 }
 
 // DEFAULTS
+Setting<bool> useMouse{"useMouse", false};
+Setting<bool> useJoystick{"use_joystick", false};
 
-int32 usemouse;
-int32 usejoystick;
+// Blocky mode, has default, 0 = high, 1 = normal
+Setting<int32> detailLevel{"detail_level", 0};
 
-extern int	key_right;
-extern int	key_left;
-extern int	key_up;
-extern int	key_down;
+Setting<int32> key_right{"key_right", KEY_RIGHTARROW};
+Setting<int32> key_left{"key_left", KEY_LEFTARROW};
+Setting<int32> key_up{"key_up", KEY_UPARROW};
+Setting<int32> key_down{"key_down", KEY_DOWNARROW};
 
-extern int	key_strafeleft;
-extern int	key_straferight;
+Setting<int32> key_strafeleft{"key_strafeleft", ','};
+Setting<int32> key_straferight{"key_straferight", '.'};
 
-extern int	key_fire;
-extern int	key_use;
-extern int	key_strafe;
-extern int	key_speed;
+Setting<int32> key_fire{"key_fire", KEY_RCTRL};
+Setting<int32> key_use{"key_use", ' '};
+Setting<int32> key_strafe{"key_strafe", KEY_RALT};
+Setting<int32> key_speed{"key_speed", KEY_RSHIFT};
 
 extern int32	mousebfire;
 extern int32	mousebstrafe;
@@ -179,10 +125,6 @@ extern int	viewheight;
 
 extern int32	mouseSensitivity;
 extern int32	showMessages;
-
-extern int32	detailLevel;
-
-extern int32	screenblocks;
 
 // machine-independent sound params
 extern	int32	numChannels;
@@ -210,31 +152,14 @@ default_t	defaults[] =
     {"music_volume",&snd_MusicVolume, 8},
     {"show_messages",&showMessages, 1},
 
-    {"key_right",&key_right, KEY_RIGHTARROW},
-    {"key_left",&key_left, KEY_LEFTARROW},
-    {"key_up",&key_up, KEY_UPARROW},
-    {"key_down",&key_down, KEY_DOWNARROW},
-    {"key_strafeleft",&key_strafeleft, ','},
-    {"key_straferight",&key_straferight, '.'},
-
-    {"key_fire",&key_fire, KEY_RCTRL},
-    {"key_use",&key_use, ' '},
-    {"key_strafe",&key_strafe, KEY_RALT},
-    {"key_speed",&key_speed, KEY_RSHIFT},
-
-    {"use_mouse",&usemouse, 1},
     {"mouseb_fire",&mousebfire,0},
     {"mouseb_strafe",&mousebstrafe,1},
     {"mouseb_forward",&mousebforward,2},
 
-    {"use_joystick",&usejoystick, 0},
     {"joyb_fire",&joybfire,0},
     {"joyb_strafe",&joybstrafe,1},
     {"joyb_use",&joybuse,3},
     {"joyb_speed",&joybspeed,2},
-
-    {"screenblocks",&screenblocks, 9},
-    {"detaillevel",&detailLevel, 0},
 
     {"snd_channels",&numChannels, 3},
 
@@ -252,106 +177,56 @@ default_t	defaults[] =
     {"chatmacro9", &chat_macros[9], 9 | 0x8000 },
 };
 
-int	numdefaults;
-string defaultfile;
+Setting<int32> screenBlocks{"screenblocks", 9};
+Setting<int32> viewWidth{"viewWidth", 0};
 
-//
-// M_SaveDefaults
-//
-void M_SaveDefaults()
+const std::filesystem::path Settings::DevDataPath = "devdata";
+const filesys::path Settings::DefaultConfigFile = Settings::DevDataPath / "default.cfg";
+
+void Settings::Save(const filesys::path& path /*= DefaultConfigFile*/)
 {
-    FILE* f = nullptr;
-    fopen_s(&f, defaultfile.c_str(), "w");
-    if (!f)
+    std::ofstream outFile(path);
+    if (!outFile.is_open())
         return; // can't write the file, but don't complain
 
-    for (int i = 0; i < numdefaults; i++)
+    for (auto& [name, var] : Directory())
     {
-        if (defaults[i].defaultvalue & 0x8000)
-        {
-            fprintf(f, "%s\t\t\"%s\"\n", defaults[i].name, *(char**)(defaults[i].location));
-        }
-        else
-        {
-            int v = *static_cast<int32*>(defaults[i].location);
-            fprintf(f, "%s\t\t%i\n", defaults[i].name, v);
-        }
+        //std::visit([&outFile, &name](auto&& val){ outFile << name << "   " << val << "\n"; }, var);
     }
-
-    fclose(f);
 }
 
-//
-// M_LoadDefaults
-//
-extern byte	scantokey[128];
-
-void M_LoadDefaults()
+void Settings::Load()
 {
-    char	def[80];
-    char	strparm[100];
-
-    // set everything to base values
-    numdefaults = sizeof(defaults) / sizeof(defaults[0]);
-    for (int32 i = 0; i < numdefaults; i++)
-    {
-        if (defaults[i].defaultvalue & 0x8000)
-            *static_cast<const char**>(defaults[i].location) = DefaultChatMacros[defaults[i].defaultvalue & 0x7fff];
-        else
-            *static_cast<int32*>(defaults[i].location) = defaults[i].defaultvalue;
-    }
-
+    filesys::path configPath = DefaultConfigFile;
     // check for a custom default file
-    if (CommandLine::TryGetValues("-config", defaultfile))
-        printf("	default file: %s\n", defaultfile.c_str());
-    else
-        defaultfile = basedefault;
+    if (string arg; CommandLine::TryGetValues("-config", arg))
+        configPath = arg;
 
     // read the file in, overriding any set defaults
-    FILE* f = nullptr;
-    fopen_s(&f, defaultfile.c_str(), "r");
-    if (f)
+    std::ifstream source(configPath);
+    if (!source.is_open())
+        return;
+
+    auto& directoy = Directory();
+
+    for (string line; std::getline(source, line);)
     {
-        while (!feof(f))
-        {
-            if (fscanf_s(f, "%79s %[^\n]\n", def, static_cast<unsigned int>(_countof(def)), strparm, static_cast<unsigned int>(_countof(strparm))) == 2)
-            {
-                int32 parm = 0;
-                char* newString = nullptr;
-                if (strparm[0] == '"')
-                {
-                    // get a string default
-                    auto len = strlen(strparm);
-                    newString = (char*)malloc(len);
-                    strparm[len - 1] = 0;
-                    strcpy_s(newString, len, strparm + 1);
-                }
-                else if (strparm[0] == '0' && strparm[1] == 'x')
-                    sscanf_s(strparm + 2, "%x", &parm);
-                else
-                    sscanf_s(strparm, "%i", &parm);
+        string_view key = line;
+        key = line.substr(line.find_first_not_of(" \t\n\r"));
+        auto split = key.find_first_of(" \t\n\r");
+        key = line.substr(0, split);
+        string value = line.substr(line.find_first_not_of(" \t\n\r", split));
+        value = value.substr(0, value.find_last_not_of(" \t\n\r"));
 
-                for (int32 i = 0; i < numdefaults; i++)
-                {
-                    if (!strcmp(def, defaults[i].name))
-                    {
-                        if (newString == nullptr)
-                            *static_cast<int32*>(defaults[i].location) = parm;
-                        else
-                            *static_cast<const char**>(defaults[i].location) = newString;
-                        break;
-                    }
-                }
-            }
-        }
+        auto entry = directoy.find(key);
+        if (entry == directoy.end())
+            continue;
 
-        fclose(f);
+        entry->second->Set(value);
     }
 }
 
-//
 // SCREEN SHOTS
-//
 typedef struct
 {
     char		manufacturer;
@@ -378,13 +253,8 @@ typedef struct
     unsigned char	data;		// unbounded
 } pcx_t;
 
-
-//
 // WritePCXfile
-//
-void
-WritePCXfile
-(char* filename,
+void WritePCXfile(char* filename,
     byte* data,
     int		width,
     int		height,
@@ -462,4 +332,10 @@ void M_ScreenShot()
     WritePCXfile(lbmname, linear, SCREENWIDTH, SCREENHEIGHT, W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
 
     players[consoleplayer].message = "screen shot";
+}
+
+SettingBase::SettingBase(string_view name)
+    : name{ name }
+{
+    Settings::Register(this);
 }
