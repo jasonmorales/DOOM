@@ -143,3 +143,6 @@ TO convert(number auto in) { return std::to_string(in); }
 
 template<same_as<string> TO>
 TO convert(string_view in) { return string(in); }
+
+template<nonstd::boolean TO>
+TO convert(string_view in) { return in == "true"; }

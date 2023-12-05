@@ -17,6 +17,7 @@
 #include "types/strings.h"
 #include "types/numbers.h"
 #include "containers/vector.h"
+#include "utility/convert.h"
 
 #include "doomtype.h"
 
@@ -32,7 +33,18 @@ public:
 
     string_view Name() const { return name; }
 
-    virtual void Set(const std::variant<int32, float, string, bool>& in) = 0;
+    using VariantType = std::variant<int32, float, bool, string>;
+
+    template<typename AS>
+    std::optional<AS> GetAs() const
+    {
+        auto* out = std::get_if<AS>(GetVar());
+        return out ? std::optional{*out} : std::nullopt;
+    }
+
+    virtual VariantType GetVar() const = 0;
+    virtual void SetVar(const VariantType& in) = 0;
+    virtual void Set(string_view in) = 0;
 
     virtual void Reset() = 0;
 
@@ -57,11 +69,16 @@ public:
     Setting& operator=(const Setting&) = delete;
 
     template<typename AS>
-    AS GetAs() const { return covert<AS>(value); }
+    AS GetAs() const { return convert<AS>(value); }
 
     T Get() const { return value; }
 
-    void Set(const std::variant<int32, float, string, bool>& in) override
+    VariantType GetVar() const override
+    {
+        return value;
+    }
+
+    void SetVar(const VariantType& in) override
     {
         auto* inVal = get_if<T>(&in);
         if (inVal)
@@ -74,7 +91,7 @@ public:
         isSet = true;
     }
 
-    void Set(string_view in)
+    void Set(string_view in) override
     {
         value = convert<T>(in);
         isSet = true;

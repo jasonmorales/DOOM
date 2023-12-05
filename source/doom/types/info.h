@@ -27,11 +27,6 @@ using x_ptr = std::remove_pointer_t<T>;
 template<typename T>
 using ptr = std::add_pointer_t<T>;
 
-// Logical
-
-template<bool TEST, typename TRUE, typename FALSE>
-using choose = std::conditional_t<TEST, TRUE, FALSE>;
-
 // Relational
 
 template<typename T1, typename T2>
@@ -46,6 +41,19 @@ concept converts_to = is_convertible<FROM, TO>;
 template<typename BASE, typename DERIVED>
 constexpr bool is_base_of = std::is_base_of_v<BASE, DERIVED>;
 using std::derived_from;
+
+// Logical
+
+template<bool TEST, typename TRUE, typename FALSE>
+using choose = std::conditional_t<TEST, TRUE, FALSE>;
+
+namespace nonstd
+{
+template<typename T>
+constexpr bool is_bool = is_same<T, bool>;
+template<typename T>
+concept boolean = is_bool<T>;
+}
 
 // Numbers
 

@@ -191,7 +191,11 @@ void Settings::Save(const filesys::path& path /*= DefaultConfigFile*/)
 
     for (auto& [name, var] : Directory())
     {
-        //std::visit([&outFile, &name](auto&& val){ outFile << name << "   " << val << "\n"; }, var);
+        std::visit(
+            [&outFile, &name](auto&& val){
+                outFile << std::format("{}   {}\n", name, val);
+            },
+            var->GetVar());
     }
 }
 
@@ -212,11 +216,12 @@ void Settings::Load()
     for (string line; std::getline(source, line);)
     {
         string_view key = line;
-        key = line.substr(line.find_first_not_of(" \t\n\r"));
+        key = key.substr(key.find_first_not_of(" \t\n\r"));
         auto split = key.find_first_of(" \t\n\r");
-        key = line.substr(0, split);
-        string value = line.substr(line.find_first_not_of(" \t\n\r", split));
-        value = value.substr(0, value.find_last_not_of(" \t\n\r"));
+        key = key.substr(0, split);
+        string_view value = line;
+        value = value.substr(value.find_first_not_of(" \t\n\r", split));
+        value = value.substr(0, value.find_last_not_of(" \t\n\r") + 1);
 
         auto entry = directoy.find(key);
         if (entry == directoy.end())

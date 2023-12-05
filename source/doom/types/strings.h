@@ -96,6 +96,15 @@ using namespace std::filesystem;
 }
 
 template<>
+struct std::formatter<nonstd::string> : std::formatter<std::string>
+{
+    auto format(const nonstd::string& sv, std::format_context& ctx) const
+    {
+        return std::formatter<std::string>::format(sv, ctx);
+    }
+};
+
+template<>
 struct std::formatter<nonstd::string_view> : std::formatter<std::string_view>
 {
     auto format(const nonstd::string_view& sv, std::format_context& ctx) const
