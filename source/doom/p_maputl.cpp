@@ -425,30 +425,16 @@ P_SetThingPosition(mobj_t* thing)
     }
 }
 
-
-
-//
 // BLOCK MAP ITERATORS
 // For each line/thing in the given mapblock,
 // call the passed PIT_* function.
 // If the function returns false,
 // exit with false without checking anything else.
-//
 
-
-//
-// P_BlockLinesIterator
-// The validcount flags are used to avoid checking lines
-// that are marked in multiple mapblocks,
-// so increment validcount before the first call
-// to P_BlockLinesIterator, then make one or more calls
+// The validcount flags are used to avoid checking lines that are marked in multiple mapblocks, so
+// increment validcount before the first call to P_BlockLinesIterator, then make one or more calls
 // to it.
-//
-boolean
-P_BlockLinesIterator
-(int			x,
-    int			y,
-    boolean(*func)(line_t*))
+bool P_BlockLinesIterator(int x, int y, bool(*func)(line_t*))
 {
     int			offset;
     short* list;
@@ -481,15 +467,7 @@ P_BlockLinesIterator
     return true;	// everything was checked
 }
 
-
-//
-// P_BlockThingsIterator
-//
-boolean
-P_BlockThingsIterator
-(int			x,
-    int			y,
-    boolean(*func)(mobj_t*))
+bool P_BlockThingsIterator(int x, int y, bool(*func)(mobj_t*))
 {
     mobj_t* mobj;
 
@@ -512,30 +490,21 @@ P_BlockThingsIterator
     return true;
 }
 
-
-
-//
 // INTERCEPT ROUTINES
-//
+
 intercept_t	intercepts[MAXINTERCEPTS];
 intercept_t* intercept_p;
 
 divline_t 	trace;
-boolean 	earlyout;
+bool earlyout = false;
 int		ptflags;
 
+// Looks for lines in the given block that intercept the given trace to add to the intercepts
+// list.
 //
-// PIT_AddLineIntercepts.
-// Looks for lines in the given block
-// that intercept the given trace
-// to add to the intercepts list.
-//
-// A line is crossed if its endpoints
-// are on opposite sides of the trace.
+// A line is crossed if its endpoints are on opposite sides of the trace.
 // Returns true if earlyout and a solid line hit.
-//
-boolean
-PIT_AddLineIntercepts(line_t* ld)
+bool PIT_AddLineIntercepts(line_t* ld)
 {
     int			s1;
     int			s2;
@@ -568,13 +537,8 @@ PIT_AddLineIntercepts(line_t* ld)
         return true;	// behind source
 
     // try to early out the check
-    if (earlyout
-        && frac < FRACUNIT
-        && !ld->backsector)
-    {
+    if (earlyout && frac < FRACUNIT && !ld->backsector)
         return false;	// stop checking
-    }
-
 
     intercept_p->frac = frac;
     intercept_p->isaline = true;
@@ -584,12 +548,7 @@ PIT_AddLineIntercepts(line_t* ld)
     return true;	// continue
 }
 
-
-
-//
-// PIT_AddThingIntercepts
-//
-boolean PIT_AddThingIntercepts(mobj_t* thing)
+bool PIT_AddThingIntercepts(mobj_t* thing)
 {
     fixed_t		x1;
     fixed_t		y1;
@@ -599,13 +558,11 @@ boolean PIT_AddThingIntercepts(mobj_t* thing)
     int			s1;
     int			s2;
 
-    boolean		tracepositive;
-
     divline_t		dl;
 
     fixed_t		frac;
 
-    tracepositive = (trace.dx ^ trace.dy) > 0;
+    bool tracepositive =(trace.dx ^ trace.dy) > 0;
 
     // check a corner to corner crossection for hit
     if (tracepositive)
@@ -649,16 +606,8 @@ boolean PIT_AddThingIntercepts(mobj_t* thing)
     return true;		// keep going
 }
 
-
-//
-// P_TraverseIntercepts
-// Returns true if the traverser function returns true
-// for all lines.
-// 
-boolean
-P_TraverseIntercepts
-(traverser_t	func,
-    fixed_t	maxfrac)
+// Returns true if the traverser function returns true for all lines.
+bool P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 {
     fixed_t		dist;
     intercept_t* scan;
@@ -704,21 +653,9 @@ P_TraverseIntercepts
     return true;		// everything was traversed
 }
 
-//
-// P_PathTraverse
-// Traces a line from x1,y1 to x2,y2,
-// calling the traverser function for each.
-// Returns true if the traverser function returns true
-// for all lines.
-//
-boolean
-P_PathTraverse
-(fixed_t		x1,
-    fixed_t		y1,
-    fixed_t		x2,
-    fixed_t		y2,
-    int			flags,
-    boolean(*trav) (intercept_t*))
+// Traces a line from x1,y1 to x2,y2, calling the traverser function for each.
+// Returns true if the traverser function returns true for all lines.
+bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, bool(*trav) (intercept_t*))
 {
     fixed_t	xt1;
     fixed_t	yt1;

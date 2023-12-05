@@ -50,12 +50,11 @@ import std;
 //
 typedef struct
 {
-    boolean	istexture;
-    int		picnum;
-    int		basepic;
-    int		numpics;
-    int		speed;
-
+    int istexture;
+    int picnum;
+    int basepic;
+    int numpics;
+    int speed;
 } anim_t;
 
 //
@@ -1058,8 +1057,8 @@ void P_PlayerInSpecialSector(player_t* player)
 // P_UpdateSpecials
 // Animate planes, scroll walls, etc.
 //
-boolean		levelTimer;
-int		levelTimeCount;
+bool levelTimer = false;
+int levelTimeCount;
 
 void P_UpdateSpecials()
 {

@@ -41,7 +41,7 @@ extern Doom* g_doom;
 
 
 // in AM_map.c
-extern boolean		automapactive;
+extern bool		automapactive;
 
 // Hack display negative frags.
 //  Loads and store the stminus lump.
@@ -52,17 +52,7 @@ void STlib_init()
     sttminus = W_CacheLumpName("STTMINUS", PU_STATIC);
 }
 
-
-// ?
-void
-STlib_initNum
-(st_number_t* n,
-    int			x,
-    int			y,
-    patch_t** pl,
-    int* num,
-    boolean* on,
-    int			width)
+void STlib_initNum(st_number_t* n, int x, int y, patch_t** pl, int* num, bool* on, int width)
 {
     n->x = x;
     n->y = y;
@@ -73,18 +63,10 @@ STlib_initNum
     n->p = pl;
 }
 
-
-// 
-// A fairly efficient way to draw a number
-//  based on differences from the old number.
+// A fairly efficient way to draw a number based on differences from the old number.
 // Note: worth the trouble?
-//
-void
-STlib_drawNum
-(st_number_t* n,
-    [[maybe_unused]] boolean	refresh)
+void STlib_drawNum(st_number_t* n, [[maybe_unused]] bool refresh)
 {
-
     int		numdigits = n->width;
     int		num = *n->num;
 
@@ -139,30 +121,17 @@ STlib_drawNum
         g_doom->GetVideo()->DrawPatch(x - 8, n->y, FG, sttminus);
 }
 
-void STlib_updateNum(st_number_t* n, boolean refresh)
+void STlib_updateNum(st_number_t* n, bool refresh)
 {
     if (*n->on)
         STlib_drawNum(n, refresh);
 }
 
-
-//
-void
-STlib_initPercent
-(st_percent_t* p,
-    int			x,
-    int			y,
-    patch_t** pl,
-    int* num,
-    boolean* on,
-    patch_t* percent)
+void STlib_initPercent(st_percent_t* p, int x, int y, patch_t** pl, int* num, bool* on, patch_t* percent)
 {
     STlib_initNum(&p->n, x, y, pl, num, on, 3);
     p->p = percent;
 }
-
-
-
 
 void
 STlib_updatePercent
@@ -185,7 +154,7 @@ void STlib_initMultIcon(st_multicon_t* i, int x, int y, patch_t** il, int* inum,
     i->p = il;
 }
 
-void STlib_updateMultIcon(st_multicon_t* mi, boolean refresh)
+void STlib_updateMultIcon(st_multicon_t* mi, bool refresh)
 {
     if (*mi->on
         && (mi->oldinum != *mi->inum || refresh)
@@ -208,14 +177,7 @@ void STlib_updateMultIcon(st_multicon_t* mi, boolean refresh)
     }
 }
 
-void
-STlib_initBinIcon
-(st_binicon_t* b,
-    int			x,
-    int			y,
-    patch_t* i,
-    boolean* val,
-    boolean* on)
+void STlib_initBinIcon(st_binicon_t* b, int x, int y, patch_t* i, bool* val, bool* on)
 {
     b->x = x;
     b->y = y;
@@ -225,12 +187,7 @@ STlib_initBinIcon
     b->p = i;
 }
 
-
-
-void
-STlib_updateBinIcon
-(st_binicon_t* bi,
-    boolean		refresh)
+void STlib_updateBinIcon(st_binicon_t* bi, bool refresh)
 {
     int			x;
     int			y;

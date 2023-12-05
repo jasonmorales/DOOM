@@ -51,7 +51,7 @@ extern Doom* g_doom;
 
 const filesys::path Game::SavePath = "./saves";
 
-boolean	G_CheckDemoStatus(Doom* doom);
+bool	G_CheckDemoStatus(Doom* doom);
 void	G_ReadDemoTiccmd(ticcmd_t* cmd);
 void	G_WriteDemoTiccmd(ticcmd_t* cmd);
 void	G_PlayerReborn(int player);
@@ -69,23 +69,22 @@ void	G_DoWorldDone();
 
 gameaction_t    gameaction;
 skill_t         gameskill;
-boolean		respawnmonsters;
+bool		respawnmonsters;
 int             gameepisode;
 int             gamemap;
 
-boolean         paused;
-boolean         sendpause;             	// send a pause event next tic 
-boolean         sendsave;             	// send a save event next tic 
-boolean         usergame;               // ok to save / end game 
+bool         paused;
+bool         sendpause;             	// send a pause event next tic 
+bool         sendsave;             	// send a save event next tic 
+bool         usergame;               // ok to save / end game 
 
-boolean         timingdemo;             // if true, exit with report on completion 
-boolean         noblit;                 // for comparative timing purposes 
+bool         timingdemo;             // if true, exit with report on completion 
 time_t starttime;          	// for comparative timing purposes  	 
 
-boolean         viewactive;
+bool         viewactive;
 
 int deathmatch;           	// only if started as net death 
-boolean         netgame;                // only true if packets are broadcast 
+bool         netgame;                // only true if packets are broadcast 
 bool playeringame[MAXPLAYERS];
 player_t        players[MAXPLAYERS];
 
@@ -96,14 +95,14 @@ int             levelstarttic;          // gametic at level start
 int             totalkills, totalitems, totalsecret;    // for intermission 
 
 char            demoname[32];
-boolean         demoplayback;
-boolean		netdemo;
+bool         demoplayback;
+bool		netdemo;
 byte* demobuffer;
 byte* demo_p;
 byte* demoend;
-boolean         singledemo;            	// quit after playing a demo from cmdline 
+bool         singledemo;            	// quit after playing a demo from cmdline 
 
-boolean         precache = true;        // if true, load all graphics at start 
+bool         precache = true;        // if true, load all graphics at start 
 
 wbstartstruct_t wminfo;               	// parms for world map / intermission 
 
@@ -133,28 +132,28 @@ fixed_t		angleturn[3] = { 640, 1280, 320 };	// + slow turn
 
 #define NUMKEYS		256 
 
-boolean         gamekeydown[NUMKEYS];
+bool         gamekeydown[NUMKEYS];
 int             turnheld;				// for accelerative turning 
 
-int mousearray[4];
-int* mousebuttons = &mousearray[1];		// allow [-1]
+bool mousearray[4];
+bool* mousebuttons = &mousearray[1];		// allow [-1]
 
 // mouse values are used once 
 int             mousex;
 int		mousey;
 
 int             dclicktime;
-int		dclickstate;
+bool		dclickstate;
 int		dclicks;
 int             dclicktime2;
-int		dclickstate2;
+bool		dclickstate2;
 int		dclicks2;
 
 // joystick values are repeated 
 int             joyxmove;
 int		joyymove;
-boolean         joyarray[5];
-boolean* joybuttons = &joyarray[1];		// allow [-1] 
+bool         joyarray[5];
+bool* joybuttons = &joyarray[1];		// allow [-1] 
 
 int		savegameslot;
 string saveDescription(24, '\0');
@@ -307,12 +306,12 @@ void G_BuildTiccmd(ticcmd_t* cmd)
         if (dclicktime > 20)
         {
             dclicks = 0;
-            dclickstate = 0;
+            dclickstate = false;
         }
     }
 
     // strafe double click
-    int bstrafe = mousebuttons[mousebstrafe] || joybuttons[joybstrafe];
+    bool bstrafe = mousebuttons[mousebstrafe] || joybuttons[joybstrafe];
     if (bstrafe != dclickstate2 && dclicktime2 > 1)
     {
         dclickstate2 = bstrafe;
@@ -332,7 +331,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
         if (dclicktime2 > 20)
         {
             dclicks2 = 0;
-            dclickstate2 = 0;
+            dclickstate2 = false;
         }
     }
 
@@ -488,9 +487,9 @@ bool G_Responder(const event_t& event)
         return false;   // always let key up events filter down 
 
     case ev_mouse:
-        mousebuttons[0] = event.data1 & 1;
-        mousebuttons[1] = event.data1 & 2;
-        mousebuttons[2] = event.data1 & 4;
+        mousebuttons[0] = ((event.data1 & 1) != 0);
+        mousebuttons[1] = ((event.data1 & 2) != 0);
+        mousebuttons[2] = ((event.data1 & 4) != 0);
         mousex = event.data2 * (mouseSensitivity + 5) / 10;
         mousey = event.data3 * (mouseSensitivity + 5) / 10;
         return true;    // eat events 
@@ -609,7 +608,7 @@ void Game::Ticker()
                 switch (players[i].cmd.buttons & BT_SPECIALMASK)
                 {
                 case BTS_PAUSE:
-                    paused ^= 1;
+                    paused = !paused;
                     if (paused)
                         S_PauseSound();
                     else
@@ -716,7 +715,7 @@ void G_PlayerReborn(int player)
 // because something is occupying it 
 void P_SpawnPlayer(mapthing_t* mthing);
 
-boolean G_CheckSpot(int32 playernum, mapthing_t* mthing)
+bool G_CheckSpot(int32 playernum, mapthing_t* mthing)
 {
     subsector_t* ss;
     unsigned		an;
@@ -850,7 +849,7 @@ int cpars[32] =
 
 // G_DoCompleted 
 
-boolean		secretexit;
+bool		secretexit;
 extern char* pagename;
 
 void G_ExitLevel()
@@ -1418,7 +1417,6 @@ void G_DoPlayDemo()
 
 void G_TimeDemo(const char* name)
 {
-    noblit = CommandLine::HasArg("-noblit");
     timingdemo = true;
     g_doom->SetUseSingleTicks(true);
 
@@ -1436,7 +1434,7 @@ void G_TimeDemo(const char* name)
 ===================
 */
 
-boolean G_CheckDemoStatus(Doom* doom)
+bool G_CheckDemoStatus(Doom* doom)
 {
     if (timingdemo)
     {

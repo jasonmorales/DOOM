@@ -21,7 +21,7 @@
 #pragma once
 
 // End-level timer (-TIMER option)
-extern	boolean levelTimer;
+extern	bool levelTimer;
 extern	int	levelTimeCount;
 
 //      Define values for map objects
@@ -47,11 +47,7 @@ void    P_SpawnSpecials();
 void    P_UpdateSpecials();
 
 // when needed
-boolean
-P_UseSpecialLine
-(mobj_t* thing,
-    line_t* line,
-    int		side);
+bool P_UseSpecialLine(mobj_t* thing, line_t* line, int side);
 
 void
 P_ShootSpecialLine
@@ -288,10 +284,9 @@ typedef struct
     int		count;
     plat_e	status;
     plat_e	oldstatus;
-    boolean	crush;
+    int	crush;
     int		tag;
     plattype_e	type;
-
 } plat_t;
 
 
@@ -483,7 +478,7 @@ struct ceiling_t
     fixed_t	bottomheight;
     fixed_t	topheight;
     fixed_t	speed;
-    boolean	crush;
+    int	crush;
 
     // 1 = up, 0 = waiting, -1 = down
     int		direction;
@@ -563,7 +558,7 @@ struct floormove_t
 {
     thinker_t	thinker;
     floor_e	type;
-    boolean	crush;
+    int	crush;
     sector_t* sector;
     int		direction;
     int		newspecial;
@@ -582,32 +577,12 @@ typedef enum
 
 } result_e;
 
-result_e
-T_MovePlane
-(sector_t* sector,
-    fixed_t	speed,
-    fixed_t	dest,
-    boolean	crush,
-    int		floorOrCeiling,
-    int		direction);
+result_e T_MovePlane(sector_t* sector, fixed_t speed, fixed_t dest, bool crush, int floorOrCeiling, int direction);
 
-int
-EV_BuildStairs
-(line_t* line,
-    stair_e	type);
+int EV_BuildStairs(line_t* line, stair_e type);
 
-int
-EV_DoFloor
-(line_t* line,
-    floor_e	floortype);
+int EV_DoFloor(line_t* line, floor_e floortype);
 
 void T_MoveFloor(floormove_t* floor);
 
-//
-// P_TELEPT
-//
-int
-EV_Teleport
-(line_t* line,
-    int		side,
-    mobj_t* thing);
+int EV_Teleport(line_t* line, int side, mobj_t* thing);

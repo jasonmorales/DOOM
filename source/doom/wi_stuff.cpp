@@ -406,14 +406,6 @@ void WI_slamBackground()
     memcpy(g_doom->GetVideo()->GetScreen(0), g_doom->GetVideo()->GetScreen(1), SCREENWIDTH * SCREENHEIGHT);
 }
 
-// The ticker is used to detect keys
-//  because of timing issues in netgames.
-boolean WI_Responder([[maybe_unused]] event_t* ev)
-{
-    return false;
-}
-
-
 // Draws "<Levelname> Finished!"
 void WI_drawLF()
 {
@@ -427,8 +419,6 @@ void WI_drawLF()
 
     g_doom->GetVideo()->DrawPatch((SCREENWIDTH - (finished->width)) / 2, y, FB, finished);
 }
-
-
 
 // Draws "Entering <LevelName>"
 void WI_drawEL()
@@ -445,18 +435,14 @@ void WI_drawEL()
 
 }
 
-void
-WI_drawOnLnode
-(int		n,
-    patch_t* c[])
+void WI_drawOnLnode(int n, patch_t* c[])
 {
-
     int		i;
     int		left;
     int		top;
     int		right;
     int		bottom;
-    boolean	fits = false;
+    bool fits = false;
 
     i = 0;
     do
@@ -732,7 +718,7 @@ void WI_updateNoState()
 
 }
 
-static boolean		snl_pointeron = false;
+static bool		snl_pointeron = false;
 
 
 void WI_initShowNextLoc()
@@ -858,7 +844,7 @@ void WI_updateDeathmatchStats()
     int		i;
     int		j;
 
-    boolean	stillticking;
+    bool stillticking = false;
 
     WI_updateAnimatedBack();
 
@@ -1082,11 +1068,10 @@ void WI_initNetgameStats()
 
 void WI_updateNetgameStats()
 {
-
     int		i;
     int		fsum;
 
-    boolean	stillticking;
+    bool stillticking = false;
 
     WI_updateAnimatedBack();
 
@@ -1540,7 +1525,7 @@ void WI_loadData()
         lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMCMAPS, PU_STATIC, 0);
         for (i = 0; i < NUMCMAPS; i++)
         {
-            lnames[i] = W_CacheLumpName(std::format("CWILV{:2}", i), PU_STATIC);
+            lnames[i] = W_CacheLumpName(std::format("CWILV{:02}", i), PU_STATIC);
         }
     }
     else
@@ -1648,7 +1633,7 @@ void WI_loadData()
         p[i] = W_CacheLumpName(std::format("STPB{}", i), PU_STATIC);
 
         // "1,2,3,4"
-        bp[i] = W_CacheLumpName(std::format("WIBP%d", i + 1), PU_STATIC);
+        bp[i] = W_CacheLumpName(std::format("WIBP{}", i + 1), PU_STATIC);
     }
 }
 

@@ -280,7 +280,7 @@ void P_LoadThings(intptr_t lump)
     int			i;
     mapthing_t* mt;
     int			numthings;
-    boolean		spawn;
+    bool spawn = false;
 
     auto* data = W_CacheLumpNum<byte>(lump, PU_STATIC);
     numthings = W_LumpLength(lump) / sizeof(mapthing_t);
@@ -309,7 +309,7 @@ void P_LoadThings(intptr_t lump)
                 break;
             }
         }
-        if (spawn == false)
+        if (!spawn)
             break;
 
         // Do spawn all other stuff. 

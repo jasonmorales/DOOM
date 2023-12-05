@@ -17,59 +17,31 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-//
+#include "types/numbers.h"
+
 // Initializes sound stuff, including volume
-// Sets channels, SFX and music volume,
-//  allocates channel buffer, sets S_sfx lookup.
-//
-void
-S_Init
-(int		sfxVolume,
-    int		musicVolume);
+// Sets channels, SFX and music volume, allocates channel buffer, sets S_sfx lookup.
+void S_Init(int32 sfxVolume, int32 musicVolume);
 
-
-
-
-//
 // Per level startup code.
-// Kills playing sounds at start of level,
-//  determines music if any, changes music.
-//
+// Kills playing sounds at start of level, determines music if any, changes music.
 void S_Start();
 
-
-//
 // Start sound for thing at <origin>
 //  using <sound_id> from sounds.h
-//
-void
-S_StartSound
-(void* origin,
-    int		sound_id);
-
-
+void S_StartSound(void* origin, int32 sound_id);
 
 // Will start a sound at a given volume.
-void
-S_StartSoundAtVolume
-(void* origin,
-    int		sound_id,
-    int		volume);
-
+void S_StartSoundAtVolume(void* origin, int32 sound_id, int32 volume);
 
 // Stop sound for thing at <origin>
 void S_StopSound(void* origin);
 
-
 // Start music using <music_id> from sounds.h
 void S_StartMusic(int music_id);
 
-// Start music using <music_id> from sounds.h,
-//  and set whether looping
-void
-S_ChangeMusic
-(int		music_id,
-    int		looping);
+// Start music using <music_id> from sounds.h, and set whether looping
+void S_ChangeMusic(int32 music_id, int32 looping);
 
 // Stops the music fer sure.
 void S_StopMusic();
@@ -78,10 +50,7 @@ void S_StopMusic();
 void S_PauseSound();
 void S_ResumeSound();
 
-
-//
 // Updates music & sounds
-//
 void S_UpdateSounds(void* listener);
 
 void S_SetMusicVolume(int volume);

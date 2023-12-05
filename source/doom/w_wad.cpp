@@ -302,7 +302,7 @@ int32 W_GetNumForName(string_view name)
     auto i = W_CheckNumForName(name);
 
     if (i == -1)
-        I_Error("W_GetNumForName: {} not found!", name);
+         I_Error("W_GetNumForName: {} not found!", name);
 
     return i;
 }

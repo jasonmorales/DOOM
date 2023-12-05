@@ -41,7 +41,7 @@ import std;
 // Fake mouse handling.
 // This cannot work properly w/o DGA.
 // Needs an invisible mouse cursor at least.
-boolean		grabMouse;
+bool grabMouse;
 int		doPointerWarp = POINTER_WARP_COUNTDOWN;
 
 template<typename T>
@@ -184,8 +184,7 @@ void I_ShutdownGraphics()
 
 static int	lastmousex = 0;
 static int	lastmousey = 0;
-boolean		mousemoved = false;
-boolean		shmFinished;
+bool mousemoved = false;
 
 void Video::FinishUpdate()
 {

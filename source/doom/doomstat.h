@@ -33,9 +33,9 @@
 // ------------------------
 // Command line parameters.
 //
-extern  boolean	nomonsters;	// checkparm of -nomonsters
-extern  boolean	respawnparm;	// checkparm of -respawn
-extern  boolean	fastparm;	// checkparm of -fast
+extern  bool	nomonsters;	// checkparm of -nomonsters
+extern  bool	respawnparm;	// checkparm of -respawn
+extern  bool	fastparm;	// checkparm of -fast
 
 
 
@@ -54,7 +54,7 @@ extern skill_t startskill;
 extern  int             startepisode;
 extern	int		startmap;
 
-extern  boolean		autostart;
+extern  bool		autostart;
 
 // Selected by user. 
 extern  skill_t         gameskill;
@@ -62,10 +62,10 @@ extern  int		gameepisode;
 extern  int		gamemap;
 
 // Nightmare mode flag, single player.
-extern  boolean         respawnmonsters;
+extern  bool         respawnmonsters;
 
 // Netgame? Only true if >1 player.
-extern  boolean	netgame;
+extern  bool	netgame;
 
 // Flag: true only if started as net deathmatch.
 // An enum might handle altdeath/cooperative better.
@@ -100,19 +100,12 @@ extern int snd_DesiredSfxDevice;
 // Status flags for refresh.
 //
 
-// Depending on view size - no status bar?
-// Note that there is no way to disable the
-//  status bar explicitely.
-extern  boolean statusbaractive;
-
-extern  boolean automapactive;	// In AutoMap mode?
-extern  boolean	menuactive;	// Menu overlayed?
-extern  boolean	paused;		// Game Pause?
+extern  bool automapactive;	// In AutoMap mode?
+extern  bool	menuactive;	// Menu overlayed?
+extern  bool	paused;		// Game Pause?
 
 
-extern  boolean		viewactive;
-
-extern  boolean		noblit;
+extern  bool		viewactive;
 
 extern	int		viewwindowx;
 extern	int		viewwindowy;
@@ -147,13 +140,13 @@ extern  int	leveltime;	// tics in game play for par
 // DEMO playback/recording related stuff.
 // No demo, there is a human player in charge?
 // Disable save/end game?
-extern  boolean	usergame;
+extern  bool	usergame;
 
 //?
-extern  boolean	demoplayback;
+extern  bool	demoplayback;
 
 // Quit after playing a demo from cmdline.
-extern  boolean		singledemo;
+extern  bool		singledemo;
 
 //-----------------------------
 // Internal parameters, fixed.
@@ -198,7 +191,7 @@ extern  int		maxammo[NUMAMMO];
 extern  FILE* debugfile;
 
 // if true, load all graphics at level load
-extern  boolean         precache;
+extern  bool         precache;
 
 extern  int32             mouseSensitivity;
 

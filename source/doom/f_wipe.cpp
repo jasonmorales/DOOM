@@ -35,7 +35,7 @@ extern Doom* g_doom;
 //                       SCREEN WIPE PACKAGE
 
 // when zero, stop the wipe
-static boolean	go = 0;
+static bool	go = 0;
 
 static byte* wipe_scr_start;
 static byte* wipe_scr_end;
@@ -148,11 +148,7 @@ int wipe_initMelt(int width, int height, [[maybe_unused]] time_t ticks)
     return 0;
 }
 
-int
-wipe_doMelt
-(int	width,
-    int	height,
-    time_t	ticks)
+int wipe_doMelt(int	width, int height, time_t ticks)
 {
     int		i;
     int		j;
@@ -161,7 +157,7 @@ wipe_doMelt
 
     short* s;
     short* d;
-    boolean	done = true;
+    bool	done = true;
 
     width /= 2;
 
@@ -200,7 +196,6 @@ wipe_doMelt
     }
 
     return done;
-
 }
 
 int
@@ -247,7 +242,7 @@ int wipe_ScreenWipe(int	wipeno, [[maybe_unused]] int x, [[maybe_unused]] int y, 
     // initial stuff
     if (!go)
     {
-        go = 1;
+        go = true;
         // wipe_scr = (byte *) Z_Malloc(width*height, PU_STATIC, 0); // DEBUG
         wipe_scr = g_doom->GetVideo()->GetScreen(0);
         (*wipes[wipeno * 3])(width, height, ticks);
@@ -260,7 +255,7 @@ int wipe_ScreenWipe(int	wipeno, [[maybe_unused]] int x, [[maybe_unused]] int y, 
     // final stuff
     if (rc)
     {
-        go = 0;
+        go = false;
         (*wipes[wipeno * 3 + 2])(width, height, ticks);
     }
 

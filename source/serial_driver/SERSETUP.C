@@ -119,7 +119,7 @@ int		packetlen;
 int		inescape;
 int		newpacket;
 
-boolean ReadPacket ()
+bool ReadPacket ()
 {
 	int	c;
 
@@ -350,7 +350,7 @@ void Connect ()
 //
 // flush out any extras
 //
-	while (ReadPacket ())
+	while (ReadPacket())
 	;
 }
 

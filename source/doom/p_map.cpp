@@ -43,7 +43,7 @@ fixed_t		tmy;
 
 // If "floatok" true, move would be ok
 // if within "tmfloorz - tmceilingz".
-boolean		floatok;
+bool		floatok;
 
 fixed_t		tmfloorz;
 fixed_t		tmceilingz;
@@ -60,16 +60,9 @@ line_t* ceilingline;
 line_t* spechit[MAXSPECIALCROSS];
 int		numspechit;
 
-
-
-//
 // TELEPORT MOVE
-// 
 
-//
-// PIT_StompThing
-//
-boolean PIT_StompThing(mobj_t* thing)
+bool PIT_StompThing(mobj_t* thing)
 {
     fixed_t	blockdist;
 
@@ -99,7 +92,7 @@ boolean PIT_StompThing(mobj_t* thing)
 
 bbox tmbbox;
 
-boolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y)
+bool P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y)
 {
     int			xl;
     int			xh;
@@ -166,7 +159,7 @@ boolean P_TeleportMove(mobj_t* thing, fixed_t x, fixed_t y)
 //
 
 // Adjusts tmfloorz and tmceilingz as lines are contacted
-boolean PIT_CheckLine(line_t* ld)
+bool PIT_CheckLine(line_t* ld)
 {
     if (!tmbbox.overlaps(ld->bounds))
         return true;
@@ -223,10 +216,10 @@ boolean PIT_CheckLine(line_t* ld)
     return true;
 }
 
-boolean PIT_CheckThing(mobj_t* thing)
+bool PIT_CheckThing(mobj_t* thing)
 {
     fixed_t		blockdist;
-    boolean		solid;
+    bool		solid = false;
     int			damage;
 
     if (!(thing->flags & (MF_SOLID | MF_SPECIAL | MF_SHOOTABLE)))
@@ -320,8 +313,6 @@ boolean PIT_CheckThing(mobj_t* thing)
 // MOVEMENT CLIPPING
 //
 
-//
-// P_CheckPosition
 // This is purely informative, nothing is modified
 // (except things picked up).
 // 
@@ -344,7 +335,7 @@ boolean PIT_CheckThing(mobj_t* thing)
 //  speciallines[]
 //  numspeciallines
 //
-boolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
+bool P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 {
     tmthing = thing;
     tmflags = thing->flags;
@@ -404,7 +395,7 @@ boolean P_CheckPosition(mobj_t* thing, fixed_t x, fixed_t y)
 
 // Attempt to move to a new position,
 // crossing special lines unless MF_TELEPORT is set.
-boolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
+bool P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 {
     fixed_t	oldx;
     fixed_t	oldy;
@@ -480,11 +471,9 @@ boolean P_TryMove(mobj_t* thing, fixed_t x, fixed_t y)
 // the z will be set to the lowest value
 // and false will be returned.
 //
-boolean P_ThingHeightClip(mobj_t* thing)
+bool P_ThingHeightClip(mobj_t* thing)
 {
-    boolean		onfloor;
-
-    onfloor = (thing->z == thing->floorz);
+    bool onfloor = (thing->z == thing->floorz);
 
     P_CheckPosition(thing, thing->x, thing->y);
     // what about stranding a monster partially off an edge?
@@ -510,12 +499,8 @@ boolean P_ThingHeightClip(mobj_t* thing)
     return true;
 }
 
-
-
-//
 // SLIDE MOVE
 // Allows the player to slide along any angled walls.
-//
 fixed_t		bestslidefrac;
 fixed_t		secondslidefrac;
 
@@ -582,11 +567,7 @@ void P_HitSlideLine(line_t* ld)
     tmymove = FixedMul(newlen, finesine[lineangle]);
 }
 
-
-//
-// PTR_SlideTraverse
-//
-boolean PTR_SlideTraverse(intercept_t* in)
+bool PTR_SlideTraverse(intercept_t* in)
 {
     line_t* li;
 
@@ -760,13 +741,8 @@ fixed_t		aimslope;
 extern fixed_t	topslope;
 extern fixed_t	bottomslope;
 
-
-//
-// PTR_AimTraverse
 // Sets linetaget and aimslope when a target is aimed at.
-//
-boolean
-PTR_AimTraverse(intercept_t* in)
+bool PTR_AimTraverse(intercept_t* in)
 {
     line_t* li;
     mobj_t* th;
@@ -845,11 +821,7 @@ PTR_AimTraverse(intercept_t* in)
     return false;			// don't go any farther
 }
 
-
-//
-// PTR_ShootTraverse
-//
-boolean PTR_ShootTraverse(intercept_t* in)
+bool PTR_ShootTraverse(intercept_t* in)
 {
     fixed_t		x;
     fixed_t		y;
@@ -1038,14 +1010,11 @@ P_LineAttack
         PTR_ShootTraverse);
 }
 
-
-
-//
 // USE LINES
-//
+
 mobj_t* usething;
 
-boolean	PTR_UseTraverse(intercept_t* in)
+bool PTR_UseTraverse(intercept_t* in)
 {
     int		side;
 
@@ -1114,7 +1083,7 @@ int		bombdamage;
 // "bombsource" is the creature
 // that caused the explosion at "bombspot".
 //
-boolean PIT_RadiusAttack(mobj_t* thing)
+bool PIT_RadiusAttack(mobj_t* thing)
 {
     fixed_t	dx;
     fixed_t	dy;
@@ -1200,14 +1169,10 @@ P_RadiusAttack
 //  the way it was and call P_ChangeSector again
 //  to undo the changes.
 //
-boolean		crushchange;
-boolean		nofit;
+bool		crushchange;
+bool		nofit;
 
-
-//
-// PIT_ChangeSector
-//
-boolean PIT_ChangeSector(mobj_t* thing)
+bool PIT_ChangeSector(mobj_t* thing)
 {
     mobj_t* mo;
 
@@ -1265,8 +1230,7 @@ boolean PIT_ChangeSector(mobj_t* thing)
     return true;
 }
 
-// P_ChangeSector
-boolean P_ChangeSector(sector_t* sector, boolean crunch)
+bool P_ChangeSector(sector_t* sector, bool crunch)
 {
     nofit = false;
     crushchange = crunch;

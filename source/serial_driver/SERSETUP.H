@@ -17,7 +17,6 @@
 #define STI()               enable()
 
 
-typedef enum {false, true} boolean;
 typedef unsigned char byte;
 
 

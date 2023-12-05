@@ -264,7 +264,7 @@ static const IconBox KeyIconBoxes[] =
 static player_t* plyr;
 
 // ST_Start() has just been called
-static boolean		st_firsttime;
+static bool		st_firsttime;
 
 // used to execute ST_Init() only once
 static int		veryfirsttime = 1;
@@ -285,25 +285,22 @@ static st_chatstateenum_t	st_chatstate;
 static st_stateenum_t	st_gamestate;
 
 // whether left-side main status bar is active
-static boolean		st_statusbaron;
+static bool st_statusbaron = false;
 
 // whether status bar chat is active
-static boolean		st_chat;
+static bool		st_chat;
 
 // value of st_chat before message popped up
-static boolean		st_oldchat;
-
-// whether chat window has the cursor on
-static boolean		st_cursoron;
+static bool		st_oldchat;
 
 // !deathmatch
-static boolean		st_notdeathmatch;
+static bool st_notdeathmatch = false;
 
 // !deathmatch && st_statusbaron
-static boolean		st_armson;
+static bool st_armson = false;
 
 // !deathmatch
-static boolean		st_fragson;
+static bool st_fragson = false;
 
 // main bar left
 static patch_t* sbar;
@@ -372,7 +369,7 @@ static int	st_fragscount;
 static int	st_oldhealth = -1;
 
 // used for evil grin
-static boolean	oldweaponsowned[NUMWEAPONS];
+static bool oldweaponsowned[NUMWEAPONS];
 
 // count until face changes
 static int	st_facecount = 0;
@@ -665,7 +662,7 @@ bool ST_Responder(const event_t& event)
 
             if (gamemode == GameMode::Doom2Commercial)
             {
-                epsd = 0;
+                epsd = 1;
                 map = (buf[0] - '0') * 10 + buf[1] - '0';
             }
             else
@@ -736,7 +733,7 @@ void ST_updateFaceWidget()
     angle_t	diffang;
     static int	lastattackdown = -1;
     static int	priority = 0;
-    boolean	doevilgrin;
+    bool doevilgrin = false;
 
     if (priority < 10)
     {
@@ -1031,7 +1028,7 @@ void ST_doPaletteStuff()
 
 }
 
-void ST_drawWidgets(boolean refresh)
+void ST_drawWidgets(bool refresh)
 {
     int		i;
 
@@ -1085,7 +1082,7 @@ void ST_diffDraw()
     ST_drawWidgets(false);
 }
 
-void ST_Drawer(boolean fullscreen, boolean refresh)
+void ST_Drawer(bool fullscreen, bool refresh)
 {
 
     st_statusbaron = (!fullscreen) || automapactive;
@@ -1240,7 +1237,6 @@ void ST_initData()
 
     st_statusbaron = true;
     st_oldchat = st_chat = false;
-    st_cursoron = false;
 
     st_faceindex = 0;
     st_palette = -1;
@@ -1410,7 +1406,7 @@ void ST_createWidgets()
 
 }
 
-static boolean	st_stopped = true;
+static bool st_stopped = true;
 
 
 void ST_Start()

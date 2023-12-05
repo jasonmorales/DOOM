@@ -136,12 +136,9 @@ void P_BringUpWeapon(player_t* player)
     P_SetPsprite(player, ps_weapon, newstate);
 }
 
-//
-// P_CheckAmmo
 // Returns true if there is enough ammo to shoot.
 // If not, selects the next weapon to use.
-//
-boolean P_CheckAmmo(player_t* player)
+bool P_CheckAmmo(player_t* player)
 {
     ammotype_t		ammo;
     int			count;
@@ -580,14 +577,7 @@ void P_BulletSlope(mobj_t* mo)
     }
 }
 
-
-//
-// P_GunShot
-//
-void
-P_GunShot
-(mobj_t* mo,
-    boolean	accurate)
+void P_GunShot(mobj_t* mo, bool	accurate)
 {
     angle_t	angle;
     int		damage;
@@ -601,14 +591,7 @@ P_GunShot
     P_LineAttack(mo, angle, MISSILERANGE, bulletslope, damage);
 }
 
-
-//
-// A_FirePistol
-//
-void
-A_FirePistol
-(player_t* player,
-    [[maybe_unused]] pspdef_t* psp)
+void A_FirePistol(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
     S_StartSound(player->mo, sfx_pistol);
 

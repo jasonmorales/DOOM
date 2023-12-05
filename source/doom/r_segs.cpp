@@ -30,13 +30,13 @@ import std;
 // OPTIMIZE: closed two sided lines as single sided
 
 // True if any of the segs textures might be visible.
-boolean		segtextured;
+bool		segtextured;
 
 // False if the back side is the same plane.
-boolean		markfloor;
-boolean		markceiling;
+bool		markfloor;
+bool		markceiling;
 
-boolean		maskedtexture;
+int		maskedtexture;
 int		toptexture;
 int		bottomtexture;
 int		midtexture;
@@ -593,7 +593,7 @@ R_StoreWallRange
         if (sidedef->midtexture)
         {
             // masked midtexture
-            maskedtexture = true;
+            maskedtexture = 1;
             ds_p->maskedtexturecol = maskedtexturecol = lastopening - rw_x;
             lastopening += rw_stopx - rw_x;
         }

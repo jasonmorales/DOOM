@@ -55,24 +55,22 @@ import std;
 
 void G_BuildTiccmd(ticcmd_t* cmd);
 
-extern boolean inhelpscreens;
+extern bool inhelpscreens;
 extern int32 showMessages;
 extern int forwardmove[2];
 extern int sidemove[2];
 extern void* statcopy;
 
-boolean advancedemo;
+bool advancedemo;
 
-boolean nomonsters;	 // checkparm of -nomonsters
-boolean respawnparm; // checkparm of -respawn
-boolean fastparm;	 // checkparm of -fast
-
-boolean drone;
+bool nomonsters;	 // checkparm of -nomonsters
+bool respawnparm; // checkparm of -respawn
+bool fastparm;	 // checkparm of -fast
 
 skill_t startskill;
 int startepisode;
 int startmap;
-boolean autostart;
+bool autostart;
 
 FILE* debugfile;
 

@@ -34,10 +34,10 @@ import std;
 extern Doom* g_doom;
 
 
-// boolean : whether the screen is always erased
+// bool : whether the screen is always erased
 #define noterased viewwindowx
 
-extern boolean	automapactive;	// in AM_map.c
+extern bool	automapactive;	// in AM_map.c
 
 void HUlib_init()
 {}
@@ -64,10 +64,7 @@ HUlib_initTextLine
     HUlib_clearTextLine(t);
 }
 
-boolean
-HUlib_addCharToTextLine
-(hu_textline_t* t,
-    char			ch)
+bool HUlib_addCharToTextLine(hu_textline_t* t, char ch)
 {
 
     if (t->len == HU_MAXLINELENGTH)
@@ -82,7 +79,7 @@ HUlib_addCharToTextLine
 
 }
 
-boolean HUlib_delCharFromTextLine(hu_textline_t* t)
+bool HUlib_delCharFromTextLine(hu_textline_t* t)
 {
 
     if (!t->len) return false;
@@ -95,10 +92,7 @@ boolean HUlib_delCharFromTextLine(hu_textline_t* t)
 
 }
 
-void
-HUlib_drawTextLine
-(hu_textline_t* l,
-    boolean		drawcursor)
+void HUlib_drawTextLine(hu_textline_t* l, bool drawcursor)
 {
 
     int			i;
@@ -130,8 +124,7 @@ HUlib_drawTextLine
     }
 
     // draw the cursor if requested
-    if (drawcursor
-        && x + (l->f['_' - l->sc]->width) <= SCREENWIDTH)
+    if (drawcursor && x + (l->f['_' - l->sc]->width) <= SCREENWIDTH)
     {
         g_doom->GetVideo()->DrawPatch(x, l->y, FG, l->f['_' - l->sc]);
     }
@@ -144,7 +137,7 @@ void HUlib_eraseTextLine(hu_textline_t* l)
     int			lh;
     int			y;
     int			yoffset;
-    static boolean	lastautomapactive = true;
+    static bool	lastautomapactive = true;
 
     // Only erases when NOT in automap and the screen is reduced,
     // and the text must either need updating or refreshing
@@ -172,17 +165,8 @@ void HUlib_eraseTextLine(hu_textline_t* l)
 
 }
 
-void
-HUlib_initSText
-(hu_stext_t* s,
-    int		x,
-    int		y,
-    int		h,
-    patch_t** font,
-    int		startchar,
-    boolean* on)
+void HUlib_initSText(hu_stext_t* s, int x, int y, int h, patch_t** font, int startchar, bool* on)
 {
-
     int i;
 
     s->h = h;
@@ -190,10 +174,9 @@ HUlib_initSText
     s->laston = true;
     s->cl = 0;
     for (i = 0;i < h;i++)
-        HUlib_initTextLine(&s->l[i],
-            x, y - i * ((font[0]->height) + 1),
-            font, startchar);
-
+    {
+        HUlib_initTextLine(&s->l[i], x, y - i * ((font[0]->height) + 1), font, startchar);
+    }
 }
 
 void HUlib_addLineToSText(hu_stext_t* s)
@@ -265,14 +248,7 @@ void HUlib_eraseSText(hu_stext_t* s)
 
 }
 
-void
-HUlib_initIText
-(hu_itext_t* it,
-    int		x,
-    int		y,
-    patch_t** font,
-    int		startchar,
-    boolean* on)
+void HUlib_initIText(hu_itext_t* it, int x, int y, patch_t** font, int startchar, bool* on)
 {
     it->lm = 0; // default left margin is start of text
     it->on = on;
@@ -313,10 +289,7 @@ HUlib_addPrefixToIText
 
 // wrapper function for handling general keyed input.
 // returns true if it ate the key
-boolean
-HUlib_keyInIText
-(hu_itext_t* it,
-    unsigned char ch)
+bool HUlib_keyInIText(hu_itext_t* it, unsigned char ch)
 {
 
     if (ch >= ' ' && ch <= '_')

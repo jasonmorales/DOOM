@@ -41,7 +41,7 @@ void G_RecordDemo(Doom* doom, const char* name);
 void G_BeginRecording();
 
 void G_TimeDemo(const char* name);
-boolean G_CheckDemoStatus(Doom* doom);
+bool G_CheckDemoStatus(Doom* doom);
 
 void G_ExitLevel();
 void G_SecretExitLevel();

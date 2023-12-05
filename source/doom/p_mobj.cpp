@@ -40,7 +40,7 @@ void P_SpawnMapThing(mapthing_t* mthing);
 // Returns true if the mobj is still present.
 int test;
 
-boolean P_SetMobjState(mobj_t* mobj, statenum_t state)
+bool P_SetMobjState(mobj_t* mobj, statenum_t state)
 {
     state_t* st;
 
@@ -743,9 +743,7 @@ void P_SpawnMapThing(mapthing_t* mthing)
         return;
 
     // don't spawn any monsters if -nomonsters
-    if (nomonsters
-        && (i == MT_SKULL
-            || (mobjinfo[i].flags & MF_COUNTKILL)))
+    if (nomonsters && (i == MT_SKULL || (mobjinfo[i].flags & MF_COUNTKILL)))
     {
         return;
     }

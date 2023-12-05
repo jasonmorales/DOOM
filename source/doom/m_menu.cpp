@@ -55,9 +55,9 @@ extern Doom* g_doom;
 
 
 extern patch_t* hu_font[HU_FONTSIZE];
-extern boolean		message_dontfuckwithme;
+extern bool		message_dontfuckwithme;
 
-extern boolean		chat_on;		// in heads-up code
+extern bool		chat_on;		// in heads-up code
 
 //
 // defaulted values
@@ -82,7 +82,7 @@ int			messy;
 int			messageLastMenuActive;
 
 // timed message = no input from user
-boolean			messageNeedsInput;
+bool			messageNeedsInput;
 
 void    (*messageRoutine)(int response);
 
@@ -102,13 +102,13 @@ size_t saveCharIndex;	// which char we're editing
 // old save description before edit
 char			saveOldString[Game::SaveStringSize];
 
-boolean			inhelpscreens;
-boolean			menuactive;
+bool			inhelpscreens;
+bool			menuactive;
 
 #define SKULLXOFF		-32
 #define LINEHEIGHT		16
 
-extern boolean		sendpause;
+extern bool		sendpause;
 char			savegamestrings[10][Game::SaveStringSize];
 
 char	endstring[160];
@@ -1666,4 +1666,3 @@ void Menu::StartMessage(string_view message, void(*routine)(int), bool input)
     messageNeedsInput = input;
     menuactive = true;
 }
-

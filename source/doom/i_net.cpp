@@ -46,7 +46,6 @@ import std;
 #define htons(x) ntohs(x)
 
 void	NetSend();
-boolean NetListen();
 
 // NETWORKING
 

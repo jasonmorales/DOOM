@@ -62,8 +62,8 @@ doomdata_t* netbuffer;		// points inside doomcom
 ticcmd_t	localcmds[BACKUPTICS];
 
 ticcmd_t netcmds[MAXPLAYERS][BACKUPTICS];
-boolean nodeingame[Net::MaxNodes];		// set false as nodes leave game
-boolean remoteresend[Net::MaxNodes];		// set when local needs tics
+bool nodeingame[Net::MaxNodes];		// set false as nodes leave game
+bool remoteresend[Net::MaxNodes];		// set when local needs tics
 int32 resendto[Net::MaxNodes];			// set when remote needs tics
 int32 resendcount[Net::MaxNodes];
 
@@ -75,7 +75,7 @@ time_t skiptics;
 int		ticdup;
 int		maxsend;	// BACKUPTICS/(2*ticdup)-1
 
-boolean		reboundpacket;
+bool		reboundpacket;
 doomdata_t	reboundstore;
 
 //
@@ -173,7 +173,7 @@ void HSendPacket(int node, int	flags)
 // HGetPacket
 // Returns false if no packet is waiting
 //
-boolean HGetPacket()
+bool HGetPacket()
 {
     if (reboundpacket)
     {
@@ -433,7 +433,7 @@ void CheckAbort()
 void D_ArbitrateNetStart()
 {
     int		i;
-    boolean	gotinfo[Net::MaxNodes];
+    bool	gotinfo[Net::MaxNodes];
 
     autostart = true;
     memset(gotinfo, 0, sizeof(gotinfo));
@@ -573,7 +573,7 @@ int	frameon;
 int	frameskip[4];
 int	oldnettics;
 
-extern	boolean	advancedemo;
+extern	bool	advancedemo;
 
 void TryRunTics()
 {

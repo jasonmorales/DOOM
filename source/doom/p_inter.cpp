@@ -48,7 +48,7 @@ int	clipammo[NUMAMMO] = { 10, 4, 20, 1 };
 // Num is the number of clip loads,
 // not the individual count (0= 1/2 clip).
 // Returns false if the ammo can't be picked up at all
-boolean P_GiveAmmo(player_t* player, ammotype_t ammo, int32 num)
+bool P_GiveAmmo(player_t* player, ammotype_t ammo, int32 num)
 {
     int		oldammo;
 
@@ -133,23 +133,13 @@ boolean P_GiveAmmo(player_t* player, ammotype_t ammo, int32 num)
     return true;
 }
 
-
-//
-// P_GiveWeapon
 // The weapon name may have a MF_DROPPED flag ored in.
-//
-boolean
-P_GiveWeapon
-(player_t* player,
-    weapontype_t	weapon,
-    boolean	dropped)
+bool P_GiveWeapon(player_t* player, weapontype_t weapon, bool dropped)
 {
-    boolean	gaveammo;
-    boolean	gaveweapon;
+    bool gaveammo = false;
+    bool gaveweapon = false;
 
-    if (netgame
-        && (deathmatch != 2)
-        && !dropped)
+    if (netgame && (deathmatch != 2) && !dropped)
     {
         // leave placed weapons forever on net games
         if (player->weaponowned[weapon])
@@ -193,16 +183,8 @@ P_GiveWeapon
     return (gaveweapon || gaveammo);
 }
 
-
-
-//
-// P_GiveBody
 // Returns false if the body isn't needed at all
-//
-boolean
-P_GiveBody
-(player_t* player,
-    int		num)
+bool P_GiveBody(player_t* player, int num)
 {
     if (player->health >= MAXHEALTH)
         return false;
@@ -215,17 +197,9 @@ P_GiveBody
     return true;
 }
 
-
-
-//
-// P_GiveArmor
 // Returns false if the armor is worse
 // than the current armor.
-//
-boolean
-P_GiveArmor
-(player_t* player,
-    int		armortype)
+bool P_GiveArmor(player_t* player, int armortype)
 {
     int		hits;
 
@@ -239,31 +213,16 @@ P_GiveArmor
     return true;
 }
 
-
-
-//
-// P_GiveCard
-//
-void
-P_GiveCard
-(player_t* player,
-    card_t	card)
+void P_GiveCard(player_t* player, card_t card)
 {
     if (player->cards[card])
         return;
 
     player->bonuscount = BONUSADD;
-    player->cards[card] = 1;
+    player->cards[card] = true;
 }
 
-
-//
-// P_GivePower
-//
-boolean
-P_GivePower
-(player_t* player,
-    int /*powertype_t*/	power)
+bool P_GivePower(player_t* player, int /*powertype_t*/	power)
 {
     if (power == pw_invulnerability)
     {

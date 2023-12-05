@@ -30,15 +30,13 @@ import std;
 
 #include "system/windows.h"
 
+#include <mmdeviceapi.h>
+#include <Audioclient.h>
+
 #include <cstdlib>
 #include <io.h>
-
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-// Separate sound server process.
-FILE* sndserver = 0;
-const char* sndserver_filename = "./sndserver ";
-#elif SNDINTR
+#include <fcntl.h>
+#include <sys/stat.h>
 
 // Update all 30 millisecs, approx. 30fps synchronized.
 // Linux resolution is allegedly 10 millisecs,
@@ -48,9 +46,6 @@ const char* sndserver_filename = "./sndserver ";
 // Get the interrupt. Set duration in millisecs.
 int I_SoundSetTimer(int duration_of_tick);
 void I_SoundDelTimer();
-#else
-// None?
-#endif
 
 
 // A quick hack to establish a protocol between
@@ -78,7 +73,7 @@ static int flag = 0;
 int 		lengths[NUMSFX];
 
 // The actual output device.
-int	audio_fd;
+int32 audio_fd = -1;
 
 // The global mixing buffer.
 // Basically, samples from all active internal channels
@@ -98,17 +93,13 @@ unsigned char* channels[NUM_CHANNELS];
 unsigned char* channelsend[NUM_CHANNELS];
 
 
-// Time/gametic that the channel started playing,
-//  used to determine oldest, which automatically
-//  has lowest priority.
-// In case number of active sounds exceeds
-//  available channels.
+// Time/gametic that the channel started playing, used to determine oldest, which automatically
+// has lowest priority.
+// In case number of active sounds exceeds available channels.
 int		channelstart[NUM_CHANNELS];
 
-// The sound in channel handles,
-//  determined on registration,
-//  might be used to unregister/stop/modify,
-//  currently unused.
+// The sound in channel handles, determined on registration, might be used to
+// unregister/stop/modify, currently unused.
 int 		channelhandles[NUM_CHANNELS];
 
 // SFX id of the playing sound effect.
@@ -140,66 +131,39 @@ void myioctl(int, int command, int*)
     }
 }
 
-//
-// This function loads the sound data from the WAD lump,
-//  for single sound.
-//
-void*
-getsfx
-(char* sfxname,
-    int* len)
+// This function loads the sound data from the WAD lump, for single sound.
+void* getsfx(const char* sfxname, int32* len)
 {
-    unsigned char* sfx;
-    unsigned char* paddedsfx;
-    int                 i;
-    int                 size;
-    int                 paddedsize;
-    char                name[20];
+    // Get the sound data from the WAD, allocate lump in zone memory.
+    string name = std::format("ds{}", sfxname);
 
-
-    // Get the sound data from the WAD, allocate lump
-    //  in zone memory.
-    sprintf_s(name, "ds%s", sfxname);
-
-    // Now, there is a severe problem with the
-    //  sound handling, in it is not (yet/anymore)
-    //  gamemode aware. That means, sounds from
-    //  DOOM II will be requested even with DOOM
-    //  shareware.
-    // The sound list is wired into sounds.c,
-    //  which sets the external variable.
-    // I do not do runtime patches to that
-    //  variable. Instead, we will use a
-    //  default sound for replacement.
+    // Now, there is a severe problem with the sound handling, in it is not (yet/anymore)
+    // gamemode aware. That means, sounds from DOOM II will be requested even with DOOM shareware.
+    // The sound list is wired into sounds.c, which sets the external variable.
+    // I do not do runtime patches to that variable. Instead, we will use a default sound for replacement.
     intptr_t sfxlump = 0;
     if (W_CheckNumForName(name) == -1)
         sfxlump = W_GetNumForName("dspistol");
     else
         sfxlump = W_GetNumForName(name);
 
-    size = W_LumpLength(sfxlump);
+    auto size = W_LumpLength(sfxlump);
 
-    // Debug.
-    // fprintf( stderr, "." );
-    //fprintf( stderr, " -loading  %s (lump %d, %d bytes)\n",
-    //	     sfxname, sfxlump, size );
-    //fflush( stderr );
-
-    sfx = W_CacheLumpNum<unsigned char>(sfxlump, PU_STATIC);
+    auto* sfx = W_CacheLumpNum<unsigned char>(sfxlump, PU_STATIC);
 
     // Pads the sound effect out to the mixing buffer size.
     // The original realloc would interfere with zone memory.
-    paddedsize = ((size - 8 + (SAMPLECOUNT - 1)) / SAMPLECOUNT) * SAMPLECOUNT;
+    auto paddedsize = ((size - 8 + (SAMPLECOUNT - 1)) / SAMPLECOUNT) * SAMPLECOUNT;
 
     // Allocate from zone memory.
-    paddedsfx = (unsigned char*)Z_Malloc(paddedsize + 8, PU_STATIC, 0);
+    auto* paddedsfx = (unsigned char*)Z_Malloc(paddedsize + 8, PU_STATIC, 0);
     // ddt: (unsigned char *) realloc(sfx, paddedsize+8);
     // This should interfere with zone memory handling,
     //  which does not kick in in the soundserver.
 
     // Now copy and pad.
     memcpy(paddedsfx, sfx, size);
-    for (i = size; i < paddedsize + 8; i++)
+    for (int32 i = size; i < paddedsize + 8; ++i)
         paddedsfx[i] = 128;
 
     // Remove the cached lump.
@@ -212,23 +176,10 @@ getsfx
     return (void*)(paddedsfx + 8);
 }
 
-
-
-
-
-//
-// This function adds a sound to the
-//  list of currently active sounds,
-//  which is maintained as a given number
-//  (eight, usually) of internal channels.
+// This function adds a sound to the list of currently active sounds, which is maintained as a
+// given number (eight, usually) of internal channels.
 // Returns a handle.
-//
-int
-addsfx
-(int		sfxid,
-    int		volume,
-    int		step,
-    int		seperation)
+int addsfx(int32 sfxid, int32 volume, int32 step, int32 seperation)
 {
     static unsigned short	handlenums = 0;
 
@@ -342,19 +293,10 @@ addsfx
     return rc;
 }
 
-
-
-
-
-//
 // SFX API
-// Note: this was called by S_Init.
-// However, whatever they did in the
-// old DPMS based DOS version, this
-// were simply dummies in the Linux
-// version.
+// Note: this was called by S_Init. However, whatever they did in the old DPMS based DOS version,
+// this were simply dummies in the Linux version.
 // See soundserver initdata().
-//
 void I_SetChannels()
 {
     // Init internal lookups (raw data, mixing buffer, channels).
@@ -385,14 +327,11 @@ void I_SetChannels()
             vol_lookup[i * 256 + j] = (i * (j - 128) * 256) / 127;
 }
 
-
 void I_SetSfxVolume(int volume)
 {
     // Identical to DOS.
-    // Basically, this should propagate
-    //  the menu/config file setting
-    //  to the state variable used in
-    //  the mixing.
+    // Basically, this should propagate the menu/config file setting to the state variable used
+    // in the mixing.
     snd_SfxVolume = volume;
 }
 
@@ -405,11 +344,7 @@ void I_SetMusicVolume(int volume)
     // Whatever( snd_MusciVolume );
 }
 
-
-//
-// Retrieve the raw data lump index
-//  for a given SFX name.
-//
+// Retrieve the raw data lump index for a given SFX name.
 intptr_t I_GetSfxLumpNum(sfxinfo_t* sfx)
 {
     char namebuf[9];
@@ -417,94 +352,39 @@ intptr_t I_GetSfxLumpNum(sfxinfo_t* sfx)
     return W_GetNumForName(namebuf);
 }
 
-//
-// Starting a sound means adding it
-//  to the current list of active sounds
-//  in the internal channels.
-// As the SFX info struct contains
-//  e.g. a pointer to the raw data,
-//  it is ignored.
-// As our sound handling does not handle
-//  priority, it is ignored.
-// Pitching (that is, increased speed of playback)
-//  is set, but currently not used by mixing.
-//
-int
-I_StartSound
-(int		id,
-    int		vol,
-    int		sep,
-    int		pitch,
-    int		priority)
+// Starting a sound means adding it to the current list of active sounds in the internal channels.
+// As the SFX info struct contains e.g. a pointer to the raw data, it is ignored.
+// As our sound handling does not handle priority, it is ignored.
+// Pitching (that is, increased speed of playback) is set, but currently not used by mixing.
+int32 I_StartSound(int32 id, int32 vol, int32 sep, int32 pitch, [[maybe_unused]] int32 priority)
 {
-
-    // UNUSED
-    priority = 0;
-
-#ifdef SNDSERV 
-    if (sndserver)
-    {
-        fprintf(sndserver, "p%2.2x%2.2x%2.2x%2.2x\n", id, pitch, vol, sep);
-        fflush(sndserver);
-    }
-    // warning: control reaches end of non-void function.
-    return id;
-#else
-    // Debug.
-    //fprintf( stderr, "starting sound %d", id );
-
     // Returns a handle (not used).
-    id = addsfx(id, vol, steptable[pitch], sep);
-
-    // fprintf( stderr, "/handle is %d\n", id );
-
-    return id;
-#endif
+    return addsfx(id, vol, steptable[pitch], sep);
 }
 
-
-
-void I_StopSound(int handle)
+void I_StopSound([[maybe_unused]] int32 handle)
 {
     // You need the handle returned by StartSound.
-    // Would be looping all channels,
-    //  tracking down the handle,
-    //  an setting the channel to zero.
-
-    // UNUSED.
-    handle = 0;
+    // Would be looping all channels, tracking down the handle, an setting the channel to zero.
 }
 
-
-int I_SoundIsPlaying(int handle)
+int32 I_SoundIsPlaying(int32 handle)
 {
     // Ouch.
     return gametic < handle;
 }
 
-
-
-
-//
-// This function loops all active (internal) sound
-//  channels, retrieves a given number of samples
-//  from the raw sound data, modifies it according
-//  to the current (internal) channel parameters,
-//  mixes the per channel samples into the global
-//  mixbuffer, clamping it to the allowed range,
-//  and sets up everything for transferring the
-//  contents of the mixbuffer to the (two)
-//  hardware channels (left and right, that is).
+// This function loops all active (internal) sound channels, retrieves a given number of samples
+// from the raw sound data, modifies it according to the current (internal) channel parameters,
+// mixes the per channel samples into the global mixbuffer, clamping it to the allowed range, and
+// sets up everything for transferring the contents of the mixbuffer to the (two) hardware
+// channels (left and right, that is).
 //
 // This function currently supports only 16bit.
-//
 void I_UpdateSound()
 {
-#ifdef SNDINTR
     // Debug. Count buffer misses with interrupt.
     static int misses = 0;
-#endif
-
 
     // Mix current sound data.
     // Data, from raw sound, for right and left.
@@ -596,7 +476,6 @@ void I_UpdateSound()
         rightout += step;
     }
 
-#ifdef SNDINTR
     // Debug check.
     if (flag)
     {
@@ -606,13 +485,12 @@ void I_UpdateSound()
 
     if (misses > 10)
     {
-        fprintf(stderr, "I_SoundUpdate: missed 10 buffer writes\n");
+        std::cerr << "I_SoundUpdate: missed 10 buffer writes\n";
         misses = 0;
     }
 
     // Increment flag for update.
     flag++;
-#endif
 }
 
 // 
@@ -623,11 +501,11 @@ void I_UpdateSound()
 // Mixing now done synchronous, and
 //  only output be done asynchronous?
 //
-void
-I_SubmitSound()
+void I_SubmitSound()
 {
     // Write it to DSP device.
-    _write(audio_fd, mixbuffer, SAMPLECOUNT * BUFMUL);
+    if (audio_fd >= 0)
+        _write(audio_fd, mixbuffer, SAMPLECOUNT * BUFMUL);
 }
 
 void I_UpdateSoundParams
@@ -647,81 +525,43 @@ void I_UpdateSoundParams
 
 void I_ShutdownSound()
 {
-#ifdef SNDSERV
-    if (sndserver)
-    {
-        // Send a "quit" command.
-        fprintf(sndserver, "q\n");
-        fflush(sndserver);
-    }
-#else
-    // Wait till all pending sounds are finished.
-    int done = 0;
-    int i;
-
-
     // FIXME (below).
-    fprintf(stderr, "I_ShutdownSound: NOT finishing pending sounds\n");
-    fflush(stderr);
+    std::cerr << "I_ShutdownSound: NOT finishing pending sounds\n";
+    std::cerr.flush();
 
+    // Wait till all pending sounds are finished.
+    bool done = false;
     while (!done)
     {
-        for (i = 0; i < 8 && !channels[i]; i++);
+        for (int32 i = 0; i < 8 && !channels[i]; i++);
 
         // FIXME. No proper channel output.
         //if (i==8)
-        done = 1;
+        done = true;
     }
-#ifdef SNDINTR
+
     I_SoundDelTimer();
-#endif
 
     // Cleaning up -releasing the DSP device.
-    close(audio_fd);
-#endif
-
-    // Done.
-    return;
+    if (audio_fd >= 0)
+        _close(audio_fd);
 }
 
 void I_InitSound()
 {
-#ifdef SNDSERV
-    char buffer[256];
-
-    if (char* waddir = nullptr; _dupenv_s(&waddir, nullptr, "DOOMWADDIR") == 0)
-    {
-        sprintf_s(buffer, "%s/%s", waddir, sndserver_filename);
-        free(waddir);
-    }
-    else
-        sprintf_s(buffer, "%s", sndserver_filename);
-
-    // start sound process
-    if (!_access(buffer, 0))
-    {
-        strcat_s(buffer, " -quiet");
-        sndserver = _popen(buffer, "w");
-    }
-    else
-        fprintf(stderr, "Could not start sound server [%s]\n", buffer);
-#else
-
     int i;
 
-#ifdef SNDINTR
     fprintf(stderr, "I_SoundSetTimer: %d microsecs\n", SOUND_INTERVAL);
     I_SoundSetTimer(SOUND_INTERVAL);
-#endif
 
     // Secure and configure sound device first.
     fprintf(stderr, "I_InitSound: ");
 
-    audio_fd = open("/dev/dsp", O_WRONLY);
-    if (audio_fd < 0)
+    audio_fd = -1;
+    if (_sopen_s(&audio_fd, "/dev/dsp", _O_WRONLY, _SH_DENYWR, _S_IREAD) == -1)
         fprintf(stderr, "Could not open /dev/dsp\n");
 
-
+#if 0
     i = 11 | (2 << 16);
     myioctl(audio_fd, SNDCTL_DSP_SETFRAGMENT, &i);
     myioctl(audio_fd, SNDCTL_DSP_RESET, 0);
@@ -739,7 +579,7 @@ void I_InitSound()
         myioctl(audio_fd, SNDCTL_DSP_SETFMT, &i);
     else
         fprintf(stderr, "Could not play signed 16 data\n");
-
+#endif
     fprintf(stderr, " configured audio device\n");
 
 
@@ -770,18 +610,11 @@ void I_InitSound()
 
     // Finished initialization.
     fprintf(stderr, "I_InitSound: sound module ready\n");
-
-#endif
 }
 
-
-
-
-//
 // MUSIC API.
 // Still no music done.
 // Remains. Dummies.
-//
 void I_InitMusic() {}
 void I_ShutdownMusic() {}
 
@@ -838,22 +671,11 @@ int I_QrySongPlaying(int handle)
     return looping || musicdies > gametic;
 }
 
-
-
-//
 // Experimental stuff.
-// A Linux timer interrupt, for asynchronous
-//  sound output.
-// I ripped this out of the Timer class in
-//  our Difference Engine, including a few
+// A Linux timer interrupt, for asynchronous sound output.
+// I ripped this out of the Timer class in our Difference Engine, including a few
 //  SUN remains...
-//  
-#ifdef sun
-typedef     sigset_t        tSigSet;
-#else    
 typedef     int             tSigSet;
-#endif
-
 
 // We might use SIGVTALRM and ITIMER_VIRTUAL, if the process
 //  time independend timer happens to get lost due to heavy load.
@@ -874,7 +696,8 @@ void CALLBACK I_HandleSoundTimer(PVOID /*lpParamter*/, BOOLEAN /*TimerOrWaitFire
     {
         // See I_SubmitSound().
         // Write it to DSP device.
-        _write(audio_fd, mixbuffer, SAMPLECOUNT * BUFMUL);
+        if (audio_fd >= 0)
+            _write(audio_fd, mixbuffer, SAMPLECOUNT * BUFMUL);
 
         // Reset flag counter.
         flag = 0;
@@ -922,16 +745,15 @@ int I_SoundSetTimer(int duration_of_tick)
     return res;
 #endif
 
-    PHANDLE handle = nullptr;
-    CreateTimerQueueTimer(handle, nullptr, I_HandleSoundTimer, nullptr, duration_of_tick, duration_of_tick, 0);
+    HANDLE handle = nullptr;
+    CreateTimerQueueTimer(&handle, nullptr, I_HandleSoundTimer, nullptr, duration_of_tick, duration_of_tick, 0);
     return 0;
 }
-
 
 // Remove the interrupt. Set duration to zero.
 void I_SoundDelTimer()
 {
     // Debug.
     if (I_SoundSetTimer(0) == -1)
-        fprintf(stderr, "I_SoundDelTimer: failed to remove interrupt. Doh!\n");
+        std::cerr << "I_SoundDelTimer: failed to remove interrupt. Doh!\n";
 }
