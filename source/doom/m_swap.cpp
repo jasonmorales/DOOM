@@ -15,9 +15,9 @@
 //	Endianess handling, swapping 16bit and 32bit.
 //
 //-----------------------------------------------------------------------------
-#ifdef __GNUG__
-#pragma implementation "m_swap.h"
-#endif
+import std;
+#define __STD_MODULE__
+
 #include "m_swap.h"
 
 

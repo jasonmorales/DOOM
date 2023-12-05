@@ -15,6 +15,9 @@
 //	Random number LUT.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 //
 // M_Random
 // Returns a 0-255 number

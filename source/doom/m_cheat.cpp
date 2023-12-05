@@ -15,6 +15,8 @@
 //	Cheat sequence checking.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "m_cheat.h"
 

@@ -19,8 +19,6 @@
 import std;
 #define __STD_MODULE__
 
-#include <math.h>
-
 #include "d_main.h"
 #include "z_zone.h"
 

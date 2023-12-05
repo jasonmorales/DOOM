@@ -29,9 +29,6 @@ import std;
 #include "d_main.h"
 #include "m_misc.h"
 
-#include <stdlib.h>
-#include <math.h>
-
 
 extern Doom* g_doom;
 
@@ -330,8 +327,8 @@ R_PointToDist
     fixed_t	temp;
     fixed_t	dist;
 
-    dx = abs(x - viewx);
-    dy = abs(y - viewy);
+    dx = std::abs(x - viewx);
+    dy = std::abs(y - viewy);
 
     if (dy > dx)
     {
@@ -638,13 +635,13 @@ bool Render::CheckSetViewSize()
     for (int32 i = 0; i < viewheight; i++)
     {
         fixed_t dy = ((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2;
-        dy = abs(dy);
+        dy = std::abs(dy);
         yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT, dy);
     }
 
     for (int32 i = 0; i < viewwidth; i++)
     {
-        fixed_t cosadj = abs(finecosine[xtoviewangle[i] >> ANGLETOFINESHIFT]);
+        fixed_t cosadj = std::abs(finecosine[xtoviewangle[i] >> ANGLETOFINESHIFT]);
         distscale[i] = FixedDiv(FRACUNIT, cosadj);
     }
 

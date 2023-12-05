@@ -29,15 +29,15 @@
 //	
 //    
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
+#include "types/numbers.h"
+
 #include "tables.h"
 
 
-
-
-int
-SlopeDiv
-(unsigned	num,
-    unsigned	den)
+int32 SlopeDiv(unsigned	num, unsigned den)
 {
     unsigned 	ans;
 

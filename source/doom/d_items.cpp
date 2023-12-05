@@ -11,9 +11,9 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 // We are referring to sprite numbers.
 #include "info.h"

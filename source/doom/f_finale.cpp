@@ -34,8 +34,6 @@ import std;
 #include "r_state.h"
 #include "d_main.h"
 
-#include <ctype.h>
-
 
 extern Doom* g_doom;
 extern GameState wipegamestate;

@@ -11,16 +11,7 @@
 // FITNESS FOR A PARTICULAR PURPOSE. See the DOOM Source Code License
 // for more details.
 //
-// DESCRIPTION:
-//
-//
 //-----------------------------------------------------------------------------
 #pragma once
-
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 
 boolean	P_GivePower(player_t*, int);

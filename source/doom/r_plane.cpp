@@ -20,8 +20,6 @@
 import std;
 #define __STD_MODULE__
 
-#include <stdlib.h>
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "w_wad.h"
@@ -417,7 +415,7 @@ void R_DrawPlanes()
             flattranslation[pl->picnum],
             PU_STATIC);
 
-        planeheight = abs(pl->height - viewz);
+        planeheight = std::abs(pl->height - viewz);
         light = (pl->lightlevel >> LIGHTSEGSHIFT) + extralight;
 
         if (light >= LIGHTLEVELS)

@@ -21,7 +21,7 @@
 
 #include "doomtype.h"
 
-boolean M_WriteFile(char const* name, void* source, uint32 length);
+bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);
 
 void M_ScreenShot();

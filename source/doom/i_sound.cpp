@@ -28,27 +28,10 @@ import std;
 
 #include "doomdef.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-#include <math.h>
-
-#include <time.h>
-#include <sys/types.h>
-
-#include <io.h>
-
-#include <fcntl.h>
-
-// Timer stuff. Experimental.
-#include <time.h>
-#include <signal.h>
-
 #include "system/windows.h"
 
-#include <threadpoollegacyapiset.h>
-
+#include <cstdlib>
+#include <io.h>
 
 // UNIX hack, to be removed.
 #ifdef SNDSERV

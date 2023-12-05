@@ -26,8 +26,6 @@
 #include <format>
 #endif
 
-#include <stdint.h>
-
 // Called by DoomMain.
 void I_Init();
 

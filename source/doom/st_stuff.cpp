@@ -20,8 +20,6 @@
 import std;
 #define __STD_MODULE__
 
-#include <stdio.h>
-
 #include "i_system.h"
 #include "i_video.h"
 #include "z_zone.h"

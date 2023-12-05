@@ -24,11 +24,9 @@
 #include <filesystem>
 #endif
 
-#include <stdint.h>
 
-//
 // TYPES
-//
+
 typedef struct
 {
     // Should be "IWAD" or "PWAD".

@@ -34,12 +34,6 @@ import std;
 #include <GL/wglew.h>
 #include <gl/gl.h>
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <time.h>
-#include <sys/types.h>
-#include <signal.h>
-
 #include "utility/bits.h"
 
 #define POINTER_WARP_COUNTDOWN	1

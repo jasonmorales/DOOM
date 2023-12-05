@@ -30,9 +30,6 @@ import std;
 #include "doomstat.h"
 #include "d_main.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 
 #define MINZ				(FRACUNIT*4)
 #define BASEYCENTER			100
@@ -316,7 +313,7 @@ void R_DrawVisSprite(vissprite_t* vis, [[maybe_unused]] int x1, [[maybe_unused]]
             ((vis->mobjflags & MF_TRANSLATION) >> (MF_TRANSSHIFT - 8));
     }
 
-    dc_iscale = abs(vis->xiscale) >> detailshift;
+    dc_iscale = std::abs(vis->xiscale) >> detailshift;
     dc_texturemid = vis->texturemid;
     frac = vis->startfrac;
     spryscale = vis->scale;
@@ -360,7 +357,7 @@ void R_ProjectSprite(mobj_t* thing)
     auto tx = -(gyt + gxt);
 
     // too far off the side?
-    if (abs(tx) > (tz << 2))
+    if (std::abs(tx) > (tz << 2))
         return;
 
     // decide which patch to use for sprite relative to player

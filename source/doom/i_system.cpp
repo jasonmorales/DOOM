@@ -26,13 +26,8 @@ import std;
 #include "i_system.h"
 #include "d_main.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include <stdarg.h>
-#include <time.h>
-
+#include <cstdlib>
+#include <ctime>
 
 extern Doom* g_doom;
 

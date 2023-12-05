@@ -34,10 +34,10 @@ import std;
 #include "doomstat.h"
 #include "r_sky.h"
 
-#include <malloc.h>
-#include <inttypes.h>
-
 #include "r_data.h"
+
+#include <malloc.h>
+
 
 // Graphics.
 // DOOM graphics for walls and sprites

@@ -15,6 +15,9 @@
 //	Put all global state variables here.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
+
 #include "doomstat.h"
 
 // Game Mode - identify IWAD as shareware, retail etc.

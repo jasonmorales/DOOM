@@ -15,6 +15,8 @@
 //	Globally defined strings.
 // 
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "dstrings.h"
 

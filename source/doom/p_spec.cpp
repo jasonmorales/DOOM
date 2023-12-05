@@ -44,8 +44,6 @@ import std;
 // Data.
 #include "sounds.h"
 
-#include <stdlib.h>
-
 
 // Animating textures and planes
 // There is another anim_t used in wi_stuff, unrelated.

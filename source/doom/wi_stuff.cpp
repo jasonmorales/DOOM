@@ -18,8 +18,6 @@
 import std;
 #define __STD_MODULE__
 
-#include <stdio.h>
-
 #include "z_zone.h"
 
 #include "m_random.h"

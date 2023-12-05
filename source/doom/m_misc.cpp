@@ -46,33 +46,19 @@ import std;
 
 #include "types/strings.h"
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <stdlib.h>
-
-#include <ctype.h>
-#include <io.h>
-
 
 extern Doom* g_doom;
 
 
 Settings::DirectoryType* Settings::settings = nullptr;
 
-boolean M_WriteFile(char const* name, void* source, uint32 length)
+bool M_WriteFile(const filesys::path& path, const char* source, uint32 length)
 {
-    int handle = 0;
-    _sopen_s(&handle, name, _O_WRONLY | _O_CREAT | _O_TRUNC | _O_BINARY, _SH_DENYWR, _S_IREAD);
-
-    if (handle == -1)
+    std::ofstream file(path, std::ios_base::binary);
+    if (!file.is_open())
         return false;
 
-    uint32 count = _write(handle, source, length);
-    _close(handle);
-
-    if (count < length)
-        return false;
+    file.write(source, length);
 
     return true;
 }
@@ -259,11 +245,7 @@ typedef struct
 } pcx_t;
 
 // WritePCXfile
-void WritePCXfile(char* filename,
-    byte* data,
-    int		width,
-    int		height,
-    byte* palette)
+void WritePCXfile(const filesys::path& path, byte* data, int32 width, int32 height, byte* palette)
 {
     pcx_t* pcx;
     byte* pack;
@@ -308,7 +290,7 @@ void WritePCXfile(char* filename,
 
     // write output file
     auto length = static_cast<uint32>(pack - reinterpret_cast<byte*>(pcx));
-    M_WriteFile(filename, pcx, length);
+    M_WriteFile(path, reinterpret_cast<char*>(pcx), length);
 
     Z_Free(pcx);
 }
@@ -319,22 +301,19 @@ void M_ScreenShot()
     auto* linear = g_doom->GetVideo()->CopyScreen(2);
 
     // find a file name to save it to
-    char lbmname[12];
-    strcpy_s(lbmname, "DOOM00.pcx");
-
-    char i = 0;
-    for (; i <= 99; i++)
+    filesys::path path;
+    int32 i = 0;
+    for (; i <= 999; ++i)
     {
-        lbmname[4] = i / 10 + '0';
-        lbmname[5] = i % 10 + '0';
-        if (_access(lbmname, 0) == -1)
-            break;	// file doesn't exist
+        path = std::format("DOOM{:03}.pcx", i);
+        if (!filesys::exists(path))
+            break;
     }
-    if (i == 100)
+    if (i > 999)
         I_Error("M_ScreenShot: Couldn't create a PCX");
 
     // save the pcx file
-    WritePCXfile(lbmname, linear, SCREENWIDTH, SCREENHEIGHT, W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+    WritePCXfile(path, linear, SCREENWIDTH, SCREENHEIGHT, W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
 
     players[consoleplayer].message = "screen shot";
 }

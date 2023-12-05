@@ -16,6 +16,8 @@
 //   and skill level, and display parameters.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "doomdef.h"
 

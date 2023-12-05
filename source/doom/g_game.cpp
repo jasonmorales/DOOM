@@ -49,9 +49,6 @@ import std;
 extern Doom* g_doom;
 
 
-#include <string.h>
-#include <stdlib.h>
-
 const filesys::path Game::SavePath = "./saves";
 
 boolean	G_CheckDemoStatus(Doom* doom);
@@ -1469,7 +1466,7 @@ boolean G_CheckDemoStatus(Doom* doom)
     if (doom->IsDemoRecording())
     {
         *demo_p++ = DEMOMARKER;
-        M_WriteFile(demoname, demobuffer, static_cast<uint32>(demo_p - demobuffer));
+        M_WriteFile(demoname, reinterpret_cast<char*>(demobuffer), static_cast<uint32>(demo_p - demobuffer));
         Z_Free(demobuffer);
         doom->SetDemoRecording(false);
         I_Error("Demo {} recorded", demoname);

@@ -22,8 +22,6 @@ import std;
 #include "i_system.h"
 #include "m_fixed.h"
 
-#include <stdlib.h>
-
 
 // Fixme. __USE_C_FIXED__ or something.
 
@@ -40,7 +38,7 @@ FixedMul
 //
 fixed_t FixedDiv(fixed_t a, fixed_t b)
 {
-    if ((abs(a) >> 14) >= abs(b))
+    if ((std::abs(a) >> 14) >= std::abs(b))
         return (a ^ b) < 0 ? std::numeric_limits<fixed_t>::min() : std::numeric_limits<fixed_t>::max();
 
     return FixedDiv2(a, b);

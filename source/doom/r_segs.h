@@ -17,14 +17,4 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-
-void
-R_RenderMaskedSegRange
-(drawseg_t* ds,
-    int		x1,
-    int		x2);
+void R_RenderMaskedSegRange(drawseg_t* ds, int32 x1, int32 x2);

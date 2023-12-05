@@ -26,8 +26,6 @@ import std;
 #include "r_local.h"
 #include "r_sky.h"
 
-#include <stdlib.h>
-
 
 // OPTIMIZE: closed two sided lines as single sided
 
@@ -387,7 +385,7 @@ R_StoreWallRange
 
     // calculate rw_distance for scale calculation
     rw_normalangle = curline->angle + ANG90;
-    offsetangle = abs(static_cast<int32_t>(rw_normalangle - rw_angle1));
+    offsetangle = std::abs(static_cast<int32_t>(rw_normalangle - rw_angle1));
 
     if (offsetangle > ANG90)
         offsetangle = ANG90;

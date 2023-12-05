@@ -25,19 +25,13 @@ import std;
 #include "w_wad.h"
 #include "z_zone.h"
 
+#include <cstring>
 #include <malloc.h>
 #include <io.h>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
-#include <memory.h>
-#include <stdint.h>
-#include <ctype.h>
+#include <sys/stat.h>
 
-//
 // GLOBALS
-//
 
 // Location of each lump on disk.
 lumpinfo_t* lumpinfo;
@@ -83,7 +77,7 @@ void ExtractFileBase(const char* path, char* dest)
         if (++length == 9)
             I_Error("Filename base of {} >8 chars", path);
 
-        *dest++ = (char)toupper(*src++);
+        *dest++ = (char)std::toupper(*src++);
     }
 }
 

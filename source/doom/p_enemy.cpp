@@ -20,8 +20,6 @@
 import std;
 #define __STD_MODULE__
 
-#include <stdlib.h>
-
 #include "m_random.h"
 #include "i_system.h"
 
@@ -386,8 +384,7 @@ void P_NewChaseDir(mobj_t* actor)
     }
 
     // try other directions
-    if (P_Random() > 200
-        || abs(deltay) > abs(deltax))
+    if (P_Random() > 200 || std::abs(deltay) > std::abs(deltax))
     {
         auto tdir = d[1];
         d[1] = d[2];
@@ -1119,8 +1116,7 @@ boolean PIT_VileCheck(mobj_t* thing)
 
     maxdist = thing->info->radius + mobjinfo[MT_VILE].radius;
 
-    if (abs(thing->x - viletryx) > maxdist
-        || abs(thing->y - viletryy) > maxdist)
+    if (std::abs(thing->x - viletryx) > maxdist || std::abs(thing->y - viletryy) > maxdist)
         return true;		// not actually touching
 
     corpsehit = thing;
@@ -1135,12 +1131,7 @@ boolean PIT_VileCheck(mobj_t* thing)
     return false;		// got one, so stop checking
 }
 
-
-
-//
-// A_VileChase
 // Check for ressurecting a body
-//
 void A_VileChase(mobj_t* actor)
 {
     int			xl;

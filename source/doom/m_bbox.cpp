@@ -18,5 +18,7 @@
 //	PCX Screenshots.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
 #include "m_bbox.h"

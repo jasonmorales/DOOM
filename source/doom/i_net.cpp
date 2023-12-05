@@ -15,12 +15,6 @@
 import std;
 #define __STD_MODULE__
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-
-#include <errno.h>
-
 #include "i_system.h"
 #include "d_event.h"
 #include "d_net.h"
@@ -34,6 +28,8 @@ import std;
 
 #include "system/windows.h"
 #include <winsock.h>
+
+#include <cstdlib>
 
 // For some odd reason...
 #define ntohl(x) \
