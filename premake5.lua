@@ -125,11 +125,3 @@ workspace 'Doom'
 		location 'project'
 		
 		files 'source/serial_driver/**'
-
-	project 'sound_server'
-		kind 'None'
-		characterset 'unicode'
-
-		location 'project'
-		
-		files 'source/sound_server/**'
