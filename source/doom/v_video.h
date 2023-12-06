@@ -36,7 +36,6 @@
 // Screen 0 is the screen updated by I_Update screen.
 // Screen 1 is an extra buffer.
 extern	byte	gammatable[5][256];
-extern	int32	usegamma;
 
 void V_CopyRect(int		srcx,
     int		srcy,

@@ -79,22 +79,15 @@ time_t I_GetTime()
     return now;
 }
 
-//
-// I_Init
-//
 void I_Init()
 {
-    I_InitSound();
-    //  I_InitGraphics();
+    Sound::Init();
 }
 
-//
-// I_Quit
-//
 void I_Quit()
 {
     D_QuitNetGame();
-    I_ShutdownSound();
+    Sound::Shutdown();
     I_ShutdownMusic();
     Settings::Save();
     I_ShutdownGraphics();

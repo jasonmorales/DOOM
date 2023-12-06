@@ -97,6 +97,11 @@ Setting<int32> key_use{"key_use", ' '};
 Setting<int32> key_strafe{"key_strafe", KEY_RALT};
 Setting<int32> key_speed{"key_speed", KEY_RSHIFT};
 
+// machine-independent sound params
+Setting<int32> numChannels{"snd_channels", 3};
+
+Setting<int32> usegamma{"usegamma", 0};
+
 extern int32	mousebfire;
 extern int32	mousebstrafe;
 extern int32	mousebforward;
@@ -111,16 +116,6 @@ extern int	viewheight;
 
 extern int32	mouseSensitivity;
 extern int32	showMessages;
-
-// machine-independent sound params
-extern	int32	numChannels;
-
-
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-extern const char* sndserver_filename;
-extern int	mb_used;
-#endif
 
 extern const char* chat_macros[];
 
@@ -146,10 +141,6 @@ default_t	defaults[] =
     {"joyb_strafe",&joybstrafe,1},
     {"joyb_use",&joybuse,3},
     {"joyb_speed",&joybspeed,2},
-
-    {"snd_channels",&numChannels, 3},
-
-    {"usegamma",&usegamma, 0},
 
     {"chatmacro0", chat_macros + 0, 0 | 0x8000 },
     {"chatmacro1", chat_macros + 1, 1 | 0x8000 },

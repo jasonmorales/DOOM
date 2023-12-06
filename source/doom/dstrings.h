@@ -27,6 +27,6 @@
 #define DEVMAPS "devmaps"
 
 // QuitDOOM messages
-#define NUM_QUITMESSAGES   22
+#define NUM_QUITMESSAGES   15
 
 extern const char* endmsg[];

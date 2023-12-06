@@ -23,16 +23,8 @@
 #include "doomstat.h"
 #include "sounds.h"
 
-
-// Init at program start...
-void I_InitSound();
-
-// ... update sound buffer and audio device at runtime...
-void I_UpdateSound();
-void I_SubmitSound();
-
-// ... shut down and relase at program termination.
-void I_ShutdownSound();
+#include "types/numbers.h"
+#include "containers/vector.h"
 
 //  SFX I/O
 
@@ -41,12 +33,6 @@ void I_SetChannels();
 
 // Get raw data lump index for sound descriptor.
 intptr_t I_GetSfxLumpNum(sfxinfo_t* sfxinfo);
-
-// Starts a sound in a particular sound channel.
-int32 I_StartSound(int32 id, int32 vol, int32 sep, int32 pitch, int32 priority);
-
-// Stops a sound channel.
-void I_StopSound(int32 handle);
 
 // Called by S_*() functions to see if a channel is still playing.
 // Returns 0 if no longer playing, 1 if playing.
@@ -80,3 +66,39 @@ void I_StopSong(int32 handle);
 
 // See above (register), then think backwards
 void I_UnRegisterSong(int32 handle);
+
+class Sound
+{
+public:
+    // Init at program start...
+    static void Init();
+
+    // ... update sound buffer and audio device at runtime...
+    static void Update();
+
+    // ... shut down and relase at program termination.
+    static void Shutdown();
+
+    // Starts a sound in a particular sound channel.
+    static int32 Play(int32 id, int32 vol, int32 sep, int32 pitch, int32 priority);
+    static void Stop(int32 handle);
+
+private:
+    static constexpr const double bufferLengthInSeconds = 0.05; //1.0 / 35; //0.05;
+
+    static struct IMMDevice* device;
+    static struct IAudioClient* client;
+    static struct IAudioRenderClient* renderer;
+
+    static int32 samplesPerSec;
+    static int32 bitsPerSample;
+    static int32 numChannels;
+    static int32 frameBytes;
+
+    static size_t mixBufferSize;
+    static byte* mixBuffer;
+    static uint32 bufferSizeInFrames;
+
+    //static vector<std::pair<double, Synth::Function*>> functions;
+    static vector<uint32> free;
+};

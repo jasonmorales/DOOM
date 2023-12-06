@@ -17,6 +17,7 @@ import std;
 
 #include "s_sound.h"
 
+#include "m_misc.h"
 #include "i_system.h"
 #include "i_sound.h"
 #include "sounds.h"
@@ -99,11 +100,6 @@ static bool mus_paused;
 // music currently being played
 static musicinfo_t* mus_playing = 0;
 
-// following is set
-//  by the defaults code in M_misc:
-// number of channels available
-int32			numChannels;
-
 static int		nextcleanup;
 
 
@@ -115,7 +111,7 @@ void S_StopChannel(int32 cnum)
 
     // stop the sound playing
     if (I_SoundIsPlaying(c->handle))
-        I_StopSound(c->handle);
+        Sound::Stop(c->handle);
 
     // check to see if other channels are playing the sound
     for (int32 i = 0; i < numChannels; ++i)
@@ -407,7 +403,7 @@ void S_StartSoundAtVolume(void* origin_p, int32 sfx_id, int32 volume)
         sfx->usefulness = 1;
 
     // Assigns the handle to one of the channels in the mix/output buffer.
-    channels[cnum].handle = I_StartSound(sfx_id, /*sfx->data,*/ volume, sep, pitch, priority);
+    channels[cnum].handle = Sound::Play(sfx_id, /*sfx->data,*/ volume, sep, pitch, priority);
 }
 
 void S_StartSound(void* origin, int32 sfx_id)

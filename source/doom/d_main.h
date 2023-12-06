@@ -52,7 +52,7 @@ class Game;
 class Doom
 {
 public:
-    static const int32 Version = 110;
+    static const int32 Version = 109;
 
     Doom() = default;
     ~Doom() = default;

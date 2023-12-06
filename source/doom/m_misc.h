@@ -170,3 +170,6 @@ extern Setting<int32> key_fire;
 extern Setting<int32> key_use;
 extern Setting<int32> key_strafe;
 extern Setting<int32> key_speed;
+
+extern Setting<int32> numChannels;
+extern Setting<int32> usegamma;

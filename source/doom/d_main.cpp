@@ -466,15 +466,8 @@ void Doom::Loop()
         // Update display, next frame, with current state.
         Display();
 
-#ifndef SNDSERV
         // Sound mixing for the buffer is snychronous.
-        I_UpdateSound();
-#endif
-        // Synchronous sound output is explicitly called.
-#ifndef SNDINTR
-        // Update sound output.
-        I_SubmitSound();
-#endif
+        Sound::Update();
     }
 }
 
