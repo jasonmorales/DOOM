@@ -42,15 +42,15 @@ static constexpr const int32 SOUND_INTERVAL = 500;
 // of the 16bit, 2 hardware channel (stereo) mixing buffer, and the samplerate of the raw data.
 
 // Needed for calling the actual sound output.
-static constexpr const int32 SAMPLECOUNT = 512;
-static constexpr const int32 NUM_CHANNELS = 8;
+static constexpr const uint32 SAMPLECOUNT = 512;
+static constexpr const uint32 NUM_CHANNELS = 8;
 
 // It is 2 for 16bit, and 2 for two channels.
-static constexpr const int32 BUFMUL = 4;
-static constexpr const int32 MIXBUFFERSIZE = SAMPLECOUNT * BUFMUL;
+static constexpr const uint32 BUFMUL = 4;
+static constexpr const uint32 MIXBUFFERSIZE = SAMPLECOUNT * BUFMUL;
 
-static constexpr const int32 SAMPLERATE = 11025;	// Hz
-static constexpr const int32 SAMPLESIZE = 2;   	// 16bit
+static constexpr const uint32 SAMPLERATE = 11025;	// Hz
+static constexpr const uint32 SAMPLESIZE = 2;   	// 16bit
 
 // The actual lengths of all sound effects.
 int 		lengths[NUMSFX];
@@ -125,7 +125,7 @@ void* getsfx(const char* sfxname, int32* len)
 
     // Now copy and pad.
     memcpy(paddedsfx, sfx, size);
-    for (int32 i = size; i < paddedsize + 8; ++i)
+    for (uint32 i = size; i < paddedsize + 8; ++i)
         paddedsfx[i] = 128;
 
     // Remove the cached lump.
@@ -487,18 +487,19 @@ void Sound::Update()
         I_Error("GetCurrentPadding failed: {}", result);
 
     uint32 numFramesAvailable = bufferSizeInFrames - paddingFrames;
-    assert(numFramesAvailable >= SAMPLECOUNT);
+    //assert(numFramesAvailable / 4 >= SAMPLECOUNT);
+    auto writeFrames = std::min(numFramesAvailable / 4, SAMPLECOUNT);
 
     // Grab all the available space in the shared buffer.
     byte* data = nullptr;
-    result = renderer->GetBuffer(numFramesAvailable, &data);
+    result = renderer->GetBuffer(writeFrames * 4, &data);
     if (FAILED(result))
         I_Error("GetBuffer failed: {}", result);
 
     auto* fp = reinterpret_cast<float*>(data);
     auto* mp = mixbuffer;
     auto to_float = [](int16 n){ return static_cast<float>(n) / std::numeric_limits<int16>::max(); };
-    for (int32 n = 0; n < SAMPLECOUNT; ++n)
+    for (uint32 n = 0; n < writeFrames; ++n)
     {
         *fp++ = to_float(*mp);
         *fp++ = to_float(*mp);
@@ -547,7 +548,7 @@ void Sound::Update()
     /**/
 
     int flags = 0;
-    result = renderer->ReleaseBuffer(numFramesAvailable, flags);
+    result = renderer->ReleaseBuffer(writeFrames * 4, flags);
     if (FAILED(result))
         I_Error("ReleaseBuffer failed: {}", result);
 }
@@ -568,7 +569,7 @@ void Sound::Shutdown()
     device = nullptr;
 }
 
-int32 Sound::Play(int32 id, int32 volume, int32 seperation, int32 pitch, int32 priority)
+int32 Sound::Play(int32 id, int32 volume, int32 seperation, int32 pitch, [[maybe_unused]] int32 priority)
 {
     // Starting a sound means adding it to the current list of active sounds in the internal channels.
     // As the SFX info struct contains e.g. a pointer to the raw data, it is ignored.
@@ -698,7 +699,7 @@ int32 Sound::Play(int32 id, int32 volume, int32 seperation, int32 pitch, int32 p
 #endif
 }
 
-void Sound::Stop(int32 handle)
+void Sound::Stop([[maybe_unused]] int32 handle)
 {
     /*
     if (handle >= functions.size())
