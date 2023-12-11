@@ -74,7 +74,7 @@ const char* t4text = T4TEXT;
 const char* t5text = T5TEXT;
 const char* t6text = T6TEXT;
 
-const char* finaletext;
+string_view finaletext;
 const char* finaleflat;
 
 int		castnum;
@@ -277,7 +277,7 @@ void F_Ticker()
     if (gamemode == GameMode::Doom2Commercial)
         return;
 
-    if (!finalestage && finalecount > strlen(finaletext) * TEXTSPEED + TEXTWAIT)
+    if (!finalestage && finalecount > finaletext.length() * TEXTSPEED + TEXTWAIT)
     {
         finalecount = 0;
         finalestage = 1;
@@ -292,19 +292,18 @@ void F_Ticker()
 //
 
 #include "hu_stuff.h"
-extern	patch_t* hu_font[HU_FONTSIZE];
+extern	const patch_t* hu_font[HU_FONTSIZE];
 
 
 void F_TextWrite()
 {
     int		x, y, w;
     int		count;
-    int		c;
     int		cx;
     int		cy;
 
     // erase the entire screen to a tiled background
-    auto src = W_CacheLumpName<byte>(finaleflat, PU_CACHE);
+    auto* src = WadManager::GetLumpData<byte>(finaleflat);
     byte* dest = g_doom->GetVideo()->GetScreen(0);
 
     for (y = 0; y < SCREENHEIGHT; y++)
@@ -324,16 +323,17 @@ void F_TextWrite()
     // draw some of the text onto the screen
     cx = 10;
     cy = 10;
-    const char* ch = finaletext;
+    int32 ch = 0;
 
     count = (finalecount - 10) / TEXTSPEED;
     if (count < 0)
         count = 0;
     for (; count; count--)
     {
-        c = *ch++;
-        if (!c)
+        auto c = finaletext[ch++];
+        if (ch >= finaletext.length())
             break;
+
         if (c == '\n')
         {
             cx = 10;
@@ -341,7 +341,7 @@ void F_TextWrite()
             continue;
         }
 
-        c = toupper(c) - HU_FONTSTART;
+        c = static_cast<char>(toupper(c)) - HU_FONTSTART;
         if (c < 0 || c> HU_FONTSIZE)
         {
             cx += 4;
@@ -521,29 +521,29 @@ void F_CastPrint(const char* text)
 //
 // F_CastDrawer
 //
-void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch);
+void V_DrawPatchFlipped(int x, int y, int scrn, const patch_t* patch);
 
 void F_CastDrawer()
 {
     // erase the entire screen to a background
-    g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("BOSSBACK", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("BOSSBACK"));
 
     F_CastPrint(castorder[castnum].name);
 
     // draw the current frame in the middle of the screen
     spritedef_t* sprdef = &sprites[caststate->sprite];
     spriteframe_t* sprframe = &sprdef->spriteframes[caststate->frame & FF_FRAMEMASK];
-    int lump = sprframe->lump[0];
+    int32 id = sprframe->lump[0];
     bool flip = (sprframe->flip[0] != 0);
 
-    auto patch = W_CacheLumpNum<patch_t>(lump + firstspritelump, PU_CACHE);
+    auto* patch = WadManager::GetLumpData<patch_t>(id + firstspritelump);
     if (flip)
         V_DrawPatchFlipped(160, 170, 0, patch);
     else
         g_doom->GetVideo()->DrawPatch(160, 170, 0, patch);
 }
 
-void F_DrawPatchCol(int x, patch_t* patch, int col)
+void F_DrawPatchCol(int x, const patch_t* patch, int col)
 {
     auto* column = (column_t*)((byte*)patch + (patch->columnofs[col]));
     auto* desttop = g_doom->GetVideo()->GetScreen(0) + x;
@@ -569,12 +569,11 @@ void F_BunnyScroll()
 {
     int		scrolled;
     int		x;
-    char	name[10];
     int		stage;
     static int	laststage;
 
-    auto p1 = W_CacheLumpName<patch_t>("PFUB2", PU_LEVEL);
-    auto p2 = W_CacheLumpName<patch_t>("PFUB1", PU_LEVEL);
+    auto* p1 = WadManager::GetLumpData<patch_t>("PFUB2");
+    auto* p2 = WadManager::GetLumpData<patch_t>("PFUB1");
 
     scrolled = 320 - (finalecount - 230) / 2;
     if (scrolled > 320)
@@ -594,7 +593,7 @@ void F_BunnyScroll()
         return;
     if (finalecount < 1180)
     {
-        g_doom->GetVideo()->DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, W_CacheLumpName<patch_t>("END0", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, WadManager::GetLumpData<patch_t>("END0"));
         laststage = 0;
         return;
     }
@@ -608,13 +607,10 @@ void F_BunnyScroll()
         laststage = stage;
     }
 
-    sprintf_s(name, "END%i", stage);
-    g_doom->GetVideo()->DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, W_CacheLumpName<patch_t>(name, PU_CACHE));
+    auto* patch = WadManager::GetLumpData<patch_t>(std::format("END{}", stage));
+    g_doom->GetVideo()->DrawPatch((SCREENWIDTH - 13 * 8) / 2, (SCREENHEIGHT - 8 * 8) / 2, 0, patch);
 }
 
-//
-// F_Drawer
-//
 void F_Drawer()
 {
     if (finalestage == 2)
@@ -631,18 +627,18 @@ void F_Drawer()
         {
         case 1:
             if (gamemode == GameMode::Doom1Retail)
-                g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
+                g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("CREDIT"));
             else
-                g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));
+                g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("HELP2"));
             break;
         case 2:
-            g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("VICTORY2", PU_CACHE));
+            g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("VICTORY2"));
             break;
         case 3:
             F_BunnyScroll();
             break;
         case 4:
-            g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("ENDPIC", PU_CACHE));
+            g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("ENDPIC"));
             break;
         }
     }

@@ -88,8 +88,8 @@ public:
     LRESULT HandleSystemEvent(const SystemEvent& event);
     void DeliverSystemMessages();
 
-    void SetPalette(byte* palette);
-    void DrawPatch(int32 x, int32 y, int32 screen, patch_t* patch);
+    void SetPalette(const byte* palette);
+    void DrawPatch(int32 x, int32 y, int32 screen, const patch_t* patch);
 
     byte* GetScreen(int32 n) const { return screens[n]; }
     byte* CopyScreen(int32 dest) const;

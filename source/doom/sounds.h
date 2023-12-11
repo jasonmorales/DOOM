@@ -18,15 +18,12 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-//
-// SoundFX struct.
-//
-typedef struct sfxinfo_struct	sfxinfo_t;
+#include "types/strings.h"
 
-struct sfxinfo_struct
+struct sfxinfo_t
 {
     // up to 6-character name
-    const char* name;
+    string_view name;
 
     // Sfx singularity (only one at a time)
     int		singularity;
@@ -55,29 +52,20 @@ struct sfxinfo_struct
     int		lumpnum;
 };
 
-
-
-
-//
-// MusicInfo struct.
-//
 struct musicinfo_t
 {
     // up to 6-character name
-    const char* name;
+    string_view name;
 
     // lump number of music
-    int		lumpnum;
+    int32 lumpnum = INVALID_ID;
 
     // music data
-    void* data;
+    const void* data = nullptr;
 
     // music handle once registered
-    int handle;
+    int32 handle = INVALID_ID;
 };
-
-
-
 
 // the complete set of sound effects
 extern sfxinfo_t	S_sfx[];
@@ -85,11 +73,9 @@ extern sfxinfo_t	S_sfx[];
 // the complete set of music
 extern musicinfo_t	S_music[];
 
-//
 // Identifiers for all music in game.
-//
 
-typedef enum
+enum musicenum_t
 {
     mus_None,
     mus_e1m1,
@@ -160,7 +146,7 @@ typedef enum
     mus_dm2ttl,
     mus_dm2int,
     NUMMUSIC
-} musicenum_t;
+};
 
 
 //

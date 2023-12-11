@@ -8,7 +8,7 @@
 #include <functional>
 #include <concepts>
 #endif
-#include <assert.h>
+#include <cassert>
 
 namespace nonstd
 {

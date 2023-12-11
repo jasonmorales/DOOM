@@ -30,6 +30,9 @@
 // as commands per game tick.
 #include "d_ticcmd.h"
 
+#include "types/strings.h"
+
+#include <cstring>
 
 // Player states.
 //
@@ -120,7 +123,7 @@ struct player_t
     int			secretcount;
 
     // Hint messages.
-    const char* message;
+    string message;
 
     // For screen flashing (red or bright).
     int			damagecount;

@@ -165,7 +165,7 @@ V_CopyRect
 // V_DrawPatchFlipped 
 // Masks a column based masked pic to the screen.
 // Flips horizontally, e.g. to mirror face.
-void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch)
+void V_DrawPatchFlipped(int x, int y, int scrn, const patch_t* patch)
 {
     int		count;
     int		col;

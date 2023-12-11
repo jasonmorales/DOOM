@@ -133,8 +133,6 @@ anim_t* lastanim;
 extern  short	numlinespecials;
 extern  line_t* linespeciallist[MAXLINEANIMS];
 
-
-
 void P_InitPicAnims()
 {
     //	Init animation
@@ -152,7 +150,7 @@ void P_InitPicAnims()
         }
         else
         {
-            if (W_CheckNumForName(animdefs[i].startname) == -1)
+            if (WadManager::GetLumpId(animdefs[i].startname) == INVALID_ID)
                 continue;
 
             lastanim->picnum = R_FlatNumForName(animdefs[i].endname);
@@ -1050,13 +1048,7 @@ void P_PlayerInSpecialSector(player_t* player)
     };
 }
 
-
-
-
-//
-// P_UpdateSpecials
 // Animate planes, scroll walls, etc.
-//
 bool levelTimer = false;
 int levelTimeCount;
 
@@ -1200,32 +1192,17 @@ int EV_DoDonut(line_t* line)
     return rtn;
 }
 
-
-
-//
 // SPECIAL SPAWNING
-//
 
-//
-// P_SpawnSpecials
-// After the map has been loaded, scan for specials
-//  that spawn thinkers
-//
+// After the map has been loaded, scan for specials that spawn thinkers
 short		numlinespecials;
 line_t* linespeciallist[MAXLINEANIMS];
-
 
 // Parses command line parameters.
 void P_SpawnSpecials()
 {
     sector_t* sector;
     int		i;
-    int		episode;
-
-    episode = 1;
-    if (W_CheckNumForName("texture2") >= 0)
-        episode = 2;
-
 
     // See if -TIMER needs to be used.
     levelTimer = false;

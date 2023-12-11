@@ -392,7 +392,7 @@ void S_StartSoundAtVolume(void* origin_p, int32 sfx_id, int32 volume)
 
     // get lumpnum if necessary
     if (sfx->lumpnum < 0)
-        sfx->lumpnum = I_GetSfxLumpNum(sfx);
+        sfx->lumpnum = W_GetNumForName(std::format("DS{}", sfx->name.to_upper()));
 
     // cache data if necessary
     if (!sfx->data)
@@ -540,12 +540,12 @@ void S_ChangeMusic(int32 musicnum, int32 looping)
     // get lumpnum if necessary
     if (!music->lumpnum)
     {
-        string name = std::format("d_{}", music->name);
+        string name = std::format("D_{}", music->name.to_upper());
         music->lumpnum = W_GetNumForName(name);
     }
 
     // load & register it
-    music->data = W_CacheLumpNum<void>(music->lumpnum, PU_MUSIC);
+    music->data = WadManager::GetLumpData(music->lumpnum);
     music->handle = I_RegisterSong(music->data);
 
     // play it
@@ -564,7 +564,7 @@ void S_StopMusic()
 
         I_StopSong(mus_playing->handle);
         I_UnRegisterSong(mus_playing->handle);
-        Z_ChangeTag(mus_playing->data, PU_CACHE);
+        //Z_ChangeTag(mus_playing->data, PU_CACHE);
 
         mus_playing->data = 0;
         mus_playing = 0;

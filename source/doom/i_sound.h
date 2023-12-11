@@ -31,9 +31,6 @@
 // Initialize channels?
 void I_SetChannels();
 
-// Get raw data lump index for sound descriptor.
-intptr_t I_GetSfxLumpNum(sfxinfo_t* sfxinfo);
-
 // Called by S_*() functions to see if a channel is still playing.
 // Returns 0 if no longer playing, 1 if playing.
 int I_SoundIsPlaying(int32 handle);
@@ -53,7 +50,7 @@ void I_PauseSong(int32 handle);
 void I_ResumeSong(int32 handle);
 
 // Registers a song handle to song data.
-int I_RegisterSong(void* data);
+int I_RegisterSong(const void* data);
 
 // Called by anything that wishes to start music.
 //  plays a song, and when the song is done,

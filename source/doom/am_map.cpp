@@ -275,7 +275,7 @@ static fixed_t scale_ftom;
 
 static player_t* plr; // the player represented by an arrow
 
-static patch_t* marknums[10]; // numbers used for marking by the automap
+static const patch_t* marknums[10]; // numbers used for marking by the automap
 static mpoint_t markpoints[AM_NUMMARKPOINTS]; // where the points are
 static int markpointnum = 0; // next point to be assigned
 
@@ -480,18 +480,16 @@ void AM_loadPics()
 {
     for (int i = 0; i < 10; i++)
     {
-        auto name = std::format("AMMNUM{}", i);
-        marknums[i] = W_CacheLumpName<patch_t>(name.c_str(), PU_STATIC);
+        marknums[i] = WadManager::GetLumpData<patch_t>(std::format("AMMNUM{}", i));
     }
 }
 
 void AM_unloadPics()
 {
-    int i;
-
-    for (i = 0; i < 10; i++)
+#if 0
+    for (int32 i = 0; i < 10; ++i)
         Z_ChangeTag(marknums[i], PU_CACHE);
-
+#endif 
 }
 
 void AM_clearMarks()
@@ -575,7 +573,6 @@ bool AM_Responder(const event_t& event)
 {
     static int cheatstate = 0;
     static int bigstate = 0;
-    static char buffer[20];
 
     bool rc = false;
 
@@ -643,8 +640,7 @@ bool AM_Responder(const event_t& event)
             plr->message = grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
             break;
         case AM_MARKKEY:
-            sprintf_s(buffer, "%s %d", AMSTR_MARKEDSPOT, markpointnum);
-            plr->message = buffer;
+            plr->message = std::format("{} {}", AMSTR_MARKEDSPOT, markpointnum);
             AM_addMark();
             break;
         case AM_CLEARMARKKEY:

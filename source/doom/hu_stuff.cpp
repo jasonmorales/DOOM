@@ -88,7 +88,7 @@ const char* player_names[] =
 
 char			chat_char; // remove later.
 static player_t* plr;
-patch_t* hu_font[HU_FONTSIZE];
+const patch_t* hu_font[HU_FONTSIZE];
 static hu_textline_t	w_title;
 bool			chat_on;
 static hu_itext_t	w_chat;
@@ -113,7 +113,7 @@ static bool		headsupactive = false;
 // The actual names can be found in DStrings.h.
 //
 
-const char* mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
+string_view mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
 {
 
     HUSTR_E1M1,
@@ -167,7 +167,7 @@ const char* mapnames[] =	// DOOM shareware/registered/retail (Ultimate) names.
     "NEWLEVEL"
 };
 
-const char* mapnames2[] =	// DOOM 2 map names.
+string_view mapnames2[] =	// DOOM 2 map names.
 {
     HUSTR_1,
     HUSTR_2,
@@ -205,95 +205,11 @@ const char* mapnames2[] =	// DOOM 2 map names.
     HUSTR_32
 };
 
-
-const char* mapnamesp[] =	// Plutonia WAD map names.
-{
-    PHUSTR_1,
-    PHUSTR_2,
-    PHUSTR_3,
-    PHUSTR_4,
-    PHUSTR_5,
-    PHUSTR_6,
-    PHUSTR_7,
-    PHUSTR_8,
-    PHUSTR_9,
-    PHUSTR_10,
-    PHUSTR_11,
-
-    PHUSTR_12,
-    PHUSTR_13,
-    PHUSTR_14,
-    PHUSTR_15,
-    PHUSTR_16,
-    PHUSTR_17,
-    PHUSTR_18,
-    PHUSTR_19,
-    PHUSTR_20,
-
-    PHUSTR_21,
-    PHUSTR_22,
-    PHUSTR_23,
-    PHUSTR_24,
-    PHUSTR_25,
-    PHUSTR_26,
-    PHUSTR_27,
-    PHUSTR_28,
-    PHUSTR_29,
-    PHUSTR_30,
-    PHUSTR_31,
-    PHUSTR_32
-};
-
-
-const char* mapnamest[] =	// TNT WAD map names.
-{
-    THUSTR_1,
-    THUSTR_2,
-    THUSTR_3,
-    THUSTR_4,
-    THUSTR_5,
-    THUSTR_6,
-    THUSTR_7,
-    THUSTR_8,
-    THUSTR_9,
-    THUSTR_10,
-    THUSTR_11,
-
-    THUSTR_12,
-    THUSTR_13,
-    THUSTR_14,
-    THUSTR_15,
-    THUSTR_16,
-    THUSTR_17,
-    THUSTR_18,
-    THUSTR_19,
-    THUSTR_20,
-
-    THUSTR_21,
-    THUSTR_22,
-    THUSTR_23,
-    THUSTR_24,
-    THUSTR_25,
-    THUSTR_26,
-    THUSTR_27,
-    THUSTR_28,
-    THUSTR_29,
-    THUSTR_30,
-    THUSTR_31,
-    THUSTR_32
-};
-
-
-const char* shiftxform;
-
-const char english_shiftxform[] =
+const char shiftxform[] =
 {
 
-    0,
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-    21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-    31,
+     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+    16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
     ' ', '!', '"', '#', '$', '%', '&',
     '"', // shift-'
     '(', ')', '*', '+',
@@ -316,53 +232,25 @@ const char english_shiftxform[] =
     '<',
     '+', // shift-=
     '>', '?', '@',
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-    'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     '[', // shift-[
     '!', // shift-backslash - OH MY GOD DOES WATCOM SUCK
     ']', // shift-]
     '"', '_',
     '\'', // shift-`
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-    'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     '{', '|', '}', '~', 127
 };
 
-char frenchKeyMap[128] =
-{
-    0,
-    1,2,3,4,5,6,7,8,9,10,
-    11,12,13,14,15,16,17,18,19,20,
-    21,22,23,24,25,26,27,28,29,30,
-    31,
-    ' ','!','"','#','$','%','&','%','(',')','*','+',';','-',':','!',
-    '0','1','2','3','4','5','6','7','8','9',':','M','<','=','>','?',
-    '@','Q','B','C','D','E','F','G','H','I','J','K','L',',','N','O',
-    'P','A','R','S','T','U','V','Z','X','Y','W','^','\\','$','^','_',
-    '@','Q','B','C','D','E','F','G','H','I','J','K','L',',','N','O',
-    'P','A','R','S','T','U','V','Z','X','Y','W','^','\\','$','^',127
-};
-
-char ForeignTranslation(unsigned char ch)
-{
-    return ch < 128 ? frenchKeyMap[ch] : ch;
-}
-
 void HU_Init()
 {
-
-    int		i;
-    int		j;
-    char	buffer[9];
-
-    shiftxform = english_shiftxform;
-
     // load the heads-up font
-    j = HU_FONTSTART;
-    for (i = 0;i < HU_FONTSIZE;i++)
+    int32 j = HU_FONTSTART;
+    for (int32 i = 0; i < HU_FONTSIZE; ++i)
     {
-        sprintf_s(buffer, "STCFN%.3d", j++);
-        hu_font[i] = W_CacheLumpName<patch_t>(buffer, PU_STATIC);
+        hu_font[i] = WadManager::GetLumpData<patch_t>(std::format("STCFN{:03d}", j++));
     }
 }
 
@@ -385,18 +273,12 @@ void HU_Start()
     chat_on = false;
 
     // create the message widget
-    HUlib_initSText(&w_message,
-        HU_MSGX, HU_MSGY, HU_MSGHEIGHT,
-        hu_font,
-        HU_FONTSTART, &message_on);
+    HUlib_initSText(&w_message, HU_MSGX, HU_MSGY, HU_MSGHEIGHT, hu_font, HU_FONTSTART, &message_on);
 
     // create the map title widget
-    HUlib_initTextLine(&w_title,
-        HU_TITLEX, HU_TITLEY,
-        hu_font,
-        HU_FONTSTART);
+    HUlib_initTextLine(&w_title, HU_TITLEX, HU_TITLEY, hu_font, HU_FONTSTART);
 
-    const char* s = nullptr;
+    string_view s;
     switch (gamemode)
     {
     case GameMode::Doom1Shareware:
@@ -410,14 +292,11 @@ void HU_Start()
         break;
     }
 
-    while (*s)
-        HUlib_addCharToTextLine(&w_title, *(s++));
+    for (auto c : s)
+        HUlib_addCharToTextLine(&w_title, c);
 
     // create the chat widget
-    HUlib_initIText(&w_chat,
-        HU_INPUTX, HU_INPUTY,
-        hu_font,
-        HU_FONTSTART, &chat_on);
+    HUlib_initIText(&w_chat, HU_INPUTX, HU_INPUTY, hu_font, HU_FONTSTART, &chat_on);
 
     // create the inputbuffer widgets
     for (i = 0; i < MAXPLAYERS; i++)
@@ -448,8 +327,6 @@ void HU_Erase()
 
 void HU_Ticker()
 {
-
-    int i, rc;
     char c;
 
     // tick down message counter if message is up
@@ -461,13 +338,11 @@ void HU_Ticker()
 
     if (showMessages || message_dontfuckwithme)
     {
-
         // display message if necessary
-        if ((plr->message && !message_nottobefuckedwith)
-            || (plr->message && message_dontfuckwithme))
+        if (!plr->message.empty() && (!message_nottobefuckedwith || message_dontfuckwithme))
         {
-            HUlib_addMessageToSText(&w_message, nullptr, plr->message);
-            plr->message = 0;
+            HUlib_addMessageToSText(&w_message, {}, plr->message);
+            plr->message.clear();
             message_on = true;
             message_counter = HU_MSGTIMEOUT;
             message_nottobefuckedwith = message_dontfuckwithme;
@@ -479,7 +354,7 @@ void HU_Ticker()
     // check for incoming chat characters
     if (netgame)
     {
-        for (i = 0; i < MAXPLAYERS; i++)
+        for (int32 i = 0; i < MAXPLAYERS; ++i)
         {
             if (!playeringame[i])
                 continue;
@@ -493,16 +368,14 @@ void HU_Ticker()
                 {
                     if (c >= 'a' && c <= 'z')
                         c = (char)shiftxform[(unsigned char)c];
-                    rc = HUlib_keyInIText(&w_inputbuffer[i], c);
+                    auto rc = HUlib_keyInIText(&w_inputbuffer[i], c);
                     if (rc && c == KEY_ENTER)
                     {
                         if (w_inputbuffer[i].l.len
                             && (chat_dest[i] == consoleplayer + 1
                                 || chat_dest[i] == HU_BROADCAST))
                         {
-                            HUlib_addMessageToSText(&w_message,
-                                player_names[i],
-                                w_inputbuffer[i].l.l);
+                            HUlib_addMessageToSText(&w_message, player_names[i], w_inputbuffer[i].l.l);
 
                             message_nottobefuckedwith = true;
                             message_on = true;
@@ -519,7 +392,6 @@ void HU_Ticker()
             }
         }
     }
-
 }
 
 #define QUEUESIZE		128
@@ -561,7 +433,6 @@ char HU_dequeueChatChar()
 
 bool HU_Responder(const event_t& event)
 {
-    static char lastmessage[HU_MAXLINELENGTH + 1];
     const char* macromessage;
     bool eatkey = false;
     static bool shiftdown = false;
@@ -663,8 +534,7 @@ bool HU_Responder(const event_t& event)
 
             // leave chat mode and notify that it was sent
             chat_on = false;
-            strcpy_s(lastmessage, chat_macros[c]);
-            plr->message = lastmessage;
+            plr->message = chat_macros[c];
             eatkey = true;
         }
         else
@@ -684,13 +554,12 @@ bool HU_Responder(const event_t& event)
             {
                 chat_on = false;
                 if (w_chat.l.len)
-                {
-                    strcpy_s(lastmessage, w_chat.l.l);
-                    plr->message = lastmessage;
-                }
+                    plr->message = w_chat.l.l;
             }
             else if (c == KEY_ESCAPE)
+            {
                 chat_on = false;
+            }
         }
     }
 

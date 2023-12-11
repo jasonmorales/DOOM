@@ -157,7 +157,8 @@ default_t	defaults[] =
 Setting<int32> screenBlocks{"screenblocks", 9};
 Setting<int32> viewWidth{"viewWidth", 0};
 
-const std::filesystem::path Settings::DevDataPath = "devdata";
+const filesys::path Settings::DevDataPath = "devdata";
+const filesys::path Settings::DevMapPath = "devmaps";
 const filesys::path Settings::DefaultConfigFile = Settings::DevDataPath / "default.cfg";
 
 void Settings::Save(const filesys::path& path /*= DefaultConfigFile*/)
@@ -236,7 +237,7 @@ typedef struct
 } pcx_t;
 
 // WritePCXfile
-void WritePCXfile(const filesys::path& path, byte* data, int32 width, int32 height, byte* palette)
+void WritePCXfile(const filesys::path& path, byte* data, int32 width, int32 height, const byte* palette)
 {
     pcx_t* pcx;
     byte* pack;
@@ -304,7 +305,7 @@ void M_ScreenShot()
         I_Error("M_ScreenShot: Couldn't create a PCX");
 
     // save the pcx file
-    WritePCXfile(path, linear, SCREENWIDTH, SCREENHEIGHT, W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+    WritePCXfile(path, linear, SCREENWIDTH, SCREENHEIGHT, WadManager::GetLumpData<byte>("PLAYPAL"));
 
     players[consoleplayer].message = "screen shot";
 }

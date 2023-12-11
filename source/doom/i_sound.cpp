@@ -34,12 +34,9 @@ import std;
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
 
-// Update all 30 millisecs, approx. 30fps synchronized.
-// Linux resolution is allegedly 10 millisecs, scale is microseconds.
-static constexpr const int32 SOUND_INTERVAL = 500;
 
 // The number of internal mixing channels, the samples calculated for each mixing step, the size
-// of the 16bit, 2 hardware channel (stereo) mixing buffer, and the samplerate of the raw data.
+// of the 16bit, 2 hardware channel (stereo) mixing buffer, and the sample rate of the raw data.
 
 // Needed for calling the actual sound output.
 static constexpr const uint32 SAMPLECOUNT = 512;
@@ -94,24 +91,25 @@ int* channelleftvol_lookup[NUM_CHANNELS];
 int* channelrightvol_lookup[NUM_CHANNELS];
 
 // This function loads the sound data from the WAD lump, for single sound.
-void* getsfx(const char* sfxname, int32* len)
+void* getsfx(string_view sfxname, int32* len)
 {
     // Get the sound data from the WAD, allocate lump in zone memory.
-    string name = std::format("ds{}", sfxname);
+    string name(8, '\0');
+    name = std::format("DS{}", sfxname);
 
     // Now, there is a severe problem with the sound handling, in it is not (yet/anymore)
     // gamemode aware. That means, sounds from DOOM II will be requested even with DOOM shareware.
     // The sound list is wired into sounds.c, which sets the external variable.
     // I do not do runtime patches to that variable. Instead, we will use a default sound for replacement.
-    intptr_t sfxlump = 0;
-    if (W_CheckNumForName(name) == -1)
-        sfxlump = W_GetNumForName("dspistol");
+    int32 sfxlump = 0;
+    if (WadManager::GetLumpId(name) == INVALID_ID)
+        sfxlump = W_GetNumForName("DSPISTOL");
     else
         sfxlump = W_GetNumForName(name);
 
-    auto size = W_LumpLength(sfxlump);
+    auto size = WadManager::GetLump(sfxlump).size;
 
-    auto* sfx = W_CacheLumpNum<unsigned char>(sfxlump, PU_STATIC);
+    auto* sfx = WadManager::GetLumpData<unsigned char>(sfxlump);
 
     // Pads the sound effect out to the mixing buffer size.
     // The original realloc would interfere with zone memory.
@@ -120,16 +118,12 @@ void* getsfx(const char* sfxname, int32* len)
     // Allocate from zone memory.
     auto* paddedsfx = (unsigned char*)Z_Malloc(paddedsize + 8, PU_STATIC, 0);
     // ddt: (unsigned char *) realloc(sfx, paddedsize+8);
-    // This should interfere with zone memory handling,
-    //  which does not kick in in the soundserver.
+    // This should interfere with zone memory handling, which does not kick in in the soundserver.
 
     // Now copy and pad.
     memcpy(paddedsfx, sfx, size);
     for (uint32 i = size; i < paddedsize + 8; ++i)
         paddedsfx[i] = 128;
-
-    // Remove the cached lump.
-    Z_Free(sfx);
 
     // Preserve padded length.
     *len = paddedsize;
@@ -187,14 +181,6 @@ void I_SetMusicVolume(int volume)
     snd_MusicVolume = volume;
     // Now set volume on output device.
     // Whatever( snd_MusciVolume );
-}
-
-// Retrieve the raw data lump index for a given SFX name.
-intptr_t I_GetSfxLumpNum(sfxinfo_t* sfx)
-{
-    char namebuf[9];
-    sprintf_s(namebuf, "ds%s", sfx->name);
-    return W_GetNumForName(namebuf);
 }
 
 int32 I_SoundIsPlaying(int32 handle)
@@ -261,7 +247,7 @@ void I_UnRegisterSong(int handle)
     handle = 0;
 }
 
-int I_RegisterSong(void* data)
+int I_RegisterSong(const void* data)
 {
     // UNUSED.
     data = nullptr;
@@ -372,7 +358,7 @@ void Sound::Init()
         if (!S_sfx[i].link)
         {
             // Load data from WAD file.
-            S_sfx[i].data = getsfx(S_sfx[i].name, &lengths[i]);
+            S_sfx[i].data = getsfx(S_sfx[i].name.to_upper(), &lengths[i]);
         }
         else
         {
@@ -478,8 +464,6 @@ void Sound::Update()
         rightout += step;
     }
 
-
-
     // See how much buffer space is available.
     uint32 paddingFrames = 0;
     auto result = client->GetCurrentPadding(&paddingFrames);
@@ -511,41 +495,6 @@ void Sound::Update()
         *fp++ = to_float(*mp);
         *fp++ = to_float(*mp++);
     }
-#if 0
-    double advance = 1.0 / samplesPerSec;
-    auto* fp = reinterpret_cast<float*>(data);
-    for (uint32 n = 0; n < numFramesAvailable; ++n)
-    {
-        double frame = 0.0;
-        /*
-        for (auto& fn : functions)
-        {
-            if (fn.second == nullptr || fn.second->IsCompleted(fn.first))
-                continue;
-
-            frame += fn.second->Sample(fn.first);
-            fn.first += advance;
-        }
-        /**/
-
-        *fp = static_cast<float>(frame);
-        ++fp;
-        *fp = static_cast<float>(frame);
-        ++fp;
-    }
-#endif
-
-    // Clear out expired functions
-    /*
-    for (int32 n = 0; n < functions.size(); ++n)
-    {
-        auto& fn = functions[n];
-        if (fn.second == nullptr)
-            continue;
-        if (fn.second->IsCompleted(fn.first))
-            Stop(n);
-    }
-    /**/
 
     int flags = 0;
     result = renderer->ReleaseBuffer(writeFrames * 4, flags);
@@ -680,23 +629,6 @@ int32 Sound::Play(int32 id, int32 volume, int32 seperation, int32 pitch, [[maybe
 
     // You tell me.
     return rc;
-
-#if 0
-    if (free.empty())
-    {
-        auto id = functions.size();
-        functions.push_back({ 0, f });
-        return static_cast<uint32>(id);
-    }
-    else
-    {
-        auto id = free.back();
-        free.pop_back();
-        functions[id].first = 0;
-        functions[id].second = f;
-        return id;
-    }
-#endif
 }
 
 void Sound::Stop([[maybe_unused]] int32 handle)

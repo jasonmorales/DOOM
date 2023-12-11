@@ -88,6 +88,7 @@ workspace 'Doom'
 		}
 
 		includedirs {
+			'source/doom',
 			'lib/glew-' .. glew_version .. '/include',
 		}
 

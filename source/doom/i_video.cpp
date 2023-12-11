@@ -29,8 +29,6 @@ import std;
 #include "doomdef.h"
 #include "z_zone.h"
 
-#include <winsock.h>
-
 #include <GL/wglew.h>
 #include <gl/gl.h>
 
@@ -227,9 +225,9 @@ void Video::FinishUpdate()
     SwapBuffers(deviceContext);
 }
 
-void Video::SetPalette(byte* inPalette)
+void Video::SetPalette(const byte* inPalette)
 {
-    byte* p = inPalette;
+    auto* p = inPalette;
     for (int32 n = 0; n < 256; ++n, p += 3)
     {
         palette[n] = 0xff'00'00'00 | (*(p + 2) << 16) | (*(p + 1) << 8) | (*(p + 0) << 0);
@@ -933,7 +931,7 @@ void Video::DeliverSystemMessages()
 }
 
 // Masks a column based masked pic to the screen. 
-void Video::DrawPatch(int32 x, int32 y, int32 screen, patch_t* patch)
+void Video::DrawPatch(int32 x, int32 y, int32 screen, const patch_t* patch)
 {
     y -= patch->topoffset;
     x -= patch->leftoffset;

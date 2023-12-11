@@ -92,9 +92,9 @@ side_t* sides;
 // Blockmap size.
 int		bmapwidth;
 int		bmapheight;	// size in mapblocks
-short* blockmap;	// int for larger maps
+const short* blockmap;	// int for larger maps
 // offsets in blockmap are from here
-short* blockmaplump;
+const short* blockmaplump;
 // origin of block map
 fixed_t		bmaporgx;
 fixed_t		bmaporgy;
@@ -109,7 +109,7 @@ mobj_t** blocklinks;
 // Without special effect, this could be
 //  used as a PVS lookup as well.
 //
-byte* rejectmatrix;
+const byte* rejectmatrix;
 
 
 // Maintain single and multi player starting spots.
@@ -129,13 +129,13 @@ void P_LoadVertexes(int lump)
 
     // Determine number of lumps:
     //  total lump length / vertex record length.
-    numvertexes = W_LumpLength(lump) / sizeof(mapvertex_t);
+    numvertexes = WadManager::GetLump(lump).size / sizeof(mapvertex_t);
 
     // Allocate zone memory for buffer.
     vertexes = Z_Malloc<vertex_t>(numvertexes * sizeof(vertex_t), PU_LEVEL, 0);
 
     // Load data into cache.
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
+    auto* data = WadManager::GetLumpData<byte>(lump);
 
     ml = (mapvertex_t*)data;
     li = vertexes;
@@ -147,27 +147,19 @@ void P_LoadVertexes(int lump)
         li->x = (ml->x) << FRACBITS;
         li->y = (ml->y) << FRACBITS;
     }
-
-    // Free buffer memory.
-    Z_Free(data);
 }
 
-
-
-//
-// P_LoadSegs
-//
-void P_LoadSegs(int lump)
+void P_LoadSegs(int32 lump)
 {
     line_t* ldef;
     int			side;
 
-    numsegs = W_LumpLength(lump) / sizeof(mapseg_t);
+    numsegs = WadManager::GetLump(lump).size / sizeof(mapseg_t);
     segs = Z_Malloc<seg_t>(numsegs * sizeof(seg_t), PU_LEVEL, 0);
     memset(segs, 0, numsegs * sizeof(seg_t));
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
+    auto* data = WadManager::GetLumpData<mapseg_t>(lump);
 
-    auto ml = reinterpret_cast<mapseg_t*>(data);
+    auto* ml = data;
     auto* li = segs;
     for (int i = 0; i < numsegs; i++, li++, ml++)
     {
@@ -187,22 +179,17 @@ void P_LoadSegs(int lump)
         else
             li->backsector = 0;
     }
-
-    Z_Free(data);
 }
 
-//
-// P_LoadSubsectors
-//
 void P_LoadSubsectors(int lump)
 {
     int			i;
     mapsubsector_t* ms;
     subsector_t* ss;
 
-    numsubsectors = W_LumpLength(lump) / sizeof(mapsubsector_t);
+    numsubsectors = WadManager::GetLump(lump).size / sizeof(mapsubsector_t);
     subsectors = Z_Malloc<subsector_t>(numsubsectors * sizeof(subsector_t), PU_LEVEL, 0);
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
+    auto* data = WadManager::GetLumpData<byte>(lump);
 
     ms = (mapsubsector_t*)data;
     memset(subsectors, 0, numsubsectors * sizeof(subsector_t));
@@ -213,28 +200,21 @@ void P_LoadSubsectors(int lump)
         ss->numlines = (ms->numsegs);
         ss->firstline = (ms->firstseg);
     }
-
-    Z_Free(data);
 }
 
-
-
-//
-// P_LoadSectors
-//
-void P_LoadSectors(int lump)
+void P_LoadSectors(int32 lumpId)
 {
-    int			i;
-    mapsector_t* ms;
+    auto* lump = WadManager::FindLump(lumpId);
+    if (!lump)
+        return;
 
-    numsectors = W_LumpLength(lump) / sizeof(mapsector_t);
+    numsectors = lump->size / sizeof(mapsector_t);
     sectors = Z_Malloc<sector_t>(numsectors * sizeof(sector_t), PU_LEVEL, 0);
     memset(sectors, 0, numsectors * sizeof(sector_t));
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
 
-    ms = (mapsector_t*)data;
+    auto* ms = lump->as<mapsector_t>();
     auto* ss = sectors;
-    for (i = 0; i < numsectors; i++, ss++, ms++)
+    for (int32 i = 0; i < numsectors; ++i, ++ss, ++ms)
     {
         ss->floorheight = (ms->floorheight) << FRACBITS;
         ss->ceilingheight = (ms->ceilingheight) << FRACBITS;
@@ -245,17 +225,14 @@ void P_LoadSectors(int lump)
         ss->tag = (ms->tag);
         ss->thinglist = nullptr;
     }
-
-    Z_Free(data);
 }
 
 void P_LoadNodes(intptr_t lump)
 {
-    numnodes = W_LumpLength(lump) / sizeof(mapnode_t);
+    numnodes = WadManager::GetLump(lump).size / sizeof(mapnode_t);
     nodes = Z_Malloc<node_t>(numnodes * sizeof(node_t), PU_LEVEL, 0);
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
-
-    mapnode_t*mn = reinterpret_cast<mapnode_t*>(data);
+    auto* data = WadManager::GetLumpData<mapnode_t>(lump);
+    auto* mn = data;
     auto* no = nodes;
 
     for (int32 i = 0; i < numnodes; i++, no++, mn++)
@@ -271,8 +248,6 @@ void P_LoadNodes(intptr_t lump)
                 no->bounds[j][k] = (mn->bounds[j][k]) << FRACBITS;
         }
     }
-
-    Z_Free(data);
 }
 
 void P_LoadThings(intptr_t lump)
@@ -282,8 +257,8 @@ void P_LoadThings(intptr_t lump)
     int			numthings;
     bool spawn = false;
 
-    auto* data = W_CacheLumpNum<byte>(lump, PU_STATIC);
-    numthings = W_LumpLength(lump) / sizeof(mapthing_t);
+    auto* data = WadManager::GetLumpData<byte>(lump);
+    numthings = WadManager::GetLump(lump).size / sizeof(mapthing_t);
 
     mt = (mapthing_t*)data;
     for (i = 0; i < numthings; i++, mt++)
@@ -321,15 +296,9 @@ void P_LoadThings(intptr_t lump)
 
         P_SpawnMapThing(mt);
     }
-
-    Z_Free(data);
 }
 
-
-//
-// P_LoadLineDefs
 // Also counts secret lines for intermissions.
-//
 void P_LoadLineDefs(intptr_t lump)
 {
     int			i;
@@ -338,10 +307,10 @@ void P_LoadLineDefs(intptr_t lump)
     vertex_t* v1;
     vertex_t* v2;
 
-    numlines = W_LumpLength(lump) / sizeof(maplinedef_t);
+    numlines = WadManager::GetLump(lump).size / sizeof(maplinedef_t);
     lines = Z_Malloc<line_t>(numlines * sizeof(line_t), PU_LEVEL, 0);
     memset(lines, 0, numlines * sizeof(line_t));
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
+    auto* data = WadManager::GetLumpData<byte>(lump);
 
     mld = (maplinedef_t*)data;
     ld = lines;
@@ -402,8 +371,6 @@ void P_LoadLineDefs(intptr_t lump)
         else
             ld->backsector = 0;
     }
-
-    Z_Free(data);
 }
 
 void P_LoadSideDefs(intptr_t lump)
@@ -412,10 +379,10 @@ void P_LoadSideDefs(intptr_t lump)
     mapsidedef_t* msd;
     side_t* sd;
 
-    numsides = W_LumpLength(lump) / sizeof(mapsidedef_t);
+    numsides = WadManager::GetLump(lump).size / sizeof(mapsidedef_t);
     sides = Z_Malloc<side_t>(numsides * sizeof(side_t), PU_LEVEL, 0);
     memset(sides, 0, numsides * sizeof(side_t));
-    auto data = W_CacheLumpNum<byte>(lump, PU_STATIC);
+    auto* data = WadManager::GetLumpData<byte>(lump);
 
     msd = (mapsidedef_t*)data;
     sd = sides;
@@ -428,25 +395,13 @@ void P_LoadSideDefs(intptr_t lump)
         sd->midtexture = R_TextureNumForName(msd->midtexture);
         sd->sector = &sectors[(msd->sector)];
     }
-
-    Z_Free(data);
 }
 
-
-//
-// P_LoadBlockMap
-//
 void P_LoadBlockMap(intptr_t lump)
 {
-    int		i;
-    int		count;
-
-    blockmaplump = W_CacheLumpNum<short>(lump, PU_LEVEL);
+    blockmaplump = WadManager::GetLumpData<short>(lump);
     blockmap = blockmaplump + 4;
-    count = W_LumpLength(lump) / 2;
-
-    for (i = 0; i < count; i++)
-        blockmaplump[i] = (blockmaplump[i]);
+    auto count = WadManager::GetLump(lump).size / 2;
 
     bmaporgx = blockmaplump[0] << FRACBITS;
     bmaporgy = blockmaplump[1] << FRACBITS;
@@ -459,11 +414,8 @@ void P_LoadBlockMap(intptr_t lump)
     memset(blocklinks, 0, count);
 }
 
-//
-// P_GroupLines
 // Builds sector line lists and subsector sector numbers.
 // Finds block bounding boxes for sectors.
-//
 void P_GroupLines()
 {
     line_t** linebuffer;
@@ -545,7 +497,6 @@ void P_GroupLines()
 void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
 {
     int		i;
-    char	lumpname[9];
 
     totalkills = totalitems = totalsecret = wminfo.maxfrags = 0;
     wminfo.partime = 180;
@@ -574,28 +525,14 @@ void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
         Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
 
 
-    // UNUSED W_Profile ();
     P_InitThinkers();
 
-    // if working with a devlopment map, reload it
-    W_Reload();
-
     // find map name
+    string lumpname;
     if (gamemode == GameMode::Doom2Commercial)
-    {
-        if (map < 10)
-            sprintf_s(lumpname, "map0%i", map);
-        else
-            sprintf_s(lumpname, "map%i", map);
-    }
+        lumpname = std::format("MAP{:02d}", map);
     else
-    {
-        lumpname[0] = 'E';
-        lumpname[1] = '0' + episode;
-        lumpname[2] = 'M';
-        lumpname[3] = '0' + map;
-        lumpname[4] = 0;
-    }
+        lumpname = std::format("E{}M{}", episode, map);
 
     auto lumpnum = W_GetNumForName(lumpname);
 
@@ -612,7 +549,7 @@ void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
     P_LoadNodes(lumpnum + ML_NODES);
     P_LoadSegs(lumpnum + ML_SEGS);
 
-    rejectmatrix = W_CacheLumpNum<byte>(lumpnum + ML_REJECT, PU_LEVEL);
+    rejectmatrix = WadManager::GetLumpData<byte>(lumpnum + ML_REJECT);
     P_GroupLines();
 
     bodyqueslot = 0;

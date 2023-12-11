@@ -236,12 +236,6 @@ bool HGetPacket()
     return true;
 }
 
-
-//
-// GetPackets
-//
-char    exitmsg[80];
-
 void GetPackets()
 {
     int		netconsole;
@@ -270,9 +264,7 @@ void GetPackets()
                 continue;
             nodeingame[netnode] = false;
             playeringame[netconsole] = false;
-            strcpy_s(exitmsg, "Player 1 left the game");
-            exitmsg[7] += static_cast<char>(netconsole);
-            players[consoleplayer].message = exitmsg;
+            players[consoleplayer].message = std::format("Player {} left the game", static_cast<char>(netconsole) + 1);
             if (g_doom->IsDemoRecording())
                 G_CheckDemoStatus(g_doom);
             continue;

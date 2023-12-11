@@ -119,7 +119,8 @@ T operator-(const T&& a, const Setting<T>& b) { return a - b.Get(); }
 class Settings
 {
 public:
-    static const std::filesystem::path DevDataPath;
+    static const filesys::path DevDataPath;
+    static const filesys::path DevMapPath;
 
     static void Save(const filesys::path& path = DefaultConfigFile);
     static void Load();

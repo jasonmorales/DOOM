@@ -13,7 +13,7 @@
 #endif
 
 #include <stdint.h>
-#include <assert.h>
+#include <cassert>
 
 using int8 = int8_t;
 using int16 = int16_t;
@@ -26,17 +26,19 @@ using uint16 = uint16_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
 
-template<floating_point T>
-constexpr const T Pi_t = static_cast<T>(3.14159265359);
-constexpr const double Pi_d = Pi_t<double>;
-constexpr const float Pi_f = Pi_t<float>;
-constexpr const auto Pi = Pi_d;
+constexpr int32 INVALID_ID = -1;
 
 template<floating_point T>
-constexpr const T Tau_t = static_cast<T>(6.28318530718);
-constexpr const double Tau_d = Tau_t<double>;
-constexpr const float Tau_f = Tau_t<float>;
-constexpr const auto Tau = Tau_d;
+constexpr T Pi_t = static_cast<T>(3.14159265359);
+constexpr double Pi_d = Pi_t<double>;
+constexpr float Pi_f = Pi_t<float>;
+constexpr auto Pi = Pi_d;
+
+template<floating_point T>
+constexpr T Tau_t = static_cast<T>(6.28318530718);
+constexpr double Tau_d = Tau_t<double>;
+constexpr float Tau_f = Tau_t<float>;
+constexpr auto Tau = Tau_d;
 
 using std::in_range;
 

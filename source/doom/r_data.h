@@ -22,11 +22,7 @@
 #include "r_state.h"
 
 // Retrieve column data for span blitting.
-byte*
-R_GetColumn
-(int		tex,
-    int		col);
-
+const byte* R_GetColumn(int32 tex, int32 col);
 
 // I/O, setting up the stuff.
 void R_InitData();
@@ -36,7 +32,7 @@ void R_PrecacheLevel();
 // Retrieval.
 // Floor/ceiling opaque texture tiles,
 // lookup by name. For animation?
-intptr_t R_FlatNumForName(const char* name);
+int32 R_FlatNumForName(string_view name);
 
 
 // Called by P_Ticker for switches and animations,

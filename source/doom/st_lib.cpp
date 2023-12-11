@@ -45,14 +45,14 @@ extern bool		automapactive;
 
 // Hack display negative frags.
 //  Loads and store the stminus lump.
-patch_t* sttminus;
+const patch_t* sttminus;
 
 void STlib_init()
 {
-    sttminus = W_CacheLumpName("STTMINUS", PU_STATIC);
+    sttminus = WadManager::GetLumpData<patch_t>("STTMINUS");
 }
 
-void STlib_initNum(st_number_t* n, int x, int y, patch_t** pl, int* num, bool* on, int width)
+void STlib_initNum(st_number_t* n, int x, int y, const patch_t** pl, int* num, bool* on, int width)
 {
     n->x = x;
     n->y = y;
@@ -127,7 +127,7 @@ void STlib_updateNum(st_number_t* n, bool refresh)
         STlib_drawNum(n, refresh);
 }
 
-void STlib_initPercent(st_percent_t* p, int x, int y, patch_t** pl, int* num, bool* on, patch_t* percent)
+void STlib_initPercent(st_percent_t* p, int x, int y, const patch_t** pl, int* num, bool* on, const patch_t* percent)
 {
     STlib_initNum(&p->n, x, y, pl, num, on, 3);
     p->p = percent;
@@ -144,7 +144,7 @@ STlib_updatePercent
     STlib_updateNum(&per->n, refresh);
 }
 
-void STlib_initMultIcon(st_multicon_t* i, int x, int y, patch_t** il, int* inum, bool* on)
+void STlib_initMultIcon(st_multicon_t* i, int x, int y, const patch_t** il, int* inum, bool* on)
 {
     i->x = x;
     i->y = y;
@@ -177,7 +177,7 @@ void STlib_updateMultIcon(st_multicon_t* mi, bool refresh)
     }
 }
 
-void STlib_initBinIcon(st_binicon_t* b, int x, int y, patch_t* i, bool* val, bool* on)
+void STlib_initBinIcon(st_binicon_t* b, int x, int y, const patch_t* i, bool* val, bool* on)
 {
     b->x = x;
     b->y = y;

@@ -437,13 +437,9 @@ P_SetThingPosition(mobj_t* thing)
 bool P_BlockLinesIterator(int x, int y, bool(*func)(line_t*))
 {
     int			offset;
-    short* list;
     line_t* ld;
 
-    if (x < 0
-        || y < 0
-        || x >= bmapwidth
-        || y >= bmapheight)
+    if (x < 0 || y < 0 || x >= bmapwidth || y >= bmapheight)
     {
         return true;
     }
@@ -452,7 +448,7 @@ bool P_BlockLinesIterator(int x, int y, bool(*func)(line_t*))
 
     offset = *(blockmap + offset);
 
-    for (list = blockmaplump + offset; *list != -1; list++)
+    for (auto* list = blockmaplump + offset; *list != -1; list++)
     {
         ld = &lines[*list];
 

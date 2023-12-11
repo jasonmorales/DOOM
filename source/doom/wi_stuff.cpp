@@ -153,7 +153,7 @@ typedef struct
     int		data2;
 
     // actual graphics for frames of animations
-    patch_t* p[3];
+    const patch_t* p[3];
 
     // following must be initialized to zero before use!
 
@@ -337,61 +337,61 @@ static int		NUMCMAPS;
 //
 
 // background (map of levels).
-static patch_t* bg;
+static const patch_t* bg;
 
 // You Are Here graphic
-static patch_t* yah[2];
+static const patch_t* yah[2];
 
 // splat
-static patch_t* splat;
+static const patch_t* splat;
 
 // %, : graphics
-static patch_t* percent;
-static patch_t* colon;
+static const patch_t* percent;
+static const patch_t* colon;
 
 // 0-9 graphic
-static patch_t* num[10];
+static const patch_t* num[10];
 
 // minus sign
-static patch_t* wiminus;
+static const patch_t* wiminus;
 
 // "Finished!" graphics
-static patch_t* finished;
+static const patch_t* finished;
 
 // "Entering" graphic
-static patch_t* entering;
+static const patch_t* entering;
 
 // "secret"
-static patch_t* sp_secret;
+static const patch_t* sp_secret;
 
 // "Kills", "Scrt", "Items", "Frags"
-static patch_t* kills;
-static patch_t* secret;
-static patch_t* items;
-static patch_t* frags;
+static const patch_t* kills;
+static const patch_t* secret;
+static const patch_t* items;
+static const patch_t* frags;
 
 // Time sucks.
-static patch_t* time;
-static patch_t* par;
-static patch_t* sucks;
+static const patch_t* time;
+static const patch_t* par;
+static const patch_t* sucks;
 
 // "killers", "victims"
-static patch_t* killers;
-static patch_t* victims;
+static const patch_t* killers;
+static const patch_t* victims;
 
 // "Total", your face, your dead face
-static patch_t* total;
-static patch_t* star;
-static patch_t* bstar;
+static const patch_t* total;
+static const patch_t* star;
+static const patch_t* bstar;
 
 // "red P[1..MAXPLAYERS]"
-static patch_t* p[MAXPLAYERS];
+static const patch_t* p[MAXPLAYERS];
 
 // "gray P[1..MAXPLAYERS]"
-static patch_t* bp[MAXPLAYERS];
+static const patch_t* bp[MAXPLAYERS];
 
 // Name graphics of each level (centered)
-static patch_t** lnames;
+static const patch_t** lnames;
 
 //
 // CODE
@@ -435,7 +435,7 @@ void WI_drawEL()
 
 }
 
-void WI_drawOnLnode(int n, patch_t* c[])
+void WI_drawOnLnode(int n, const patch_t* c[])
 {
     int		i;
     int		left;
@@ -1516,34 +1516,34 @@ void WI_loadData()
     }
 
     // background
-    bg = W_CacheLumpName(name.c_str(), PU_CACHE);
+    bg = WadManager::GetLumpData<patch_t>(name);
     g_doom->GetVideo()->DrawPatch(0, 0, 1, bg);
 
     if (gamemode == GameMode::Doom2Commercial)
     {
         NUMCMAPS = 32;
-        lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMCMAPS, PU_STATIC, 0);
+        lnames = (const patch_t**)Z_Malloc(sizeof(patch_t*) * NUMCMAPS, PU_STATIC, 0);
         for (i = 0; i < NUMCMAPS; i++)
         {
-            lnames[i] = W_CacheLumpName(std::format("CWILV{:02}", i), PU_STATIC);
+            lnames[i] = WadManager::GetLumpData<patch_t>(std::format("CWILV{:02}", i));
         }
     }
     else
     {
-        lnames = (patch_t**)Z_Malloc(sizeof(patch_t*) * NUMMAPS, PU_STATIC, 0);
+        lnames = (const patch_t**)Z_Malloc(sizeof(patch_t*) * NUMMAPS, PU_STATIC, 0);
         for (i = 0; i < NUMMAPS; i++)
         {
-            lnames[i] = W_CacheLumpName(std::format("WILV{}{}", wbs->epsd, i), PU_STATIC);
+            lnames[i] = WadManager::GetLumpData<patch_t>(std::format("WILV{}{}", wbs->epsd, i));
         }
 
         // you are here
-        yah[0] = W_CacheLumpName("WIURH0", PU_STATIC);
+        yah[0] = WadManager::GetLumpData<patch_t>("WIURH0");
 
         // you are here (alt.)
-        yah[1] = W_CacheLumpName("WIURH1", PU_STATIC);
+        yah[1] = WadManager::GetLumpData<patch_t>("WIURH1");
 
         // splat
-        splat = W_CacheLumpName("WISPLAT", PU_STATIC);
+        splat = WadManager::GetLumpData<patch_t>("WISPLAT");
 
         if (wbs->epsd < 3)
         {
@@ -1556,7 +1556,7 @@ void WI_loadData()
                     if (wbs->epsd != 1 || j != 8)
                     {
                         // animations
-                        a->p[i] = W_CacheLumpName(std::format("WIA{}{:2}{:2}", wbs->epsd, j, i), PU_STATIC);
+                        a->p[i] = WadManager::GetLumpData<patch_t>(std::format("WIA{}{:2}{:2}", wbs->epsd, j, i));
                     }
                     else
                     {
@@ -1569,76 +1569,77 @@ void WI_loadData()
     }
 
     // More hacks on minus sign.
-    wiminus = W_CacheLumpName("WIMINUS", PU_STATIC);
+    wiminus = WadManager::GetLumpData<patch_t>("WIMINUS");
 
     for (i = 0;i < 10;i++)
     {
         // numbers 0-9
-        num[i] = W_CacheLumpName(std::format("WINUM{}", i).c_str(), PU_STATIC);
+        num[i] = WadManager::GetLumpData<patch_t>(std::format("WINUM{}", i).c_str());
     }
 
     // percent sign
-    percent = W_CacheLumpName("WIPCNT", PU_STATIC);
+    percent = WadManager::GetLumpData<patch_t>("WIPCNT");
 
     // "finished"
-    finished = W_CacheLumpName("WIF", PU_STATIC);
+    finished = WadManager::GetLumpData<patch_t>("WIF");
 
     // "entering"
-    entering = W_CacheLumpName("WIENTER", PU_STATIC);
+    entering = WadManager::GetLumpData<patch_t>("WIENTER");
 
     // "kills"
-    kills = W_CacheLumpName("WIOSTK", PU_STATIC);
+    kills = WadManager::GetLumpData<patch_t>("WIOSTK");
 
     // "scrt"
-    secret = W_CacheLumpName("WIOSTS", PU_STATIC);
+    secret = WadManager::GetLumpData<patch_t>("WIOSTS");
 
     // "secret"
-    sp_secret = W_CacheLumpName("WISCRT2", PU_STATIC);
+    sp_secret = WadManager::GetLumpData<patch_t>("WISCRT2");
 
-    items = W_CacheLumpName("WIOSTI", PU_STATIC);
+    items = WadManager::GetLumpData<patch_t>("WIOSTI");
 
     // "frgs"
-    frags = W_CacheLumpName("WIFRGS", PU_STATIC);
+    frags = WadManager::GetLumpData<patch_t>("WIFRGS");
 
     // ":"
-    colon = W_CacheLumpName("WICOLON", PU_STATIC);
+    colon = WadManager::GetLumpData<patch_t>("WICOLON");
 
     // "time"
-    time = W_CacheLumpName("WITIME", PU_STATIC);
+    time = WadManager::GetLumpData<patch_t>("WITIME");
 
     // "sucks"
-    sucks = W_CacheLumpName("WISUCKS", PU_STATIC);
+    sucks = WadManager::GetLumpData<patch_t>("WISUCKS");
 
     // "par"
-    par = W_CacheLumpName("WIPAR", PU_STATIC);
+    par = WadManager::GetLumpData<patch_t>("WIPAR");
 
     // "killers" (vertical)
-    killers = W_CacheLumpName("WIKILRS", PU_STATIC);
+    killers = WadManager::GetLumpData<patch_t>("WIKILRS");
 
     // "victims" (horiz)
-    victims = W_CacheLumpName("WIVCTMS", PU_STATIC);
+    victims = WadManager::GetLumpData<patch_t>("WIVCTMS");
 
     // "total"
-    total = W_CacheLumpName("WIMSTT", PU_STATIC);
+    total = WadManager::GetLumpData<patch_t>("WIMSTT");
 
     // your face
-    star = W_CacheLumpName("STFST01", PU_STATIC);
+    star = WadManager::GetLumpData<patch_t>("STFST01");
 
     // dead face
-    bstar = W_CacheLumpName("STFDEAD0", PU_STATIC);
+    bstar = WadManager::GetLumpData<patch_t>("STFDEAD0");
 
     for (i = 0; i < MAXPLAYERS; i++)
     {
         // "1,2,3,4"
-        p[i] = W_CacheLumpName(std::format("STPB{}", i), PU_STATIC);
+        p[i] = WadManager::GetLumpData<patch_t>(std::format("STPB{}", i));
 
         // "1,2,3,4"
-        bp[i] = W_CacheLumpName(std::format("WIBP{}", i + 1), PU_STATIC);
+        bp[i] = WadManager::GetLumpData<patch_t>(std::format("WIBP{}", i + 1));
     }
 }
 
 void WI_unloadData()
 {
+#if 0
     int		i;
     int		j;
 
@@ -1699,6 +1700,7 @@ void WI_unloadData()
 
     for (i = 0; i < MAXPLAYERS; i++)
         Z_ChangeTag(bp[i], PU_CACHE);
+#endif
 }
 
 void WI_Drawer()

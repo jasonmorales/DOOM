@@ -411,9 +411,7 @@ void R_DrawPlanes()
         }
 
         // regular flat
-        ds_source = W_CacheLumpNum<byte>(firstflat +
-            flattranslation[pl->picnum],
-            PU_STATIC);
+        ds_source = WadManager::GetLumpData<byte>(firstflat + flattranslation[pl->picnum]);
 
         planeheight = std::abs(pl->height - viewz);
         light = (pl->lightlevel >> LIGHTSEGSHIFT) + extralight;
@@ -439,6 +437,6 @@ void R_DrawPlanes()
                 pl->bottom[x]);
         }
 
-        Z_ChangeTag(ds_source, PU_CACHE);
+        //Z_ChangeTag(ds_source, PU_CACHE);
     }
 }

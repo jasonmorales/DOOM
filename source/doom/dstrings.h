@@ -21,11 +21,6 @@
 
 #include "d_englsh.h"
 
-// Misc. other strings.
-
-// File locations,  relative to current position.
-#define DEVMAPS "devmaps"
-
 // QuitDOOM messages
 #define NUM_QUITMESSAGES   15
 

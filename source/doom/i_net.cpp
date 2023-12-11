@@ -148,7 +148,7 @@ void PacketGet()
     {
         static int first = 1;
         if (first)
-            printf("len=%d:p=[0x%x 0x%x] \n", c, *(int*)&sw, *((int*)&sw + 1));
+            std::cout << std::format("len={}:p=[{:#010x} {:#010x}] \n", c, *(int*)&sw, *((int*)&sw + 1));
         first = 0;
     }
 

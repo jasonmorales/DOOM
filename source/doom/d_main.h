@@ -83,7 +83,6 @@ public:
 
 private:
     void IdentifyVersion();
-    void AddFile(const filesys::path& in) { wadFiles.push_back(in); }
 
     void Display();
     void PageDraw();
@@ -118,6 +117,4 @@ private:
 
     // debug flag to cancel adaptiveness
     bool useSingleTicks = false;
-
-    vector<filesys::path> wadFiles;
 };

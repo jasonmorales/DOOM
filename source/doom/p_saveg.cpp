@@ -58,7 +58,7 @@ void P_UnArchivePlayers(std::ifstream& inFile)
 
         // will be set when unarc thinker
         player->mo = nullptr;
-        player->message = nullptr;
+        player->message.clear();
         player->attacker = nullptr;
 
         for (int32 j = 0; j < NUMPSPRITES; j++)

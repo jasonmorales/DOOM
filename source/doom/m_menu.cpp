@@ -54,7 +54,7 @@ import std;
 extern Doom* g_doom;
 
 
-extern patch_t* hu_font[HU_FONTSIZE];
+extern const patch_t* hu_font[HU_FONTSIZE];
 extern bool		message_dontfuckwithme;
 
 extern bool		chat_on;		// in heads-up code
@@ -100,7 +100,7 @@ int			saveStringEnter;
 int             	saveSlot;	// which slot to save in
 size_t saveCharIndex;	// which char we're editing
 // old save description before edit
-char			saveOldString[Game::SaveStringSize];
+string saveOldString{Game::SaveStringSize, '\0'};
 
 bool			inhelpscreens;
 bool			menuactive;
@@ -109,7 +109,7 @@ bool			menuactive;
 #define LINEHEIGHT		16
 
 extern bool		sendpause;
-char			savegamestrings[10][Game::SaveStringSize];
+string savegamestrings[10];
 
 char	endstring[160];
 
@@ -483,7 +483,8 @@ void M_ReadSaveStrings()
     for (int32 i = 0;i < load_end; ++i)
     {
         LoadMenu[i].status = 0;
-        memset(&savegamestrings[i], 0, Game::SaveStringSize);
+        savegamestrings[i].clear();
+        savegamestrings[i].reserve(Game::SaveStringSize);
 
         auto path = Game::GetSaveFilePath(i);
         std::ifstream file(path);
@@ -491,14 +492,14 @@ void M_ReadSaveStrings()
         if (!file.is_open())
             continue;
 
-        file.read(reinterpret_cast<char*>(&savegamestrings[i]), Game::SaveStringSize);
+        file.read(savegamestrings[i].data(), Game::SaveStringSize);
         LoadMenu[i].status = 1;
     }
 }
 
 void M_DrawLoad()
 {
-    g_doom->GetVideo()->DrawPatch(72, 28, 0, W_CacheLumpName("M_LOADG", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(72, 28, 0, WadManager::GetLumpData<patch_t>("M_LOADG"));
     for (int32 i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x, LoadDef.y + LINEHEIGHT * i);
@@ -509,15 +510,15 @@ void M_DrawLoad()
 // Draw border for the savegame description
 void M_DrawSaveLoadBorder(int x, int y)
 {
-    g_doom->GetVideo()->DrawPatch(x - 8, y + 7, 0, W_CacheLumpName<patch_t>("M_LSLEFT", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(x - 8, y + 7, 0, WadManager::GetLumpData<patch_t>("M_LSLEFT"));
 
     for (int i = 0;i < 24;i++)
     {
-        g_doom->GetVideo()->DrawPatch(x, y + 7, 0, W_CacheLumpName<patch_t>("M_LSCNTR", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(x, y + 7, 0, WadManager::GetLumpData<patch_t>("M_LSCNTR"));
         x += 8;
     }
 
-    g_doom->GetVideo()->DrawPatch(x, y + 7, 0, W_CacheLumpName<patch_t>("M_LSRGHT", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(x, y + 7, 0, WadManager::GetLumpData<patch_t>("M_LSRGHT"));
 }
 
 // User wants to load this game
@@ -544,7 +545,7 @@ void M_DrawSave()
 {
     int             i;
 
-    g_doom->GetVideo()->DrawPatch(72, 28, 0, W_CacheLumpName<patch_t>("M_SAVEG", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(72, 28, 0, WadManager::GetLumpData<patch_t>("M_SAVEG"));
     for (i = 0;i < load_end; i++)
     {
         M_DrawSaveLoadBorder(LoadDef.x, LoadDef.y + LINEHEIGHT * i);
@@ -580,10 +581,10 @@ void M_SaveSelect(int choice)
     saveStringEnter = 1;
 
     saveSlot = choice;
-    strcpy_s(saveOldString, savegamestrings[choice]);
-    if (!strcmp(savegamestrings[choice], EMPTYSTRING))
-        savegamestrings[choice][0] = 0;
-    saveCharIndex = strlen(savegamestrings[choice]);
+    saveOldString = savegamestrings[choice];
+    if (saveOldString == EMPTYSTRING)
+        savegamestrings[choice].clear();
+    saveCharIndex = savegamestrings[choice].length();
 }
 
 //
@@ -604,10 +605,7 @@ void M_SaveGame(int)
     M_ReadSaveStrings();
 }
 
-//
 //      M_QuickSave
-//
-char    tempstring[80];
 
 void M_QuickSaveResponse(int ch)
 {
@@ -637,8 +635,8 @@ void M_QuickSave()
         quickSaveSlot = -2;	// means to pick a slot now
         return;
     }
-    sprintf_s(tempstring, QSPROMPT, savegamestrings[quickSaveSlot]);
-    Menu::StartMessage(tempstring, M_QuickSaveResponse, true);
+
+    Menu::StartMessage(std::format(QSPROMPT, savegamestrings[quickSaveSlot]), M_QuickSaveResponse, true);
 }
 
 void M_QuickLoadResponse(int ch)
@@ -664,29 +662,24 @@ void M_QuickLoad()
         Menu::StartMessage(QSAVESPOT, nullptr, false);
         return;
     }
-    sprintf_s(tempstring, QLPROMPT, savegamestrings[quickSaveSlot]);
-    Menu::StartMessage(tempstring, M_QuickLoadResponse, true);
+
+    Menu::StartMessage(std::format(QLPROMPT, savegamestrings[quickSaveSlot]), M_QuickLoadResponse, true);
 }
 
-
-
-
-//
 // Read This Menus
 // Had a "quick hack to fix romero bug"
-//
 void M_DrawReadThis1()
 {
     inhelpscreens = true;
     switch (gamemode)
     {
     case GameMode::Doom2Commercial:
-        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("HELP"));
         break;
     case GameMode::Doom1Shareware:
     case GameMode::Doom1Registered:
     case GameMode::Doom1Retail:
-        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP1", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("HELP1"));
         break;
     default:
         break;
@@ -707,11 +700,11 @@ void M_DrawReadThis2()
     case GameMode::Doom1Retail:
     case GameMode::Doom2Commercial:
         // This hack keeps us from having to change menus.
-        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("CREDIT", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("CREDIT"));
         break;
     case GameMode::Doom1Shareware:
     case GameMode::Doom1Registered:
-        g_doom->GetVideo()->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>("HELP2", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("HELP2"));
         break;
     default:
         break;
@@ -725,7 +718,7 @@ void M_DrawReadThis2()
 //
 void M_DrawSound()
 {
-    g_doom->GetVideo()->DrawPatch(60, 38, 0, W_CacheLumpName<patch_t>("M_SVOL", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(60, 38, 0, WadManager::GetLumpData<patch_t>("M_SVOL"));
 
     M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (sfx_vol + 1), 16, snd_SfxVolume);
 
@@ -773,13 +766,13 @@ void M_MusicVol(int choice)
 
 void M_DrawMainMenu()
 {
-    g_doom->GetVideo()->DrawPatch(94, 2, 0, W_CacheLumpName<patch_t>("M_DOOM", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(94, 2, 0, WadManager::GetLumpData<patch_t>("M_DOOM"));
 }
 
 void M_DrawNewGame()
 {
-    g_doom->GetVideo()->DrawPatch(96, 14, 0, W_CacheLumpName<patch_t>("M_NEWG", PU_CACHE));
-    g_doom->GetVideo()->DrawPatch(54, 38, 0, W_CacheLumpName<patch_t>("M_SKILL", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(96, 14, 0, WadManager::GetLumpData<patch_t>("M_NEWG"));
+    g_doom->GetVideo()->DrawPatch(54, 38, 0, WadManager::GetLumpData<patch_t>("M_SKILL"));
 }
 
 void M_NewGame(int)
@@ -804,7 +797,7 @@ int     epi;
 
 void M_DrawEpisode()
 {
-    g_doom->GetVideo()->DrawPatch(54, 38, 0, W_CacheLumpName<patch_t>("M_EPISOD", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(54, 38, 0, WadManager::GetLumpData<patch_t>("M_EPISOD"));
 }
 
 void M_VerifyNightmare(int ch)
@@ -861,11 +854,11 @@ char	msgNames[2][9] = { "M_MSGOFF","M_MSGON" };
 
 void M_DrawOptions()
 {
-    g_doom->GetVideo()->DrawPatch(108, 15, 0, W_CacheLumpName<patch_t>("M_OPTTTL", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(108, 15, 0, WadManager::GetLumpData<patch_t>("M_OPTTTL"));
 
-    g_doom->GetVideo()->DrawPatch(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT * detail, 0, W_CacheLumpName(detailNames[detailLevel], PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(OptionsDef.x + 175, OptionsDef.y + LINEHEIGHT * detail, 0, WadManager::GetLumpData<patch_t>(detailNames[detailLevel]));
 
-    g_doom->GetVideo()->DrawPatch(OptionsDef.x + 120, OptionsDef.y + LINEHEIGHT * messages, 0, W_CacheLumpName(msgNames[showMessages], PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(OptionsDef.x + 120, OptionsDef.y + LINEHEIGHT * messages, 0, WadManager::GetLumpData<patch_t>(msgNames[showMessages]));
 
     M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (mousesens + 1), 10, mouseSensitivity);
 
@@ -1057,16 +1050,16 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
     int		i;
 
     xx = x;
-    g_doom->GetVideo()->DrawPatch(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(xx, y, 0, WadManager::GetLumpData<patch_t>("M_THERML"));
     xx += 8;
     for (i = 0;i < thermWidth;i++)
     {
-        g_doom->GetVideo()->DrawPatch(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE));
+        g_doom->GetVideo()->DrawPatch(xx, y, 0, WadManager::GetLumpData<patch_t>("M_THERMM"));
         xx += 8;
     }
-    g_doom->GetVideo()->DrawPatch(xx, y, 0, W_CacheLumpName("M_THERMR", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(xx, y, 0, WadManager::GetLumpData<patch_t>("M_THERMR"));
 
-    g_doom->GetVideo()->DrawPatch((x + 8) + thermDot * 8, y, 0, W_CacheLumpName("M_THERMO", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch((x + 8) + thermDot * 8, y, 0, WadManager::GetLumpData<patch_t>("M_THERMO"));
 }
 
 void
@@ -1074,12 +1067,12 @@ M_DrawEmptyCell
 (menu_t* menu,
     int		item)
 {
-    g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, W_CacheLumpName("M_CELL1", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, WadManager::GetLumpData<patch_t>("M_CELL1"));
 }
 
 void M_DrawSelCell(menu_t* menu, int32 item)
 {
-    g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, W_CacheLumpName("M_CELL2", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, WadManager::GetLumpData<patch_t>("M_CELL2"));
 }
 
 void M_StopMessage()
@@ -1094,7 +1087,7 @@ int32 M_StringWidth(string_view str)
     int32 width = 0;
     for (auto c : str)
     {
-        c = toupper(c) - HU_FONTSTART;
+        c = static_cast<char>(toupper(c)) - HU_FONTSTART;
         if (c < 0 || c >= HU_FONTSIZE)
             width += 4;
         else
@@ -1134,7 +1127,7 @@ void M_WriteText(int32 x, int32 y, string_view text)
             continue;
         }
 
-        c = toupper(c) - HU_FONTSTART;
+        c = static_cast<char>(toupper(c)) - HU_FONTSTART;
         if (c < 0 || c >= HU_FONTSIZE)
         {
             cx += 4;
@@ -1261,18 +1254,18 @@ bool M_Responder(const event_t& event)
             if (saveCharIndex > 0)
             {
                 saveCharIndex--;
-                savegamestrings[saveSlot][saveCharIndex] = 0;
+                savegamestrings[saveSlot].pop_back();
             }
             break;
 
         case KEY_ESCAPE:
             saveStringEnter = 0;
-            strcpy_s(savegamestrings[saveSlot], saveOldString);
+            savegamestrings[saveSlot] = saveOldString;
             break;
 
         case KEY_ENTER:
             saveStringEnter = 0;
-            if (savegamestrings[saveSlot][0])
+            if (!savegamestrings[saveSlot].empty())
                 M_DoSave(saveSlot);
             break;
 
@@ -1286,8 +1279,7 @@ bool M_Responder(const event_t& event)
                 M_StringWidth(savegamestrings[saveSlot]) <
                 (Game::SaveStringSize - 2) * 8)
             {
-                savegamestrings[saveSlot][saveCharIndex++] = static_cast<char>(ch);
-                savegamestrings[saveSlot][saveCharIndex] = 0;
+                savegamestrings[saveSlot] += static_cast<char>(ch);
             }
             break;
         }
@@ -1402,7 +1394,7 @@ bool M_Responder(const event_t& event)
             if (usegamma > 4)
                 usegamma = 0;
             players[consoleplayer].message = gammamsg[usegamma];
-            g_doom->GetVideo()->SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+            g_doom->GetVideo()->SetPalette(WadManager::GetLumpData<byte>("PLAYPAL"));
             return true;
         }
     }
@@ -1578,12 +1570,12 @@ void M_Drawer()
     for (short i = 0;i < max;i++)
     {
         if (currentMenu->menuitems[i].name[0])
-            g_doom->GetVideo()->DrawPatch(x, y, 0, W_CacheLumpName(currentMenu->menuitems[i].name, PU_CACHE));
+            g_doom->GetVideo()->DrawPatch(x, y, 0, WadManager::GetLumpData<patch_t>(currentMenu->menuitems[i].name));
         y += LINEHEIGHT;
     }
 
     // DRAW SKULL
-    g_doom->GetVideo()->DrawPatch(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0, W_CacheLumpName(skullName[whichSkull], PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(x + SKULLXOFF, currentMenu->y - 5 + itemOn * LINEHEIGHT, 0, WadManager::GetLumpData<patch_t>(skullName[whichSkull]));
 }
 
 void M_ClearMenus()

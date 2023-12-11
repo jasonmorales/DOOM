@@ -33,10 +33,10 @@ void G_DeferedInitNew(skill_t skill, int episode, int map);
 void G_DeferedPlayDemo(const char* demo);
 
 // Called by M_Responder.
-void G_SaveGame(int slot, char* description);
+void G_SaveGame(int slot, string_view description);
 
 // Only called by startup code.
-void G_RecordDemo(Doom* doom, const char* name);
+void G_RecordDemo(Doom* doom, string_view name);
 
 void G_BeginRecording();
 

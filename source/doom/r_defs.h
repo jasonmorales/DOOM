@@ -47,23 +47,18 @@
 // Note: transformed values not buffered locally,
 //  like some DOOM-alikes ("wt", "WebView") did.
 //
-typedef struct
+struct vertex_t
 {
     fixed_t	x;
     fixed_t	y;
-
-} vertex_t;
-
+};
 
 // Forward of LineDefs, for Sectors.
 struct line_s;
 
-// Each sector has a degenmobj_t in its center
-//  for sound origin purposes.
-// I suppose this does not handle sound from
-//  moving objects (doppler), because
-//  position is prolly just buffered, not
-//  updated.
+// Each sector has a degenmobj_t in its center for sound origin purposes.
+// I suppose this does not handle sound from moving objects (doppler), because position is prolly
+// just buffered, not updated.
 typedef struct
 {
     thinker_t		thinker;	// not used for anything

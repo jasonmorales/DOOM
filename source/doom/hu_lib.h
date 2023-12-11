@@ -19,6 +19,7 @@
 // We are referring to patches.
 #include "r_defs.h"
 
+#include "types/strings.h"
 
 // background and foreground screen numbers
 // different from other modules.
@@ -43,7 +44,7 @@ typedef struct
     int		x;
     int		y;
 
-    patch_t** f;			// font
+    const patch_t** f;			// font
     int		sc;			// start character
     char	l[HU_MAXLINELENGTH + 1];	// line of text
     int		len;		      	// current line length
@@ -99,9 +100,9 @@ void HUlib_init();
 //
 
 // clear a line of text
-void	HUlib_clearTextLine(hu_textline_t* t);
+void HUlib_clearTextLine(hu_textline_t* t);
 
-void	HUlib_initTextLine(hu_textline_t* t, int x, int y, patch_t** f, int sc);
+void HUlib_initTextLine(hu_textline_t* t, int x, int y, const patch_t** f, int sc);
 
 // returns success
 bool HUlib_addCharToTextLine(hu_textline_t* t, char ch);
@@ -115,27 +116,15 @@ void	HUlib_drawTextLine(hu_textline_t* l, bool drawcursor);
 // erases text line
 void	HUlib_eraseTextLine(hu_textline_t* l);
 
-
-//
 // Scrolling Text window widget routines
-//
 
-// ?
-void
-HUlib_initSText
-(hu_stext_t* s,
-    int		x,
-    int		y,
-    int		h,
-    patch_t** font,
-    int		startchar,
-    bool* on);
+void HUlib_initSText(hu_stext_t* s, int32 x, int32 y, int32 h, const patch_t** font, int32 startchar, bool* on);
 
 // add a new line
 void HUlib_addLineToSText(hu_stext_t* s);
 
 // ?
-void HUlib_addMessageToSText(hu_stext_t* s, const char* prefix, const char* msg);
+void HUlib_addMessageToSText(hu_stext_t* s, string_view prefix, string_view msg);
 
 // draws stext
 void HUlib_drawSText(hu_stext_t* s);
@@ -144,7 +133,7 @@ void HUlib_drawSText(hu_stext_t* s);
 void HUlib_eraseSText(hu_stext_t* s);
 
 // Input Text Line widget routines
-void HUlib_initIText(hu_itext_t* it, int x, int y, patch_t** font, int startchar, bool* on);
+void HUlib_initIText(hu_itext_t* it, int x, int y, const patch_t** font, int startchar, bool* on);
 
 // enforces left margin
 void HUlib_delCharFromIText(hu_itext_t* it);

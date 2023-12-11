@@ -138,18 +138,19 @@ void R_InitSpriteDefs(Doom* doom, const vector<string_view>& names)
         // scan the lumps, filling in the frames for whatever is found
         for (int l = start + 1; l < end; ++l)
         {
-            if (string_view(lumpinfo[l].name, 4) == name)
+            auto& lump = WadManager::GetLump(l);
+            if (lump.name.substr(0, 4) == name)
             {
-                int frame = lumpinfo[l].name[4] - 'A';
-                int rotation = lumpinfo[l].name[5] - '0';
-                int patched = doom->IsModified() ? W_GetNumForName(lumpinfo[l].name) : l;
+                int frame = lump.name[4] - 'A';
+                int rotation = lump.name[5] - '0';
+                int patched = doom->IsModified() ? W_GetNumForName(lump.name) : l;
 
                 R_InstallSpriteLump(name, patched, frame, rotation, false);
 
-                if (lumpinfo[l].name[6])
+                if (lump.name[6])
                 {
-                    frame = lumpinfo[l].name[6] - 'A';
-                    rotation = lumpinfo[l].name[7] - '0';
+                    frame = lump.name[6] - 'A';
+                    rotation = lump.name[7] - '0';
                     R_InstallSpriteLump(name, l, frame, rotation, true);
                 }
             }
@@ -297,7 +298,7 @@ void R_DrawVisSprite(vissprite_t* vis, [[maybe_unused]] int x1, [[maybe_unused]]
     int			texturecolumn;
     fixed_t		frac;
 
-    auto patch = W_CacheLumpNum(vis->patch + firstspritelump, PU_CACHE);
+    auto* patch = WadManager::GetLumpData<patch_t>(vis->patch + firstspritelump);
 
     dc_colormap = vis->colormap;
 

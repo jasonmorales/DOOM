@@ -100,14 +100,6 @@ bool Doom::HasEventInQueue(const event_t& event)
     return false;
 }
 
-const char* fA() { return "asdffsdf"; }
-std::string fB() { return string("cccc"); }
-std::string_view fC() { static const char* s = "...."; return s; }
-std::filesystem::path fD() { return std::filesystem::path("adfgfghghh"); }
-nonstd::string fE() { return string("ccccxx"); }
-nonstd::string_view fF() { static const char* s = "....xx"; return s; }
-nonstd::filesystem::path fG() { return nonstd::filesystem::path("axxxxdfgfghghh"); }
-
 void Doom::Main()
 {
     IdentifyVersion();
@@ -124,47 +116,47 @@ void Doom::Main()
     else if (CommandLine::HasArg("-deathmatch"))
         deathmatch = 1;
 
-    static char title[128];
+    string title;
     switch (gamemode)
     {
     case GameMode::Doom1Retail:
-        sprintf_s(title,
+        title = std::format(
             "                         "
-            "The Ultimate DOOM Startup v%i.%i"
+            "The Ultimate DOOM Startup v{}.{}"
             "                           ",
             Version / 100, Version % 100);
         break;
     case GameMode::Doom1Shareware:
-        sprintf_s(title,
+        title = std::format(
             "                            "
-            "DOOM Shareware Startup v%i.%i"
+            "DOOM Shareware Startup v{}.{}"
             "                           ",
             Version / 100, Version % 100);
         break;
     case GameMode::Doom1Registered:
-        sprintf_s(title,
+        title = std::format(
             "                            "
-            "DOOM Registered Startup v%i.%i"
+            "DOOM Registered Startup v{}.{}"
             "                           ",
             Version / 100, Version % 100);
         break;
     case GameMode::Doom2Commercial:
-        sprintf_s(title,
+        title = std::format(
             "                         "
-            "DOOM 2: Hell on Earth v%i.%i"
+            "DOOM 2: Hell on Earth v{}.{}"
             "                           ",
             Version / 100, Version % 100);
         break;
     default:
-        sprintf_s(title,
+        title = std::format(
             "                     "
-            "Public DOOM - v%i.%i"
+            "Public DOOM - v{}.{}"
             "                           ",
             Version / 100, Version % 100);
         break;
     }
 
-    printf("%s\n", title);
+    std::cout << title << "\n";
 
     if (isDevMode)
         printf(D_DEVSTR);
@@ -187,8 +179,6 @@ void Doom::Main()
         sidemove[1] = sidemove[1] * scale / 100;
     }
 
-    char file[256];
-
     auto doWarp = [](int32 ep, int32 map)
         {
             if (gamemode == GameMode::Doom2Commercial)
@@ -205,22 +195,23 @@ void Doom::Main()
     // convenience hack to allow -wart e m to add a wad file prepend a tilde to the filename so wadfile will be reloadable
     if (int32 ep = 0, map = 0; CommandLine::TryGetValues("-wart", ep, map))
     {
+        string file;
         // Map name handling.
         switch (gamemode)
         {
         case GameMode::Doom1Shareware:
         case GameMode::Doom1Retail:
         case GameMode::Doom1Registered:
-            sprintf_s(file, "~" DEVMAPS "E%dM%d.wad", ep, map);
-            printf("Warping to Episode %d, Map %d.\n", ep, map);
+            file = std::format("~{}E{}M{}.wad", Settings::DevMapPath, ep, map);
+            std::cout << "Warping to Episode " << ep << ", Map " << map << ".\n";
             break;
 
         case GameMode::Doom2Commercial:
         default:
-            sprintf_s(file, "~" DEVMAPS "cdata/map%02d.wad", ep);
+            file = std::format("~{}cdata/map{:02d}.wad", Settings::DevMapPath, ep);
             break;
         }
-        AddFile(file);
+        WadManager::AddFile(file);
 
         doWarp(ep,map);
     }
@@ -229,7 +220,7 @@ void Doom::Main()
     {
         isModified = true; // homebrew levels
         for (auto fileName : fileList)
-            AddFile(fileName);
+            WadManager::AddFile(fileName);
     }
 
     if (string_view name;
@@ -238,8 +229,8 @@ void Doom::Main()
     {
         string fileName(name);
         fileName += ".lmp";
-        AddFile(fileName);
-        printf("Playing demo %s.\n", fileName.c_str());
+        WadManager::AddFile(fileName);
+        std::cout << "Playing demo " << fileName << ".\n";
     }
 
     // get skill / episode / map from parms
@@ -261,32 +252,27 @@ void Doom::Main()
     }
 
     if (int32 time = 0; CommandLine::TryGetValues("-timer", time) && deathmatch)
-    {
-        printf("Levels will end after %d minute", time);
-        if (time > 1)
-            printf("s");
-        printf(".\n");
-    }
+        std::cout << std::format("Levels will end after {} minute{}.\n", time, (time > 1) ? "s" : "");
 
     if (CommandLine::HasArg("-avg") && deathmatch)
-        printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
+        std::cout << "Austin Virtual Gaming: Levels will end after 20 minutes\n";
 
     if (int32 ep = 0, map = 0; CommandLine::TryGetValues("-warp", ep, map))
         doWarp(ep,map);
 
     // init subsystems
-    printf("Z_Init: Init zone memory allocation daemon. \n");
+    std::cout << "Z_Init: Init zone memory allocation daemon. \n";
     Z_Init();
 
-    printf("Video::Init: allocate screens.\n");
+    std::cout << "Video::Init: allocate screens.\n";
     video = new Video(this);
     video->Init();
 
-    printf("Settings::Load: Load system defaults.\n");
+    std::cout << "Settings::Load: Load system defaults.\n";
     Settings::Load(); // load before initing other systems
 
-    printf("W_Init: Init WADfiles.\n");
-    W_InitMultipleFiles(wadFiles);
+    std::cout << "WadManger::LoadAllFiles: Init WADfiles.\n";
+    WadManager::LoadAllFiles();
 
     std::cout << "Init Game\n";
     game = new Game(this);
@@ -296,22 +282,25 @@ void Doom::Main()
     {
         // These are the lumps that will be checked in IWAD,
         // if any one is not present, execution will be aborted.
-        char name[23][9] =
+        string_view names[] =
         {
             "e2m1", "e2m2", "e2m3", "e2m4", "e2m5", "e2m6", "e2m7", "e2m8", "e2m9",
             "e3m1", "e3m3", "e3m3", "e3m4", "e3m5", "e3m6", "e3m7", "e3m8", "e3m9",
             "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1" };
-        int i;
 
         if (gamemode == GameMode::Doom1Shareware)
-            I_Error("\nYou cannot -file with the shareware ", "version. Register!");
+            I_Error("\nYou cannot -file with the shareware version. Register!");
 
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version.
         if (gamemode == GameMode::Doom1Registered)
-            for (i = 0; i < 23; i++)
-                if (W_CheckNumForName(name[i]) < 0)
+        {
+            for (int32 i = 0; i < 23; ++i)
+            {
+                if (WadManager::GetLumpId(names[i]) == INVALID_ID)
                     I_Error("\nThis is not the registered version.");
+            }
+        }
     }
 
     // If additional PWAD files are used, print modified banner
@@ -388,7 +377,7 @@ void Doom::Main()
     // start the appropriate game based on params
     if (string name; CommandLine::TryGetValues("-record", name))
     {
-        G_RecordDemo(this, name.c_str());
+        G_RecordDemo(this, name);
         autostart = true;
     }
 
@@ -433,8 +422,8 @@ void Doom::Loop()
 
     if (CommandLine::HasArg("-debugfile"))
     {
-        string fileName = "debug" + convert<string>(consoleplayer) + ".txt";
-        printf("debug output to: %s\n", fileName.c_str());
+        string fileName = std::format("debug{}.txt", consoleplayer);
+        std::cout << "debug output to: " << fileName << "\n";
         fopen_s(&debugfile, fileName.c_str(), "w");
     }
 
@@ -474,10 +463,6 @@ void Doom::Loop()
 // Send all the events of the given timestamp down the responder chain
 void Doom::ProcessEvents()
 {
-    // IF STORE DEMO, DO NOT ACCEPT INPUT
-    if (gamemode == GameMode::Doom2Commercial && (W_CheckNumForName("map01") < 0))
-        return;
-
     for (; eventTail != eventHead; eventTail = (++eventTail) & (MaxEvents - 1))
     {
         if (M_Responder(events[eventTail]))
@@ -565,8 +550,7 @@ void Doom::StartTitle()
     D_AdvanceDemo();
 }
 
-// Checks availability of IWAD files by name,
-// to determine whether registered/commercial features
+// Checks availability of IWAD files by name, to determine whether registered/commercial features
 // should be executed (notably loading PWAD's).
 void Doom::IdentifyVersion()
 {
@@ -575,9 +559,9 @@ void Doom::IdentifyVersion()
         gamemode = GameMode::Doom1Shareware;
         isDevMode = true;
 
-        AddFile(Settings::DevDataPath / "doom1.wad");
-        AddFile(DEVMAPS "data_se/texture1.lmp");
-        AddFile(DEVMAPS "data_se/pnames.lmp");
+        WadManager::AddFile(Settings::DevDataPath / "doom1.wad");
+        WadManager::AddFile(Settings::DevMapPath / "data_se/texture1.lmp");
+        WadManager::AddFile(Settings::DevMapPath / "data_se/pnames.lmp");
         return;
     }
 
@@ -586,10 +570,10 @@ void Doom::IdentifyVersion()
         gamemode = GameMode::Doom1Registered;
         isDevMode = true;
 
-        AddFile(Settings::DevDataPath /"doom.wad");
-        AddFile(DEVMAPS "data_se/texture1.lmp");
-        AddFile(DEVMAPS "data_se/texture2.lmp");
-        AddFile(DEVMAPS "data_se/pnames.lmp");
+        WadManager::AddFile(Settings::DevDataPath /"doom.wad");
+        WadManager::AddFile(Settings::DevMapPath / "data_se/texture1.lmp");
+        WadManager::AddFile(Settings::DevMapPath / "data_se/texture2.lmp");
+        WadManager::AddFile(Settings::DevMapPath / "data_se/pnames.lmp");
         return;
     }
 
@@ -598,52 +582,34 @@ void Doom::IdentifyVersion()
         gamemode = GameMode::Doom2Commercial;
         isDevMode = true;
 
-        AddFile(Settings::DevDataPath /"doom2.wad");
-        AddFile(DEVMAPS "cdata/texture1.lmp");
-        AddFile(DEVMAPS "cdata/pnames.lmp");
+        WadManager::AddFile(Settings::DevDataPath /"doom2.wad");
+        WadManager::AddFile(Settings::DevMapPath / "cdata/texture1.lmp");
+        WadManager::AddFile(Settings::DevMapPath / "cdata/pnames.lmp");
         return;
     }
 
+    gamemode = GameMode::Unknown;
     std::filesystem::path doomWadDir = "data";
 
-    // Commercial.
-    std::filesystem::path doom2Wad = doomWadDir / "doom2.wad";
-    if (std::filesystem::exists(doom2Wad))
+    const vector<std::pair<filesys::path, GameMode>> coreWads = {
+        { doomWadDir / "doom2.wad", GameMode::Doom2Commercial },    // Commercial
+        { doomWadDir / "doomu.wad", GameMode::Doom1Retail },        // Retail
+        { doomWadDir / "doom.wad", GameMode::Doom1Registered },     // Registered
+        { doomWadDir / "doom1.wad", GameMode::Doom1Shareware },     // Shareware
+    };
+
+    for (const auto& entry : coreWads)
     {
-        gamemode = GameMode::Doom2Commercial;
-        AddFile(doom2Wad.string().c_str());
-        return;
+        if (!filesys::exists(entry.first))
+            continue;
+
+        WadManager::AddFile(entry.first);
+        gamemode = entry.second;
+        break;
     }
 
-    // Retail.
-    std::filesystem::path doomUWad = doomWadDir / "doomu.wad";
-    if (std::filesystem::exists(doomUWad))
-    {
-        gamemode = GameMode::Doom1Retail;
-        AddFile(doomUWad.string().c_str());
-        return;
-    }
-
-    // Registered.
-    std::filesystem::path doomWad = doomWadDir / "doom.wad";
-    if (std::filesystem::exists(doomWad))
-    {
-        gamemode = GameMode::Doom1Registered;
-        AddFile(doomWad.string().c_str());
-        return;
-    }
-
-    // Shareware.
-    std::filesystem::path doom1Wad = doomWadDir / "doom1.wad";
-    if (std::filesystem::exists(doom1Wad))
-    {
-        gamemode = GameMode::Doom1Shareware;
-        AddFile(doom1Wad.string().c_str());
-        return;
-    }
-
-    printf("Game mode indeterminate.\n");
-    gamemode = GameMode::Unknown;
+    if (gamemode == GameMode::Unknown)
+        std::cout << "Game mode indeterminate.\n";
 }
 
 //  draw current display, possibly wiping it from the previous
@@ -716,7 +682,7 @@ void Doom::Display()
 
     // clean up border stuff
     if (gameState != oldGameState && gameState != GameState::Level)
-        video->SetPalette(W_CacheLumpName<byte>("PLAYPAL", PU_CACHE));
+        video->SetPalette(WadManager::GetLumpData<byte>("PLAYPAL"));
 
     // see if the border needs to be initially drawn
     if (gameState == GameState::Level && oldGameState != GameState::Level)
@@ -750,7 +716,7 @@ void Doom::Display()
             y = 4;
         else
             y = viewwindowy + 4;
-        video->DrawPatch(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, W_CacheLumpName<patch_t>("M_PAUSE", PU_CACHE));
+        video->DrawPatch(viewwindowx + (scaledviewwidth - 68) / 2, y, 0, WadManager::GetLumpData<patch_t>("M_PAUSE"));
     }
 
     // menus go directly to the screen
@@ -793,7 +759,7 @@ void Doom::Display()
 
 void Doom::PageDraw()
 {
-    video->DrawPatch(0, 0, 0, W_CacheLumpName<patch_t>(pagename, PU_CACHE));
+    video->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>(pagename));
 }
 
 //  DEMO LOOP

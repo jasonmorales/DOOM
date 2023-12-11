@@ -22,5 +22,3 @@ import std;
 
 // Game Mode - identify IWAD as shareware, retail etc.
 GameMode gamemode = GameMode::Unknown;
-
-GameMission_t	gamemission = doom;

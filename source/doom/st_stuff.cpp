@@ -250,8 +250,7 @@ static const IconBox KeyIconBoxes[] =
  // Height, in lines. 
 #define ST_OUTHEIGHT		1
 
-#define ST_MAPWIDTH	\
-    (strlen(mapnames[(gameepisode-1)*9+(gamemap-1)]))
+#define ST_MAPWIDTH (mapnames[(gameepisode-1)*9+(gamemap-1)].length())
 
 #define ST_MAPTITLEX \
     (SCREENWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH)
@@ -303,31 +302,31 @@ static bool st_armson = false;
 static bool st_fragson = false;
 
 // main bar left
-static patch_t* sbar;
+static const patch_t* sbar;
 
 // 0-9, tall numbers
-static patch_t* tallnum[10];
+static const patch_t* tallnum[10];
 
 // tall % sign
-static patch_t* tallpercent;
+static const patch_t* tallpercent;
 
 // 0-9, short, yellow (,different!) numbers
-static patch_t* shortnum[10];
+static const patch_t* shortnum[10];
 
 // 3 key-cards, 3 skulls
-static patch_t* keys[NUMCARDS];
+static const patch_t* keys[NUMCARDS];
 
 // face status patches
-static patch_t* faces[ST_NUMFACES];
+static const patch_t* faces[ST_NUMFACES];
 
 // face background
-static patch_t* faceback;
+static const patch_t* faceback;
 
 // main bar right
-static patch_t* armsbg;
+static const patch_t* armsbg;
 
 // weapon ownership patches
-static patch_t* arms[6][2];
+static const patch_t* arms[6][2];
 
 // ready-weapon widget
 static st_number_t	w_ready;
@@ -477,14 +476,10 @@ cheatseq_t	cheat_choppers = { cheat_choppers_seq, 0 };
 cheatseq_t	cheat_clev = { cheat_clev_seq, 0 };
 cheatseq_t	cheat_mypos = { cheat_mypos_seq, 0 };
 
+extern string_view mapnames[];
 
-// 
-extern char* mapnames[];
-
-
-//
 // STATUS BAR CODE
-//
+
 void ST_Stop();
 
 void ST_refreshBackground()
@@ -642,12 +637,10 @@ bool ST_Responder(const event_t& event)
             // 'mypos' for player position
             else if (cht_CheckCheat(&cheat_mypos, event.data1))
             {
-                static char	buf[ST_MSGWIDTH];
-                sprintf_s(buf, "ang=0x%x;x,y=(0x%x,0x%x)",
+                plyr->message = std::format("ang={:#06x};x,y=({:#010x},{:#010x})",
                     players[consoleplayer].mo->angle,
                     players[consoleplayer].mo->x,
                     players[consoleplayer].mo->y);
-                plyr->message = buf;
             }
         }
 
@@ -976,9 +969,7 @@ static int st_palette = 0;
 
 void ST_doPaletteStuff()
 {
-
     int		palette;
-    byte* pal;
     int		cnt;
     int		bzc;
 
@@ -1022,8 +1013,7 @@ void ST_doPaletteStuff()
     if (palette != st_palette)
     {
         st_palette = palette;
-        pal = W_CacheLumpNum<byte>(lu_palette, PU_CACHE) + palette * 768;
-        g_doom->GetVideo()->SetPalette(pal);
+        g_doom->GetVideo()->SetPalette(WadManager::GetLumpData<byte>(lu_palette) + palette * 768);
     }
 
 }
@@ -1100,55 +1090,45 @@ void ST_Drawer(bool fullscreen, bool refresh)
 
 void ST_loadGraphics()
 {
-
     int		i;
     int		j;
     int		facenum;
 
-    char	namebuf[9];
-
     // Load the numbers, tall and short
     for (i = 0;i < 10;i++)
     {
-        sprintf_s(namebuf, "STTNUM%d", i);
-        tallnum[i] = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC);
-
-        sprintf_s(namebuf, "STYSNUM%d", i);
-        shortnum[i] = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC);
+        tallnum[i] = WadManager::GetLumpData<patch_t>(std::format("STTNUM{}", i));
+        shortnum[i] = WadManager::GetLumpData<patch_t>(std::format("STYSNUM{}", i));
     }
 
     // Load percent key.
     //Note: why not load STMINUS here, too?
-    tallpercent = (patch_t*)W_CacheLumpName("STTPRCNT", PU_STATIC);
+    tallpercent = WadManager::GetLumpData<patch_t>("STTPRCNT");
 
     // key cards
     for (i = 0;i < NUMCARDS;i++)
     {
-        sprintf_s(namebuf, "STKEYS%d", i);
-        keys[i] = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC);
+        keys[i] = WadManager::GetLumpData<patch_t>(std::format("STKEYS{}", i));
     }
 
     // arms background
-    armsbg = (patch_t*)W_CacheLumpName("STARMS", PU_STATIC);
+    armsbg = WadManager::GetLumpData<patch_t>("STARMS");
 
     // arms ownership widgets
     for (i = 0;i < 6;i++)
     {
-        sprintf_s(namebuf, "STGNUM%d", i + 2);
-
         // gray #
-        arms[i][0] = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC);
+        arms[i][0] = WadManager::GetLumpData<patch_t>(std::format("STGNUM{}", i + 2));
 
         // yellow #
         arms[i][1] = shortnum[i + 2];
     }
 
     // face backgrounds for different color players
-    sprintf_s(namebuf, "STFB%d", consoleplayer);
-    faceback = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC);
+    faceback = WadManager::GetLumpData<patch_t>(std::format("STFB{}", consoleplayer));
 
     // status bar background bits
-    sbar = (patch_t*)W_CacheLumpName("STBAR", PU_STATIC);
+    sbar = WadManager::GetLumpData<patch_t>("STBAR");
 
     // face states
     facenum = 0;
@@ -1156,22 +1136,16 @@ void ST_loadGraphics()
     {
         for (j = 0;j < ST_NUMSTRAIGHTFACES;j++)
         {
-            sprintf_s(namebuf, "STFST%d%d", i, j);
-            faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
+            faces[facenum++] = WadManager::GetLumpData<patch_t>(std::format("STFST{}{}", i, j));
         }
-        sprintf_s(namebuf, "STFTR%d0", i);	// turn right
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf_s(namebuf, "STFTL%d0", i);	// turn left
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf_s(namebuf, "STFOUCH%d", i);	// ouch!
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf_s(namebuf, "STFEVL%d", i);	// evil grin ;)
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
-        sprintf_s(namebuf, "STFKILL%d", i);	// pissed off
-        faces[facenum++] = W_CacheLumpName(namebuf, PU_STATIC);
+        faces[facenum++] = WadManager::GetLumpData<patch_t>(std::format("STFTR{}0", i));
+        faces[facenum++] = WadManager::GetLumpData<patch_t>(std::format("STFTL{}0", i));
+        faces[facenum++] = WadManager::GetLumpData<patch_t>(std::format("STFOUCH{}", i));
+        faces[facenum++] = WadManager::GetLumpData<patch_t>(std::format("STFEVL{}", i));
+        faces[facenum++] = WadManager::GetLumpData<patch_t>(std::format("STFKILL{}", i));
     }
-    faces[facenum++] = W_CacheLumpName("STFGOD0", PU_STATIC);
-    faces[facenum++] = W_CacheLumpName("STFDEAD0", PU_STATIC);
+    faces[facenum++] = WadManager::GetLumpData<patch_t>("STFGOD0");
+    faces[facenum++] = WadManager::GetLumpData<patch_t>("STFDEAD0");
 
 }
 
@@ -1183,11 +1157,9 @@ void ST_loadData()
 
 void ST_unloadGraphics()
 {
-
-    int i;
-
+#if 0
     // unload the numbers, tall and short
-    for (i = 0;i < 10;i++)
+    for (int32 i = 0;i < 10;i++)
     {
         Z_ChangeTag(tallnum[i], PU_CACHE);
         Z_ChangeTag(shortnum[i], PU_CACHE);
@@ -1199,23 +1171,21 @@ void ST_unloadGraphics()
     Z_ChangeTag(armsbg, PU_CACHE);
 
     // unload gray #'s
-    for (i = 0;i < 6;i++)
+    for (int32 i = 0;i < 6;i++)
         Z_ChangeTag(arms[i][0], PU_CACHE);
 
     // unload the key cards
-    for (i = 0;i < NUMCARDS;i++)
+    for (int32 i = 0;i < NUMCARDS;i++)
         Z_ChangeTag(keys[i], PU_CACHE);
 
     Z_ChangeTag(sbar, PU_CACHE);
     Z_ChangeTag(faceback, PU_CACHE);
 
-    for (i = 0;i < ST_NUMFACES;i++)
+    for (int32 i = 0;i < ST_NUMFACES;i++)
         Z_ChangeTag(faces[i], PU_CACHE);
 
-    // Note: nobody ain't seen no unloading
-    //   of stminus yet. Dude.
-
-
+    // Note: nobody ain't seen no unloading of stminus yet. Dude.
+#endif
 }
 
 void ST_unloadData()
@@ -1225,7 +1195,6 @@ void ST_unloadData()
 
 void ST_initData()
 {
-
     int		i;
 
     st_firsttime = true;
@@ -1316,12 +1285,7 @@ void ST_createWidgets()
     };
 
     // armor percentage - should be colored later
-    STlib_initPercent(&w_armor,
-        ST_ARMORX,
-        ST_ARMORY,
-        tallnum,
-        &plyr->armorpoints,
-        &st_statusbaron, tallpercent);
+    STlib_initPercent(&w_armor, ST_ARMORX, ST_ARMORY, tallnum, &plyr->armorpoints, &st_statusbaron, tallpercent);
 
     // keyboxes 0-2
     static_assert(std::size(keyboxes) == std::size(KeyIconBoxes));
@@ -1411,14 +1375,12 @@ static bool st_stopped = true;
 
 void ST_Start()
 {
-
     if (!st_stopped)
         ST_Stop();
 
     ST_initData();
     ST_createWidgets();
     st_stopped = false;
-
 }
 
 void ST_Stop()
@@ -1426,7 +1388,7 @@ void ST_Stop()
     if (st_stopped)
         return;
 
-    g_doom->GetVideo()->SetPalette(W_CacheLumpNum<byte>(lu_palette, PU_CACHE));
+    g_doom->GetVideo()->SetPalette(WadManager::GetLumpData<byte>(lu_palette));
 
     st_stopped = true;
 }

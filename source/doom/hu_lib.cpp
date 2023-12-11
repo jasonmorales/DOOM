@@ -49,13 +49,7 @@ void HUlib_clearTextLine(hu_textline_t* t)
     t->needsupdate = true;
 }
 
-void
-HUlib_initTextLine
-(hu_textline_t* t,
-    int			x,
-    int			y,
-    patch_t** f,
-    int			sc)
+void HUlib_initTextLine(hu_textline_t* t, int32 x, int32 y, const patch_t** f, int32 sc)
 {
     t->x = x;
     t->y = y;
@@ -66,7 +60,6 @@ HUlib_initTextLine
 
 bool HUlib_addCharToTextLine(hu_textline_t* t, char ch)
 {
-
     if (t->len == HU_MAXLINELENGTH)
         return false;
     else
@@ -165,7 +158,7 @@ void HUlib_eraseTextLine(hu_textline_t* l)
 
 }
 
-void HUlib_initSText(hu_stext_t* s, int x, int y, int h, patch_t** font, int startchar, bool* on)
+void HUlib_initSText(hu_stext_t* s, int x, int y, int h, const patch_t** font, int startchar, bool* on)
 {
     int i;
 
@@ -195,19 +188,14 @@ void HUlib_addLineToSText(hu_stext_t* s)
 
 }
 
-void
-HUlib_addMessageToSText
-(hu_stext_t* s,
-    const char* prefix,
-    const char* msg)
+void HUlib_addMessageToSText(hu_stext_t* s, string_view prefix, string_view msg)
 {
     HUlib_addLineToSText(s);
-    if (prefix)
-        while (*prefix)
-            HUlib_addCharToTextLine(&s->l[s->cl], *(prefix++));
+    for (auto c: prefix)
+        HUlib_addCharToTextLine(&s->l[s->cl], c);
 
-    while (*msg)
-        HUlib_addCharToTextLine(&s->l[s->cl], *(msg++));
+    for (auto c : msg)
+        HUlib_addCharToTextLine(&s->l[s->cl], c);
 }
 
 void HUlib_drawSText(hu_stext_t* s)
@@ -248,7 +236,7 @@ void HUlib_eraseSText(hu_stext_t* s)
 
 }
 
-void HUlib_initIText(hu_itext_t* it, int x, int y, patch_t** font, int startchar, bool* on)
+void HUlib_initIText(hu_itext_t* it, int x, int y, const patch_t** font, int startchar, bool* on)
 {
     it->lm = 0; // default left margin is start of text
     it->on = on;

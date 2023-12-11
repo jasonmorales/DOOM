@@ -94,12 +94,14 @@ int             gametic;
 int             levelstarttic;          // gametic at level start 
 int             totalkills, totalitems, totalsecret;    // for intermission 
 
-char            demoname[32];
+string demoname;
 bool         demoplayback;
 bool		netdemo;
-byte* demobuffer;
+const byte* demo_ibuffer;
+const byte* demo_g;
+byte* demo_obuffer;
 byte* demo_p;
-byte* demoend;
+const byte* demoend;
 bool         singledemo;            	// quit after playing a demo from cmdline 
 
 bool         precache = true;        // if true, load all graphics at start 
@@ -577,19 +579,15 @@ void Game::Ticker()
             if (cmd->forwardmove > TURBOTHRESHOLD
                 && !(gametic & 31) && ((gametic >> 5) & 3) == i)
             {
-                static char turbomessage[80];
                 extern const char* player_names[4];
-                sprintf_s(turbomessage, "%s is turbo!", player_names[i]);
-                players[consoleplayer].message = turbomessage;
+                players[consoleplayer].message = std::format("{} is turbo!", player_names[i]);
             }
 
             if (netgame && !netdemo && !(gametic % ticdup))
             {
-                if (gametic > BACKUPTICS
-                    && consistancy[i][buf] != cmd->consistancy)
-                {
+                if (gametic > BACKUPTICS && consistancy[i][buf] != cmd->consistancy)
                     I_Error("consistency failure ({} should be {})", cmd->consistancy, consistancy[i][buf]);
-                }
+
                 if (players[i].mo)
                     consistancy[i][buf] = static_cast<short>(players[i].mo->x);
                 else
@@ -858,15 +856,9 @@ void G_ExitLevel()
     gameaction = ga_completed;
 }
 
-// Here's for the german edition.
 void G_SecretExitLevel()
 {
-    // IF NO WOLF3D LEVELS, NO SECRET EXIT!
-    if ((gamemode == GameMode::Doom2Commercial)
-        && (W_CheckNumForName("map31") < 0))
-        secretexit = false;
-    else
-        secretexit = true;
+    secretexit = true;
     gameaction = ga_completed;
 }
 
@@ -1087,7 +1079,7 @@ void Game::DoLoadGame()
 
 // Called by the menu task.
 // Description is a 24 byte text string 
-void G_SaveGame(int slot, char* description)
+void G_SaveGame(int slot, string_view description)
 {
     savegameslot = slot;
     saveDescription = description;
@@ -1325,28 +1317,25 @@ void G_WriteDemoTiccmd(ticcmd_t* cmd)
     G_ReadDemoTiccmd(cmd);         // make SURE it is exactly the same 
 }
 
-//
-// G_RecordDemo 
-// 
-void G_RecordDemo(Doom* doom, const char* name)
+void G_RecordDemo(Doom* doom, string_view name)
 {
     usergame = false;
-    strcpy_s(demoname, name);
-    strcat_s(demoname, ".lmp");
+    demoname = name;
+    demoname += ".lmp";
     int maxsize = 0x20000;
 
     if (CommandLine::TryGetValues("-maxdemo", maxsize))
         maxsize *= 1024;
 
-    demobuffer = static_cast<byte*>(Z_Malloc(maxsize, PU_STATIC, nullptr));
-    demoend = demobuffer + maxsize;
+    demo_obuffer = static_cast<byte*>(Z_Malloc(maxsize, PU_STATIC, nullptr));
+    demoend = demo_obuffer + maxsize;
 
     doom->SetDemoRecording(true);
 }
 
 void G_BeginRecording()
 {
-    demo_p = demobuffer;
+    demo_p = demo_obuffer;
 
     *demo_p++ = Doom::Version;
     *demo_p++ = static_cast<byte>(gameskill);
@@ -1381,7 +1370,7 @@ void G_DoPlayDemo()
     int             i, episode, map;
 
     gameaction = ga_nothing;
-    demobuffer = demo_p = W_CacheLumpName<byte>(defdemoname, PU_STATIC);
+    demo_ibuffer = demo_g = WadManager::GetLumpData<byte>(defdemoname);
     if (*demo_p++ != Doom::Version)
     {
         fprintf(stderr, "Demo is from a different game version!\n");
@@ -1389,17 +1378,17 @@ void G_DoPlayDemo()
         return;
     }
 
-    skill = static_cast<skill_t>(*demo_p++);
-    episode = *demo_p++;
-    map = *demo_p++;
-    deathmatch = *demo_p++;
-    respawnparm = *demo_p++;
-    fastparm = *demo_p++;
-    nomonsters = *demo_p++;
-    consoleplayer = *demo_p++;
+    skill = static_cast<skill_t>(*demo_g++);
+    episode = *demo_g++;
+    map = *demo_g++;
+    deathmatch = *demo_g++;
+    respawnparm = *demo_g++;
+    fastparm = *demo_g++;
+    nomonsters = *demo_g++;
+    consoleplayer = *demo_g++;
 
     for (i = 0; i < MAXPLAYERS; i++)
-        playeringame[i] = *demo_p++;
+        playeringame[i] = *demo_g++;
     if (playeringame[1])
     {
         netgame = true;
@@ -1447,7 +1436,7 @@ bool G_CheckDemoStatus(Doom* doom)
         if (singledemo)
             I_Quit();
 
-        Z_ChangeTag(demobuffer, PU_CACHE);
+        //Z_ChangeTag(demobuffer, PU_CACHE);
         demoplayback = false;
         netdemo = false;
         netgame = false;
@@ -1464,8 +1453,8 @@ bool G_CheckDemoStatus(Doom* doom)
     if (doom->IsDemoRecording())
     {
         *demo_p++ = DEMOMARKER;
-        M_WriteFile(demoname, reinterpret_cast<char*>(demobuffer), static_cast<uint32>(demo_p - demobuffer));
-        Z_Free(demobuffer);
+        M_WriteFile(demoname, reinterpret_cast<char*>(demo_obuffer), static_cast<uint32>(demo_p - demo_obuffer));
+        Z_Free(demo_obuffer);
         doom->SetDemoRecording(false);
         I_Error("Demo {} recorded", demoname);
     }

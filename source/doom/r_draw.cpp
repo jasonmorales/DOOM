@@ -89,7 +89,7 @@ fixed_t			dc_iscale;
 fixed_t			dc_texturemid;
 
 // first pixel in a column (possibly virtual) 
-byte* dc_source;
+const byte* dc_source;
 
 // just for profiling 
 int			dccount;
@@ -499,7 +499,7 @@ fixed_t			ds_xstep;
 fixed_t			ds_ystep;
 
 // start of a 64*64 tile image 
-byte* ds_source;
+const byte* ds_source;
 
 // just for profiling
 int			dscount;
@@ -717,7 +717,6 @@ void R_FillBackScreen()
 {
     int		x;
     int		y;
-    patch_t* patch;
 
     // DOOM border patch.
     char	name1[] = "FLOOR7_2";
@@ -735,7 +734,7 @@ void R_FillBackScreen()
     else
         name = name1;
 
-    auto* src = W_CacheLumpName<byte>(name, PU_CACHE);
+    auto* src = WadManager::GetLumpData<byte>(name);
     auto* dest = g_doom->GetVideo()->GetScreen(1);
 
     for (y = 0; y < SCREENHEIGHT - SBARHEIGHT; y++)
@@ -753,31 +752,31 @@ void R_FillBackScreen()
         }
     }
 
-    patch = W_CacheLumpName("brdr_t", PU_CACHE);
+    auto* patch = WadManager::GetLumpData<patch_t>("brdr_t");
 
     for (x = 0; x < scaledviewwidth; x += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx + x, viewwindowy - 8, 1, patch);
-    patch = W_CacheLumpName("brdr_b", PU_CACHE);
+    patch = WadManager::GetLumpData<patch_t>("brdr_b");
 
     for (x = 0; x < scaledviewwidth; x += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx + x, viewwindowy + viewheight, 1, patch);
-    patch = W_CacheLumpName("brdr_l", PU_CACHE);
+    patch = WadManager::GetLumpData<patch_t>("brdr_l");
 
     for (y = 0; y < viewheight; y += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + y, 1, patch);
-    patch = W_CacheLumpName("brdr_r", PU_CACHE);
+    patch = WadManager::GetLumpData<patch_t>("brdr_r");
 
     for (y = 0; y < viewheight; y += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + y, 1, patch);
 
     // Draw beveled edge. 
-    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, W_CacheLumpName("brdr_tl", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, WadManager::GetLumpData<patch_t>("brdr_tl"));
 
-    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, W_CacheLumpName("brdr_tr", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, WadManager::GetLumpData<patch_t>("brdr_tr"));
 
-    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, W_CacheLumpName("brdr_bl", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, WadManager::GetLumpData<patch_t>("brdr_bl"));
 
-    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, W_CacheLumpName("brdr_br", PU_CACHE));
+    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, WadManager::GetLumpData<patch_t>("brdr_br"));
 }
 
 // Copy a screen buffer.
