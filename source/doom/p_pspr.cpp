@@ -670,14 +670,7 @@ A_FireShotgun2
     }
 }
 
-
-//
-// A_FireCGun
-//
-void
-A_FireCGun
-(player_t* player,
-    pspdef_t* psp)
+void A_FireCGun(player_t* player, pspdef_t* psp)
 {
     S_StartSound(player->mo, sfx_pistol);
 
@@ -695,9 +688,6 @@ A_FireCGun
     P_GunShot(player->mo, !player->refire);
 }
 
-//
-// ?
-//
 void A_Light0(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
     player->extralight = 0;
@@ -713,22 +703,13 @@ void A_Light2(player_t* player, [[maybe_unused]] pspdef_t* psp)
     player->extralight = 2;
 }
 
-
-//
-// A_BFGSpray
 // Spawn a BFG explosion on every monster in view
-//
 void A_BFGSpray(mobj_t* mo)
 {
-    int			i;
-    int			j;
-    int			damage;
-    angle_t		an;
-
     // offset angles from its attack angle
-    for (i = 0; i < 40; i++)
+    for (int32 i = 0; i < 40; ++i)
     {
-        an = mo->angle - ANG90 / 2 + ANG90 / 40 * i;
+        angle_t an = mo->angle - ANG90 / 2 + ANG90 / 40 * i;
 
         // mo->target is the originator (player)
         //  of the missile
@@ -742,38 +723,24 @@ void A_BFGSpray(mobj_t* mo)
             linetarget->z + (linetarget->height >> 2),
             MT_EXTRABFG);
 
-        damage = 0;
-        for (j = 0;j < 15;j++)
+        int32 damage = 0;
+        for (int32 j = 0; j < 15; ++j)
             damage += (P_Random() & 7) + 1;
 
         P_DamageMobj(linetarget, mo->target, mo->target, damage);
     }
 }
 
-
-//
-// A_BFGsound
-//
-void
-A_BFGsound
-(player_t* player,
-    [[maybe_unused]] pspdef_t* psp)
+void A_BFGsound(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
     S_StartSound(player->mo, sfx_bfg);
 }
 
-
-
-//
-// P_SetupPsprites
 // Called at start of level for each player.
-//
 void P_SetupPsprites(player_t* player)
 {
-    int	i;
-
     // remove all psprites
-    for (i = 0; i < NUMPSPRITES; i++)
+    for (int32 i = 0; i < NUMPSPRITES; ++i)
         player->psprites[i].state = nullptr;
 
     // spawn the gun
@@ -781,24 +748,14 @@ void P_SetupPsprites(player_t* player)
     P_BringUpWeapon(player);
 }
 
-
-
-
-//
-// P_MovePsprites
 // Called every tic by player thinking routine.
-//
 void P_MovePsprites(player_t* player)
 {
-    int		i;
-    pspdef_t* psp;
-    state_t* state;
-
-    psp = &player->psprites[0];
-    for (i = 0; i < NUMPSPRITES; i++, psp++)
+    auto* psp = &player->psprites[0];
+    for (int32 i = 0; i < NUMPSPRITES; ++i, ++psp)
     {
         // a null state means not active
-        if ((state = psp->state))
+        if (psp->state)
         {
             // drop tic count and possibly change state
 
@@ -815,5 +772,3 @@ void P_MovePsprites(player_t* player)
     player->psprites[ps_flash].sx = player->psprites[ps_weapon].sx;
     player->psprites[ps_flash].sy = player->psprites[ps_weapon].sy;
 }
-
-

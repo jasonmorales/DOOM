@@ -19,13 +19,13 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import config;
 
 #include "doomdef.h"
 
 #include "z_zone.h"
 
 #include "m_swap.h"
-#include "m_argv.h"
 
 #include "w_wad.h"
 

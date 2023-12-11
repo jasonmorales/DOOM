@@ -18,7 +18,6 @@
 import std;
 #define __STD_MODULE__
 
-#include "doomtype.h"
 #include "i_system.h"
 #include "m_fixed.h"
 

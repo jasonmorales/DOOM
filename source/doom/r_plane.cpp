@@ -168,20 +168,13 @@ R_MapPlane
     spanfunc();
 }
 
-
-//
-// R_ClearPlanes
 // At begining of frame.
-//
 void R_ClearPlanes()
 {
-    int		i;
-    angle_t	angle;
-
     // opening / clipping determination
-    for (i = 0; i < viewwidth; i++)
+    for (int32 i = 0; i < viewwidth; ++i)
     {
-        floorclip[i] = viewheight;
+        floorclip[i] = size_cast<int16>(viewheight);
         ceilingclip[i] = -1;
     }
 
@@ -192,24 +185,14 @@ void R_ClearPlanes()
     memset(cachedheight, 0, sizeof(cachedheight));
 
     // left to right mapping
-    angle = (viewangle - ANG90) >> ANGLETOFINESHIFT;
+    angle_t	angle = (viewangle - ANG90) >> ANGLETOFINESHIFT;
 
     // scale will be unit scale at SCREENWIDTH/2 distance
     basexscale = FixedDiv(finecosine[angle], centerxfrac);
     baseyscale = -FixedDiv(finesine[angle], centerxfrac);
 }
 
-
-
-
-//
-// R_FindPlane
-//
-visplane_t*
-R_FindPlane
-(fixed_t	height,
-    int		picnum,
-    int		lightlevel)
+visplane_t* R_FindPlane(fixed_t height, int32 picnum, int32 lightlevel)
 {
     visplane_t* check;
 

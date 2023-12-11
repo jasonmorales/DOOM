@@ -17,8 +17,6 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "doomtype.h"
-
 #include "types/numbers.h"
 
 // The data sampled per tick (single player)

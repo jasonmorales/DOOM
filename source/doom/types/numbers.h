@@ -66,6 +66,19 @@ constexpr TO saturate_cast(FROM in) noexcept
     return static_cast<TO>(in);
 }
 
+template<integral TO, integral FROM>
+constexpr TO size_cast(FROM value) noexcept
+{
+    if constexpr (is_same<FROM, TO>)
+        return value;
+
+    assert(
+        std::cmp_greater_equal(value, std::numeric_limits<TO>::min()) &&
+        std::cmp_less_equal(value, std::numeric_limits<TO>::max()));
+
+    return static_cast<TO>(value);
+}
+
 namespace nonstd
 {
 

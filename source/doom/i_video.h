@@ -17,8 +17,6 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "doomtype.h"
-
 #include "system/windows.h"
 #include "types/numbers.h"
 #include "types/strings.h"

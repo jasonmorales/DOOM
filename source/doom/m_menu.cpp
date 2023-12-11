@@ -18,6 +18,7 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import config;
 
 #include "doomdef.h"
 #include "dstrings.h"
@@ -37,7 +38,6 @@ import std;
 
 #include "g_game.h"
 
-#include "m_argv.h"
 #include "m_swap.h"
 
 #include "s_sound.h"

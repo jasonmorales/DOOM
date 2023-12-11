@@ -629,7 +629,7 @@ bool Render::CheckSetViewSize()
 
     // thing clipping
     for (int32 i = 0; i < viewwidth; i++)
-        screenheightarray[i] = viewheight;
+        screenheightarray[i] = size_cast<int16>(viewheight);
 
     // planes
     for (int32 i = 0; i < viewheight; i++)

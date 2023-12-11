@@ -14,6 +14,7 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import config;
 
 #include "doomdef.h" 
 #include "doomstat.h"
@@ -26,7 +27,6 @@ import std;
 #include "g_game.h"
 #include "hu_stuff.h"
 #include "i_system.h"
-#include "m_argv.h"
 #include "m_misc.h"
 #include "m_menu.h"
 #include "m_random.h"

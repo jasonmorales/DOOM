@@ -1,85 +1,94 @@
 module;
 
+#define __STD_MODULE__
+#include "containers/vector.h"
 #include "types/numbers.h"
 #include "types/strings.h"
-#include "containers/vector.h"
+
+#include <cstdlib>
 
 module config;
 
-class CommandLine
+import std;
+
+string_view CommandLine::commandLine;
+vector<string_view> CommandLine::args;
+vector<string_view> CommandLine::fileStack;
+vector<char*> CommandLine::responseFileContent;
+
+void CommandLine::Initialize(string_view source)
 {
-public:
-    using iterator = vector<string_view>::iterator;
+    commandLine = source;
+    Parse(commandLine);
+}
 
-    static void Initialize(string_view source);
+bool CommandLine::HasArg(string_view name)
+{
+    return args.has(name);
+}
 
-    static string_view Get() { return commandLine; }
-    static const vector<string_view>& GetArgs() { return args; }
-    static int32 GetArgCount() { return args.size(); }
+bool CommandLine::HasArg(const std::function<bool(string_view)>& condition)
+{
+    return args.has(condition);
+}
 
-    static bool HasArg(string_view name);
-    static bool HasArg(const std::function<bool(string_view)>& condition);
+void CommandLine::Parse(string_view source)
+{
+    int32 start = 0;
+    int32 end = 0;
+    int32 last = source.length();
 
-    static bool GetValueList(string_view name, vector<string_view>& out)
+    while(end < last)
     {
-        out.clear();
+        // Eat whitespace
+        while (end < last && is_whitespace(source[end])) ++ end;
+        start = end;
 
-        auto arg = args.find(name);
-        if (arg == args.end())
-            return false;
+        bool inString = false;
+        while (end < last && (inString || !is_whitespace(source[end])))
+        {
+            if (source[end] == '"')
+                inString = !inString;
 
-        auto start = arg + 1;
-        while (arg != args.end() && arg->front() != '-') ++ arg;
-        out.insert(out.end(), start, arg);
+            ++end;
+        }
 
-        return true;
+        if (start == end)
+            continue;
+
+        auto arg = source.substr(start, end - start);
+        if (arg.starts_with('@'))
+            ParseResponseFile(arg.substr(1));
+        else
+            args.push_back(arg);
+
+        start = end = end + 1;
+    }
+}
+
+void CommandLine::ParseResponseFile(string_view path)
+{
+    if (fileStack.has(path))
+    {
+        std::cerr << "Recursive response file!";
+        exit(-1);
     }
 
-    static bool TryGetValues(string_view name, auto&& ...out)
-    {
-        auto arg = args.find(name);
-        if (arg == args.end())
-            return false;
+    fileStack.push_back(path);
 
-        return ConvertPack(++arg, out...);
+    auto file = std::ifstream{string{path}, std::ifstream::binary | std::ifstream::ate};
+    if (!file.is_open())
+    {
+        std::cerr << "No such response file!";
+        return;
     }
 
-    template<typename T>
-    static T GetValue(string_view name, T def = {})
-    {
-        auto arg = args.find(name);
-        if (arg == args.end() || arg + 1 == args.end())
-            return def;
+    auto size = file.tellg();
+    auto content =new char[size];
+    responseFileContent.push_back(content);
+    file.seekg(0);
+    file.read(content, size);
+    Parse(string_view(content, size));
 
-        return convert<T>(*(arg + 1));
-    }
-
-private:
-    static void Parse(string_view source);
-    static void ParseResponseFile(string_view file);
-
-    template<typename T>
-    static bool ConvertPack(iterator arg, T& out, auto&&... more)
-    {
-        if (arg == args.end())
-            return false;
-
-        out = convert<T>(*(arg));
-        return ConvertPack(++arg, more...);
-    }
-
-    template<typename T>
-    static bool ConvertPack(iterator arg, T& out)
-    {
-        if (arg == args.end())
-            return false;
-
-        out = convert<T>(*(arg));
-        return true;
-    }
-
-    static string_view commandLine;
-    static vector<string_view> args;
-    static vector<string_view> fileStack;
-    static vector<char*> responseFileContent;
-};
+    fileStack.pop_back();
+}

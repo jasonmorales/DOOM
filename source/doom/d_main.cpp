@@ -20,6 +20,7 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import config;
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -35,7 +36,6 @@ import std;
 #include "i_system.h"
 #include "i_sound.h"
 #include "i_video.h"
-#include "m_argv.h"
 #include "m_misc.h"
 #include "m_menu.h"
 #include "p_setup.h"

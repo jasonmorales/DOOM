@@ -14,8 +14,6 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "doomtype.h"
-
 #include "types/numbers.h"
 
 

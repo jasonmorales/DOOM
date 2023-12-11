@@ -1,4 +1,5 @@
 #pragma once
+import std;
 
 #ifndef __STD_MODULE__
 #include <type_traits>

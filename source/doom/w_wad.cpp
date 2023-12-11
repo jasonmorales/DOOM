@@ -18,18 +18,10 @@
 import std;
 #define __STD_MODULE__
 
-#include "doomtype.h"
-
 #include "i_system.h"
 #include "m_swap.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
-#include <cstring>
-#include <cstdlib>
-#include <io.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 
 vector<filesys::path> WadManager::loadList;

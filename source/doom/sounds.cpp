@@ -16,8 +16,9 @@
 //	Kept as a sample, DOOM2 sounds.
 //
 //-----------------------------------------------------------------------------
+import std;
+#define __STD_MODULE__
 
-#include "doomtype.h"
 #include "sounds.h"
 
 //

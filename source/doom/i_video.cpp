@@ -17,12 +17,12 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import config;
 
 #include "doomstat.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "v_video.h"
-#include "m_argv.h"
 #include "d_main.h"
 #include "m_bbox.h"
 #include "st_stuff.h"
