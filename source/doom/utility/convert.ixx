@@ -1,8 +1,15 @@
-#pragma once
+module;
 
-#include "types/strings.h"
-#include "types/numbers.h"
-#include "types/info.h"
+#include <cassert>
+
+export module convert;
+
+import traits;
+import strings;
+import numbers;
+
+export
+{
 
 template<typename T>
 T parse_number(string_view str)
@@ -146,3 +153,5 @@ TO convert(string_view in) { return string(in); }
 
 template<nonstd::boolean TO>
 TO convert(string_view in) { return in == "true"; }
+
+}

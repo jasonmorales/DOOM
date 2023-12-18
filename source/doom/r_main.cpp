@@ -234,15 +234,9 @@ R_PointOnSegSide
     return 1;
 }
 
-//
-// R_PointToAngle
-// To get a global angle from cartesian coordinates,
-//  the coordinates are flipped until they are in
-//  the first octant of the coordinate system, then
-//  the y (<=x) is scaled and divided by x to get a
-//  tangent (slope) value which is looked up in the
-//  tantoangle[] table.
-//
+// To get a global angle from cartesian coordinates, the coordinates are flipped until they are in
+// the first octant of the coordinate system, then the y (<=x) is scaled and divided by x to get a
+// tangent (slope) value which is looked up in the tantoangle[] table.
 angle_t R_PointToAngle(fixed_t x, fixed_t y)
 {
     x -= viewx;
@@ -301,13 +295,7 @@ angle_t R_PointToAngle(fixed_t x, fixed_t y)
     }
 }
 
-
-angle_t
-R_PointToAngle2
-(fixed_t	x1,
-    fixed_t	y1,
-    fixed_t	x2,
-    fixed_t	y2)
+angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2)
 {
     viewx = x1;
     viewy = y1;
@@ -315,42 +303,24 @@ R_PointToAngle2
     return R_PointToAngle(x2, y2);
 }
 
-
-fixed_t
-R_PointToDist
-(fixed_t	x,
-    fixed_t	y)
+fixed_t R_PointToDist(fixed_t x, fixed_t y)
 {
-    int		angle;
-    fixed_t	dx;
-    fixed_t	dy;
-    fixed_t	temp;
-    fixed_t	dist;
-
-    dx = std::abs(x - viewx);
-    dy = std::abs(y - viewy);
+    fixed_t dx = std::abs(x - viewx);
+    fixed_t dy = std::abs(y - viewy);
 
     if (dy > dx)
     {
-        temp = dx;
+        auto temp = dx;
         dx = dy;
         dy = temp;
     }
 
-    angle = (tantoangle[FixedDiv(dy, dx) >> DBITS] + ANG90) >> ANGLETOFINESHIFT;
+    auto angle = (tantoangle[FixedDiv(dy, dx) >> DBITS] + ANG90) >> ANGLETOFINESHIFT;
 
     // use as cosine
-    dist = FixedDiv(dx, finesine[angle]);
-
-    return dist;
+    return FixedDiv(dx, finesine[angle]);
 }
 
-
-
-
-//
-// R_InitPointToAngle
-//
 void R_InitPointToAngle()
 {
     // UNUSED - now getting from tables.c

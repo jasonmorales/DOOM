@@ -1,15 +1,13 @@
 module;
 
-#define __STD_MODULE__
-#include "containers/vector.h"
-#include "types/numbers.h"
-#include "types/strings.h"
-
 #include <cstdlib>
 
 module config;
 
 import std;
+import strings;
+import numbers;
+import vector;
 
 string_view CommandLine::commandLine;
 vector<string_view> CommandLine::args;

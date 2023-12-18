@@ -1,11 +1,10 @@
 #pragma once
 
-#include "types/info.h"
-#include "types/numbers.h"
-#include "types/strings.h"
+import traits;
+import strings;
+import numbers;
 
 #ifndef __STD_MODULE__
-#include <string_view>
 #include <array>
 #include <algorithm>
 #include <optional>

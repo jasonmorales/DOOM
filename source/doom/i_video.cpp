@@ -17,9 +17,10 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import traits;
 import config;
+import bits;
 
-#include "doomstat.h"
 #include "i_system.h"
 #include "i_video.h"
 #include "v_video.h"
@@ -32,7 +33,6 @@ import config;
 #include <GL/wglew.h>
 #include <gl/gl.h>
 
-#include "utility/bits.h"
 
 #define POINTER_WARP_COUNTDOWN	1
 

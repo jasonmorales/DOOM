@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/strings.h"
+import strings;
 
 #include "d_englsh.h"
 

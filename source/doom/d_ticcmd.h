@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/numbers.h"
+import numbers;
 
 // The data sampled per tick (single player)
 // and transmitted to other peers (multiplayer).

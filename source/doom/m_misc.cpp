@@ -20,6 +20,7 @@
 import std;
 #define __STD_MODULE__
 import config;
+import strings;
 
 #include "doomdef.h"
 
@@ -43,8 +44,6 @@ import config;
 
 #include "m_misc.h"
 #include "d_main.h"
-
-#include "types/strings.h"
 
 
 extern Doom* g_doom;

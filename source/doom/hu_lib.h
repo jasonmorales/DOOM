@@ -16,10 +16,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import strings;
+
 // We are referring to patches.
 #include "r_defs.h"
-
-#include "types/strings.h"
 
 // background and foreground screen numbers
 // different from other modules.

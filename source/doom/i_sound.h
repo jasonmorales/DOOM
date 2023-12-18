@@ -18,13 +18,13 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import numbers;
+import vector;
+
 #include "doomdef.h"
 
 #include "doomstat.h"
 #include "sounds.h"
-
-#include "types/numbers.h"
-#include "containers/vector.h"
 
 //  SFX I/O
 

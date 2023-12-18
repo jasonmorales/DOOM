@@ -14,7 +14,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/numbers.h"
+import numbers;
+
+#include <cassert>
 
 class bbox
 {

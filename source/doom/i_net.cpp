@@ -15,6 +15,7 @@
 import std;
 #define __STD_MODULE__
 import config;
+import convert;
 
 #include "i_system.h"
 #include "d_event.h"
@@ -23,8 +24,6 @@ import config;
 #include "doomstat.h"
 
 #include "i_net.h"
-
-#include "utility/convert.h"
 
 #include "system/windows.h"
 #include <winsock.h>

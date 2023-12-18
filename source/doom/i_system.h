@@ -17,14 +17,16 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import strings;
+
 #include "d_ticcmd.h"
 #include "d_event.h"
-
-#include "types/strings.h"
 
 #ifndef __STD_MODULE__
 #include <format>
 #endif
+
+#include <ctime>
 
 // Called by DoomMain.
 void I_Init();

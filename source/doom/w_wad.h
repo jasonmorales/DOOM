@@ -17,8 +17,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "containers/vector.h"
-#include "types/strings.h"
+import strings;
+import vector;
+
+#include <cassert>
 
 #ifndef __STD_MODULE__
 #include <filesystem>

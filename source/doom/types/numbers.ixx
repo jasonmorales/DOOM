@@ -1,19 +1,17 @@
-#pragma once
-
-#include "types/info.h"
-
-#ifndef __STD_MODULE__
-#include <type_traits>
-#include <concepts>
-#include <cmath>
-#include <limits>
-#include <utility>
-#include <numeric>
-#include <memory>
-#endif
+module;
 
 #include <stdint.h>
 #include <cassert>
+
+export module numbers;
+
+import std;
+import traits;
+
+export
+{
+
+using std::intptr_t;
 
 using int8 = int8_t;
 using int16 = int16_t;
@@ -82,32 +80,34 @@ constexpr TO size_cast(FROM value) noexcept
 namespace nonstd
 {
 
-template<integral B, integral E>
-constexpr std::common_type_t<B, E> pow(B b, E e)
-{
-    using R = std::common_type_t<B, E>;
-
-    if (e == 0)
-        return 1;
-    if (e == 1)
-        return b;
-
-    if (e & 1)
+    template<integral B, integral E>
+    constexpr std::common_type_t<B, E> pow(B b, E e)
     {
-        auto out = b * pow(b * b, (e - 1) / 2);
+        using R = std::common_type_t<B, E>;
+
+        if (e == 0)
+            return 1;
+        if (e == 1)
+            return b;
+
+        if (e & 1)
+        {
+            auto out = b * pow(b * b, (e - 1) / 2);
+            assert(out <= std::numeric_limits<R>::max());
+            return static_cast<R>(out);
+        }
+
+        auto out = pow(b * b, e / 2);
         assert(out <= std::numeric_limits<R>::max());
         return static_cast<R>(out);
     }
 
-    auto out = pow(b * b, e / 2);
-    assert(out <= std::numeric_limits<R>::max());
-    return static_cast<R>(out);
-}
+    template<floating_point B, floating_point E>
+    constexpr std::common_type<B, E> pow(B b, E e)
+    {
+        return std::pow(b, e);
+    }
 
-template<floating_point B, floating_point E>
-constexpr std::common_type<B, E> pow(B b, E e)
-{
-    return std::pow(b, e);
 }
 
 }

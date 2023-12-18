@@ -64,11 +64,9 @@ extern fixed_t		finetangent[FINEANGLES / 2];
 
 typedef unsigned angle_t;
 
-
 // Effective size is 2049;
-// The +1 size is to handle the case when x==y
-//  without additional checking.
-extern angle_t		tantoangle[SLOPERANGE + 1];
+// The +1 size is to handle the case when x==y without additional checking.
+extern int32 tantoangle[SLOPERANGE + 1];
 
 
 // Utility function,

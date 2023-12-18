@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "utility/convert.h"
+import convert;
 
 #ifndef __STD_MODULE__
 #include <format>

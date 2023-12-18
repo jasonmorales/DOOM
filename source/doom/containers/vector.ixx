@@ -1,14 +1,14 @@
-#pragma once
+module;
 
-#include "types/numbers.h"
-
-#ifndef __STD_MODULE__
-#include <vector>
-#include <algorithm>
-#include <functional>
-#include <concepts>
-#endif
 #include <cassert>
+
+export module vector;
+
+import std;
+import numbers;
+
+export
+{
 
 namespace nonstd
 {
@@ -44,3 +44,5 @@ public:
 
 template<typename T>
 using vector = nonstd::vector<T>;
+
+}

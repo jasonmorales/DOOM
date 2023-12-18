@@ -102,32 +102,29 @@ struct st_multicon_t
 };
 
 // Binary Icon widget
-
-typedef struct
+struct st_binicon_t
 {
     // center-justified location of icon
-    int			x;
-    int			y;
+    int32 x = 0;
+    int32 y = 0;
 
     // last icon value
-    int			oldval;
+    bool oldval = false;
 
     // pointer to current icon status
-    bool* val;
+    bool* val = nullptr;
 
     // pointer to bool stating whether to update icon
-    bool* on;
+    bool* on = nullptr;
 
-    const patch_t* p;	// icon
-    int			data;   // user data
+    // icon
+    const patch_t* p = nullptr;
 
-} st_binicon_t;
+    // user data
+    int32 data;
+};
 
-
-
-//
 // Widget creation, access, and update routines
-//
 
 // Initializes widget library.
 // More precisely, initialize STMINUS,

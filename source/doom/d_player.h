@@ -14,6 +14,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import strings;
+
 // The player data structure depends on a number
 // of other structs: items (internal inventory),
 // animation states (closely tied to the sprites
@@ -29,8 +31,6 @@
 // is buffered within the player data struct,
 // as commands per game tick.
 #include "d_ticcmd.h"
-
-#include "types/strings.h"
 
 #include <cstring>
 
@@ -62,10 +62,7 @@ typedef enum
 
 } cheat_t;
 
-
-//
 // Extended player object info: player_t
-//
 struct player_t
 {
     mobj_t* mo;

@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/numbers.h"
+import numbers;
 
 // CHEAT SEQUENCE PACKAGE
 

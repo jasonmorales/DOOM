@@ -189,18 +189,13 @@ void STlib_initBinIcon(st_binicon_t* b, int x, int y, const patch_t* i, bool* va
 
 void STlib_updateBinIcon(st_binicon_t* bi, bool refresh)
 {
-    int			x;
-    int			y;
-    int			w;
-    int			h;
-
     if (*bi->on
         && (bi->oldval != *bi->val || refresh))
     {
-        x = bi->x - (bi->p->leftoffset);
-        y = bi->y - (bi->p->topoffset);
-        w = (bi->p->width);
-        h = (bi->p->height);
+        auto x = bi->x - bi->p->leftoffset;
+        auto y = bi->y - bi->p->topoffset;
+        auto w = bi->p->width;
+        auto h = bi->p->height;
 
         if (y - ST_Y < 0)
             I_Error("updateBinIcon: y - ST_Y < 0");

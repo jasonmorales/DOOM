@@ -1,0 +1,30 @@
+===========================================================================
+Advanced engine needed  : Vanilla Doom required
+Title                   : PC speaker sound effect format
+Filename                : speaker.txt
+Release date            : 2007-02-27
+Authors                 : Simon Howard, Andrew Apted
+Email Address           : fraggle@gmail.com, ajapted@users.sourceforge.net
+
+Description             : Finally the last piece in the puzzle of the Doom
+                          WAD format has been solved!  While every other
+                          lump format contained in the Doom IWADs was long
+                          ago reverse engineered, one last mystery
+                          remained: the PC speaker sound effects.  This is
+                          a technical description of the PC speaker file
+                          format, determined through reverse engineering
+                          the Vanilla Doom executables.
+                          
+                          Also included is some example code for
+                          generating and playing back PC speaker sound
+                          effects, and a WAD containing some replacement
+                          sound effects.
+
+===========================================================================
+
+* Copyright / Permissions *
+
+GPL.  See the file COPYING inside the archive.
+
+You may redistribute this file verbatim.
+

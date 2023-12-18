@@ -83,21 +83,11 @@ fixed_t			cacheddistance[SCREENHEIGHT];
 fixed_t			cachedxstep[SCREENHEIGHT];
 fixed_t			cachedystep[SCREENHEIGHT];
 
-
-
-//
-// R_InitPlanes
 // Only at game startup.
-//
 void R_InitPlanes()
 {
-    // Doh!
 }
 
-
-//
-// R_MapPlane
-//
 // Uses global vars:
 //  planeheight
 //  ds_source
@@ -108,11 +98,7 @@ void R_InitPlanes()
 //
 // BASIC PRIMITIVE
 //
-void
-R_MapPlane
-(int		y,
-    int		x1,
-    int		x2)
+void R_MapPlane(int32 y, int32 x1, int32 x2)
 {
     angle_t	angle;
     fixed_t	distance;
@@ -120,13 +106,8 @@ R_MapPlane
     unsigned	index;
 
 #ifdef RANGECHECK
-    if (x2 < x1
-        || x1<0
-        || x2 >= viewwidth
-        || (unsigned)y>viewheight)
-    {
+    if (x2 < x1 || x1 < 0 || x2 >= viewwidth || y > viewheight)
         I_Error("R_MapPlane: {}, {} at {}", x1, x2, y);
-    }
 #endif
 
     if (planeheight != cachedheight[y])

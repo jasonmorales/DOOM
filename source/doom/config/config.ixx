@@ -1,13 +1,13 @@
 module;
 
-#define __STD_MODULE__
-#include "types/numbers.h"
-#include "types/strings.h"
-#include "containers/vector.h"
-#include "utility/convert.h"
-
 export module config;
 
+import std;
+
+import strings;
+import numbers;
+import vector;
+import convert;
 
 export class CommandLine
 {

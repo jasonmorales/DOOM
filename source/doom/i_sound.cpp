@@ -17,7 +17,9 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+
 import config;
+import numbers;
 
 #include "z_zone.h"
 
@@ -29,7 +31,6 @@ import config;
 #include "doomdef.h"
 
 #include "system/windows.h"
-#include "types/numbers.h"
 
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
@@ -155,7 +156,7 @@ void I_SetChannels()
     // This table provides step widths for pitch parameters.
     // I fail to see that this is currently used.
     for (i = -128; i < 128; i++)
-        steptablemid[i] = (int)(pow(2.0, (i / 64.0)) * 65536.0);
+        steptablemid[i] = (int)(std::pow(2.0, (i / 64.0)) * 65536.0);
 
 
     // Generates volume lookup tables

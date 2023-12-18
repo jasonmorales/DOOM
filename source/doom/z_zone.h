@@ -20,9 +20,9 @@
 //---------------------------------------------------------------------
 #pragma once
 
-#include <stdio.h>
+import numbers;
 
-#include "types/numbers.h"
+#include <stdio.h>
 
 //
 // ZONE MEMORY

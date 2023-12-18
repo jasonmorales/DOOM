@@ -17,9 +17,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import strings;
+import numbers;
+
 #include "system/windows.h"
-#include "types/numbers.h"
-#include "types/strings.h"
 
 #include <GL/glew.h>
 

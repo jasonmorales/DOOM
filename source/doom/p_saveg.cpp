@@ -17,6 +17,9 @@
 //-----------------------------------------------------------------------------
 import std;
 #define __STD_MODULE__
+import numbers;
+import bits;
+import memory;
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -24,10 +27,6 @@ import std;
 #include "doomstat.h"
 #include "r_state.h"
 #include "p_saveg.h"
-
-#include "utility/bits.h"
-#include "utility/memory.h"
-#include "types/numbers.h"
 
 void P_ArchivePlayers(std::ofstream& outFile)
 {

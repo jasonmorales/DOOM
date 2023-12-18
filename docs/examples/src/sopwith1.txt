@@ -1,0 +1,9 @@
+; This is the tune from sopwith 1
+
+>e4./d8/c4/d4/e4/d+4/e4/c4/d4/d4/d4/d1/
+d4./c8/b4/c4/d4/c+4/d4/b4/c4/c4/c4/c1/<g4./g+8/
+>a4./a-8/<g4./g+8/>a4/a-4/<g4/>d4/d4/d2./<g4./g+8/
+>a4./a-8/<g4./g+8/>a4/a-4/<g4/>e4/e4/e2./
+e4./d8/c4/d4/e4/d+4/e4/c4/d4/d4/d4/d2/c4/<g+4/>a4/
+d2/e2/g1/
+

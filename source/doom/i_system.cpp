@@ -26,6 +26,7 @@ import std;
 #include "i_system.h"
 #include "d_main.h"
 
+#include <cassert>
 #include <cstdlib>
 #include <ctime>
 

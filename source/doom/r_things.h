@@ -17,8 +17,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "containers/vector.h"
-#include "types/strings.h"
+import strings;
+import vector;
 
 class Doom;
 

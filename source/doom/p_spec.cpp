@@ -1098,6 +1098,7 @@ void P_UpdateSpecials()
 
     //	DO BUTTONS
     for (i = 0; i < MAXBUTTONS; i++)
+    {
         if (buttonlist[i].btimer)
         {
             buttonlist[i].btimer--;
@@ -1106,32 +1107,26 @@ void P_UpdateSpecials()
                 switch (buttonlist[i].where)
                 {
                 case top:
-                    sides[buttonlist[i].line->sidenum[0]].toptexture =
-                        buttonlist[i].btexture;
+                    sides[buttonlist[i].line->sidenum[0]].toptexture = size_cast<int16>(buttonlist[i].btexture);
                     break;
 
                 case middle:
-                    sides[buttonlist[i].line->sidenum[0]].midtexture =
-                        buttonlist[i].btexture;
+                    sides[buttonlist[i].line->sidenum[0]].midtexture = size_cast<int16>(buttonlist[i].btexture);
                     break;
 
                 case bottom:
-                    sides[buttonlist[i].line->sidenum[0]].bottomtexture =
-                        buttonlist[i].btexture;
+                    sides[buttonlist[i].line->sidenum[0]].bottomtexture = size_cast<int16>(buttonlist[i].btexture);
                     break;
                 }
                 S_StartSound((mobj_t*)&buttonlist[i].soundorg, sfx_swtchn);
                 memset(&buttonlist[i], 0, sizeof(button_t));
             }
         }
-
+    }
 }
 
-
-
-//
 // Special Stuff that can not be categorized
-//
+
 int EV_DoDonut(line_t* line)
 {
     sector_t* s1;
@@ -1156,7 +1151,7 @@ int EV_DoDonut(line_t* line)
         s2 = getNextSector(s1->lines[0], s1);
         for (i = 0;i < s2->linecount;i++)
         {
-            if ((!s2->lines[i]->flags & ML_TWOSIDED) ||
+            if (!(s2->lines[i]->flags & ML_TWOSIDED) ||
                 (s2->lines[i]->backsector == s1))
                 continue;
             s3 = s2->lines[i]->backsector;

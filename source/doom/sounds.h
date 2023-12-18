@@ -18,7 +18,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/strings.h"
+import strings;
+import numbers;
+
 
 struct sfxinfo_t
 {

@@ -17,10 +17,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "d_event.h"
+import strings;
+import vector;
 
-#include "containers/vector.h"
-#include "types/strings.h"
+#include "d_event.h"
 
 #ifndef __STD_MODULE__
 #include <filesystem>

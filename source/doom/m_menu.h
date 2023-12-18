@@ -17,9 +17,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "d_event.h"
+import strings;
 
-#include "types/strings.h"
+#include "d_event.h"
 
 // MENUS
 //

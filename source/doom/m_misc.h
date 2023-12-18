@@ -14,10 +14,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/strings.h"
-#include "types/numbers.h"
-#include "containers/vector.h"
-#include "utility/convert.h"
+import strings;
+import numbers;
+import vector;
+import convert;
 
 bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);

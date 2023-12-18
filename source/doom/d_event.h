@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "types/numbers.h"
+import numbers;
 
 
 // Event handling.
