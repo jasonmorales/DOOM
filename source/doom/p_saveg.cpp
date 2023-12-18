@@ -16,7 +16,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 import numbers;
 import bits;
 import memory;

@@ -15,7 +15,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define  __STD_MODULE__
 
 #include "doomdef.h"
 #include "doomstat.h"

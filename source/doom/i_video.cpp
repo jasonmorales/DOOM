@@ -16,7 +16,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 import traits;
 import config;
 import bits;

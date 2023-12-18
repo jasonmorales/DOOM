@@ -16,7 +16,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 #include "i_system.h"
 #include "m_fixed.h"

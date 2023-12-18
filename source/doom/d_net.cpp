@@ -17,7 +17,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 #include "m_menu.h"
 #include "i_system.h"

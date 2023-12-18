@@ -17,14 +17,11 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import std;
 import strings;
 
 #include "d_ticcmd.h"
 #include "d_event.h"
-
-#ifndef __STD_MODULE__
-#include <format>
-#endif
 
 #include <ctime>
 

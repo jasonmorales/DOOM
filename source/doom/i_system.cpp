@@ -13,7 +13,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 #include "doomdef.h"
 #include "m_misc.h"

@@ -1,14 +1,9 @@
 #pragma once
 
+import std;
 import traits;
 import strings;
 import numbers;
-
-#ifndef __STD_MODULE__
-#include <array>
-#include <algorithm>
-#include <optional>
-#endif
 
 //==================================================================================================
 

@@ -16,7 +16,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 import config;
 
 #include "d_main.h"

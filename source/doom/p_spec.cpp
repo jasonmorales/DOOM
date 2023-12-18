@@ -20,7 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 import config;
 
 #include "doomdef.h"

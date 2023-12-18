@@ -17,11 +17,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-#include "r_local.h"
+import std;
 
-#ifndef __STD_MODULE__
-#include <limits>
-#endif
+#include "r_local.h"
 
 #define FLOATSPEED		(FRACUNIT*4)
 

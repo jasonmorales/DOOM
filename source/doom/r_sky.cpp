@@ -20,7 +20,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 // Needed for FRACUNIT.
 #include "m_fixed.h"

@@ -13,7 +13,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 // We are referring to sprite numbers.
 #include "info.h"

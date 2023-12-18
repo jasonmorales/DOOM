@@ -16,7 +16,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 #include "z_zone.h"
 #include "i_video.h"

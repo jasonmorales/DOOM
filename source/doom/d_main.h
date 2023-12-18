@@ -17,14 +17,11 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import std;
 import strings;
 import vector;
 
 #include "d_event.h"
-
-#ifndef __STD_MODULE__
-#include <filesystem>
-#endif
 
 //
 // BASE LEVEL

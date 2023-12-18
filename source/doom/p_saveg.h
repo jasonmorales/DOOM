@@ -17,11 +17,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import std;
 import convert;
-
-#ifndef __STD_MODULE__
-#include <format>
-#endif
 
 enum class SaveFileMarker : uint8
 {

@@ -17,14 +17,11 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import std;
 import strings;
 import vector;
 
 #include <cassert>
-
-#ifndef __STD_MODULE__
-#include <filesystem>
-#endif
 
 int32 W_GetNumForName(string_view name);
 

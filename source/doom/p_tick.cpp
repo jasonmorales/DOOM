@@ -17,7 +17,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 
 #include "z_zone.h"
 #include "p_local.h"

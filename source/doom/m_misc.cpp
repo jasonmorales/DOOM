@@ -18,7 +18,6 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-#define __STD_MODULE__
 import config;
 import strings;
 
