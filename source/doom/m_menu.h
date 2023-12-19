@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import strings;
+import nstd;
 
 #include "d_event.h"
 

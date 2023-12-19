@@ -6,7 +6,6 @@ module config;
 
 import std;
 import nstd;
-import strings;
 import numbers;
 
 string_view CommandLine::commandLine;
@@ -39,11 +38,11 @@ void CommandLine::Parse(string_view source)
     while(end < last)
     {
         // Eat whitespace
-        while (end < last && is_whitespace(source[end])) ++ end;
+        while (end < last && nstd::is_whitespace(source[end])) ++ end;
         start = end;
 
         bool inString = false;
-        while (end < last && (inString || !is_whitespace(source[end])))
+        while (end < last && (inString || !nstd::is_whitespace(source[end])))
         {
             if (source[end] == '"')
                 inString = !inString;

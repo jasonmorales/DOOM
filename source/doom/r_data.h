@@ -18,6 +18,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import nstd;
+
 #include "r_defs.h"
 #include "r_state.h"
 

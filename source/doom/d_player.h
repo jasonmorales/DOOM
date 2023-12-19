@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import strings;
+import nstd;
 
 // The player data structure depends on a number
 // of other structs: items (internal inventory),

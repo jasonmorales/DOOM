@@ -16,7 +16,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import strings;
+import nstd;
 
 // We are referring to patches.
 #include "r_defs.h"

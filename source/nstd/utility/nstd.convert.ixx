@@ -4,8 +4,8 @@ module;
 
 export module nstd.convert;
 
+import nstd.strings;
 import traits;
-import strings;
 import numbers;
 
 export namespace nstd {
@@ -35,7 +35,7 @@ T parse_number(string_view str)
     if (*at == '0')
     {
         ++at;
-        if (at == end || is_whitespace(*at))
+        if (at == end || nstd::is_whitespace(*at))
             return {};
 
         switch (*at | 32)

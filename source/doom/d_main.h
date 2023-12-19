@@ -18,7 +18,7 @@
 #pragma once
 
 import std;
-import strings;
+import nstd;
 
 #include "d_event.h"
 

@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import strings;
+import nstd;
 import numbers;
 
 #include "system/windows.h"

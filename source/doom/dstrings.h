@@ -17,8 +17,6 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import strings;
-
 #include "d_englsh.h"
 
 // QuitDOOM messages

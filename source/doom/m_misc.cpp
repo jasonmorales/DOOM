@@ -18,8 +18,8 @@
 //
 //-----------------------------------------------------------------------------
 import std;
+import nstd;
 import config;
-import strings;
 
 #include "doomdef.h"
 

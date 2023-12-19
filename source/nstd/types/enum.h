@@ -1,8 +1,9 @@
 #pragma once
 
 import std;
+
+import nstd.strings;
 import traits;
-import strings;
 import numbers;
 
 //==================================================================================================
