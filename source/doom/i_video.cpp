@@ -16,9 +16,8 @@
 //
 //-----------------------------------------------------------------------------
 import std;
-
 import nstd;
-import traits;
+
 import config;
 
 #include "i_system.h"
@@ -86,7 +85,7 @@ private:
     static void _add(GLuint& index, intptr_t& offset)
     {
         glEnableVertexAttribArray(index);
-        if (is_integral<T>)
+        if constexpr (nstd::is_integral<T>)
             glVertexAttribIPointer(index, count<T>(), gl_type<std::remove_all_extents_t<T>>, size, reinterpret_cast<GLvoid*>(offset));
         else
             glVertexAttribPointer(index, count<T>(), gl_type<std::remove_all_extents_t<T>>, GL_FALSE, size, reinterpret_cast<GLvoid*>(offset));

@@ -6,7 +6,7 @@ module;
 export module nstd.numbers;
 
 import std;
-import traits;
+import nstd.traits;
 
 export {
 

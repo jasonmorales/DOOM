@@ -2,14 +2,13 @@ module;
 
 #include <stdint.h>
 
-export module traits;
+export module nstd.traits;
 
 import std;
 
 // General
 
-export
-{
+export namespace nstd {
 
 template<typename T>
 using x_const = std::remove_const_t<T>;
@@ -50,13 +49,10 @@ using std::derived_from;
 template<bool TEST, typename TRUE, typename FALSE>
 using choose = std::conditional_t<TEST, TRUE, FALSE>;
 
-namespace nonstd
-{
-	template<typename T>
-	constexpr bool is_bool = is_same<T, bool>;
-	template<typename T>
-	concept boolean = is_bool<T>;
-}
+template<typename T>
+constexpr bool is_bool = is_same<T, bool>;
+template<typename T>
+concept boolean = is_bool<T>;
 
 // Numbers
 
@@ -96,25 +92,22 @@ concept enum_t = is_enum<T>;
 template<typename T>
 using underlying_type = std::underlying_type_t<naked_type<T>>;
 
-namespace nonstd
-{
-	template<typename T, bool = is_integral<T> || is_enum<T> || is_pointer<T>>
-	struct _int_rep_s { using type = T; };
-
-	template<typename T>
-	struct _int_rep_s<T, false> {};
-
-	template<enum_t E>
-	struct _int_rep_s<E, true> { using type = underlying_type<E>; };
-
-	template<pointer P>
-	struct _int_rep_s<P, true> { using type = intptr_t; };
-
-	template<typename T>
-	struct _int_rep : _int_rep_s<T> {};
-}
+template<typename T, bool = is_integral<T> || is_enum<T> || is_pointer<T>>
+struct _int_rep_s { using type = T; };
 
 template<typename T>
-using int_rep = typename nonstd::_int_rep<T>::type;
+struct _int_rep_s<T, false> {};
 
-}
+template<enum_t E>
+struct _int_rep_s<E, true> { using type = underlying_type<E>; };
+
+template<pointer P>
+struct _int_rep_s<P, true> { using type = intptr_t; };
+
+template<typename T>
+struct _int_rep : _int_rep_s<T> {};
+
+template<typename T>
+using int_rep = typename nstd::_int_rep<T>::type;
+
+} //export namespace nstd

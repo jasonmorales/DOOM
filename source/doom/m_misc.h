@@ -98,10 +98,10 @@ public:
 
     T operator=(const T&& other) { value = other; return value; }
 
-    Setting<T>& operator++() { static_assert(is_integral<T>); value += 1; return *this; }
-    Setting<T>& operator--() { static_assert(is_integral<T>); value -= 1; return *this; }
-    T operator++(int) { static_assert(is_integral<T>); auto out = value; value += 1; return out; }
-    T operator--(int) { static_assert(is_integral<T>); auto out = value; value -= 1; return out; }
+    Setting<T>& operator++() { static_assert(nstd::is_integral<T>); value += 1; return *this; }
+    Setting<T>& operator--() { static_assert(nstd::is_integral<T>); value -= 1; return *this; }
+    T operator++(int) { static_assert(nstd::is_integral<T>); auto out = value; value += 1; return out; }
+    T operator--(int) { static_assert(nstd::is_integral<T>); auto out = value; value -= 1; return out; }
 
 private:
     T value;

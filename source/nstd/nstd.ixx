@@ -4,8 +4,9 @@ export module nstd;
 export import nstd.vector; 
 
 // Types
-export import nstd.strings;
 export import nstd.numbers;
+export import nstd.strings;
+export import nstd.traits;
 
 // Utility
 export import nstd.memory;

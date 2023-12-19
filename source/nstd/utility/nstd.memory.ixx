@@ -3,7 +3,7 @@ module;
 export module nstd.memory;
 
 import std;
-import traits;
+import nstd.traits;
 
 export namespace nstd {
 
