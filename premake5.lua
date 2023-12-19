@@ -42,7 +42,49 @@ workspace 'Doom'
             '.gitignore',
 		}
 	}
+	project 'nstd'
+		kind 'StaticLib'
+		language 'C++'
+		cppdialect 'C++latest'
+		systemversion '10.0'
+		characterset 'unicode'
+		warnings 'extra'
+		rtti 'Off'
+		dpiawareness 'HighPerMonitor'
+		usestandardpreprocessor 'On'
+		buildstlmodules 'On'
+		flags {}
 
+		location 'prject'
+		objdir 'intermediate'
+		targetdir 'bin'
+
+		filter 'Debug'
+			defines { 'DEBUG', '_DEBUG' }
+			symbols 'On'
+			optimize 'Off'
+			targetsuffix '_d'
+			
+		filter 'Release'
+			defines { 'NDEBUG' }
+			optimize 'full'
+			
+		filter {}
+
+		files {
+            'source/nstd/**',
+		}
+
+		vpaths {
+			["source/*"] = 'source/nstd/**',
+		}
+
+		includedirs {
+		}
+
+		libdirs {
+		}
+			
 	project 'doom'
 		--kind 'WindowedApp'
 		kind 'ConsoleApp'
@@ -102,6 +144,7 @@ workspace 'Doom'
 		}
 	
 		links {
+			'nstd',
 			'opengl32',
 			'glu32',
 			'glew32',
