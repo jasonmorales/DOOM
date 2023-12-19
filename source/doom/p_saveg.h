@@ -18,7 +18,7 @@
 #pragma once
 
 import std;
-import convert;
+import nstd;
 
 enum class SaveFileMarker : uint8
 {

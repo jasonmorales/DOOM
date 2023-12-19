@@ -16,9 +16,9 @@
 //
 //-----------------------------------------------------------------------------
 import std;
+
+import nstd;
 import numbers;
-import bits;
-import memory;
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -34,7 +34,7 @@ void P_ArchivePlayers(std::ofstream& outFile)
         if (!playeringame[i])
             continue;
 
-        nonstd::align(4, outFile);
+        nstd::align(4, outFile);
 
         auto* player = players[i].GetSaveData();
         outFile.write(reinterpret_cast<char*>(player), sizeof(player_t));
@@ -51,7 +51,7 @@ void P_UnArchivePlayers(std::ifstream& inFile)
 
         auto* player = &players[i];
 
-        nonstd::align(4, inFile);
+        nstd::align(4, inFile);
         inFile.read(reinterpret_cast<char*>(player), sizeof(player_t));
 
         // will be set when unarc thinker
@@ -176,7 +176,7 @@ void P_ArchiveThinkers(std::ofstream& outFile)
         {
             outFile << static_cast<uint8>(SaveFileMarker::MapObject);
 
-            nonstd::align(4, outFile);
+            nstd::align(4, outFile);
 
             auto* mobj = reinterpret_cast<mobj_t*>(th)->GetSaveData();
             outFile.write(reinterpret_cast<char*>(mobj), sizeof(mobj_t));
@@ -219,7 +219,7 @@ void P_UnArchiveThinkers(std::ifstream& inFile)
         if (tclass != SaveFileMarker::MapObject)
             I_Error("Unknown tclass {} in savegame", tclass);
 
-        nonstd::align(4, inFile);
+        nstd::align(4, inFile);
 
         auto* mobj = Z_Malloc<mobj_t>(sizeof(mobj_t), PU_LEVEL, nullptr);
         inFile.read(reinterpret_cast<char*>(mobj), sizeof(mobj_t));
@@ -259,7 +259,7 @@ template<typename T>
 inline void writeObject(std::ofstream& outFile, thinker_t* object, SaveFileMarker marker)
 {
     outFile << marker;
-    nonstd::align(4, outFile);
+    nstd::align(4, outFile);
 
     auto* data = GetSaveData(reinterpret_cast<T*>(object));
     outFile.write(reinterpret_cast<char*>(data), sizeof(T));
@@ -309,7 +309,7 @@ void P_ArchiveSpecials(std::ofstream& outFile)
 template<typename T>
 T* ReadThinker(std::ifstream& inFile, actionf_p1 action)
 {
-    nonstd::align(4, inFile);
+    nstd::align(4, inFile);
     auto* object = Z_Malloc<T>(sizeof(T), PU_LEVEL, nullptr);
     inFile.read(reinterpret_cast<char*>(object), sizeof(T));
     object->sector = sectors + reinterpret_cast<intptr_t>(object->sector);

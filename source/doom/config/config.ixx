@@ -4,10 +4,10 @@ export module config;
 
 import std;
 
+import nstd;
 import strings;
 import numbers;
 import vector;
-import convert;
 
 export class CommandLine
 {
@@ -67,7 +67,7 @@ private:
         if (arg == args.end())
             return false;
 
-        out = convert<T>(*(arg));
+        out = nstd::convert<T>(*(arg));
         return ConvertPack(++arg, more...);
     }
 
@@ -77,7 +77,7 @@ private:
         if (arg == args.end())
             return false;
 
-        out = convert<T>(*(arg));
+        out = nstd::convert<T>(*(arg));
         return true;
     }
 

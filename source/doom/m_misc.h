@@ -14,10 +14,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import nstd;
 import strings;
 import numbers;
 import vector;
-import convert;
 
 bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);
@@ -91,7 +91,7 @@ public:
 
     void Set(string_view in) override
     {
-        value = convert<T>(in);
+        value = nstd::convert<T>(in);
         isSet = true;
     }
 

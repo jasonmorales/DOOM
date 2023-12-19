@@ -1,4 +1,3 @@
-finish moving new core code to modules
 explore module partitions
 midi playing
 pc speaker sound playing

@@ -13,8 +13,9 @@
 //
 //-----------------------------------------------------------------------------
 import std;
+
+import nstd;
 import config;
-import convert;
 
 #include "i_system.h"
 #include "d_event.h"
@@ -250,7 +251,7 @@ void I_InitNetwork()
     netgame = true;
 
     // parse player number and host list
-    doomcom->consoleplayer = convert<short>(netSettings[0]) - 1;
+    doomcom->consoleplayer = nstd::convert<short>(netSettings[0]) - 1;
 
     doomcom->numnodes = 1;	// this node for sure
 
