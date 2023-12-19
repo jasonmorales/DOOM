@@ -5,9 +5,9 @@ module;
 module config;
 
 import std;
+import nstd;
 import strings;
 import numbers;
-import vector;
 
 string_view CommandLine::commandLine;
 vector<string_view> CommandLine::args;

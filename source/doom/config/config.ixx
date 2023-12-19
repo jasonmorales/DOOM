@@ -7,7 +7,6 @@ import std;
 import nstd;
 import strings;
 import numbers;
-import vector;
 
 export class CommandLine
 {

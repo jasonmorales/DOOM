@@ -2,16 +2,12 @@ module;
 
 #include <cassert>
 
-export module vector;
+export module nstd.vector;
 
 import std;
 import numbers;
 
-export
-{
-
-namespace nonstd
-{
+export namespace nstd {
 
 template<typename T>
 class vector : public std::vector<T>
@@ -40,9 +36,7 @@ public:
     inline bool has(std::predicate<T> auto test) const { return std::any_of(base::begin(), base::end(), test); }
 };
 
-}
+} // export namespace nstd
 
-template<typename T>
-using vector = nonstd::vector<T>;
-
-}
+export template<typename T>
+using vector = nstd::vector<T>;

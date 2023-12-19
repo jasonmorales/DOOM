@@ -17,7 +17,6 @@
 import nstd;
 import strings;
 import numbers;
-import vector;
 
 bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);

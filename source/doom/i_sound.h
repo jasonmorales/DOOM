@@ -18,8 +18,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import nstd;
 import numbers;
-import vector;
 
 #include "doomdef.h"
 

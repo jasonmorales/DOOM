@@ -18,8 +18,8 @@
 #pragma once
 
 import std;
+import nstd;
 import strings;
-import vector;
 
 #include <cassert>
 

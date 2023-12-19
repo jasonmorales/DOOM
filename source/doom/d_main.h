@@ -19,7 +19,6 @@
 
 import std;
 import strings;
-import vector;
 
 #include "d_event.h"
 

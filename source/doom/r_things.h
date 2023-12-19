@@ -17,8 +17,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import nstd;
 import strings;
-import vector;
 
 class Doom;
 
