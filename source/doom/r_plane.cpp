@@ -154,7 +154,7 @@ void R_ClearPlanes()
     // opening / clipping determination
     for (int32 i = 0; i < viewwidth; ++i)
     {
-        floorclip[i] = size_cast<int16>(viewheight);
+        floorclip[i] = nstd::size_cast<int16>(viewheight);
         ceilingclip[i] = -1;
     }
 

@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import numbers;
+import nstd;
 
 // CHEAT SEQUENCE PACKAGE
 

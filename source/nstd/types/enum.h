@@ -4,7 +4,7 @@ import std;
 
 import nstd.strings;
 import traits;
-import numbers;
+import nstd.numbers;
 
 //==================================================================================================
 

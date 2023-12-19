@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import numbers;
+import nstd;
 
 // The data sampled per tick (single player)
 // and transmitted to other peers (multiplayer).

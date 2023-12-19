@@ -7,7 +7,7 @@ export module nstd.strings;
 import std;
 
 import traits;
-import numbers;
+import nstd.numbers;
 
 export namespace nstd {
 

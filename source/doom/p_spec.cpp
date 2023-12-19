@@ -1106,15 +1106,15 @@ void P_UpdateSpecials()
                 switch (buttonlist[i].where)
                 {
                 case top:
-                    sides[buttonlist[i].line->sidenum[0]].toptexture = size_cast<int16>(buttonlist[i].btexture);
+                    sides[buttonlist[i].line->sidenum[0]].toptexture = nstd::size_cast<int16>(buttonlist[i].btexture);
                     break;
 
                 case middle:
-                    sides[buttonlist[i].line->sidenum[0]].midtexture = size_cast<int16>(buttonlist[i].btexture);
+                    sides[buttonlist[i].line->sidenum[0]].midtexture = nstd::size_cast<int16>(buttonlist[i].btexture);
                     break;
 
                 case bottom:
-                    sides[buttonlist[i].line->sidenum[0]].bottomtexture = size_cast<int16>(buttonlist[i].btexture);
+                    sides[buttonlist[i].line->sidenum[0]].bottomtexture = nstd::size_cast<int16>(buttonlist[i].btexture);
                     break;
                 }
                 S_StartSound((mobj_t*)&buttonlist[i].soundorg, sfx_swtchn);

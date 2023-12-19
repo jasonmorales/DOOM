@@ -5,7 +5,7 @@ module;
 export module nstd.vector;
 
 import std;
-import numbers;
+import nstd.numbers;
 
 export namespace nstd {
 

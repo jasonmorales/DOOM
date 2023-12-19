@@ -15,7 +15,6 @@
 #pragma once
 
 import nstd;
-import numbers;
 
 bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);

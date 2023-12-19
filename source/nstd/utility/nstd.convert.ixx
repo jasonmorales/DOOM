@@ -6,7 +6,7 @@ export module nstd.convert;
 
 import nstd.strings;
 import traits;
-import numbers;
+import nstd.numbers;
 
 export namespace nstd {
 
@@ -133,7 +133,7 @@ T parse_number(string_view str)
     }
     exp_value *= exp_sign;
 
-    out *= nonstd::pow(base, exp_value);
+    out *= nstd::pow(base, exp_value);
     assert(out <= std::numeric_limits<T>::max() && out >= std::numeric_limits<T>::min());
     return static_cast<T>(out);
 }

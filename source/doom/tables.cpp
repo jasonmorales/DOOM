@@ -30,8 +30,7 @@
 //    
 //-----------------------------------------------------------------------------
 import std;
-
-import numbers;
+import nstd;
 
 #include "tables.h"
 

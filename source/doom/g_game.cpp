@@ -1039,7 +1039,7 @@ void Game::DoLoadGame()
 
     auto read_byte = [&inFile](auto* val){
         using T = int_rep<x_ptr<decltype(val)>>;
-        *reinterpret_cast<T*>(val) = zero<T>;
+        *reinterpret_cast<T*>(val) = nstd::zero<T>;
         inFile.read(reinterpret_cast<char*>(val), 1);
     };
 

@@ -18,7 +18,6 @@
 import std;
 
 import nstd;
-import numbers;
 
 #include "i_system.h"
 #include "z_zone.h"
@@ -242,7 +241,7 @@ void P_UnArchiveThinkers(std::ifstream& inFile)
 
 std::ostream& operator<<(std::ostream& os, SaveFileMarker sp)
 {
-    os << to_underlying(sp);
+    os << nstd::to_underlying(sp);
     return os;
 }
 

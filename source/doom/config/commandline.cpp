@@ -6,7 +6,6 @@ module config;
 
 import std;
 import nstd;
-import numbers;
 
 string_view CommandLine::commandLine;
 vector<string_view> CommandLine::args;

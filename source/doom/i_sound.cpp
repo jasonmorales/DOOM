@@ -16,8 +16,8 @@
 //
 //-----------------------------------------------------------------------------
 import std;
+import nstd;
 import config;
-import numbers;
 
 #include "z_zone.h"
 

@@ -14,7 +14,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import numbers;
+import nstd;
 
 
 // Event handling.

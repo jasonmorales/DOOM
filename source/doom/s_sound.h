@@ -17,7 +17,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import numbers;
+import nstd;
 
 // Initializes sound stuff, including volume
 // Sets channels, SFX and music volume, allocates channel buffer, sets S_sfx lookup.

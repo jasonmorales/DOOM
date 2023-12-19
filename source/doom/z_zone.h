@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------
 #pragma once
 
-import numbers;
+import nstd;
 
 #include <stdio.h>
 

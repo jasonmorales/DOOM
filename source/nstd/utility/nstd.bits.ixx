@@ -6,7 +6,7 @@ export module nstd.bits;
 
 import std;
 import traits;
-import numbers;
+import nstd.numbers;
 
 export namespace nstd {
 

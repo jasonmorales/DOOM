@@ -3,13 +3,12 @@ module;
 #include <stdint.h>
 #include <cassert>
 
-export module numbers;
+export module nstd.numbers;
 
 import std;
 import traits;
 
-export
-{
+export {
 
 using std::intptr_t;
 
@@ -25,6 +24,10 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 
 constexpr int32 INVALID_ID = -1;
+
+}
+
+export namespace nstd {
 
 template<floating_point T>
 constexpr T Pi_t = static_cast<T>(3.14159265359);
@@ -77,37 +80,32 @@ constexpr TO size_cast(FROM value) noexcept
     return static_cast<TO>(value);
 }
 
-namespace nonstd
+template<integral B, integral E>
+constexpr std::common_type_t<B, E> pow(B b, E e)
 {
+    using R = std::common_type_t<B, E>;
 
-    template<integral B, integral E>
-    constexpr std::common_type_t<B, E> pow(B b, E e)
+    if (e == 0)
+        return 1;
+    if (e == 1)
+        return b;
+
+    if (e & 1)
     {
-        using R = std::common_type_t<B, E>;
-
-        if (e == 0)
-            return 1;
-        if (e == 1)
-            return b;
-
-        if (e & 1)
-        {
-            auto out = b * pow(b * b, (e - 1) / 2);
-            assert(out <= std::numeric_limits<R>::max());
-            return static_cast<R>(out);
-        }
-
-        auto out = pow(b * b, e / 2);
+        auto out = b * pow(b * b, (e - 1) / 2);
         assert(out <= std::numeric_limits<R>::max());
         return static_cast<R>(out);
     }
 
-    template<floating_point B, floating_point E>
-    constexpr std::common_type<B, E> pow(B b, E e)
-    {
-        return std::pow(b, e);
-    }
-
+    auto out = pow(b * b, e / 2);
+    assert(out <= std::numeric_limits<R>::max());
+    return static_cast<R>(out);
 }
 
+template<floating_point B, floating_point E>
+constexpr std::common_type<B, E> pow(B b, E e)
+{
+    return std::pow(b, e);
 }
+
+} // export namespace nstd
