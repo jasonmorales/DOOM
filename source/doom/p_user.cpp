@@ -20,10 +20,15 @@
 import std;
 
 #include "doomdef.h"
+#include "d_main.h"
 #include "doomstat.h"
 
 #include "d_event.h"
 #include "p_local.h"
+
+
+extern Doom* g_doom;
+
 
 // Index of the special effects (INVUL inverse) map.
 #define INVERSECOLORMAP		32
@@ -283,7 +288,7 @@ void P_PlayerThink(player_t* player)
             newweapon = wp_chainsaw;
         }
 
-        if ((gamemode == GameMode::Doom2Commercial)
+        if ((g_doom->GetGameMode() == GameMode::Doom2Commercial)
             && newweapon == wp_shotgun
             && player->weaponowned[wp_supershotgun]
             && player->readyweapon != wp_supershotgun)
@@ -299,7 +304,7 @@ void P_PlayerThink(player_t* player)
             //  even if cheated.
             if ((newweapon != wp_plasma
                 && newweapon != wp_bfg)
-                || (gamemode != GameMode::Doom1Shareware))
+                || (g_doom->GetGameMode() != GameMode::Doom1Shareware))
             {
                 player->pendingweapon = newweapon;
             }

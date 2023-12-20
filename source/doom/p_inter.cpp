@@ -18,6 +18,7 @@
 import std;
 
 #include "doomdef.h"
+#include "d_main.h"
 #include "dstrings.h"
 #include "sounds.h"
 
@@ -32,6 +33,9 @@ import std;
 
 #include "s_sound.h"
 #include "p_inter.h"
+
+
+extern Doom* g_doom;
 
 
 #define BONUSADD	6
@@ -339,7 +343,7 @@ P_TouchSpecialThing
         break;
 
     case SPR_MEGA:
-        if (gamemode != GameMode::Doom2Commercial)
+        if (g_doom->GetGameMode() != GameMode::Doom2Commercial)
             return;
         player->health = 200;
         player->mo->health = player->health;

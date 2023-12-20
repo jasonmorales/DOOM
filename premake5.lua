@@ -55,7 +55,7 @@ workspace 'Doom'
 		buildstlmodules 'On'
 		flags {}
 
-		location 'prject'
+		location 'project'
 		objdir 'intermediate'
 		targetdir 'bin'
 

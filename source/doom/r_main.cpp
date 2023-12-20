@@ -12,8 +12,7 @@
 // for more details.
 //
 // DESCRIPTION:
-//	Rendering main loop and setup functions,
-//	 utility functions (BSP, geometry, trigonometry).
+//	Rendering main loop and setup functions, utility functions (BSP, geometry, trigonometry).
 //	See tables.c, too.
 //
 //-----------------------------------------------------------------------------
@@ -106,23 +105,15 @@ lighttable_t* zlight[LIGHTLEVELS][MAXLIGHTZ];
 // bumped light from gun blasts
 int			extralight;
 
-
-
 void (*colfunc) ();
 void (*basecolfunc) ();
 void (*fuzzcolfunc) ();
 void (*transcolfunc) ();
 void (*spanfunc) ();
 
-// Traverse BSP (sub) tree,
-//  check point against partition plane.
+// Traverse BSP (sub) tree, check point against partition plane.
 // Returns side 0 (front) or 1 (back).
-//
-int
-R_PointOnSide
-(fixed_t	x,
-    fixed_t	y,
-    node_t* node)
+int32 R_PointOnSide(fixed_t x, fixed_t y, node_t* node)
 {
     fixed_t	dx;
     fixed_t	dy;
@@ -170,12 +161,7 @@ R_PointOnSide
     return 1;
 }
 
-
-int
-R_PointOnSegSide
-(fixed_t	x,
-    fixed_t	y,
-    seg_t* line)
+int32 R_PointOnSegSide(fixed_t x, fixed_t y, seg_t* line)
 {
     fixed_t	lx;
     fixed_t	ly;
@@ -339,14 +325,8 @@ void R_InitPointToAngle()
 #endif
 }
 
-
-//
-// R_ScaleFromGlobalAngle
-// Returns the texture mapping scale
-//  for the current line (horizontal span)
-//  at the given angle.
+// Returns the texture mapping scale for the current line (horizontal span) at the given angle.
 // rw_distance must be calculated first.
-//
 fixed_t R_ScaleFromGlobalAngle(angle_t visangle)
 {
     fixed_t		scale;
@@ -398,11 +378,6 @@ fixed_t R_ScaleFromGlobalAngle(angle_t visangle)
     return scale;
 }
 
-
-
-//
-// R_InitTables
-//
 void R_InitTables()
 {
     // UNUSED: now getting from tables.c
@@ -433,29 +408,17 @@ void R_InitTables()
 
 }
 
-
-
-//
-// R_InitTextureMapping
-//
 void R_InitTextureMapping()
 {
-    int			i;
-    int			x;
-    int			t;
-    fixed_t		focallength;
-
-    // Use tangent table to generate viewangletox:
-    //  viewangletox will give the next greatest x
-    //  after the view angle.
+    // Use tangent table to generate viewangletox: viewangletox will give the next greatest x
+    // after the view angle.
     //
-    // Calc focallength
-    //  so FIELDOFVIEW angles covers SCREENWIDTH.
-    focallength = FixedDiv(centerxfrac,
-        finetangent[FINEANGLES / 4 + FIELDOFVIEW / 2]);
+    // Calc focallength so FIELDOFVIEW angles covers SCREENWIDTH.
+    auto focallength = FixedDiv(centerxfrac, finetangent[FINEANGLES / 4 + FIELDOFVIEW / 2]);
 
-    for (i = 0; i < FINEANGLES / 2; i++)
+    for (int32 i = 0; i < FINEANGLES / 2; ++i)
     {
+        fixed_t t = 0;
         if (finetangent[i] > FRACUNIT * 2)
             t = -1;
         else if (finetangent[i] < -FRACUNIT * 2)
@@ -476,18 +439,18 @@ void R_InitTextureMapping()
     // Scan viewangletox[] to generate xtoviewangle[]:
     //  xtoviewangle will give the smallest view angle
     //  that maps to x.	
-    for (x = 0;x <= viewwidth;x++)
+    for (int32 x = 0; x <= viewwidth; ++x)
     {
-        i = 0;
+        int32 i = 0;
         while (viewangletox[i] > x)
-            i++;
+            ++i;
         xtoviewangle[x] = (i << ANGLETOFINESHIFT) - ANG90;
     }
 
     // Take out the fencepost cases from viewangletox.
-    for (i = 0; i < FINEANGLES / 2; i++)
+    for (int32 i = 0; i < FINEANGLES / 2; ++i)
     {
-        t = FixedMul(finetangent[i], focallength);
+        auto t = FixedMul(finetangent[i], focallength);
         t = centerx - t;
 
         if (viewangletox[i] == -1)
@@ -499,13 +462,7 @@ void R_InitTextureMapping()
     clipangle = xtoviewangle[0];
 }
 
-
-
-//
-// R_InitLightTables
-// Only inits the zlight table,
-//  because the scalelight table changes with view size.
-//
+// Only inits the zlight table, because the scalelight table changes with view size.
 #define DISTMAP		2
 
 void R_InitLightTables()
@@ -538,8 +495,7 @@ void R_InitLightTables()
     }
 }
 
-// Do not really change anything here,
-//  because it might be in the middle of a refresh.
+// Do not really change anything here, because it might be in the middle of a refresh.
 // The change will take effect next refresh.
 void Render::RequestSetViewSize(int32 inBlocks, int32 inDetail)
 {
@@ -614,8 +570,7 @@ bool Render::CheckSetViewSize()
         distscale[i] = FixedDiv(FRACUNIT, cosadj);
     }
 
-    // Calculate the light levels to use
-    //  for each level / scale combination.
+    // Calculate the light levels to use for each level / scale combination.
     for (int32 i = 0; i < LIGHTLEVELS; i++)
     {
         auto startmap = ((LIGHTLEVELS - 1 - i) * 2) * NUMCOLORMAPS / LIGHTLEVELS;
@@ -684,11 +639,6 @@ subsector_t* R_PointInSubsector(fixed_t x, fixed_t	y)
     return &subsectors[nodenum & ~NF_SUBSECTOR];
 }
 
-
-
-//
-// R_SetupFrame
-//
 void R_SetupFrame(player_t* player)
 {
     int		i;
@@ -724,11 +674,6 @@ void R_SetupFrame(player_t* player)
     validcount++;
 }
 
-
-
-//
-// R_RenderView
-//
 void R_RenderPlayerView(player_t* player)
 {
     R_SetupFrame(player);

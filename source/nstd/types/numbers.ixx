@@ -108,4 +108,10 @@ constexpr std::common_type<B, E> pow(B b, E e)
     return std::pow(b, e);
 }
 
+template<number T>
+constexpr T sign(T n) { return static_cast<T>(n == 0 ? 0 : (n > 0 ? 1 : -1)); }
+
+template<number T>
+constexpr T sqr(T n) { return n * n; }
+
 } // export namespace nstd

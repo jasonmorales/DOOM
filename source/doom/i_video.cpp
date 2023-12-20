@@ -33,14 +33,6 @@ import config;
 #include <gl/gl.h>
 
 
-#define POINTER_WARP_COUNTDOWN	1
-
-// Fake mouse handling.
-// This cannot work properly w/o DGA.
-// Needs an invisible mouse cursor at least.
-bool grabMouse;
-int		doPointerWarp = POINTER_WARP_COUNTDOWN;
-
 template<typename T>
 constexpr const GLenum gl_type = []{ static_assert(false, "type does not have a corresponding GL type"); return 0; }();
 template<> constexpr const GLenum gl_type<int8> = GL_BYTE;
@@ -594,28 +586,6 @@ void Video::StartFrame()
 void Video::StartTick()
 {
     DeliverSystemMessages();
-
-#if 0
-    // Warp the pointer back to the middle of the window
-    //  or it will wander off - that is, the game will
-    //  loose input focus within X11.
-    if (grabMouse)
-    {
-        if (!--doPointerWarp)
-        {
-            XWarpPointer(X_display,
-                None,
-                X_mainWindow,
-                0, 0,
-                0, 0,
-                X_width / 2, X_height / 2);
-
-            doPointerWarp = POINTER_WARP_COUNTDOWN;
-        }
-    }
-
-    mousemoved = false;
-#endif
 }
 
 LRESULT Video::HandleSystemEvent(const SystemEvent& event)

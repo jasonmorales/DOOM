@@ -481,7 +481,7 @@ void WI_initAnimatedBack()
     int		i;
     anim_t* a;
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         return;
 
     if (wbs->epsd > 2)
@@ -510,7 +510,7 @@ void WI_updateAnimatedBack()
     int		i;
     anim_t* a;
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         return;
 
     if (wbs->epsd > 2)
@@ -561,7 +561,7 @@ void WI_drawAnimatedBack()
     int			i;
     anim_t* a;
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         return;
 
     if (wbs->epsd > 2)
@@ -750,7 +750,7 @@ void WI_drawShowNextLoc()
     // draw animated background
     WI_drawAnimatedBack();
 
-    if (gamemode != GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() != GameMode::Doom2Commercial)
     {
         if (wbs->epsd > 2)
         {
@@ -774,7 +774,7 @@ void WI_drawShowNextLoc()
     }
 
     // draws which level you are entering..
-    if ((gamemode != GameMode::Doom2Commercial)
+    if ((g_doom->GetGameMode() != GameMode::Doom2Commercial)
         || wbs->next != 30)
         WI_drawEL();
 
@@ -922,7 +922,7 @@ void WI_updateDeathmatchStats()
         {
             S_StartSound(0, sfx_slop);
 
-            if (gamemode == GameMode::Doom2Commercial)
+            if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
                 WI_initNoState();
             else
                 WI_initShowNextLoc();
@@ -1201,7 +1201,7 @@ void WI_updateNetgameStats()
         if (acceleratestage)
         {
             S_StartSound(0, sfx_sgcock);
-            if (gamemode == GameMode::Doom2Commercial)
+            if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
                 WI_initNoState();
             else
                 WI_initShowNextLoc();
@@ -1377,7 +1377,7 @@ void WI_updateStats()
         {
             S_StartSound(0, sfx_sgcock);
 
-            if (gamemode == GameMode::Doom2Commercial)
+            if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
                 WI_initNoState();
             else
                 WI_initShowNextLoc();
@@ -1469,7 +1469,7 @@ void WI_Ticker()
     if (bcnt == 1)
     {
         // intermission music
-        if (gamemode == GameMode::Doom2Commercial)
+        if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
             S_ChangeMusic(mus_dm2int, true);
         else
             S_ChangeMusic(mus_inter, true);
@@ -1503,12 +1503,12 @@ void WI_loadData()
     anim_t* a;
 
     string name;
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         name = "INTERPIC";
     else
         name = std::format("WIMAP{}", wbs->epsd);
 
-    if (gamemode == GameMode::Doom1Retail)
+    if (g_doom->GetGameMode() == GameMode::Doom1Retail)
     {
         if (wbs->epsd == 3)
             name = "INTERPIC";
@@ -1518,7 +1518,7 @@ void WI_loadData()
     bg = WadManager::GetLumpData<patch_t>(name);
     g_doom->GetVideo()->DrawPatch(0, 0, 1, bg);
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         NUMCMAPS = 32;
         lnames = (const patch_t**)Z_Malloc(sizeof(patch_t*) * NUMCMAPS, PU_STATIC, 0);
@@ -1647,7 +1647,7 @@ void WI_unloadData()
     for (i = 0; i < 10; i++)
         Z_ChangeTag(num[i], PU_CACHE);
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         for (i = 0; i < NUMCMAPS; i++)
             Z_ChangeTag(lnames[i], PU_CACHE);
@@ -1732,9 +1732,9 @@ void WI_initVariables(wbstartstruct_t* wbstartstruct)
     wbs = wbstartstruct;
 
 #ifdef RANGECHECKING
-    if (gamemode != commercial)
+    if (g_doom->GetGameMode() != commercial)
     {
-        if (gamemode == retail)
+        if (g_doom->GetGameMode() == retail)
             RNGCHECK(wbs->epsd, 0, 3);
         else
             RNGCHECK(wbs->epsd, 0, 2);
@@ -1763,7 +1763,7 @@ void WI_initVariables(wbstartstruct_t* wbstartstruct)
     if (!wbs->maxsecret)
         wbs->maxsecret = 1;
 
-    if (gamemode != GameMode::Doom1Retail)
+    if (g_doom->GetGameMode() != GameMode::Doom1Retail)
         if (wbs->epsd > 2)
             wbs->epsd -= 3;
 }

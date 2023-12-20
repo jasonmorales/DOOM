@@ -23,6 +23,7 @@ import std;
 #include "i_system.h"
 
 #include "doomdef.h"
+#include "d_main.h"
 #include "p_local.h"
 
 #include "s_sound.h"
@@ -33,6 +34,9 @@ import std;
 #include "r_state.h"
 
 #include "sounds.h"
+
+
+extern Doom* g_doom;
 
 
 typedef enum
@@ -1361,11 +1365,7 @@ void A_FatAttack3(mobj_t* actor)
     mo->momy = FixedMul(mo->info->speed, finesine[an]);
 }
 
-
-//
-// SkullAttack
 // Fly at the player like a missile.
-//
 #define	SKULLSPEED		(20*FRACUNIT)
 
 void A_SkullAttack(mobj_t* actor)
@@ -1393,15 +1393,8 @@ void A_SkullAttack(mobj_t* actor)
     actor->momz = (dest->z + (dest->height >> 1) - actor->z) / dist;
 }
 
-
-//
-// A_PainShootSkull
 // Spawn a lost soul and launch it at the target
-//
-void
-A_PainShootSkull
-(mobj_t* actor,
-    angle_t	angle)
+void A_PainShootSkull(mobj_t* actor, angle_t angle)
 {
     fixed_t	x;
     fixed_t	y;
@@ -1456,11 +1449,7 @@ A_PainShootSkull
     A_SkullAttack(newmobj);
 }
 
-
-//
-// A_PainAttack
 // Spawn a lost soul and launch it at the target
-// 
 void A_PainAttack(mobj_t* actor)
 {
     if (!actor->target)
@@ -1470,7 +1459,6 @@ void A_PainAttack(mobj_t* actor)
     A_PainShootSkull(actor, actor->angle);
 }
 
-
 void A_PainDie(mobj_t* actor)
 {
     A_Fall(actor);
@@ -1478,11 +1466,6 @@ void A_PainDie(mobj_t* actor)
     A_PainShootSkull(actor, actor->angle + ANG180);
     A_PainShootSkull(actor, actor->angle + ANG270);
 }
-
-
-
-
-
 
 void A_Scream(mobj_t* actor)
 {
@@ -1520,7 +1503,6 @@ void A_Scream(mobj_t* actor)
         S_StartSound(actor, sound);
 }
 
-
 void A_XScream(mobj_t* actor)
 {
     S_StartSound(actor, sfx_slop);
@@ -1532,8 +1514,6 @@ void A_Pain(mobj_t* actor)
         S_StartSound(actor, actor->info->painsound);
 }
 
-
-
 void A_Fall(mobj_t* actor)
 {
     // actor is on ground, it can be walked over
@@ -1543,21 +1523,12 @@ void A_Fall(mobj_t* actor)
     // are meant to be obstacles.
 }
 
-
-//
-// A_Explode
-//
 void A_Explode(mobj_t* thingy)
 {
     P_RadiusAttack(thingy, thingy->target, 128);
 }
 
-
-//
-// A_BossDeath
-// Possibly trigger special effects
-// if on first boss level
-//
+// Possibly trigger special effects if on first boss level
 void A_BossDeath(mobj_t* mo)
 {
     thinker_t* th;
@@ -1565,7 +1536,7 @@ void A_BossDeath(mobj_t* mo)
     line_t	junk;
     int		i;
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         if (gamemap != 7)
             return;
@@ -1657,7 +1628,7 @@ void A_BossDeath(mobj_t* mo)
     }
 
     // victory!
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         if (gamemap == 7)
         {
@@ -1948,7 +1919,7 @@ void A_PlayerScream(mobj_t* mo)
     // Default death sound.
     int		sound = sfx_pldeth;
 
-    if ((gamemode == GameMode::Doom2Commercial)
+    if ((g_doom->GetGameMode() == GameMode::Doom2Commercial)
         && (mo->health < -50))
     {
         // IF THE PLAYER DIES

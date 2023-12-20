@@ -37,6 +37,9 @@ import std;
 #include "doomstat.h"
 
 
+extern Doom* g_doom;
+
+
 void	P_SpawnMapThing(mapthing_t* mthing);
 
 const vector<string_view> spriteNames = {
@@ -265,7 +268,7 @@ void P_LoadThings(intptr_t lump)
         spawn = true;
 
         // Do not spawn cool, new monsters if !commercial
-        if (gamemode != GameMode::Doom2Commercial)
+        if (g_doom->GetGameMode() != GameMode::Doom2Commercial)
         {
             switch (mt->type)
             {
@@ -528,7 +531,7 @@ void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
 
     // find map name
     string lumpname;
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         lumpname = std::format("MAP{:02d}", map);
     else
         lumpname = std::format("E{}M{}", episode, map);

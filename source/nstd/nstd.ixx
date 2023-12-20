@@ -1,6 +1,7 @@
 export module nstd;
 
 // Containers
+export import nstd.containers;
 export import nstd.vector; 
 
 // Types

@@ -17,6 +17,7 @@
 import std;
 
 #include "doomdef.h"
+#include "d_main.h"
 
 #include "z_zone.h"
 
@@ -32,6 +33,9 @@ import std;
 
 #include "dstrings.h"
 #include "sounds.h"
+
+
+extern Doom* g_doom;
 
 
 // Locally used constants, shortcuts.
@@ -278,7 +282,7 @@ void HU_Start()
     HUlib_initTextLine(&w_title, HU_TITLEX, HU_TITLEY, hu_font, HU_FONTSTART);
 
     string_view s;
-    switch (gamemode)
+    switch (g_doom->GetGameMode())
     {
     case GameMode::Doom1Shareware:
     case GameMode::Doom1Registered:
@@ -379,7 +383,7 @@ void HU_Ticker()
                             message_nottobefuckedwith = true;
                             message_on = true;
                             message_counter = HU_MSGTIMEOUT;
-                            if (gamemode == GameMode::Doom2Commercial)
+                            if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
                                 S_StartSound(0, sfx_radio);
                             else
                                 S_StartSound(0, sfx_tink);

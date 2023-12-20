@@ -39,11 +39,6 @@ extern  bool	fastparm;	// checkparm of -fast
 
 
 
-// -----------------------------------------------------
-// Game Mode - identify IWAD as shareware, retail etc.
-//
-extern GameMode	gamemode;
-
 // -------------------------------------------
 // Selected skill type, map etc.
 //

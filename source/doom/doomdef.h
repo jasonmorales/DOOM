@@ -25,17 +25,6 @@ import nstd;
 //
 // Global parameters/defines.
 
-// Game mode handling - identify IWAD version
-//  to handle IWAD dependent animations etc.
-enum class GameMode : int32
-{
-    Doom1Shareware,	    // DOOM 1 shareware, E1, M9
-    Doom1Registered,	// DOOM 1 registered, E3, M27
-    Doom2Commercial,	// DOOM 2 retail, E1 M34
-    Doom1Retail,	    // DOOM 1 retail, E4, M36
-    Unknown,            // Well, no IWAD found.
-};
-
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled
 #define RANGECHECK

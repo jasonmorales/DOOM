@@ -574,7 +574,7 @@ bool ST_Responder(const event_t& event)
                 plyr->message = STSTR_MUS;
                 cht_GetParam(&cheat_mus, buf);
 
-                if (gamemode == GameMode::Doom2Commercial)
+                if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
                 {
                     auto musnum = mus_runnin + (buf[0] - '0') * 10 + buf[1] - '0' - 1;
 
@@ -652,7 +652,7 @@ bool ST_Responder(const event_t& event)
 
             cht_GetParam(&cheat_clev, buf);
 
-            if (gamemode == GameMode::Doom2Commercial)
+            if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
             {
                 epsd = 1;
                 map = (buf[0] - '0') * 10 + buf[1] - '0';
@@ -671,19 +671,19 @@ bool ST_Responder(const event_t& event)
                 return false;
 
             // Ohmygod - this is not going to work.
-            if ((gamemode == GameMode::Doom1Retail)
+            if ((g_doom->GetGameMode() == GameMode::Doom1Retail)
                 && ((epsd > 4) || (map > 9)))
                 return false;
 
-            if ((gamemode == GameMode::Doom1Registered)
+            if ((g_doom->GetGameMode() == GameMode::Doom1Registered)
                 && ((epsd > 3) || (map > 9)))
                 return false;
 
-            if ((gamemode == GameMode::Doom1Shareware)
+            if ((g_doom->GetGameMode() == GameMode::Doom1Shareware)
                 && ((epsd > 1) || (map > 9)))
                 return false;
 
-            if ((gamemode == GameMode::Doom2Commercial)
+            if ((g_doom->GetGameMode() == GameMode::Doom2Commercial)
                 && ((epsd > 1) || (map > 34)))
                 return false;
 

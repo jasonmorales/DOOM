@@ -670,7 +670,7 @@ void M_QuickLoad()
 void M_DrawReadThis1()
 {
     inhelpscreens = true;
-    switch (gamemode)
+    switch (g_doom->GetGameMode())
     {
     case GameMode::Doom2Commercial:
         g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("HELP"));
@@ -686,15 +686,11 @@ void M_DrawReadThis1()
     return;
 }
 
-
-
-//
 // Read This Menus - optional second page.
-//
 void M_DrawReadThis2()
 {
     inhelpscreens = true;
-    switch (gamemode)
+    switch (g_doom->GetGameMode())
     {
     case GameMode::Doom1Retail:
     case GameMode::Doom2Commercial:
@@ -708,13 +704,9 @@ void M_DrawReadThis2()
     default:
         break;
     }
-    return;
 }
 
-
-//
 // Change Sfx & Music volumes
-//
 void M_DrawSound()
 {
     g_doom->GetVideo()->DrawPatch(60, 38, 0, WadManager::GetLumpData<patch_t>("M_SVOL"));
@@ -782,16 +774,13 @@ void M_NewGame(int)
         return;
     }
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         M_SetupNextMenu(&NewDef);
     else
         M_SetupNextMenu(&EpiDef);
 }
 
-
-//
 //      M_Episode
-//
 int     epi;
 
 void M_DrawEpisode()
@@ -822,7 +811,7 @@ void M_ChooseSkill(int choice)
 
 void M_Episode(int choice)
 {
-    if ((gamemode == GameMode::Doom1Shareware) && choice)
+    if ((g_doom->GetGameMode() == GameMode::Doom1Shareware) && choice)
     {
         Menu::StartMessage(SWSTRING, nullptr, false);
         M_SetupNextMenu(&ReadDef1);
@@ -830,8 +819,7 @@ void M_Episode(int choice)
     }
 
     // Yet another hack...
-    if ((gamemode == GameMode::Doom1Registered)
-        && (choice > 2))
+    if ((g_doom->GetGameMode() == GameMode::Doom1Registered) && (choice > 2))
     {
         fprintf(stderr,
             "M_Episode: 4th episode requires UltimateDOOM\n");
@@ -842,14 +830,9 @@ void M_Episode(int choice)
     M_SetupNextMenu(&NewDef);
 }
 
-
-
-//
 // M_Options
-//
 char    detailNames[2][9] = { "M_GDHIGH","M_GDLOW" };
 char	msgNames[2][9] = { "M_MSGOFF","M_MSGON" };
-
 
 void M_DrawOptions()
 {
@@ -979,7 +962,7 @@ void M_QuitResponse(int ch)
         return;
     if (!netgame)
     {
-        if (gamemode == GameMode::Doom2Commercial)
+        if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
             S_StartSound(nullptr, quitsounds2[(gametic >> 2) & 7]);
         else
             S_StartSound(nullptr, quitsounds[(gametic >> 2) & 7]);
@@ -1014,9 +997,7 @@ void M_ChangeDetail(int choice)
     detailLevel = 1 - detailLevel;
 
     // FIXME - does not work. Remove anyway?
-    fprintf(stderr, "M_ChangeDetail: low detail mode n.a.\n");
-
-    return;
+    g_doom->GetRender()->RequestSetViewSize(screenBlocks, detailLevel);
 }
 
 void M_SizeDisplay(int choice)
@@ -1061,10 +1042,7 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
     g_doom->GetVideo()->DrawPatch((x + 8) + thermDot * 8, y, 0, WadManager::GetLumpData<patch_t>("M_THERMO"));
 }
 
-void
-M_DrawEmptyCell
-(menu_t* menu,
-    int		item)
+void M_DrawEmptyCell(menu_t* menu, int32 item)
 {
     g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, WadManager::GetLumpData<patch_t>("M_CELL1"));
 }
@@ -1330,7 +1308,7 @@ bool M_Responder(const event_t& event)
         case KEY_F1:            // Help key
             M_StartControlPanel();
 
-            if (gamemode == GameMode::Doom1Retail)
+            if (g_doom->GetGameMode() == GameMode::Doom1Retail)
                 currentMenu = &ReadDef2;
             else
                 currentMenu = &ReadDef1;
@@ -1618,7 +1596,7 @@ void Menu::Init()
     //  like HELP1/2, and four episodes.
 
 
-    switch (gamemode)
+    switch (g_doom->GetGameMode())
     {
     case GameMode::Doom2Commercial:
         // This is used because DOOM 2 had only one HELP

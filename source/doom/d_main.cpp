@@ -116,7 +116,7 @@ void Doom::Main()
         deathmatch = 1;
 
     string title;
-    switch (gamemode)
+    switch (gameMode)
     {
     case GameMode::Doom1Retail:
         title = std::format(
@@ -178,9 +178,9 @@ void Doom::Main()
         sidemove[1] = sidemove[1] * scale / 100;
     }
 
-    auto doWarp = [](int32 ep, int32 map)
+    auto doWarp = [this](int32 ep, int32 map)
         {
-            if (gamemode == GameMode::Doom2Commercial)
+            if (gameMode == GameMode::Doom2Commercial)
                 startmap = ep;
             else
             {
@@ -196,7 +196,7 @@ void Doom::Main()
     {
         string file;
         // Map name handling.
-        switch (gamemode)
+        switch (gameMode)
         {
         case GameMode::Doom1Shareware:
         case GameMode::Doom1Retail:
@@ -287,12 +287,12 @@ void Doom::Main()
             "e3m1", "e3m3", "e3m3", "e3m4", "e3m5", "e3m6", "e3m7", "e3m8", "e3m9",
             "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1" };
 
-        if (gamemode == GameMode::Doom1Shareware)
+        if (gameMode == GameMode::Doom1Shareware)
             I_Error("\nYou cannot -file with the shareware version. Register!");
 
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version.
-        if (gamemode == GameMode::Doom1Registered)
+        if (gameMode == GameMode::Doom1Registered)
         {
             for (int32 i = 0; i < 23; ++i)
             {
@@ -316,7 +316,7 @@ void Doom::Main()
     }
 
     // Check and print which version is executed.
-    switch (gamemode)
+    switch (gameMode)
     {
     case GameMode::Doom1Shareware:
     case GameMode::Unknown:
@@ -484,7 +484,7 @@ void Doom::DoAdvanceDemo()
     paused = false;
     gameaction = ga_nothing;
 
-    if (gamemode == GameMode::Doom1Retail)
+    if (gameMode == GameMode::Doom1Retail)
         borderDrawCount = (borderDrawCount + 1) % 7;
     else
         borderDrawCount = (borderDrawCount + 1) % 6;
@@ -492,13 +492,13 @@ void Doom::DoAdvanceDemo()
     switch (borderDrawCount)
     {
     case 0:
-        if (gamemode == GameMode::Doom2Commercial)
+        if (gameMode == GameMode::Doom2Commercial)
             pagetic = 35 * 11;
         else
             pagetic = 170;
         gameState = GameState::Demo;
         pagename = "TITLEPIC";
-        if (gamemode == GameMode::Doom2Commercial)
+        if (gameMode == GameMode::Doom2Commercial)
             S_StartMusic(mus_dm2ttl);
         else
             S_StartMusic(mus_intro);
@@ -516,7 +516,7 @@ void Doom::DoAdvanceDemo()
         break;
     case 4:
         gameState = GameState::Demo;
-        if (gamemode == GameMode::Doom2Commercial)
+        if (gameMode == GameMode::Doom2Commercial)
         {
             pagetic = 35 * 11;
             pagename = "TITLEPIC";
@@ -526,7 +526,7 @@ void Doom::DoAdvanceDemo()
         {
             pagetic = 200;
 
-            if (gamemode == GameMode::Doom1Retail)
+            if (gameMode == GameMode::Doom1Retail)
                 pagename = "CREDIT";
             else
                 pagename = "HELP2";
@@ -555,7 +555,7 @@ void Doom::IdentifyVersion()
 {
     if (CommandLine::HasArg("-shdev"))
     {
-        gamemode = GameMode::Doom1Shareware;
+        gameMode = GameMode::Doom1Shareware;
         isDevMode = true;
 
         WadManager::AddFile(Settings::DevDataPath / "doom1.wad");
@@ -566,7 +566,7 @@ void Doom::IdentifyVersion()
 
     if (CommandLine::HasArg("-regdev"))
     {
-        gamemode = GameMode::Doom1Registered;
+        gameMode = GameMode::Doom1Registered;
         isDevMode = true;
 
         WadManager::AddFile(Settings::DevDataPath /"doom.wad");
@@ -578,7 +578,7 @@ void Doom::IdentifyVersion()
 
     if (CommandLine::HasArg("-comdev"))
     {
-        gamemode = GameMode::Doom2Commercial;
+        gameMode = GameMode::Doom2Commercial;
         isDevMode = true;
 
         WadManager::AddFile(Settings::DevDataPath /"doom2.wad");
@@ -587,7 +587,7 @@ void Doom::IdentifyVersion()
         return;
     }
 
-    gamemode = GameMode::Unknown;
+    gameMode = GameMode::Unknown;
     std::filesystem::path doomWadDir = "data";
 
     const vector<std::pair<filesys::path, GameMode>> coreWads = {
@@ -603,11 +603,11 @@ void Doom::IdentifyVersion()
             continue;
 
         WadManager::AddFile(entry.first);
-        gamemode = entry.second;
+        gameMode = entry.second;
         break;
     }
 
-    if (gamemode == GameMode::Unknown)
+    if (gameMode == GameMode::Unknown)
         std::cout << "Game mode indeterminate.\n";
 }
 

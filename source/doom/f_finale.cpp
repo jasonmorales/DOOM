@@ -33,6 +33,9 @@ import std;
 #include "r_state.h"
 #include "d_main.h"
 
+#include "hu_stuff.h"
+extern	const patch_t* hu_font[HU_FONTSIZE];
+
 
 extern Doom* g_doom;
 extern GameState wipegamestate;
@@ -129,7 +132,7 @@ void F_StartFinale()
     // Okay - IWAD dependent stuff.
     // This has been changed severely, and
     //  some stuff might have changed in the process.
-    switch (gamemode)
+    switch (g_doom->GetGameMode())
     {
 
         // DOOM 1 - E1, E3 or E4, but each nine missions
@@ -244,16 +247,16 @@ bool F_Responder(const event_t& event)
 
 void F_Ticker()
 {
-    int		i;
-
     // check for skipping
-    if ((gamemode == GameMode::Doom2Commercial)
-        && (finalecount > 50))
+    if ((g_doom->GetGameMode() == GameMode::Doom2Commercial) && (finalecount > 50))
     {
         // go on to the next level
-        for (i = 0; i < MAXPLAYERS; i++)
+        int32 i = 0;
+        for (; i < MAXPLAYERS; ++i)
+        {
             if (players[i].cmd.buttons)
                 break;
+        }
 
         if (i < MAXPLAYERS)
         {
@@ -273,7 +276,7 @@ void F_Ticker()
         return;
     }
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         return;
 
     if (!finalestage && finalecount > finaletext.length() * TEXTSPEED + TEXTWAIT)
@@ -285,14 +288,6 @@ void F_Ticker()
             S_StartMusic(mus_bunny);
     }
 }
-
-//
-// F_TextWrite
-//
-
-#include "hu_stuff.h"
-extern	const patch_t* hu_font[HU_FONTSIZE];
-
 
 void F_TextWrite()
 {
@@ -625,7 +620,7 @@ void F_Drawer()
         switch (gameepisode)
         {
         case 1:
-            if (gamemode == GameMode::Doom1Retail)
+            if (g_doom->GetGameMode() == GameMode::Doom1Retail)
                 g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("CREDIT"));
             else
                 g_doom->GetVideo()->DrawPatch(0, 0, 0, WadManager::GetLumpData<patch_t>("HELP2"));

@@ -26,9 +26,13 @@ import std;
 #include "w_wad.h"
 
 #include "doomdef.h"
+#include "d_main.h"
 #include "p_local.h"
 
 #include "doomstat.h"
+
+
+extern Doom* g_doom;
 
 
 // when to clip out sounds
@@ -275,7 +279,7 @@ void S_Start()
     mus_paused = false;
 
     int32 mnum = 0;
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         mnum = mus_runnin + gamemap - 1;
     }

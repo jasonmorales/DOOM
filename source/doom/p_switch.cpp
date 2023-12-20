@@ -20,6 +20,7 @@ import std;
 
 #include "i_system.h"
 #include "doomdef.h"
+#include "d_main.h"
 #include "p_local.h"
 
 #include "g_game.h"
@@ -32,6 +33,9 @@ import std;
 // State.
 #include "doomstat.h"
 #include "r_state.h"
+
+
+extern Doom* g_doom;
 
 
 //
@@ -104,11 +108,10 @@ void P_InitSwitchList()
 
     episode = 1;
 
-    if (gamemode == GameMode::Doom1Registered)
+    if (g_doom->GetGameMode() == GameMode::Doom1Registered)
         episode = 2;
-    else
-        if (gamemode == GameMode::Doom2Commercial)
-            episode = 3;
+    else if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
+       episode = 3;
 
     for (index = 0, i = 0;i < MAXSWITCHES;i++)
     {

@@ -19,6 +19,7 @@
 import std;
 
 #include "doomdef.h"
+#include "d_main.h"
 #include "d_event.h"
 
 #include "m_random.h"
@@ -30,6 +31,10 @@ import std;
 #include "sounds.h"
 
 #include "p_pspr.h"
+
+
+extern Doom* g_doom;
+
 
 #define LOWERSPEED		FRACUNIT*6
 #define RAISESPEED		FRACUNIT*6
@@ -163,13 +168,13 @@ bool P_CheckAmmo(player_t* player)
     {
         if (player->weaponowned[wp_plasma]
             && player->ammo[am_cell]
-            && (gamemode != GameMode::Doom1Shareware))
+            && (g_doom->GetGameMode() != GameMode::Doom1Shareware))
         {
             player->pendingweapon = wp_plasma;
         }
         else if (player->weaponowned[wp_supershotgun]
             && player->ammo[am_shell] > 2
-            && (gamemode == GameMode::Doom2Commercial))
+            && (g_doom->GetGameMode() == GameMode::Doom2Commercial))
         {
             player->pendingweapon = wp_supershotgun;
         }
@@ -198,7 +203,7 @@ bool P_CheckAmmo(player_t* player)
         }
         else if (player->weaponowned[wp_bfg]
             && player->ammo[am_cell] > 40
-            && (gamemode != GameMode::Doom1Shareware))
+            && (g_doom->GetGameMode() != GameMode::Doom1Shareware))
         {
             player->pendingweapon = wp_bfg;
         }

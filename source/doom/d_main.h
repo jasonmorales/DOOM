@@ -41,6 +41,17 @@ enum class GameState : int32
     ForceWipe
 };
 
+// Game mode handling - identify IWAD version
+//  to handle IWAD dependent animations etc.
+enum class GameMode : int32
+{
+    Doom1Shareware,	    // DOOM 1 shareware, E1, M9
+    Doom1Registered,	// DOOM 1 registered, E3, M27
+    Doom2Commercial,	// DOOM 2 retail, E1 M34
+    Doom1Retail,	    // DOOM 1 retail, E4, M36
+    Unknown,            // Well, no IWAD found.
+};
+
 class Video;
 class Render;
 class Game;
@@ -65,6 +76,7 @@ public:
     bool IsDemoRecording() const { return isDemoRecording; }
     bool UseSingleTicks() const { return useSingleTicks; }
     GameState GetGameState() const { return gameState; }
+    GameMode GetGameMode() const { return gameMode; }
 
     void SetDemoRecording(bool b) { isDemoRecording = b; }
     void SetUseSingleTicks(bool b) { useSingleTicks = b; }
@@ -93,6 +105,7 @@ private:
     Render* render = nullptr;
 
     Game* game = nullptr;
+    GameMode gameMode = GameMode::Unknown;
     GameState gameState = GameState::Demo;
     GameState oldGameState = GameState::ForceWipe;
 

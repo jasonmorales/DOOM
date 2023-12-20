@@ -383,7 +383,7 @@ void G_DoLoadLevel()
 
     // DOOM determines the sky texture to be used
     // depending on the current episode, and the game version.
-    if ((gamemode == GameMode::Doom2Commercial))
+    if ((g_doom->GetGameMode() == GameMode::Doom2Commercial))
     {
         skytexture = R_TextureNumForName("SKY3");
         if (gamemap < 12)
@@ -872,7 +872,7 @@ void G_DoCompleted()
     if (automapactive)
         AM_Stop();
 
-    if (gamemode != GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() != GameMode::Doom2Commercial)
     {
         switch (gamemap)
         {
@@ -886,14 +886,14 @@ void G_DoCompleted()
         }
     }
 
-    if ((gamemap == 8) && (gamemode != GameMode::Doom2Commercial))
+    if ((gamemap == 8) && (g_doom->GetGameMode() != GameMode::Doom2Commercial))
     {
         // victory 
         gameaction = ga_victory;
         return;
     }
 
-    if ((gamemap == 9) && (gamemode != GameMode::Doom2Commercial))
+    if ((gamemap == 9) && (g_doom->GetGameMode() != GameMode::Doom2Commercial))
     {
         // exit secret level 
         for (int32 i = 0; i < MAXPLAYERS; ++i)
@@ -905,7 +905,7 @@ void G_DoCompleted()
     wminfo.last = gamemap - 1;
 
     // wminfo.next is 0 biased, unlike gamemap
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         if (secretexit)
             switch (gamemap)
@@ -952,7 +952,7 @@ void G_DoCompleted()
     wminfo.maxitems = totalitems;
     wminfo.maxsecret = totalsecret;
     wminfo.maxfrags = 0;
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
         wminfo.partime = 35 * cpars[gamemap - 1];
     else
         wminfo.partime = 35 * pars[gameepisode][gamemap];
@@ -985,7 +985,7 @@ void G_WorldDone()
     if (secretexit)
         players[consoleplayer].didsecret = true;
 
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         switch (gamemap)
         {
@@ -1182,12 +1182,12 @@ void G_InitNew(skill_t skill, int32 episode, int32 map)
     if (episode < 1)
         episode = 1;
 
-    if (gamemode == GameMode::Doom1Retail)
+    if (g_doom->GetGameMode() == GameMode::Doom1Retail)
     {
         if (episode > 4)
             episode = 4;
     }
-    else if (gamemode == GameMode::Doom1Shareware)
+    else if (g_doom->GetGameMode() == GameMode::Doom1Shareware)
     {
         if (episode > 1)
             episode = 1;	// only start episode 1 on shareware
@@ -1203,8 +1203,7 @@ void G_InitNew(skill_t skill, int32 episode, int32 map)
     if (map < 1)
         map = 1;
 
-    if ((map > 9)
-        && (gamemode != GameMode::Doom2Commercial))
+    if ((map > 9) && (g_doom->GetGameMode() != GameMode::Doom2Commercial))
         map = 9;
 
     M_ClearRandom();
@@ -1248,7 +1247,7 @@ void G_InitNew(skill_t skill, int32 episode, int32 map)
     viewactive = true;
 
     // set the sky map for the episode
-    if (gamemode == GameMode::Doom2Commercial)
+    if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
     {
         skytexture = R_TextureNumForName("SKY3");
         if (gamemap < 12)
