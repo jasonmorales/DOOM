@@ -313,8 +313,7 @@ void R_AddLine(seg_t* line)
         || backsector->floorheight != frontsector->floorheight)
         goto clippass;
 
-    // Reject empty lines used for triggers
-    //  and special events.
+    // Reject empty lines used for triggers and special events.
     // Identical floor and ceiling on both sides,
     // identical light levels on both sides,
     // and no middle texture.
@@ -444,14 +443,9 @@ bool R_CheckBBox(bbox bspcoord)
     return true;
 }
 
-
-
-//
-// R_Subsector
 // Determine floor/ceiling planes.
 // Add sprites of things in sector.
 // Draw one or more line segments.
-//
 void R_Subsector(int num)
 {
     int			count;
@@ -499,8 +493,7 @@ void R_Subsector(int num)
     }
 }
 
-// Renders all subsectors below a given node,
-//  traversing subtree recursively.
+// Renders all subsectors below a given node, traversing subtree recursively.
 // Just call with BSP root.
 void R_RenderBSPNode(int bspnum)
 {

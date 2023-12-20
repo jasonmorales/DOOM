@@ -44,17 +44,12 @@ void T_PlatRaise(plat_t* plat)
     switch (plat->status)
     {
     case up:
-        res = T_MovePlane(plat->sector,
-            plat->speed,
-            plat->high,
-            plat->crush, 0, 1);
+        res = T_MovePlane(plat->sector, plat->speed, plat->high, plat->crush, 0, 1);
 
-        if (plat->type == raiseAndChange
-            || plat->type == raiseToNearestAndChange)
+        if (plat->type == raiseAndChange || plat->type == raiseToNearestAndChange)
         {
             if (!(leveltime & 7))
-                S_StartSound((mobj_t*)&plat->sector->soundorg,
-                    sfx_stnmov);
+                S_StartSound((mobj_t*)&plat->sector->soundorg, sfx_stnmov);
         }
 
 
@@ -62,38 +57,33 @@ void T_PlatRaise(plat_t* plat)
         {
             plat->count = plat->wait;
             plat->status = down;
-            S_StartSound((mobj_t*)&plat->sector->soundorg,
-                sfx_pstart);
+            S_StartSound((mobj_t*)&plat->sector->soundorg, sfx_pstart);
         }
-        else
+        else if (res == pastdest)
         {
-            if (res == pastdest)
+            plat->count = plat->wait;
+            plat->status = waiting;
+            S_StartSound((mobj_t*)&plat->sector->soundorg, sfx_pstop);
+
+            switch (plat->type)
             {
-                plat->count = plat->wait;
-                plat->status = waiting;
-                S_StartSound((mobj_t*)&plat->sector->soundorg,
-                    sfx_pstop);
+            case blazeDWUS:
+            case downWaitUpStay:
+                P_RemoveActivePlat(plat);
+                break;
 
-                switch (plat->type)
-                {
-                case blazeDWUS:
-                case downWaitUpStay:
-                    P_RemoveActivePlat(plat);
-                    break;
+            case raiseAndChange:
+            case raiseToNearestAndChange:
+                P_RemoveActivePlat(plat);
+                break;
 
-                case raiseAndChange:
-                case raiseToNearestAndChange:
-                    P_RemoveActivePlat(plat);
-                    break;
-
-                default:
-                    break;
-                }
+            default:
+                break;
             }
         }
         break;
 
-    case	down:
+    case down:
         res = T_MovePlane(plat->sector, plat->speed, plat->low, false, 0, -1);
 
         if (res == pastdest)
@@ -104,7 +94,7 @@ void T_PlatRaise(plat_t* plat)
         }
         break;
 
-    case	waiting:
+    case waiting:
         if (!--plat->count)
         {
             if (plat->sector->floorheight == plat->low)
@@ -113,7 +103,7 @@ void T_PlatRaise(plat_t* plat)
                 plat->status = down;
             S_StartSound((mobj_t*)&plat->sector->soundorg, sfx_pstart);
         }
-    case	in_stasis:
+    case in_stasis:
         break;
     }
 }

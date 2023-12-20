@@ -175,17 +175,9 @@ R_RenderMaskedSegRange
 
 }
 
-
-
-
-//
-// R_RenderSegLoop
-// Draws zero, one, or two textures (and possibly a masked
-//  texture) for walls.
-// Can draw or mark the starting pixel of floor and ceiling
-//  textures.
+// Draws zero, one, or two textures (and possibly a masked texture) for walls.
+// Can draw or mark the starting pixel of floor and ceiling textures.
 // CALLED: CORE LOOPING ROUTINE.
-//
 #define HEIGHTBITS		12
 #define HEIGHTUNIT		(1<<HEIGHTBITS)
 
@@ -319,8 +311,7 @@ void R_RenderSegLoop()
                     dc_yl = mid;
                     dc_yh = yh;
                     dc_texturemid = rw_bottomtexturemid;
-                    dc_source = R_GetColumn(bottomtexture,
-                        texturecolumn);
+                    dc_source = R_GetColumn(bottomtexture, texturecolumn);
                     colfunc();
                     floorclip[rw_x] = mid;
                 }
@@ -348,25 +339,9 @@ void R_RenderSegLoop()
     }
 }
 
-
-
-
-//
-// R_StoreWallRange
-// A wall segment will be drawn
-//  between start and stop pixels (inclusive).
-//
-void
-R_StoreWallRange
-(int	start,
-    int	stop)
+// A wall segment will be drawn between start and stop pixels (inclusive).
+void R_StoreWallRange(int32 start, int32 stop)
 {
-    fixed_t		hyp;
-    fixed_t		sineval;
-    angle_t		distangle, offsetangle;
-    fixed_t		vtop;
-    int			lightnum;
-
     // don't overflow and crash
     if (ds_p == &drawsegs[MAXDRAWSEGS])
         return;
@@ -384,16 +359,15 @@ R_StoreWallRange
 
     // calculate rw_distance for scale calculation
     rw_normalangle = curline->angle + ANG90;
-    offsetangle = std::abs(static_cast<int32_t>(rw_normalangle - rw_angle1));
+    auto offsetangle = std::abs(static_cast<int32>(rw_normalangle) - rw_angle1);
 
     if (offsetangle > ANG90)
         offsetangle = ANG90;
 
-    distangle = ANG90 - offsetangle;
-    hyp = R_PointToDist(curline->v1->x, curline->v1->y);
-    sineval = finesine[distangle >> ANGLETOFINESHIFT];
+    auto distangle = ANG90 - offsetangle;
+    auto hyp = R_PointToDist(curline->v1->x, curline->v1->y);
+    auto sineval = finesine[distangle >> ANGLETOFINESHIFT];
     rw_distance = FixedMul(hyp, sineval);
-
 
     ds_p->x1 = rw_x = start;
     ds_p->x2 = stop;
@@ -412,26 +386,10 @@ R_StoreWallRange
     }
     else
     {
-        // UNUSED: try to fix the stretched line bug
-#if 0
-        if (rw_distance < FRACUNIT / 2)
-        {
-            fixed_t		trx, try;
-            fixed_t		gxt, gyt;
-
-            trx = curline->v1->x - viewx;
-            try = curline->v1->y - viewy;
-
-            gxt = FixedMul(trx, viewcos);
-            gyt = -FixedMul(try, viewsin);
-            ds_p->scale1 = FixedDiv(projection, gxt - gyt) << detailshift;
-        }
-#endif
         ds_p->scale2 = ds_p->scale1;
     }
 
-    // calculate texture boundaries
-    //  and decide if floor / ceiling marks are needed
+    // calculate texture boundaries and decide if floor / ceiling marks are needed
     worldtop = frontsector->ceilingheight - viewz;
     worldbottom = frontsector->floorheight - viewz;
 
@@ -442,12 +400,12 @@ R_StoreWallRange
     {
         // single sided line
         midtexture = texturetranslation[sidedef->midtexture];
+
         // a single sided line is terminal, so it must mark ends
         markfloor = markceiling = true;
         if (linedef->flags & ML_DONTPEGBOTTOM)
         {
-            vtop = frontsector->floorheight +
-                textureheight[sidedef->midtexture];
+            auto vtop = frontsector->floorheight + textureheight[sidedef->midtexture];
             // bottom of texture at bottom
             rw_midtexturemid = vtop - viewz;
         }
@@ -512,8 +470,7 @@ R_StoreWallRange
         worldlow = backsector->floorheight - viewz;
 
         // hack to allow height changes in outdoor areas
-        if (frontsector->ceilingpic == skyflatnum
-            && backsector->ceilingpic == skyflatnum)
+        if (frontsector->ceilingpic == skyflatnum && backsector->ceilingpic == skyflatnum)
         {
             worldtop = worldhigh;
         }
@@ -563,7 +520,7 @@ R_StoreWallRange
             }
             else
             {
-                vtop =
+                auto vtop =
                     backsector->ceilingheight
                     + textureheight[sidedef->toptexture];
 
@@ -626,7 +583,7 @@ R_StoreWallRange
         // OPTIMIZE: get rid of LIGHTSEGSHIFT globally
         if (!fixedcolormap)
         {
-            lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT) + extralight;
+            auto lightnum = (frontsector->lightlevel >> LIGHTSEGSHIFT) + extralight;
 
             if (curline->v1->y == curline->v2->y)
                 lightnum--;

@@ -445,6 +445,7 @@ EV_BuildStairs
     sector_t* tsec;
 
     fixed_t speed = 0;
+    fixed_t stairsize = 0;
 
     secnum = -1;
     rtn = 0;
@@ -465,7 +466,6 @@ EV_BuildStairs
         floor->direction = 1;
         floor->sector = sec;
 
-        fixed_t stairsize = 0;
         switch (type)
         {
         case build8:

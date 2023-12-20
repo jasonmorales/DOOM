@@ -40,23 +40,16 @@ import std;
 extern Doom* g_doom;
 
 
-
-// ?
 #define MAXWIDTH			1120
 #define MAXHEIGHT			832
 
 // status bar height at bottom of screen
 #define SBARHEIGHT		32
 
-//
 // All drawing to the view buffer is accomplished in this file.
-// The other refresh files only know about ccordinates,
-//  not the architecture of the frame buffer.
-// Conveniently, the frame buffer is a linear one,
-//  and we need only the base address,
-//  and the total size == width*height*depth/8.,
-//
-
+// The other refresh files only know about coordinates, not the architecture of the frame buffer.
+// Conveniently, the frame buffer is a linear one, and we need only the base address, and the
+// total size == width*height*depth/8.,
 
 byte* viewimage;
 int		viewwidth;
@@ -74,12 +67,7 @@ int		columnofs[MAXWIDTH];
 byte		translations[3][256];
 
 
-
-
-//
-// R_DrawColumn
 // Source is the top of the column to scale.
-//
 lighttable_t* dc_colormap;
 int			dc_x;
 int			dc_yl;
@@ -93,200 +81,101 @@ const byte* dc_source;
 // just for profiling 
 int			dccount;
 
-//
-// A column is a vertical slice/span from a wall texture that,
-//  given the DOOM style restrictions on the view orientation,
-//  will always have constant z depth.
-// Thus a special case loop for very fast rendering can
-//  be used. It has also been used with Wolfenstein 3D.
-// 
+// A column is a vertical slice/span from a wall texture that, given the DOOM style restrictions
+// on the view orientation, will always have constant z depth.
+// Thus a special case loop for very fast rendering can be used. It has also been used with
+// Wolfenstein 3D.
 void R_DrawColumn()
 {
-    int			count;
-    byte* dest;
-    fixed_t		frac;
-    fixed_t		fracstep;
-
-    count = dc_yh - dc_yl;
+    auto count = dc_yh - dc_yl;
 
     // Zero length, column does not exceed a pixel.
     if (count < 0)
         return;
 
 #ifdef RANGECHECK 
-    if ((unsigned)dc_x >= SCREENWIDTH
-        || dc_yl < 0
-        || dc_yh >= SCREENHEIGHT)
+    if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
         I_Error("R_DrawColumn: {} to {} at {}", dc_yl, dc_yh, dc_x);
 #endif 
 
     // Framebuffer destination address.
     // Use ylookup LUT to avoid multiply with ScreenWidth.
     // Use columnofs LUT for subwindows? 
-    dest = ylookup[dc_yl] + columnofs[dc_x];
+    auto* dest = ylookup[dc_yl] + columnofs[dc_x];
 
-    // Determine scaling,
-    //  which is the only mapping to be done.
-    fracstep = dc_iscale;
-    frac = dc_texturemid + (dc_yl - centery) * fracstep;
+    // Determine scaling, which is the only mapping to be done.
+    auto fracstep = dc_iscale;
+    auto frac = dc_texturemid + (dc_yl - centery) * fracstep;
 
-    // Inner loop that does the actual texture mapping,
-    //  e.g. a DDA-lile scaling.
+    // Inner loop that does the actual texture mapping, e.g. a DDA-lile scaling.
     // This is as fast as it gets.
     do
     {
-        // Re-map color indices from wall texture column
-        //  using a lighting/special effects LUT.
+        // Re-map color indices from wall texture column using a lighting/special effects LUT.
         *dest = dc_colormap[dc_source[(frac >> FRACBITS) & 127]];
 
         dest += SCREENWIDTH;
         frac += fracstep;
 
-    } while (count--);
-}
-
-
-
-// UNUSED.
-// Loop unrolled.
-#if 0
-void R_DrawColumn()
-{
-    int			count;
-    byte* source;
-    byte* dest;
-    byte* colormap;
-
-    unsigned		frac;
-    unsigned		fracstep;
-    unsigned		fracstep2;
-    unsigned		fracstep3;
-    unsigned		fracstep4;
-
-    count = dc_yh - dc_yl + 1;
-
-    source = dc_source;
-    colormap = dc_colormap;
-    dest = ylookup[dc_yl] + columnofs[dc_x];
-
-    fracstep = dc_iscale << 9;
-    frac = (dc_texturemid + (dc_yl - centery) * dc_iscale) << 9;
-
-    fracstep2 = fracstep + fracstep;
-    fracstep3 = fracstep2 + fracstep;
-    fracstep4 = fracstep3 + fracstep;
-
-    while (count >= 8)
-    {
-        dest[0] = colormap[source[frac >> 25]];
-        dest[SCREENWIDTH] = colormap[source[(frac + fracstep) >> 25]];
-        dest[SCREENWIDTH * 2] = colormap[source[(frac + fracstep2) >> 25]];
-        dest[SCREENWIDTH * 3] = colormap[source[(frac + fracstep3) >> 25]];
-
-        frac += fracstep4;
-
-        dest[SCREENWIDTH * 4] = colormap[source[frac >> 25]];
-        dest[SCREENWIDTH * 5] = colormap[source[(frac + fracstep) >> 25]];
-        dest[SCREENWIDTH * 6] = colormap[source[(frac + fracstep2) >> 25]];
-        dest[SCREENWIDTH * 7] = colormap[source[(frac + fracstep3) >> 25]];
-
-        frac += fracstep4;
-        dest += SCREENWIDTH * 8;
-        count -= 8;
     }
-
-    while (count > 0)
-    {
-        *dest = colormap[source[frac >> 25]];
-        dest += SCREENWIDTH;
-        frac += fracstep;
-        count--;
-    }
+    while (count--);
 }
-#endif
-
 
 void R_DrawColumnLow()
 {
-    int			count;
-    byte* dest;
-    byte* dest2;
-    fixed_t		frac;
-    fixed_t		fracstep;
-
-    count = dc_yh - dc_yl;
+    auto count = dc_yh - dc_yl;
 
     // Zero length.
     if (count < 0)
         return;
 
 #ifdef RANGECHECK 
-    if ((unsigned)dc_x >= SCREENWIDTH
-        || dc_yl < 0
-        || dc_yh >= SCREENHEIGHT)
-    {
-
+    if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
         I_Error("R_DrawColumn: {} to {} at {}", dc_yl, dc_yh, dc_x);
-    }
-    //	dccount++; 
-#endif 
+#endif
+
     // Blocky mode, need to multiply by 2.
-    dc_x <<= 1;
+    auto x = dc_x << 1;
 
-    dest = ylookup[dc_yl] + columnofs[dc_x];
-    dest2 = ylookup[dc_yl] + columnofs[dc_x + 1];
+    auto* dest = ylookup[dc_yl] + columnofs[x];
+    auto* dest2 = ylookup[dc_yl] + columnofs[x + 1];
 
-    fracstep = dc_iscale;
-    frac = dc_texturemid + (dc_yl - centery) * fracstep;
+    auto fracstep = dc_iscale;
+    auto frac = dc_texturemid + (dc_yl - centery) * fracstep;
 
     do
     {
-        // Hack. Does not work corretly.
         *dest2 = *dest = dc_colormap[dc_source[(frac >> FRACBITS) & 127]];
+
         dest += SCREENWIDTH;
         dest2 += SCREENWIDTH;
         frac += fracstep;
-
-    } while (count--);
+    }
+    while (count--);
 }
 
-
-//
 // Spectre/Invisibility.
-//
-#define FUZZTABLE		50 
-#define FUZZOFF	(SCREENWIDTH)
+static const int32 FUZZOFF = SCREENWIDTH;
 
-
-int	fuzzoffset[FUZZTABLE] =
+int32 fuzzoffset[] =
 {
-    FUZZOFF,-FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,
-    FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,
-    FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,
-    FUZZOFF,-FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,
-    FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,-FUZZOFF,FUZZOFF,
-    FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,
-    FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF,FUZZOFF,-FUZZOFF,FUZZOFF
+    FUZZOFF,-FUZZOFF, FUZZOFF,-FUZZOFF, FUZZOFF, FUZZOFF,-FUZZOFF,
+    FUZZOFF, FUZZOFF,-FUZZOFF, FUZZOFF, FUZZOFF, FUZZOFF,-FUZZOFF,
+    FUZZOFF, FUZZOFF, FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,
+    FUZZOFF,-FUZZOFF,-FUZZOFF, FUZZOFF, FUZZOFF, FUZZOFF, FUZZOFF,-FUZZOFF,
+    FUZZOFF,-FUZZOFF, FUZZOFF, FUZZOFF,-FUZZOFF,-FUZZOFF, FUZZOFF,
+    FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF,-FUZZOFF, FUZZOFF, FUZZOFF,
+    FUZZOFF, FUZZOFF,-FUZZOFF, FUZZOFF, FUZZOFF,-FUZZOFF, FUZZOFF
 };
 
 int	fuzzpos = 0;
 
-
-//
 // Framebuffer postprocessing.
-// Creates a fuzzy image by copying pixels
-//  from adjacent ones to left and right.
-// Used with an all black colormap, this
-//  could create the SHADOW effect,
-//  i.e. spectres and invisible players.
-//
+// Creates a fuzzy image by copying pixels from adjacent ones to left and right.
+// Used with an all black colormap, this could create the SHADOW effect, i.e. spectres and
+// invisible players.
 void R_DrawFuzzColumn()
 {
-    int			count;
-    byte* dest;
-    fixed_t		frac;
-    fixed_t		fracstep;
-
     // Adjust borders. Low... 
     if (!dc_yl)
         dc_yl = 1;
@@ -295,162 +184,90 @@ void R_DrawFuzzColumn()
     if (dc_yh == viewheight - 1)
         dc_yh = viewheight - 2;
 
-    count = dc_yh - dc_yl;
+    auto count = dc_yh - dc_yl;
 
     // Zero length.
     if (count < 0)
         return;
 
-
 #ifdef RANGECHECK 
-    if ((unsigned)dc_x >= SCREENWIDTH
-        || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
-    {
-        I_Error("R_DrawFuzzColumn: {} to {} at {}",
-            dc_yl, dc_yh, dc_x);
-    }
+    if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
+        I_Error("R_DrawFuzzColumn: {} to {} at {}", dc_yl, dc_yh, dc_x);
 #endif
 
+    auto x = dc_x * (detailshift ? 2 : 1);
 
-    // Keep till detailshift bug in blocky mode fixed,
-    //  or blocky mode removed.
-    /* WATCOM code
-    if (detailshift)
-    {
-    if (dc_x & 1)
-    {
-        outpw (GC_INDEX,GC_READMAP+(2<<8) );
-        outp (SC_INDEX+1,12);
-    }
-    else
-    {
-        outpw (GC_INDEX,GC_READMAP);
-        outp (SC_INDEX+1,3);
-    }
-    dest = destview + dc_yl*80 + (dc_x>>1);
-    }
-    else
-    {
-    outpw (GC_INDEX,GC_READMAP+((dc_x&3)<<8) );
-    outp (SC_INDEX+1,1<<(dc_x&3));
-    dest = destview + dc_yl*80 + (dc_x>>2);
-    }*/
+    auto* dest = ylookup[dc_yl] + columnofs[x];
+    auto* dest2 = ylookup[dc_yl] + columnofs[x + 1];
 
-
-    // Does not work with blocky mode.
-    dest = ylookup[dc_yl] + columnofs[dc_x];
-
-    // Looks familiar.
-    fracstep = dc_iscale;
-    frac = dc_texturemid + (dc_yl - centery) * fracstep;
-
-    // Looks like an attempt at dithering,
-    //  using the colormap #6 (of 0-31, a bit
-    //  brighter than average).
+    // Looks like an attempt at dithering, using the colormap #6 (of 0-31, a bit brighter than
+    // average).
     do
     {
-        // Lookup framebuffer, and retrieve
-        //  a pixel that is either one column
-        //  left or right of the current one.
+        // Lookup framebuffer, and retrieve a pixel that is either one column left or right of
+        // the current one.
         // Add index from colormap to index.
         *dest = colormaps[6 * 256 + dest[fuzzoffset[fuzzpos]]];
+        if (detailshift)
+            *dest2 = colormaps[6 * 256 + dest2[fuzzoffset[fuzzpos]]];
 
         // Clamp table lookup index.
-        if (++fuzzpos == FUZZTABLE)
-            fuzzpos = 0;
+        fuzzpos = (fuzzpos + 1) % std::size(fuzzoffset);
 
         dest += SCREENWIDTH;
-
-        frac += fracstep;
-    } while (count--);
+        dest2 += SCREENWIDTH;
+    }
+    while (count--);
 }
 
-
-
-
-//
-// R_DrawTranslatedColumn
-// Used to draw player sprites
-//  with the green colorramp mapped to others.
-// Could be used with different translation
-//  tables, e.g. the lighter colored version
-//  of the BaronOfHell, the HellKnight, uses
-//  identical sprites, kinda brightened up.
-//
+// Used to draw player sprites with the green colorramp mapped to others.
+// Could be used with different translation tables, e.g. the lighter colored version of the
+// BaronOfHell, the HellKnight, uses identical sprites, kinda brightened up.
 byte* dc_translation;
 byte* translationtables;
 
 void R_DrawTranslatedColumn()
 {
-    int			count;
-    byte* dest;
-    fixed_t		frac;
-    fixed_t		fracstep;
-
-    count = dc_yh - dc_yl;
+    auto count = dc_yh - dc_yl;
     if (count < 0)
         return;
 
 #ifdef RANGECHECK 
-    if ((unsigned)dc_x >= SCREENWIDTH
-        || dc_yl < 0
-        || dc_yh >= SCREENHEIGHT)
-    {
-        I_Error("R_DrawColumn: {} to {} at {}",
-            dc_yl, dc_yh, dc_x);
-    }
-
+    if (dc_x >= SCREENWIDTH || dc_yl < 0 || dc_yh >= SCREENHEIGHT)
+        I_Error("R_DrawTranslatedColumn: {} to {} at {}", dc_yl, dc_yh, dc_x);
 #endif 
 
-
-    // WATCOM VGA specific.
-    /* Keep for fixing.
+    auto x = dc_x;
     if (detailshift)
-    {
-    if (dc_x & 1)
-        outp (SC_INDEX+1,12);
-    else
-        outp (SC_INDEX+1,3);
+        x <<= 1;
 
-    dest = destview + dc_yl*80 + (dc_x>>1);
-    }
-    else
-    {
-    outp (SC_INDEX+1,1<<(dc_x&3));
-
-    dest = destview + dc_yl*80 + (dc_x>>2);
-    }*/
-
-
-    // FIXME. As above.
-    dest = ylookup[dc_yl] + columnofs[dc_x];
+    auto* dest = ylookup[dc_yl] + columnofs[x];
+    auto* dest2 = ylookup[dc_yl] + columnofs[x + 1];
 
     // Looks familiar.
-    fracstep = dc_iscale;
-    frac = dc_texturemid + (dc_yl - centery) * fracstep;
+    auto fracstep = dc_iscale;
+    auto frac = dc_texturemid + (dc_yl - centery) * fracstep;
 
     // Here we do an additional index re-mapping.
     do
     {
-        // Translation tables are used
-        //  to map certain colorramps to other ones,
-        //  used with PLAY sprites.
-        // Thus the "green" ramp of the player 0 sprite
-        //  is mapped to gray, red, black/indigo. 
+        // Translation tables are used to map certain colorramps to other ones, used with PLAY
+        // sprites.
+        // Thus the "green" ramp of the player 0 sprite is mapped to gray, red, black/indigo. 
         *dest = dc_colormap[dc_translation[dc_source[frac >> FRACBITS]]];
-        dest += SCREENWIDTH;
+        if (detailshift)
+            *dest2 = dc_colormap[dc_translation[dc_source[frac >> FRACBITS]]];
 
+        dest += SCREENWIDTH;
+        dest2 += SCREENWIDTH;
         frac += fracstep;
-    } while (count--);
+    }
+    while (count--);
 }
 
-//
-// R_InitTranslationTables
-// Creates the translation tables to map
-//  the green color ramp to gray, brown, red.
+// Creates the translation tables to map the green color ramp to gray, brown, red.
 // Assumes a given structure of the PLAYPAL.
 // Could be read from a lump instead.
-//
 void R_InitTranslationTables()
 {
     translationtables = Z_Malloc(256 * 3 + 255, PU_STATIC, 0);
@@ -474,18 +291,13 @@ void R_InitTranslationTables()
     }
 }
 
-//
-// R_DrawSpan 
-// With DOOM style restrictions on view orientation,
-//  the floors and ceilings consist of horizontal slices
-//  or spans with constant z depth.
-// However, rotation around the world z axis is possible,
-//  thus this mapping, while simpler and faster than
-//  perspective correct texture mapping, has to traverse
-//  the texture at an angle in all but a few cases.
-// In consequence, flats are not stored by column (like walls),
-//  and the inner loop has to step in texture space u and v.
-//
+// With DOOM style restrictions on view orientation, the floors and ceilings consist of horizontal
+// slices or spans with constant z depth.
+// However, rotation around the world z axis is possible, thus this mapping, while simpler and
+// faster than perspective correct texture mapping, has to traverse the texture at an angle in all
+// but a few cases.
+// In consequence, flats are not stored by column (like walls), and the inner loop has to step in
+// texture space u and v.
 int			ds_y;
 int			ds_x1;
 int			ds_x2;
@@ -503,8 +315,6 @@ const byte* ds_source;
 // just for profiling
 int			dscount;
 
-
-//
 // Draws the actual span.
 void R_DrawSpan()
 {
@@ -551,150 +361,46 @@ void R_DrawSpan()
     } while (count--);
 }
 
-
-
-// UNUSED.
-// Loop unrolled by 4.
-#if 0
-void R_DrawSpan()
-{
-    unsigned	position, step;
-
-    byte* source;
-    byte* colormap;
-    byte* dest;
-
-    unsigned	count;
-    usingned	spot;
-    unsigned	value;
-    unsigned	temp;
-    unsigned	xtemp;
-    unsigned	ytemp;
-
-    position = ((ds_xfrac << 10) & 0xffff0000) | ((ds_yfrac >> 6) & 0xffff);
-    step = ((ds_xstep << 10) & 0xffff0000) | ((ds_ystep >> 6) & 0xffff);
-
-    source = ds_source;
-    colormap = ds_colormap;
-    dest = ylookup[ds_y] + columnofs[ds_x1];
-    count = ds_x2 - ds_x1 + 1;
-
-    while (count >= 4)
-    {
-        ytemp = position >> 4;
-        ytemp = ytemp & 4032;
-        xtemp = position >> 26;
-        spot = xtemp | ytemp;
-        position += step;
-        dest[0] = colormap[source[spot]];
-
-        ytemp = position >> 4;
-        ytemp = ytemp & 4032;
-        xtemp = position >> 26;
-        spot = xtemp | ytemp;
-        position += step;
-        dest[1] = colormap[source[spot]];
-
-        ytemp = position >> 4;
-        ytemp = ytemp & 4032;
-        xtemp = position >> 26;
-        spot = xtemp | ytemp;
-        position += step;
-        dest[2] = colormap[source[spot]];
-
-        ytemp = position >> 4;
-        ytemp = ytemp & 4032;
-        xtemp = position >> 26;
-        spot = xtemp | ytemp;
-        position += step;
-        dest[3] = colormap[source[spot]];
-
-        count -= 4;
-        dest += 4;
-    }
-    while (count > 0)
-    {
-        ytemp = position >> 4;
-        ytemp = ytemp & 4032;
-        xtemp = position >> 26;
-        spot = xtemp | ytemp;
-        position += step;
-        *dest++ = colormap[source[spot]];
-        count--;
-    }
-}
-#endif
-
-
-//
-// Again..
-//
 void R_DrawSpanLow()
 {
-    fixed_t		xfrac;
-    fixed_t		yfrac;
-    byte* dest;
-    int			count;
-    int			spot;
-
 #ifdef RANGECHECK 
-    if (ds_x2 < ds_x1
-        || ds_x1<0
-        || ds_x2 >= SCREENWIDTH
-        || (unsigned)ds_y>SCREENHEIGHT)
-    {
-        I_Error("R_DrawSpan: {} to {} at {}",
-            ds_x1, ds_x2, ds_y);
-    }
-    //	dscount++; 
+    if (ds_x2 < ds_x1 || ds_x1 < 0 || ds_x2 >= SCREENWIDTH || ds_y > SCREENHEIGHT)
+        I_Error("R_DrawSpanLow: {} to {} at {}", ds_x1, ds_x2, ds_y);
 #endif 
 
-    xfrac = ds_xfrac;
-    yfrac = ds_yfrac;
+    auto xfrac = ds_xfrac;
+    auto yfrac = ds_yfrac;
 
     // Blocky mode, need to multiply by 2.
     ds_x1 <<= 1;
     ds_x2 <<= 1;
 
-    dest = ylookup[ds_y] + columnofs[ds_x1];
+    auto dest = ylookup[ds_y] + columnofs[ds_x1];
 
-
-    count = ds_x2 - ds_x1;
+    auto count = ds_x2 - ds_x1;
     do
     {
-        spot = ((yfrac >> (16 - 6)) & (63 * 64)) + ((xfrac >> 16) & 63);
-        // Lowres/blocky mode does it twice,
-        //  while scale is adjusted appropriately.
+        auto spot = ((yfrac >> (16 - 6)) & (63 * 64)) + ((xfrac >> 16) & 63);
+        // Lowres/blocky mode does it twice, while scale is adjusted appropriately.
         *dest++ = ds_colormap[ds_source[spot]];
         *dest++ = ds_colormap[ds_source[spot]];
 
         xfrac += ds_xstep;
         yfrac += ds_ystep;
 
-    } while (count--);
+    }
+    while (count--);
 }
 
-//
-// R_InitBuffer 
-// Creats lookup tables that avoid
-//  multiplies and other hazzles
-//  for getting the framebuffer address
-//  of a pixel to draw.
-//
-void
-R_InitBuffer
-(int		width,
-    int		height)
+// Creats lookup tables that avoid multiplies and other hazzles for getting the framebuffer
+// address of a pixel to draw.
+void R_InitBuffer(int32 width, int32 height)
 {
-    int		i;
-
-    // Handle resize,
-    //  e.g. smaller view windows
-    //  with border and/or status bar.
+    // Handle resize, e.g. smaller view windows with border and/or status bar.
     viewwindowx = (SCREENWIDTH - width) >> 1;
 
     // Column offset. For windows.
-    for (i = 0; i < width; i++)
+    for (int32 i = 0; i < width; ++i)
         columnofs[i] = viewwindowx + i;
 
     // Samw with base row offset.
@@ -704,14 +410,12 @@ R_InitBuffer
         viewwindowy = (SCREENHEIGHT - SBARHEIGHT - height) >> 1;
 
     // Preclaculate all row offsets.
-    for (i = 0; i < height; i++)
+    for (int32 i = 0; i < height; ++i)
         ylookup[i] = g_doom->GetVideo()->GetScreen(0) + (i + viewwindowy) * SCREENWIDTH;
 }
 
-// Fills the back screen with a pattern
-//  for variable screen sizes
+// Fills the back screen with a pattern for variable screen sizes
 // Also draws a beveled edge.
-//
 void R_FillBackScreen()
 {
     int		x;

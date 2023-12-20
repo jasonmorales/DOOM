@@ -996,7 +996,6 @@ void M_ChangeDetail(int choice)
     choice = 0;
     detailLevel = 1 - detailLevel;
 
-    // FIXME - does not work. Remove anyway?
     g_doom->GetRender()->RequestSetViewSize(screenBlocks, detailLevel);
 }
 

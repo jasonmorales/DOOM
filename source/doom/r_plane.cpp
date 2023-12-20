@@ -312,12 +312,7 @@ R_MakeSpans
     }
 }
 
-
-
-//
-// R_DrawPlanes
 // At the end of each frame.
-//
 void R_DrawPlanes()
 {
     visplane_t* pl;

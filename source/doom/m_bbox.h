@@ -31,7 +31,7 @@ public:
     {
         left = std::min(left, x);
         right = std::max(right, x);
-        top = std::min(top, y);
+        top = std::max(top, y);
         bottom = std::min(bottom, y);
     }
 
@@ -45,6 +45,6 @@ public:
 
     int32 top = std::numeric_limits<int32>::min();
     int32 bottom = std::numeric_limits<int32>::max();
-    int32 right = std::numeric_limits<int32>::min();
     int32 left = std::numeric_limits<int32>::max();
+    int32 right = std::numeric_limits<int32>::min();
 };

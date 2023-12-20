@@ -219,7 +219,7 @@ int32 R_PointOnSegSide(fixed_t x, fixed_t y, seg_t* line)
     return 1;
 }
 
-// To get a global angle from cartesian coordinates, the coordinates are flipped until they are in
+// To get a global angle from Cartesian coordinates, the coordinates are flipped until they are in
 // the first octant of the coordinate system, then the y (<=x) is scaled and divided by x to get a
 // tangent (slope) value which is looked up in the tantoangle[] table.
 angle_t R_PointToAngle(fixed_t x, fixed_t y)
