@@ -18,6 +18,7 @@
 import std;
 import nstd;
 import config;
+import log;
 
 #include "z_zone.h"
 
@@ -348,8 +349,9 @@ void Sound::Init()
     if (FAILED(result))
         I_Error("Start failed: {}", result);
 
-    std::cout << std::format("Sound::Initialize - buffer frames: {} samples/sec: {} bits/sample: {} channels: {} mixBufferSize: {}\n",
-        bufferSizeInFrames, samplesPerSec, bitsPerSample, numChannels, mixBufferSize);
+    //std::cout << std::format("Sound::Initialize - buffer frames: {} samples/sec: {} bits/sample: {} channels: {} mixBufferSize: {}\n",
+    //    bufferSizeInFrames, samplesPerSec, bitsPerSample, numChannels, mixBufferSize);
+    log::write("Sound::Initialize - buffer frames: ",  bufferSizeInFrames, "samples/sec: ", samplesPerSec, " bits/sample: ", bitsPerSample, " channels: ", numChannels, " mixBufferSize: ", mixBufferSize);
 
     for (int32 i = 1; i < NUMSFX; i++)
     {

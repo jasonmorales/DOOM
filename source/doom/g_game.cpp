@@ -1283,16 +1283,16 @@ void G_InitNew(skill_t skill, int32 episode, int32 map)
 
 void G_ReadDemoTiccmd(ticcmd_t* cmd)
 {
-    if (*demo_p == DEMOMARKER)
+    if (*demo_g == DEMOMARKER)
     {
         // end of demo data stream 
         G_CheckDemoStatus(g_doom);
         return;
     }
-    cmd->forwardmove = ((signed char)*demo_p++);
-    cmd->sidemove = ((signed char)*demo_p++);
-    cmd->angleturn = ((unsigned char)*demo_p++) << 8;
-    cmd->buttons = (unsigned char)*demo_p++;
+    cmd->forwardmove = ((signed char)*demo_g++);
+    cmd->sidemove = ((signed char)*demo_g++);
+    cmd->angleturn = ((unsigned char)*demo_g++) << 8;
+    cmd->buttons = (unsigned char)*demo_g++;
 }
 
 
@@ -1349,12 +1349,9 @@ void G_BeginRecording()
         *demo_p++ = playeringame[i];
 }
 
-
-//
 // G_PlayDemo 
-//
 
-static const char* defdemoname = nullptr;
+static string_view defdemoname;
 
 void G_DeferedPlayDemo(const char* name)
 {
@@ -1368,8 +1365,8 @@ void G_DoPlayDemo()
     int             i, episode, map;
 
     gameaction = ga_nothing;
-    demo_ibuffer = demo_g = WadManager::GetLumpData<byte>(defdemoname);
-    if (*demo_p++ != Doom::Version)
+    demo_ibuffer = demo_g = WadManager::GetLumpData<byte>(defdemoname.to_upper());
+    if (*demo_g++ != Doom::Version)
     {
         fprintf(stderr, "Demo is from a different game version!\n");
         gameaction = ga_nothing;

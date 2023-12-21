@@ -20,6 +20,7 @@
 //-----------------------------------------------------------------------------
 import std;
 import config;
+import log;
 
 #include "doomdef.h"
 #include "doomstat.h"
@@ -155,7 +156,7 @@ void Doom::Main()
         break;
     }
 
-    std::cout << title << "\n";
+    log::write(title);
 
     if (isDevMode)
         printf(D_DEVSTR);
@@ -260,7 +261,7 @@ void Doom::Main()
         doWarp(ep,map);
 
     // init subsystems
-    std::cout << "Z_Init: Init zone memory allocation daemon. \n";
+    log::write("Z_Init: Init zone memory allocation daemon.");
     Z_Init();
 
     std::cout << "Video::Init: allocate screens.\n";
@@ -408,12 +409,10 @@ void Doom::Main()
     Loop(); // never returns
 }
 
-// Not a globally visible function,
-//  just included for source reference,
-//  called by Doom::Main, never exits.
-// Manages timing and IO,
-//  calls all ?_Responder, ?_Ticker, and ?_Drawer,
-//  calls I_GetTime, Video::StartFrame, and Video::StartTic
+// Not a globally visible function, just included for source reference, called by Doom::Main,
+// never exits.
+// Manages timing and IO, calls all ?_Responder, ?_Ticker, and ?_Drawer, calls I_GetTime,
+// Video::StartFrame, and Video::StartTic
 void Doom::Loop()
 {
     if (isDemoRecording)
