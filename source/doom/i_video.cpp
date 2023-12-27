@@ -19,6 +19,7 @@ import std;
 import nstd;
 
 import config;
+import platform;
 
 #include "i_system.h"
 #include "i_video.h"

@@ -11,7 +11,7 @@ import nstd.numbers;
 export namespace nstd {
 
 template<typename T>
-T parse_number(string_view str)
+T parse_number(::string_view str)
 {
     auto at = str.data();
     auto end = at + str.length();
@@ -142,15 +142,15 @@ template<typename TO>
 TO convert(same_as<TO> auto from) { return from; }
 
 template<number TO>
-TO convert(string_t auto&& from) { return parse_number<TO>(from); }
+TO convert(string_type auto&& from) { return parse_number<TO>(from); }
 
 template<same_as<string> TO>
 TO convert(number auto in) { return std::to_string(in); }
 
 template<same_as<string> TO>
-TO convert(string_view in) { return string(in); }
+TO convert(::string_view in) { return string(in); }
 
 template<nstd::boolean TO>
-TO convert(string_view in) { return in == "true"; }
+TO convert(::string_view in) { return in == "true"; }
 
 } // export namespace nstd

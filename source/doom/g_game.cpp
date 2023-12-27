@@ -14,6 +14,7 @@
 //-----------------------------------------------------------------------------
 import std;
 import config;
+import log;
 
 #include "doomdef.h" 
 #include "doomstat.h"
@@ -1025,7 +1026,7 @@ void Game::DoLoadGame()
     auto inFile = std::ifstream{loadFileName, std::ifstream::binary};
     if (!inFile.is_open())
     {
-        std::cerr << "Failed to open load file: " << loadFileName << "\n";
+        log::write(log::Verbosity::Error, "Failed to open load file: ", loadFileName);
         return;
     }
 

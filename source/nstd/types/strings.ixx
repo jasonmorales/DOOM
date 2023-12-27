@@ -11,31 +11,39 @@ import nstd.numbers;
 
 export namespace nstd {
 
-class string;
-class string_view;
+template<typename CHAR> class string_t;
+template<typename CHAR> class string_view;
+
+template<typename T>
+concept has_value_type = requires { typename T::value_type; };
 
 template<typename S>
-concept xstd_string = same_as<S, string> || same_as<S, std::string>;
+constexpr auto is_xstd_string = same_as<S, string_t<typename S::value_type>> || same_as<S, std::basic_string<typename S::value_type>>;
 
-template<typename SV>
+template<typename S>
+concept xstd_string = has_value_type<S> && is_xstd_string<S>;
+
+template<typename T>
 concept string_view_like =
-    (converts_to<const SV&, string_view> || converts_to<const SV&, std::string_view>) &&
-    !converts_to<const SV&, const char*>;
+    has_value_type<naked_type<T>> &&
+    (converts_to<const T&, string_view<typename naked_type<T>::value_type>> || converts_to<const T&, std::basic_string_view<typename naked_type<T>::value_type>>) &&
+    !converts_to<const T&, const typename naked_type<T>::value_type*>;
 
-class string : public std::string
+template<typename CH>
+class string_t : public std::basic_string<CH, std::char_traits<CH>, std::allocator<CH>>
 {
 public:
-    using base = std::string;
+    using base = std::basic_string<CH, std::char_traits<CH>, std::allocator<CH>>;
     using size_type = int32;
     static constexpr size_type npos = -1;
 
     using base::base;
 
-    constexpr string() : base() {}
-    constexpr string(const std::string& in) : base(in) {}
-    constexpr explicit string(const string_view_like auto& in) : base(in.data(), in.size()) {}
-    constexpr string(const string_view_like auto& in, size_type p, size_type n) : base(in, p, n) {}
-    constexpr string(const byte* in, size_type n) : base(reinterpret_cast<const char*>(in), n) {}
+    constexpr string_t() : base() {}
+    constexpr string_t(const std::string& in) : base(in) {}
+    constexpr explicit string_t(const string_view_like auto& in) : base(in.data(), in.size()) {}
+    constexpr string_t(const string_view_like auto& in, size_type p, size_type n) : base(in, p, n) {}
+    constexpr string_t(const byte* in, size_type n) : base(reinterpret_cast<const char*>(in), n) {}
 
     constexpr size_type find(base::value_type ch, size_type pos = 0) const noexcept
     {
@@ -44,8 +52,9 @@ public:
         return saturate_cast<size_type>(out);
     }
 
-    constexpr string& operator=(const string_view_like auto& other) { assign(other); return *this;}
-    constexpr string& operator=(const std::string& other) { assign(other); return *this;}
+    constexpr auto& operator=(const string_view_like auto& other) { base::assign(other); return *this; }    
+    constexpr auto& operator=(const CH* other) { base::assign(other); return *this; }
+    constexpr auto& operator=(const base& other) { base::assign(other); return *this; }
 
     constexpr size_type length() const noexcept
     {
@@ -54,34 +63,35 @@ public:
         return saturate_cast<size_type>(out);
     }
 
-    [[nodiscard]] constexpr string trim() const
+    [[nodiscard]] constexpr string_t trim() const
     {
-        auto start = find_first_not_of("\0 \t\n\r", 0, 5);
-        return base::substr(start, find_last_not_of("\0 \t\n\r", base::npos, 5) - start + 1);
+        auto start = base::find_first_not_of("\0 \t\n\r", 0, 5);
+        return base::substr(start, base::find_last_not_of("\0 \t\n\r", base::npos, 5) - start + 1);
     };
 
-    [[nodiscard]] constexpr string substr(const size_type offset = 0, const size_type count = npos) const
+    [[nodiscard]] constexpr string_t substr(const size_type offset = 0, const size_type count = npos) const
     {
         return base::substr(offset, count == npos ? base::npos : count);
     };
 
-    string& to_lower()
+    string_t& to_lower()
     {
-        std::transform(begin(), end(), begin(), [](byte c){ return static_cast<value_type>(std::tolower(c)); });
+        std::transform(base::begin(), base::end(), base::begin(), [](byte c){ return static_cast<base::value_type>(std::tolower(c)); });
         return *this;
     }
 
-    string& to_upper()
+    string_t& to_upper()
     {
-        std::transform(begin(), end(), begin(), [](byte c){ return static_cast<value_type>(std::toupper(c)); });
+        std::transform(base::begin(), base::end(), base::begin(), [](byte c){ return static_cast<base::value_type>(std::toupper(c)); });
         return *this;
     }
 };
 
-class string_view : public std::string_view
+template<typename T>
+class string_view : public std::basic_string_view<T>
 {
 public:
-    using base = std::string_view;
+    using base = std::basic_string_view<T>;
     using size_type = int32;
     static constexpr size_type npos = -1;
 
@@ -89,6 +99,7 @@ public:
 
     constexpr string_view() : base() {}
     constexpr string_view(const xstd_string auto& in) : base(in.data(), in.size()) {}
+    constexpr string_view(const std::basic_string<T>& in) : base(in.data(), in.size()) {}
     constexpr string_view(std::string_view in) : base(in.data(), in.size()) {}
 
     constexpr size_type find(base::value_type ch, size_type pos = 0) const noexcept
@@ -108,25 +119,25 @@ public:
 
     [[nodiscard]] constexpr string_view trim() const
     {
-        auto start = find_first_not_of("\0 \t\n\r", 0, 5);
-        return base::substr(start, find_last_not_of("\0 \t\n\r", base::npos, 5) - start + 1);
+        auto start = base::find_first_not_of("\0 \t\n\r", 0, 5);
+        return base::substr(start, base::find_last_not_of("\0 \t\n\r", base::npos, 5) - start + 1);
     };
 
-    string to_lower()
+    string_t<T> to_lower()
     {
-        string out(size(), '\0');
-        std::transform(begin(), end(), out.begin(), [](byte c){ return static_cast<value_type>(std::tolower(c)); });
+        string_t<T> out(size(), '\0');
+        std::transform(base::begin(), base::end(), out.begin(), [](byte c){ return static_cast<base::value_type>(std::tolower(c)); });
         return out;
     }
 
-    string to_upper()
+    string_t<T> to_upper()
     {
-        string out(size(), '\0');
-        std::transform(begin(), end(), out.begin(), [](byte c){ return static_cast<value_type>(std::toupper(c)); });
+        string_t<T> out(size(), '\0');
+        std::transform(base::begin(), base::end(), out.begin(), [](byte c){ return static_cast<base::value_type>(std::toupper(c)); });
         return out;
     }
 
-    constexpr string str() const noexcept { return string(data(), length()); }
+    constexpr string_t<T> str() const noexcept { return string_t<T>(base::data(), length()); }
 };
 
 namespace filesystem
@@ -156,17 +167,18 @@ namespace filesystem
         path() : base() {}
         path(const std::filesystem::path& in) : base(in) {}
         path(const is_path_src auto& in) : base(in) {}
-        explicit path(const xstd_string auto& in) : base(static_cast<std::string>(in)) {}
-        path(string_view_like auto&& in) : base(static_cast<std::string_view>(in)) {}
+        explicit path(const xstd_string auto& in) : base(static_cast<const std::string>(in)) {}
+        template<string_view_like T>
+        path(const T& in) : base(static_cast<std::basic_string_view<T::value_type>>(in)) {}
 
         [[nodiscard]] path extension() const { return base::extension(); }
 
         path& operator=(const xstd_string auto& other) { assign(other.begin(), other.end()); return *this;}
         path& operator=(string_view_like auto&& other) { assign(other.begin(), other.end()); return *this;}
 
-        [[nodiscard]] nstd::string string() const { return base::string(); }
+        [[nodiscard]] nstd::string_t<char> string() const { return base::string(); }
 
-        //operator nstd::string() const { return string(); }
+        //operator nstd::string_t() const { return string_t(); }
     };
 
     using namespace std::filesystem;
@@ -176,9 +188,10 @@ constexpr bool is_newline(char c) { return c == '\n' || c == '\r'; }
 constexpr bool is_whitespace(char c) { return is_newline(c) || c == ' ' || c == '\t'; }
 
 template<typename T>
-constexpr bool is_string = is_same<T, string> || is_same<T, string_view>;
-template<typename T>
-concept string_t = same_as<naked_type<T>, string> || same_as<naked_type<T>, string_view>;
+concept string_type =
+    has_value_type<naked_type<T>> &&
+    (same_as<naked_type<T>, string_t<typename naked_type<T>::value_type>> ||
+    same_as<naked_type<T>, string_view<typename naked_type<T>::value_type>>);
 
 template<typename T>
 concept path_like = is_same<naked_type<T>, filesystem::path> || converts_to<T, filesystem::path>;
@@ -186,20 +199,20 @@ concept path_like = is_same<naked_type<T>, filesystem::path> || converts_to<T, f
 } // export namespace nstd
 
 template<>
-struct std::formatter<nstd::string> : std::formatter<std::string>
+struct std::formatter<nstd::string_t<char>> : std::formatter<std::string>
 {
-    auto format(const nstd::string& sv, std::format_context& ctx) const
+    auto format(const nstd::string_t<char>& sv, std::format_context& ctx) const
     {
         return std::formatter<std::string>::format(sv, ctx);
     }
 };
 
 template<>
-struct std::formatter<nstd::string_view> : std::formatter<std::string_view>
+struct std::formatter<nstd::string_view<char>> : std::formatter<std::basic_string_view<char>>
 {
-    auto format(const nstd::string_view& sv, std::format_context& ctx) const
+    auto format(const nstd::string_view<char>& sv, std::format_context& ctx) const
     {
-        return std::formatter<std::string_view>::format(sv, ctx);
+        return std::formatter<std::basic_string_view<char>>::format(sv, ctx);
     }
 };
 
@@ -212,7 +225,10 @@ struct std::formatter<nstd::filesystem::path> : std::formatter<string>
     }
 };
 
-export using string = nstd::string;
-export using string_view = nstd::string_view;
+export using string = nstd::string_t<char>;
+export using string_view = nstd::string_view<char>;
+export using wstring = nstd::string_t<wchar_t>;
+export using wstring_view = nstd::string_view<wchar_t>;
+
 //using path = nstd::filesystem::path;
 export namespace filesys = nstd::filesystem;
