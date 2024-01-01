@@ -150,6 +150,14 @@ TO convert(number auto in) { return std::to_string(in); }
 template<same_as<string> TO>
 TO convert(::string_view in) { return string(in); }
 
+template<same_as<wstring> TO>
+TO convert(::string_view in)
+{
+    wstring out;
+    std::transform(in.begin(), in.end(), out.begin(), [](auto c){ return static_cast<wstring::value_type>(c); });
+    return out;
+}
+
 template<nstd::boolean TO>
 TO convert(::string_view in) { return in == "true"; }
 

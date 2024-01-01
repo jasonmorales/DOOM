@@ -18,6 +18,7 @@
 #pragma once
 
 import nstd;
+import platform;
 
 #include "system/windows.h"
 
@@ -66,16 +67,13 @@ public:
 
     void Init();
 
-    // Called by Doom::Loop,
-    // called before processing any tics in a frame
-    // (just after displaying a frame).
-    // Time consuming synchronous operations
-    // are performed here (joystick reading).
+    // Called by Doom::Loop, called before processing any tics in a frame (just after displaying a
+    // frame).
+    // Time consuming synchronous operations are performed here (joystick reading).
     // Can call Doom::PostEvent.
     void StartFrame();
 
-    // Called by Doom::Loop,
-    // called before processing each tic in a frame.
+    // Called by Doom::Loop, called before processing each tic in a frame.
     // Quick synchronous operations are performed here.
     // Can call Doom::PostEvent.
     void StartTick();
@@ -83,7 +81,6 @@ public:
     void FinishUpdate();
     void UpdateNoBlit() {}
 
-    LRESULT HandleSystemEvent(const SystemEvent& event);
     void DeliverSystemMessages();
 
     void SetPalette(const byte* palette);
@@ -93,12 +90,11 @@ public:
     byte* CopyScreen(int32 dest) const;
 
 private:
-    bool RegisterWindowClass();
     GLuint LoadShader(string_view name);
 
     Doom* doom = nullptr;
 
-    const wchar_t* WindowClassName = L"DoomWindow";
+    //const wchar_t* WindowClassName = L"DoomWindow";
 
     bool isInitialized = false;
 
@@ -107,9 +103,11 @@ private:
     bool isBorderless = false;
     bool isResizeable = false;
 
-    HWND windowHandle = nullptr;
-    HDC deviceContext = nullptr;
-    HGLRC renderContext = nullptr;
+    platform::Window* window = nullptr;
+
+    //HWND windowHandle = nullptr;
+    //HDC deviceContext = nullptr;
+    //HGLRC renderContext = nullptr;
 
     bool hasFocus = true;
 
@@ -124,8 +122,8 @@ private:
     uint32 screenWidth = 0;
     uint32 screenHeight = 0;
 
-    DWORD windowStyle = 0;
-    DWORD windowStyleEx = 0;
+    //DWORD windowStyle = 0;
+    //DWORD windowStyleEx = 0;
 
     uint32 screenTextureSize = 0;
     uint32* screenBuffer = nullptr;

@@ -27,7 +27,7 @@ Doom* g_doom = nullptr;
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {
-     CommandLine::Initialize(args);
+    CommandLine::Initialize(args);
 
     g_doom = new Doom;
     g_doom->Main();

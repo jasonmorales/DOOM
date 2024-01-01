@@ -34,13 +34,14 @@ class string_t : public std::basic_string<CH, std::char_traits<CH>, std::allocat
 {
 public:
     using base = std::basic_string<CH, std::char_traits<CH>, std::allocator<CH>>;
+    using value_type = base::value_type;
     using size_type = int32;
     static constexpr size_type npos = -1;
 
     using base::base;
 
     constexpr string_t() : base() {}
-    constexpr string_t(const std::string& in) : base(in) {}
+    constexpr string_t(const std::basic_string<value_type>& in) : base(in) {}
     constexpr explicit string_t(const string_view_like auto& in) : base(in.data(), in.size()) {}
     constexpr string_t(const string_view_like auto& in, size_type p, size_type n) : base(in, p, n) {}
     constexpr string_t(const byte* in, size_type n) : base(reinterpret_cast<const char*>(in), n) {}
@@ -140,6 +141,14 @@ public:
     constexpr string_t<T> str() const noexcept { return string_t<T>(base::data(), length()); }
 };
 
+template<size_t N>
+struct StringLiteralTemplate
+{
+    consteval StringLiteralTemplate(const char (&in)[N]) { std::copy_n(in, N, str); }
+
+    char str[N];
+};
+
 namespace filesystem
 {
     template<typename T>
@@ -198,10 +207,18 @@ concept path_like = is_same<naked_type<T>, filesystem::path> || converts_to<T, f
 
 } // export namespace nstd
 
+export using string = nstd::string_t<char>;
+export using string_view = nstd::string_view<char>;
+export using wstring = nstd::string_t<wchar_t>;
+export using wstring_view = nstd::string_view<wchar_t>;
+
+//using path = nstd::filesystem::path;
+export namespace filesys = nstd::filesystem;
+
 template<>
-struct std::formatter<nstd::string_t<char>> : std::formatter<std::string>
+struct std::formatter<string> : std::formatter<std::string>
 {
-    auto format(const nstd::string_t<char>& sv, std::format_context& ctx) const
+    auto format(const string& sv, std::format_context& ctx) const
     {
         return std::formatter<std::string>::format(sv, ctx);
     }
@@ -224,11 +241,3 @@ struct std::formatter<nstd::filesystem::path> : std::formatter<string>
         return std::formatter<string>::format(path.string(), ctx);
     }
 };
-
-export using string = nstd::string_t<char>;
-export using string_view = nstd::string_view<char>;
-export using wstring = nstd::string_t<wchar_t>;
-export using wstring_view = nstd::string_view<wchar_t>;
-
-//using path = nstd::filesystem::path;
-export namespace filesys = nstd::filesystem;

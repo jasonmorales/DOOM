@@ -1,6 +1,7 @@
 module;
 
 #include <limits.h>
+#include <cassert>
 
 export module nstd.bits;
 

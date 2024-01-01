@@ -93,21 +93,18 @@ template<typename T>
 using underlying_type = std::underlying_type_t<naked_type<T>>;
 
 template<typename T, bool = is_integral<T> || is_enum<T> || is_pointer<T>>
-struct _int_rep_s { using type = T; };
+struct int_rep_s { using type = T; };
 
 template<typename T>
-struct _int_rep_s<T, false> {};
+struct int_rep_s<T, false> {};
 
 template<enum_t E>
-struct _int_rep_s<E, true> { using type = underlying_type<E>; };
+struct int_rep_s<E, true> { using type = underlying_type<E>; };
 
 template<pointer P>
-struct _int_rep_s<P, true> { using type = intptr_t; };
+struct int_rep_s<P, true> { using type = intptr_t; };
 
 template<typename T>
-struct _int_rep : _int_rep_s<T> {};
-
-template<typename T>
-using int_rep = typename nstd::_int_rep<T>::type;
+using int_rep = int_rep_s<T>::type;
 
 } //export namespace nstd
