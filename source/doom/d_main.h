@@ -86,8 +86,7 @@ public:
     Render* GetRender() const { return render; }
     Game* GetGame() const { return game; }
 
-    void PostEvent(const event_t& event);
-    bool HasEventInQueue(const event_t& event);
+    bool HasEscEventInQueue();
 
 private:
     void IdentifyVersion();
@@ -110,11 +109,6 @@ private:
     GameState oldGameState = GameState::ForceWipe;
 
     int32 demoSequence = 0;
-
-    static const int32 MaxEvents = 64;
-    event_t events[MaxEvents];
-    int32 eventHead = 0;
-    int32 eventTail = 0;
 
     bool isModified = false; // Set if homebrew PWAD stuff has been added.
     bool isDevMode = false;	// DEBUG: launched with -devparm

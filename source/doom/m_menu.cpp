@@ -83,7 +83,7 @@ int			messageLastMenuActive;
 // timed message = no input from user
 bool			messageNeedsInput;
 
-void    (*messageRoutine)(int response);
+void    (*messageRoutine)(bool response);
 
 char gammamsg[5][26] =
 {
@@ -205,7 +205,6 @@ void M_WriteText(int32 x, int32 y, string_view text);
 int32  M_StringWidth(string_view str);
 int32  M_StringHeight(string_view str);
 void M_StartControlPanel();
-void M_StopMessage();
 void M_ClearMenus();
 
 // DOOM MENU
@@ -604,11 +603,9 @@ void M_SaveGame(int)
     M_ReadSaveStrings();
 }
 
-//      M_QuickSave
-
-void M_QuickSaveResponse(int ch)
+void M_QuickSaveResponse(bool response)
 {
-    if (ch == 'y')
+    if (response)
     {
         M_DoSave(quickSaveSlot);
         S_StartSound(nullptr, sfx_swtchx);
@@ -638,9 +635,9 @@ void M_QuickSave()
     Menu::StartMessage(std::format(QSPROMPT, savegamestrings[quickSaveSlot]), M_QuickSaveResponse, true);
 }
 
-void M_QuickLoadResponse(int ch)
+void M_QuickLoadResponse(bool response)
 {
-    if (ch == 'y')
+    if (response)
     {
         M_LoadSelect(quickSaveSlot);
         S_StartSound(nullptr, sfx_swtchx);
@@ -788,9 +785,9 @@ void M_DrawEpisode()
     g_doom->GetVideo()->DrawPatch(54, 38, 0, WadManager::GetLumpData<patch_t>("M_EPISOD"));
 }
 
-void M_VerifyNightmare(int ch)
+void M_VerifyNightmare(bool response)
 {
-    if (ch != 'y')
+    if (!response)
         return;
 
     G_DeferedInitNew(static_cast<skill_t>(nightmare), epi + 1, 1);
@@ -871,13 +868,9 @@ void M_ChangeMessages(int choice)
     message_dontfuckwithme = true;
 }
 
-
-//
-// M_EndGame
-//
-void M_EndGameResponse(int ch)
+void M_EndGameResponse(bool response)
 {
-    if (ch != 'y')
+    if (!response)
         return;
 
     currentMenu->lastOn = itemOn;
@@ -956,10 +949,11 @@ int     quitsounds2[8] =
 
 
 
-void M_QuitResponse(int ch)
+void M_QuitResponse(bool response)
 {
-    if (ch != 'y')
+    if (!response)
         return;
+
     if (!netgame)
     {
         if (g_doom->GetGameMode() == GameMode::Doom2Commercial)
@@ -968,6 +962,7 @@ void M_QuitResponse(int ch)
             S_StartSound(nullptr, quitsounds[(gametic >> 2) & 7]);
         I_WaitVBL(105);
     }
+
     I_Quit();
 }
 
@@ -1051,12 +1046,6 @@ void M_DrawSelCell(menu_t* menu, int32 item)
     g_doom->GetVideo()->DrawPatch(menu->x - 10, menu->y + item * LINEHEIGHT - 1, 0, WadManager::GetLumpData<patch_t>("M_CELL2"));
 }
 
-void M_StopMessage()
-{
-    menuactive = messageLastMenuActive;
-    messageToPrint = 0;
-}
-
 // Find string width from hu_font chars
 int32 M_StringWidth(string_view str)
 {
@@ -1121,101 +1110,104 @@ void M_WriteText(int32 x, int32 y, string_view text)
 
 // CONTROL PANEL
 
-bool M_Responder(const event_t& event)
+bool M_Responder(const input::event& event)
 {
     static  time_t joywait = 0;
-    static  time_t mousewait = 0;
-    static  int     mousey = 0;
-    static  int     lasty = 0;
-    static  int     mousex = 0;
-    static  int     lastx = 0;
+    static float x_count = 0;
+    static float y_count = 0;
 
     int32 ch = -1;
 
-    if (event.type == ev_joystick && joywait < I_GetTime())
+    auto nav_up_down = [&](int32 dir)
     {
-        if (event.data3 == -1)
+        do
         {
-            ch = KEY_UPARROW;
+            itemOn = (itemOn + currentMenu->numitems + dir) % currentMenu->numitems;
+            S_StartSound(nullptr, sfx_pstop);
+        }
+        while (currentMenu->menuitems[itemOn].status == -1);
+    };
+
+    auto nav_left_right = [&](int32 dir)
+    {
+        auto& item = currentMenu->menuitems[itemOn];
+        if (item.routine && item.status == 2)
+        {
+            S_StartSound(nullptr, sfx_stnmov);
+            item.routine(dir);
+        }
+    };
+
+    if (event.is_controller() && joywait < I_GetTime())
+    {
+        if (event.is("JoyYNeg"))
+        {
+            nav_up_down(-1);
             joywait = I_GetTime() + 5;
         }
-        else if (event.data3 == 1)
+        else if (event.is("JoyYPos"))
         {
-            ch = KEY_DOWNARROW;
+            nav_up_down(1);
             joywait = I_GetTime() + 5;
         }
 
-        if (event.data2 == -1)
+        if (event.is("JoyXNeg"))
         {
-            ch = KEY_LEFTARROW;
+            nav_left_right(0);
             joywait = I_GetTime() + 2;
         }
-        else if (event.data2 == 1)
+        else if (event.is("JoyXPos"))
         {
-            ch = KEY_RIGHTARROW;
+            nav_left_right(1);
             joywait = I_GetTime() + 2;
         }
 
-        if (event.data1 & 1)
+        if (event.down("Button1"))
         {
             ch = KEY_ENTER;
             joywait = I_GetTime() + 5;
         }
-        if (event.data1 & 2)
+        if (event.down("Button2"))
         {
             ch = KEY_BACKSPACE;
             joywait = I_GetTime() + 5;
         }
     }
-    else
+    else if (event.is_mouse())
     {
-        if (event.type == ev_mouse && mousewait < I_GetTime())
+        if (event.is("MouseDeltaY"))
         {
-            mousey += event.data3;
-            if (mousey < lasty - 30)
-            {
-                ch = KEY_DOWNARROW;
-                mousewait = I_GetTime() + 5;
-                mousey = lasty -= 30;
-            }
-            else if (mousey > lasty + 30)
-            {
-                ch = KEY_UPARROW;
-                mousewait = I_GetTime() + 5;
-                mousey = lasty += 30;
-            }
+            static const float delta_threshold = 100.f;
 
-            mousex += event.data2;
-            if (mousex < lastx - 30)
+            y_count += event.value;
+            if (menuactive && std::abs(y_count) > delta_threshold)
             {
-                ch = KEY_LEFTARROW;
-                mousewait = I_GetTime() + 5;
-                mousex = lastx -= 30;
-            }
-            else if (mousex > lastx + 30)
-            {
-                ch = KEY_RIGHTARROW;
-                mousewait = I_GetTime() + 5;
-                mousex = lastx += 30;
-            }
-
-            if (event.data1 & 1)
-            {
-                ch = KEY_ENTER;
-                mousewait = I_GetTime() + 15;
-            }
-
-            if (event.data1 & 2)
-            {
-                ch = KEY_BACKSPACE;
-                mousewait = I_GetTime() + 15;
+                nav_up_down(nstd::round_to<int32>(nstd::sign(event.value)));
+                y_count -= std::copysign(delta_threshold, y_count);
             }
         }
-        else
-            if (event.type == ev_keydown)
+
+        if (event.is("MouseDeltaX"))
+        {
+            static const float delta_threshold = 100.f;
+
+            x_count += event.value;
+            if (std::abs(x_count) > delta_threshold)
             {
-                ch = event.data1;
+                nav_left_right(nstd::round_to<int32>(nstd::sign((event.value) + 1) / 2));
+                x_count -= std::copysign(delta_threshold, x_count);
             }
+        }
+
+        if (event.down("MouseLeft"))
+            ch = KEY_ENTER;
+
+        if (event.down("MouseRight"))
+            ch = KEY_BACKSPACE;
+    }
+    else if (event.is_keyboard() && event.down())
+    {
+        ch = event.id.value;
     }
 
     if (ch == -1)
@@ -1265,21 +1257,23 @@ bool M_Responder(const event_t& event)
     // Take care of any messages that need input
     if (messageToPrint)
     {
-        if (messageNeedsInput == true &&
-            !(ch == ' ' || ch == 'n' || ch == 'y' || ch == KEY_ESCAPE))
+        bool is_affirmative = event.down("Space") || event.down("Y");
+        bool is_relevant = is_affirmative || event.down("N") || event.down("Escape");
+
+        if (messageNeedsInput && !is_relevant)
             return false;
 
         menuactive = messageLastMenuActive;
         messageToPrint = 0;
         if (messageRoutine)
-            messageRoutine(ch);
+            messageRoutine(is_affirmative);
 
         menuactive = false;
         S_StartSound(nullptr, sfx_swtchx);
         return true;
     }
 
-    if (g_doom->IsDevMode() && ch == KEY_F1)
+    if (g_doom->IsDevMode() && event.down("F1"))
     {
         G_ScreenShot();
         return true;
@@ -1288,23 +1282,23 @@ bool M_Responder(const event_t& event)
     // F-Keys
     if (!menuactive)
     {
-        switch (ch)
+        switch (event.id.value)
         {
-        case KEY_MINUS:         // Screen size down
+        case input::event_id("Minus"):         // Screen size down
             if (automapactive || chat_on)
                 return false;
             M_SizeDisplay(0);
             S_StartSound(nullptr, sfx_stnmov);
             return true;
 
-        case KEY_EQUALS:        // Screen size up
+        case input::event_id("Plus"):        // Screen size up
             if (automapactive || chat_on)
                 return false;
             M_SizeDisplay(1);
             S_StartSound(nullptr, sfx_stnmov);
             return true;
 
-        case KEY_F1:            // Help key
+        case input::event_id("F1"):            // Help key
             M_StartControlPanel();
 
             if (g_doom->GetGameMode() == GameMode::Doom1Retail)
@@ -1316,56 +1310,56 @@ bool M_Responder(const event_t& event)
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case KEY_F2:            // Save
+        case input::event_id("F2"):            // Save
             M_StartControlPanel();
             S_StartSound(nullptr, sfx_swtchn);
             M_SaveGame(0);
             return true;
 
-        case KEY_F3:            // Load
+        case input::event_id("F3"):            // Load
             M_StartControlPanel();
             S_StartSound(nullptr, sfx_swtchn);
             M_LoadGame(0);
             return true;
 
-        case KEY_F4:            // Sound Volume
+        case input::event_id("F4"):            // Sound Volume
             M_StartControlPanel();
             currentMenu = &SoundDef;
             itemOn = sfx_vol;
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case KEY_F5:            // Detail toggle
+        case input::event_id("F5"):            // Detail toggle
             M_ChangeDetail(0);
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case KEY_F6:            // Quicksave
+        case input::event_id("F6"):            // Quicksave
             S_StartSound(nullptr, sfx_swtchn);
             M_QuickSave();
             return true;
 
-        case KEY_F7:            // End game
+        case input::event_id("F7"):            // End game
             S_StartSound(nullptr, sfx_swtchn);
             M_EndGame(0);
             return true;
 
-        case KEY_F8:            // Toggle messages
+        case input::event_id("F8"):            // Toggle messages
             M_ChangeMessages(0);
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case KEY_F9:            // Quickload
+        case input::event_id("F9"):            // Quickload
             S_StartSound(nullptr, sfx_swtchn);
             M_QuickLoad();
             return true;
 
-        case KEY_F10:           // Quit DOOM
+        case input::event_id("F10"):           // Quit DOOM
             S_StartSound(nullptr, sfx_swtchn);
             M_QuitDOOM(0);
             return true;
 
-        case KEY_F11:           // gamma toggle
+        case input::event_id("F11"):           // gamma toggle
             usegamma++;
             if (usegamma > 4)
                 usegamma = 0;
@@ -1378,7 +1372,7 @@ bool M_Responder(const event_t& event)
     // Pop-up menu?
     if (!menuactive)
     {
-        if (ch == KEY_ESCAPE)
+        if (event.is("Escape"))
         {
             M_StartControlPanel();
             S_StartSound(nullptr, sfx_swtchn);
@@ -1388,47 +1382,25 @@ bool M_Responder(const event_t& event)
     }
 
     // Keys usable within menu
-    switch (ch)
+    switch (event.id.value)
     {
-    case KEY_DOWNARROW:
-        do
-        {
-            if (itemOn + 1 > currentMenu->numitems - 1)
-                itemOn = 0;
-            else itemOn++;
-            S_StartSound(nullptr, sfx_pstop);
-        } while (currentMenu->menuitems[itemOn].status == -1);
+    case input::event_id("DownArrow"):
+        nav_up_down(1);
         return true;
 
-    case KEY_UPARROW:
-        do
-        {
-            if (!itemOn)
-                itemOn = currentMenu->numitems - 1;
-            else itemOn--;
-            S_StartSound(nullptr, sfx_pstop);
-        } while (currentMenu->menuitems[itemOn].status == -1);
+    case input::event_id("UpArrow"):
+        nav_up_down(-1);
         return true;
 
-    case KEY_LEFTARROW:
-        if (currentMenu->menuitems[itemOn].routine &&
-            currentMenu->menuitems[itemOn].status == 2)
-        {
-            S_StartSound(nullptr, sfx_stnmov);
-            currentMenu->menuitems[itemOn].routine(0);
-        }
+    case input::event_id("LeftArrow"):
+        nav_left_right(0);
         return true;
 
-    case KEY_RIGHTARROW:
-        if (currentMenu->menuitems[itemOn].routine &&
-            currentMenu->menuitems[itemOn].status == 2)
-        {
-            S_StartSound(nullptr, sfx_stnmov);
-            currentMenu->menuitems[itemOn].routine(1);
-        }
+    case input::event_id("RightArrow"):
+        nav_left_right(1);
         return true;
 
-    case KEY_ENTER:
+    case input::event_id("Enter"):
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status)
         {
@@ -1446,13 +1418,13 @@ bool M_Responder(const event_t& event)
         }
         return true;
 
-    case KEY_ESCAPE:
+    case input::event_id("Escape"):
         currentMenu->lastOn = itemOn;
         M_ClearMenus();
         S_StartSound(nullptr, sfx_swtchx);
         return true;
 
-    case KEY_BACKSPACE:
+    case input::event_id("Backspace"):
         currentMenu->lastOn = itemOn;
         if (currentMenu->prevMenu)
         {
@@ -1625,7 +1597,7 @@ void Menu::Init()
 
 }
 
-void Menu::StartMessage(string_view message, void(*routine)(int), bool input)
+void Menu::StartMessage(string_view message, void(*routine)(bool), bool input)
 {
     messageLastMenuActive = menuactive;
     messageToPrint = 1;

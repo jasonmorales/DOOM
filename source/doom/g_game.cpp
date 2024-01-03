@@ -15,6 +15,7 @@
 import std;
 import config;
 import log;
+import input;
 
 #include "doomdef.h" 
 #include "doomstat.h"
@@ -132,10 +133,8 @@ fixed_t		angleturn[3] = { 640, 1280, 320 };	// + slow turn
 
 #define SLOWTURNTICS	6 
 
-#define NUMKEYS		256 
-
-bool         gamekeydown[NUMKEYS];
-int             turnheld;				// for accelerative turning 
+bool gamekeydown[input::event_id::count] = {};
+int32 turnheld;				// for accelerative turning 
 
 bool mousearray[4];
 bool* mousebuttons = &mousearray[1];		// allow [-1]
@@ -424,19 +423,19 @@ void G_DoLoadLevel()
 }
 
 // Get info needed to make ticcmd_ts for the players.
-bool G_Responder(const event_t& event)
+bool G_Responder(const input::event& event)
 {
     // allow spy mode changes even during the demo
-    if (g_doom->GetGameState() == GameState::Level && event.type == ev_keydown
-        && event.data1 == KEY_F12 && (singledemo || !deathmatch))
+    if (g_doom->GetGameState() == GameState::Level && event.is_keyboard() && event.down("F12") && (singledemo || !deathmatch))
     {
-        // spy mode 
+        // spy mode
         do
         {
             displayplayer++;
             if (displayplayer == MAXPLAYERS)
                 displayplayer = 0;
-        } while (!playeringame[displayplayer] && displayplayer != consoleplayer);
+        }
+        while (!playeringame[displayplayer] && displayplayer != consoleplayer);
         return true;
     }
 
@@ -445,9 +444,9 @@ bool G_Responder(const event_t& event)
         (demoplayback || g_doom->GetGameState() == GameState::Demo)
         )
     {
-        if (event.type == ev_keydown ||
-            (event.type == ev_mouse && event.data1) ||
-            (event.type == ev_joystick && event.data1))
+        if ((event.is_keyboard() && event.down())||
+            (event.is_mouse() && event.down()) ||
+            (event.is_controller() && event.down()))
         {
             M_StartControlPanel();
             return true;
@@ -471,38 +470,36 @@ bool G_Responder(const event_t& event)
             return true;	// finale ate the event 
     }
 
-    switch (event.type)
+    switch (event.device.value)
     {
-    case ev_keydown:
-        if (event.data1 == KEY_PAUSE)
+    case input::Keyboard:
+        if (event.down("Pause"))
         {
             sendpause = true;
             return true;
         }
-        if (event.data1 < NUMKEYS)
-            gamekeydown[event.data1] = true;
-        return true;    // eat key down events 
 
-    case ev_keyup:
-        if (event.data1 < NUMKEYS)
-            gamekeydown[event.data1] = false;
+        gamekeydown[event.id.value] = event.down();
+        if (event.down())
+            return true;    // eat key down events 
+        
         return false;   // always let key up events filter down 
 
-    case ev_mouse:
-        mousebuttons[0] = ((event.data1 & 1) != 0);
-        mousebuttons[1] = ((event.data1 & 2) != 0);
-        mousebuttons[2] = ((event.data1 & 4) != 0);
-        mousex = event.data2 * (mouseSensitivity + 5) / 10;
-        mousey = event.data3 * (mouseSensitivity + 5) / 10;
+    case input::Mouse:
+        if (event.is("MouseLeft")) mousebuttons[0] = event.down();
+        if (event.is("MouseRight")) mousebuttons[1] = event.down();
+        if (event.is("MouseMiddle")) mousebuttons[2] = event.down();
+        if (event.is("MouseDeltaX")) mousex = event.value * (mouseSensitivity + 5) / 10;
+        if (event.is("MouseDeltaY")) mousey = event.value * (mouseSensitivity + 5) / 10;
         return true;    // eat events 
 
-    case ev_joystick:
-        joybuttons[0] = event.data1 & 1;
-        joybuttons[1] = event.data1 & 2;
-        joybuttons[2] = event.data1 & 4;
-        joybuttons[3] = event.data1 & 8;
-        joyxmove = event.data2;
-        joyymove = event.data3;
+    case input::Controller:
+        if (event.is("Button1")) joybuttons[0] = event.down();
+        if (event.is("Button2")) joybuttons[1] = event.down();
+        if (event.is("Button3")) joybuttons[2] = event.down();
+        if (event.is("Button4")) joybuttons[3] = event.down();
+        if (event.is("JoyX")) joyxmove = event.value;
+        if (event.is("JoyY")) joyymove = event.value;
         return true;    // eat events 
 
     default:

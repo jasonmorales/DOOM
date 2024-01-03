@@ -19,6 +19,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import input;
+
 #include "d_event.h"
 
 // Size of statusbar.
@@ -30,7 +32,7 @@
 // STATUS BAR
 
 // Called by main loop.
-bool ST_Responder(const event_t& event);
+bool ST_Responder(const input::event& event);
 
 // Called by main loop.
 void ST_Ticker();

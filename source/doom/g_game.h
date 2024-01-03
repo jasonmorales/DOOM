@@ -14,6 +14,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import input;
+
 #include "doomdef.h"
 #include "d_event.h"
 
@@ -48,7 +50,7 @@ void G_SecretExitLevel();
 
 void G_WorldDone();
 
-bool G_Responder(const event_t& ev);
+bool G_Responder(const input::event& event);
 
 void G_ScreenShot();
 

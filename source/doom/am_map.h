@@ -17,13 +17,10 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-// Used by ST StatusBar stuff.
-#define AM_MSGHEADER (('a'<<24)+('m'<<16))
-#define AM_MSGENTERED (AM_MSGHEADER | ('e'<<8))
-#define AM_MSGEXITED (AM_MSGHEADER | ('x'<<8))
+import input;
 
 // Called by main loop.
-bool AM_Responder(const struct event_t& event);
+bool AM_Responder(const input::event& event);
 
 // Called by main loop.
 void AM_Ticker();

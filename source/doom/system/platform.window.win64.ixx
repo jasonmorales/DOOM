@@ -96,10 +96,12 @@ public:
 
     bool IsValid() const noexcept { return is_valid; }
 
+    void Update();
+
     void Show() { ShowWindow(handle, SW_SHOWNORMAL); }
     void SwapBuffers() { ::SwapBuffers(device_context); }
     RECT GetClientArea() const;
-    POINT GetCursorPos() const;
+    nstd::v2i GetCursorPos() const;
 
 private:
     bool is_valid = false;
@@ -111,6 +113,7 @@ private:
     HWND handle = NULL;
     HDC device_context = NULL;
     HGLRC render_context = NULL;
+    nstd::v2i old_cursor_pos;
 
     LRESULT HandleSystemEvent(SystemEvent event);
     void CreateInputEvent(const SystemEvent& event);
@@ -123,7 +126,7 @@ private:
 
 export struct SystemEvent
 {
-    HWND handle = nullptr;
+    HWND handle = NULL;
     UINT message = 0;
     WPARAM wParam = 0;
     LPARAM lParam = 0;
@@ -262,33 +265,128 @@ export struct SystemEvent
     }
 };
 
-LRESULT CALLBACK Window::InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
+bool Window::RegisterClass(WindowClassDefinition& definition)
 {
-    if (msg != WM_NCCREATE)
-        return DefWindowProc(handle, msg, wParam, lParam);
+    auto signature = definition.get_signature();
+    auto it = WindowClassDefinitions.find(signature);
+    if (it != WindowClassDefinitions.end())
+        return true;
 
-    auto create = reinterpret_cast<LPCREATESTRUCT>(lParam);
+    auto window_class = WNDCLASSEXW{
+        .cbSize = sizeof(WNDCLASSEXW),
+        .style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | (definition.processDoubleClicks ? CS_DBLCLKS : 0u) | (definition.disableClose ? CS_NOCLOSE : 0u),
+        .lpfnWndProc = Window::InitProc,
+        .cbClsExtra = 0,
+        .cbWndExtra = sizeof(Window*),
+        .hInstance = GetModuleHandleW(NULL),
+        .hIcon = NULL,
+        .hCursor = LoadCursorW(NULL, IDC_ARROW),
+        .hbrBackground = NULL,
+        .lpszMenuName = NULL,
+        .lpszClassName = signature.c_str(),
+        .hIconSm = NULL,
+    };
 
-    // Assign the pointer to the Window class that owns this window to the "user data" of this window
-    SetLastError(0);
-    auto result = SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
-    if (auto error_code = GetLastError(); result == 0 && error_code != 0)
+    auto result = RegisterClassExW(&window_class);
+    if (result == 0)
     {
         log::error(error::get_message());
-        return FALSE;
+        return false;
     }
 
-    // Replace this window proc with the simpler version which passes the event to the Window class
-    SetLastError(0);
-    result = SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Window::Proc));
-    if (auto error_code = GetLastError(); result == 0 && error_code != 0)
-    {
-        log::error(error::get_message());
-        return FALSE;
-    }
+    definition.id = result;
+    WindowClassDefinitions.insert({signature, result});
 
-    return DefWindowProc(handle, msg, wParam, lParam);
+    return true;
 }
+
+void Window::Update()
+{
+    auto new_cursor_pos = GetCursorPos();
+    auto delta = new_cursor_pos - old_cursor_pos;
+
+    if (!delta.is_zero())
+    {
+        static const auto MouseAbsolute = input::event_id{"MouseAbsolute"};
+        static const auto MouseDelta = input::event_id{"MouseDelta"};
+        static const auto MouseDeltaX = input::event_id{"MouseDeltaX"};
+        static const auto MouseDeltaY = input::event_id{"MouseDeltaY"};
+
+        input::event_flags flags = { "changed" };
+        flags.set<"caps_lock">(nstd::is_bit_set<0>(GetKeyState(VK_CAPITAL)));
+        flags.set<"scroll_lock">(nstd::is_bit_set<0>(GetKeyState(VK_SCROLL)));
+        flags.set<"num_lock">(nstd::is_bit_set<0>(GetKeyState(VK_NUMLOCK)));
+        flags.set<"ctrl">(nstd::is_bit_set<7>(GetKeyState(VK_CONTROL)));
+        flags.set<"shift">(nstd::is_bit_set<7>(GetKeyState(VK_SHIFT)));
+        flags.set<"alt">(nstd::is_bit_set<7>(GetKeyState(VK_MENU)));
+
+        input::event event = {
+            .device = input::Mouse,
+            .id = MouseAbsolute,
+            .count = 1,
+            .flags = flags,
+            .cursor_pos = new_cursor_pos,
+            };
+
+        input::event_queue.push_front(event);
+        std::cout << std::format("{}\n", input::event_queue.front().str());
+
+        event.id = "MouseDelta";
+        event.cursor_pos = delta;
+        event.value = delta.length<float>();
+        input::event_queue.push_front(event);
+        std::cout << std::format("{}\n", input::event_queue.front().str());
+
+        if (delta.x != 0)
+        {
+            event.id = "MouseDeltaX";
+            event.value = static_cast<float>(delta.x);
+            input::event_queue.push_front(event);
+            std::cout << std::format("{}\n", input::event_queue.front().str());
+        }
+
+        if (delta.y != 0)
+        {
+            event.id = "MouseDeltaY";
+            event.value = static_cast<float>(delta.y);
+            input::event_queue.push_front(event);
+            std::cout << std::format("{}\n", input::event_queue.front().str());
+        }
+    }
+
+    old_cursor_pos = new_cursor_pos;
+}
+
+RECT Window::GetClientArea() const
+{
+    RECT client_area;
+    GetClientRect(handle, &client_area);
+    auto client_width = client_area.right;
+    auto client_height = client_area.bottom;
+    AdjustWindowRectEx(&client_area, style, has_menu, style_ex);
+
+    RECT window_area;
+    GetWindowRect(handle, &window_area);
+
+    return {
+        .left =  window_area.left - client_area.left,
+        .top = window_area.top - client_area.top,
+        .right = client_width,
+        .bottom = client_height,
+    };
+}
+
+nstd::v2i Window::GetCursorPos() const
+{
+    RECT client_area = GetClientArea();
+    POINT point;
+    ::GetCursorPos(&point);
+    return {
+        .x = point.x - client_area.left,
+        .y = point.y - client_area.top
+    };
+}
+
 
 LRESULT Window::HandleSystemEvent(SystemEvent event)
 {
@@ -297,6 +395,7 @@ LRESULT Window::HandleSystemEvent(SystemEvent event)
     case WM_ACTIVATE:
         hasFocus = (LOWORD(event.wParam) != WA_INACTIVE);
         //input->OnFocusChanged(has_focus);
+        old_cursor_pos = GetCursorPos();
         break;
 
     case WM_SETFOCUS:
@@ -310,7 +409,7 @@ LRESULT Window::HandleSystemEvent(SystemEvent event)
         return MA_ACTIVATEANDEAT;
 
     case WM_PAINT:
-    {
+        {
         PAINTSTRUCT ps;
         BeginPaint(event.handle, &ps);
         EndPaint(event.handle, &ps);
@@ -318,7 +417,7 @@ LRESULT Window::HandleSystemEvent(SystemEvent event)
     }
 
     case WM_SIZING:
-    {
+        {
         RECT actual = {};
         /*GetClientRect(windowHandle, &actual);
         windowWidth = actual.right - actual.left;
@@ -361,16 +460,6 @@ LRESULT Window::HandleSystemEvent(SystemEvent event)
         PostQuitMessage(0);
         return 0;
 
-#if 0
-    case WM_MOUSEWHEEL:
-        handle_mouse_wheel(Button::MouseWheel_V);
-        return 0;
-
-    case WM_MOUSEHWHEEL:
-        handle_mouse_wheel(Button::MouseWheel_H);
-        return 0;
-#endif
-
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
@@ -390,7 +479,7 @@ LRESULT Window::HandleSystemEvent(SystemEvent event)
     case WM_MBUTTONDBLCLK:
     case WM_MOUSEWHEEL:
     case WM_MOUSEHWHEEL:
-    case WM_MOUSEMOVE:
+        //case WM_MOUSEMOVE:
         CreateInputEvent(event);
         return 0;
 
@@ -399,65 +488,6 @@ LRESULT Window::HandleSystemEvent(SystemEvent event)
     case WM_XBUTTONDBLCLK:
         CreateInputEvent(event);
         return TRUE;
-
-#if 0
-    event_t event;
-    case ButtonPress:
-        event.type = ev_mouse;
-        event.data1 =
-            (X_event.xbutton.state & Button1Mask)
-            | (X_event.xbutton.state & Button2Mask ? 2 : 0)
-            | (X_event.xbutton.state & Button3Mask ? 4 : 0)
-            | (X_event.xbutton.button == Button1)
-            | (X_event.xbutton.button == Button2 ? 2 : 0)
-            | (X_event.xbutton.button == Button3 ? 4 : 0);
-        event.data2 = event.data3 = 0;
-        doom->PostEvent(&event);
-        // fprintf(stderr, "b");
-        break;
-    case ButtonRelease:
-        event.type = ev_mouse;
-        event.data1 =
-            (X_event.xbutton.state & Button1Mask)
-            | (X_event.xbutton.state & Button2Mask ? 2 : 0)
-            | (X_event.xbutton.state & Button3Mask ? 4 : 0);
-        // suggest parentheses around arithmetic in operand of |
-        event.data1 =
-            event.data1
-            ^ (X_event.xbutton.button == Button1 ? 1 : 0)
-            ^ (X_event.xbutton.button == Button2 ? 2 : 0)
-            ^ (X_event.xbutton.button == Button3 ? 4 : 0);
-        event.data2 = event.data3 = 0;
-        doom->PostEvent(&event);
-        // fprintf(stderr, "bu");
-        break;
-    case MotionNotify:
-        event.type = ev_mouse;
-        event.data1 =
-            (X_event.xmotion.state & Button1Mask)
-            | (X_event.xmotion.state & Button2Mask ? 2 : 0)
-            | (X_event.xmotion.state & Button3Mask ? 4 : 0);
-        event.data2 = (X_event.xmotion.x - lastmousex) << 2;
-        event.data3 = (lastmousey - X_event.xmotion.y) << 2;
-
-        if (event.data2 || event.data3)
-        {
-            lastmousex = X_event.xmotion.x;
-            lastmousey = X_event.xmotion.y;
-            if (X_event.xmotion.x != X_width / 2 &&
-                X_event.xmotion.y != X_height / 2)
-            {
-                doom->PostEvent(&event);
-                // fprintf(stderr, "m");
-                mousemoved = false;
-            }
-            else
-            {
-                mousemoved = true;
-            }
-        }
-        break;
-#endif
     }
 
     return DefWindowProc(event.handle, event.message, event.wParam, event.lParam);
@@ -477,15 +507,43 @@ void Window::CreateInputEvent(const SystemEvent& event)
         .count = event.get_count(),
         .flags = event.get_input_flags(),
         .cursor_pos = event.get_cursor_pos(this),
-    });
-    
-    //std::cout << std::format("{}\n", input_event.str());
+        });
+
+    std::cout << std::format("{}\n", input::event_queue.front().str());
 }
 
 LRESULT CALLBACK Window::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(handle, GWLP_USERDATA));
-	return window->HandleSystemEvent({ handle, msg, wParam, lParam });
+    auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(handle, GWLP_USERDATA));
+    return window->HandleSystemEvent({ handle, msg, wParam, lParam });
+}
+
+LRESULT CALLBACK Window::InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if (msg != WM_NCCREATE)
+        return DefWindowProc(handle, msg, wParam, lParam);
+
+    auto create = reinterpret_cast<LPCREATESTRUCT>(lParam);
+
+    // Assign the pointer to the Window class that owns this window to the "user data" of this window
+    SetLastError(0);
+    auto result = SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
+    if (auto error_code = GetLastError(); result == 0 && error_code != 0)
+    {
+        log::error(error::get_message());
+        return FALSE;
+    }
+
+    // Replace this window proc with the simpler version which passes the event to the Window class
+    SetLastError(0);
+    result = SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Window::Proc));
+    if (auto error_code = GetLastError(); result == 0 && error_code != 0)
+    {
+        log::error(error::get_message());
+        return FALSE;
+    }
+
+    return DefWindowProc(handle, msg, wParam, lParam);
 }
 
 export Window* CreateWindow(const WindowDefinition& definition)
@@ -617,71 +675,6 @@ export Window* CreateWindow(const WindowDefinition& definition)
 
     window->is_valid = true;
     return window;
-}
-
-bool Window::RegisterClass(WindowClassDefinition& definition)
-{
-    auto signature = definition.get_signature();
-    auto it = WindowClassDefinitions.find(signature);
-    if (it != WindowClassDefinitions.end())
-        return true;
-
-    auto window_class = WNDCLASSEXW{
-        .cbSize = sizeof(WNDCLASSEXW),
-        .style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC | (definition.processDoubleClicks ? CS_DBLCLKS : 0u) | (definition.disableClose ? CS_NOCLOSE : 0u),
-        .lpfnWndProc = Window::InitProc,
-        .cbClsExtra = 0,
-        .cbWndExtra = sizeof(Window*),
-        .hInstance = GetModuleHandleW(NULL),
-        .hIcon = NULL,
-        .hCursor = LoadCursorW(NULL, IDC_ARROW),
-        .hbrBackground = NULL,
-        .lpszMenuName = NULL,
-        .lpszClassName = signature.c_str(),
-        .hIconSm = NULL,
-    };
-
-    auto result = RegisterClassExW(&window_class);
-    if (result == 0)
-    {
-        log::error(error::get_message());
-        return false;
-    }
-
-    definition.id = result;
-    WindowClassDefinitions.insert({signature, result});
-
-    return true;
-}
-
-RECT Window::GetClientArea() const
-{
-    RECT client_area;
-    GetClientRect(handle, &client_area);
-    auto client_width = client_area.right;
-    auto client_height = client_area.bottom;
-    AdjustWindowRectEx(&client_area, style, has_menu, style_ex);
-
-    RECT window_area;
-    GetWindowRect(handle, &window_area);
-
-    return {
-        .left =  window_area.left - client_area.left,
-        .top = window_area.top - client_area.top,
-        .right = client_width,
-        .bottom = client_height,
-    };
-}
-
-POINT Window::GetCursorPos() const
-{
-    RECT client_area = GetClientArea();
-    POINT point;
-    ::GetCursorPos(&point);
-    return {
-        .x = point.x - client_area.left,
-        .y = point.y - client_area.top
-    };
 }
 
 } // namespace platform

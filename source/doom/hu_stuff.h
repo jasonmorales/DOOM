@@ -16,6 +16,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import input;
+
 #include "d_event.h"
 
 
@@ -45,7 +47,7 @@
 void HU_Init();
 void HU_Start();
 
-bool HU_Responder(const event_t& event);
+bool HU_Responder(const input::event& event);
 
 void HU_Ticker();
 void HU_Drawer();

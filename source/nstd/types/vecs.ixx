@@ -57,8 +57,8 @@ public:
 
 	v2_t& SetLength(T f) { if (x != 0.f || y != 0.f) { T scale(f / sqrt(x * x + y * y)); x *= scale; y *= scale; } return *this; }
 
-	template<typename TO = T>
-	TO length() const { return ::rcast<TO>(sqrt(x * x + y * y)); }
+	template<typename TO = double>
+	TO length() const { return size_cast<TO>(std::sqrt(x * x + y * y)); }
 
 	T GetLengthSq() const { return x * x + y * y; }
 	v2_t& Clamp(double length)

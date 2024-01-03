@@ -18,6 +18,7 @@
 #pragma once
 
 import nstd;
+import input;
 
 // CHEAT SEQUENCE PACKAGE
 
@@ -32,5 +33,5 @@ typedef struct
 
 } cheatseq_t;
 
-int32 cht_CheckCheat(cheatseq_t* cht, char key);
+int32 cht_CheckCheat(cheatseq_t* cht, input::event_id id);
 void cht_GetParam(cheatseq_t* cht, char* buffer);

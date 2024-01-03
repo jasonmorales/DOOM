@@ -217,9 +217,9 @@ void F_StartFinale()
 
 }
 
-bool F_CastResponder(const event_t& event)
+bool F_CastResponder(const input::event& event)
 {
-    if (event.type != ev_keydown)
+    if (!event.down())
         return false;
 
     if (castdeath)
@@ -237,7 +237,7 @@ bool F_CastResponder(const event_t& event)
     return true;
 }
 
-bool F_Responder(const event_t& event)
+bool F_Responder(const input::event& event)
 {
     if (finalestage == 2)
         return F_CastResponder(event);

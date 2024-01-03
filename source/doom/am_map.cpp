@@ -32,7 +32,7 @@ import std;
 #include "z_zone.h"
 #include "d_main.h"
 #include "i_video.h"
-
+#include "m_misc.h"
 
 extern Doom* g_doom;
 
@@ -76,20 +76,6 @@ extern Doom* g_doom;
 
 // drawing stuff
 #define	FB		0
-
-#define AM_PANDOWNKEY	KEY_DOWNARROW
-#define AM_PANUPKEY	KEY_UPARROW
-#define AM_PANRIGHTKEY	KEY_RIGHTARROW
-#define AM_PANLEFTKEY	KEY_LEFTARROW
-#define AM_ZOOMINKEY	'='
-#define AM_ZOOMOUTKEY	'-'
-#define AM_STARTKEY	KEY_TAB
-#define AM_ENDKEY	KEY_TAB
-#define AM_GOBIGKEY	'0'
-#define AM_FOLLOWKEY	'f'
-#define AM_GRIDKEY	'g'
-#define AM_MARKKEY	'm'
-#define AM_CLEARMARKKEY	'c'
 
 #define AM_NUMMARKPOINTS 10
 
@@ -437,7 +423,7 @@ void AM_changeWindowLoc()
 
 void AM_initVariables()
 {
-    static event_t st_notify = { ev_keyup, AM_MSGENTERED };
+    static input::event st_notify { .flags = {"down", "automap"} };
 
     automapactive = true;
     fb = g_doom->GetVideo()->GetScreen(0);
@@ -523,7 +509,7 @@ void AM_LevelInit()
 
 void AM_Stop()
 {
-    static event_t st_notify = { ev_keyup, 0, AM_MSGEXITED };
+    static input::event st_notify = { .flags = {"up", "automap"} };
 
     AM_unloadPics();
     automapactive = false;
@@ -568,7 +554,7 @@ void AM_maxOutWindowScale()
 }
 
 // Handle events (user inputs) in automap mode
-bool AM_Responder(const event_t& event)
+bool AM_Responder(const input::event& event)
 {
     static int cheatstate = 0;
     static int bigstate = 0;
@@ -577,50 +563,54 @@ bool AM_Responder(const event_t& event)
 
     if (!automapactive)
     {
-        if (event.type == ev_keydown && event.data1 == AM_STARTKEY)
+        if (event.down() && Settings::CheckBind("MapOpen", event.id))
         {
             AM_Start();
             viewactive = false;
             rc = true;
         }
     }
-
-    else if (event.type == ev_keydown)
+    else if (event.down())
     {
-
         rc = true;
-        switch (event.data1)
+        if (Settings::CheckBind("MapRight", event.id))
         {
-        case AM_PANRIGHTKEY: // pan right
             if (!followplayer) m_paninc.x = FTOM(F_PANINC);
             else rc = false;
-            break;
-        case AM_PANLEFTKEY: // pan left
+        }
+        else if (Settings::CheckBind("MapLeft", event.id))
+        {
             if (!followplayer) m_paninc.x = -FTOM(F_PANINC);
             else rc = false;
-            break;
-        case AM_PANUPKEY: // pan up
+        }
+        else if (Settings::CheckBind("MapUp", event.id))
+        {
             if (!followplayer) m_paninc.y = FTOM(F_PANINC);
             else rc = false;
-            break;
-        case AM_PANDOWNKEY: // pan down
+        }
+        else if (Settings::CheckBind("MapDown", event.id))
+        {
             if (!followplayer) m_paninc.y = -FTOM(F_PANINC);
             else rc = false;
-            break;
-        case AM_ZOOMOUTKEY: // zoom out
+        }
+        else if (Settings::CheckBind("MapZoomOut", event.id))
+        {
             mtof_zoommul = M_ZOOMOUT;
             ftom_zoommul = M_ZOOMIN;
-            break;
-        case AM_ZOOMINKEY: // zoom in
+        }
+        else if (Settings::CheckBind("MapZoomIn", event.id))
+        {
             mtof_zoommul = M_ZOOMIN;
             ftom_zoommul = M_ZOOMOUT;
-            break;
-        case AM_ENDKEY:
+        }
+        else if (Settings::CheckBind("MapClose", event.id))
+        {
             bigstate = 0;
             viewactive = true;
             AM_Stop();
-            break;
-        case AM_GOBIGKEY:
+        }
+        else if (Settings::CheckBind("MapGoBig", event.id))
+        {
             bigstate = !bigstate;
             if (bigstate)
             {
@@ -628,57 +618,63 @@ bool AM_Responder(const event_t& event)
                 AM_minOutWindowScale();
             }
             else AM_restoreScaleAndLoc();
-            break;
-        case AM_FOLLOWKEY:
+        }
+        else if (Settings::CheckBind("MapToggleFollow", event.id))
+        {
             followplayer = !followplayer;
             f_oldloc.x = std::numeric_limits<decltype(f_oldloc.x)>::max();;
             plr->message = followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF;
-            break;
-        case AM_GRIDKEY:
+        }
+        else if (Settings::CheckBind("MapToggleGrid", event.id))
+        {
             grid = !grid;
             plr->message = grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
-            break;
-        case AM_MARKKEY:
+        }
+        else if (Settings::CheckBind("MapSetMark", event.id))
+        {
             plr->message = std::format("{} {}", AMSTR_MARKEDSPOT, markpointnum);
             AM_addMark();
-            break;
-        case AM_CLEARMARKKEY:
+        }
+        else if (Settings::CheckBind("MapClearMark", event.id))
+        {
             AM_clearMarks();
             plr->message = AMSTR_MARKSCLEARED;
-            break;
-        default:
+        }
+        else
+        {
             cheatstate = 0;
             rc = false;
         }
-        if (!deathmatch && cht_CheckCheat(&cheat_amap, static_cast<char>(event.data1)))
+
+        if (!deathmatch && cht_CheckCheat(&cheat_amap, event.id.value))
         {
             rc = false;
             cheating = (cheating + 1) % 3;
         }
     }
-
-    else if (event.type == ev_keyup)
+    else if (event.is_keyboard() && event.up())
     {
         rc = false;
-        switch (event.data1)
+        if (Settings::CheckBind("MapRight", event.id))
         {
-        case AM_PANRIGHTKEY:
             if (!followplayer) m_paninc.x = 0;
-            break;
-        case AM_PANLEFTKEY:
+        }
+        else if (Settings::CheckBind("MapLeft", event.id))
+        {
             if (!followplayer) m_paninc.x = 0;
-            break;
-        case AM_PANUPKEY:
+        }
+        else if (Settings::CheckBind("MapUp", event.id))
+        {
             if (!followplayer) m_paninc.y = 0;
-            break;
-        case AM_PANDOWNKEY:
+        }
+        else if (Settings::CheckBind("MapDown", event.id))
+        {
             if (!followplayer) m_paninc.y = 0;
-            break;
-        case AM_ZOOMOUTKEY:
-        case AM_ZOOMINKEY:
+        }
+        else if (Settings::CheckBind("MapZoomIn", event.id) || Settings::CheckBind("MapZoomOut", event.id))
+        {
             mtof_zoommul = FRACUNIT;
             ftom_zoommul = FRACUNIT;
-            break;
         }
     }
 
@@ -688,7 +684,6 @@ bool AM_Responder(const event_t& event)
 // Zooming
 void AM_changeWindowScale()
 {
-
     // Change the scaling multipliers
     scale_mtof = FixedMul(scale_mtof, mtof_zoommul);
     scale_ftom = FixedDiv(FRACUNIT, scale_mtof);

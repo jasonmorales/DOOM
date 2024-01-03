@@ -70,12 +70,10 @@ public:
     // Called by Doom::Loop, called before processing any tics in a frame (just after displaying a
     // frame).
     // Time consuming synchronous operations are performed here (joystick reading).
-    // Can call Doom::PostEvent.
     void StartFrame();
 
     // Called by Doom::Loop, called before processing each tic in a frame.
     // Quick synchronous operations are performed here.
-    // Can call Doom::PostEvent.
     void StartTick();
 
     void FinishUpdate();

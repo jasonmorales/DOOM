@@ -417,7 +417,7 @@ void CheckAbort()
         g_doom->GetVideo()->StartTick();
 
     g_doom->GetVideo()->StartTick();
-    if (g_doom->HasEventInQueue({ev_keydown, KEY_ESCAPE}))
+    if (g_doom->HasEscEventInQueue())
         I_Error("Network game synchronization aborted.");
 }
 

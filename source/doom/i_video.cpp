@@ -356,6 +356,9 @@ void Video::StartFrame()
 {
     glClearColor(0.f, 1.f, 1.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    if (window)
+        window->Update();
 }
 
 void Video::StartTick()

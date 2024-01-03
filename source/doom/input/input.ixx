@@ -9,7 +9,7 @@ namespace {
 export namespace input {
 
 using device_id = nstd::ename<
-	"Keyboard", "Mouse"
+	"Keyboard", "Mouse", "Controller"
 >;
 
 using event_id = nstd::ename<
@@ -46,7 +46,7 @@ using event_id = nstd::ename<
 	"MouseLeft", "MouseRight", "MouseMiddle", "MouseX", "MouseX1", "MouseX2",
 	"WheelDown", "WheelUp", "WheelVert", "WheelLeft", "WheelRight", "WheelHorz",
 
-	"MouseAbsolute", "MouseDeltaX", "MouseDeltaY", "MouseDeltaXY",
+	"MouseAbsolute", "MouseDelta", "MouseDeltaX", "MouseDeltaY",
 
 	"Button1", "Button2", "Button3", "Button4", "Button5", "Button6", "Button7", "Button8",
 	"Button9", "Button10", "Button11", "Button12", "Button13", "Button14", "Button15", "Button16",
@@ -82,7 +82,9 @@ using event_flags = nstd::flags<
 	"mouse_left", "mouse_right", "mouse_middle",
 	"mouse_x1", "mouse_x2",
 	"double_click",
-	"shadow"
+	"shadow",
+
+	"automap"
 >;
 
 struct event
@@ -94,7 +96,7 @@ struct event
 	nstd::v2i cursor_pos;
 	float value = 0;
 
-	constexpr bool is(event_id test_id) const { return id == Any || id == test_id; }
+	constexpr bool is(event_id test_id) const { return test_id == Any || test_id == id; }
 	constexpr bool down(event_id test_id = Any) const { return flags.all<"down">() && is(test_id); }
 	constexpr bool up(event_id test_id = Any) const { return flags.all<"up">() && is(test_id); }
 	constexpr bool ctrl() const { return flags.all<"ctrl">(); }
@@ -110,6 +112,7 @@ struct event
 	constexpr bool is_device() const { return device.is<ID>(); }
 	constexpr bool is_keyboard() const { return device.is<"Keyboard">(); }
 	constexpr bool is_mouse() const { return device.is<"Mouse">(); }
+	constexpr bool is_controller() const { return device.is<"Controller">(); }
 
 	constexpr string str() const noexcept
 	{
@@ -117,10 +120,13 @@ struct event
 			device.name(), id.name(), count, cursor_pos.x, cursor_pos.y, flags.str(), value);
 	}
 
-	static constexpr auto Any = event_id{"Any"};
+	static constexpr event_id Any = "Any";
 };
 
-nstd::v2i cursor_pos;
+constexpr device_id Keyboard = "Keyboard";
+constexpr device_id Mouse = "Mouse";
+constexpr device_id Controller = "Controller";
+
 ::wstring character_stream;
 std::deque<event> event_queue(64);
 

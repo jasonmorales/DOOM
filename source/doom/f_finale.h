@@ -14,12 +14,14 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import input;
+
 #include "d_event.h"
 
 // FINALE
 
 // Called by main loop.
-bool F_Responder(const event_t& event);
+bool F_Responder(const input::event& event);
 
 // Called by main loop.
 void F_Ticker();

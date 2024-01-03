@@ -49,6 +49,7 @@ extern Doom* g_doom;
 
 
 Settings::DirectoryType* Settings::settings = nullptr;
+Settings::bind_table Settings::action_bindings;
 
 bool M_WriteFile(const filesys::path& path, const char* source, uint32 length)
 {
@@ -82,18 +83,18 @@ Setting<bool> useJoystick{"use_joystick", false};
 // Blocky mode, has default, 0 = high, 1 = normal
 Setting<int32> detailLevel{"detail_level", 0};
 
-Setting<int32> key_right{"key_right", KEY_RIGHTARROW};
-Setting<int32> key_left{"key_left", KEY_LEFTARROW};
-Setting<int32> key_up{"key_up", KEY_UPARROW};
-Setting<int32> key_down{"key_down", KEY_DOWNARROW};
+Setting<int32> key_right{"key_right", input::event_id{"RightArrow"}};
+Setting<int32> key_left{"key_left", input::event_id{"LeftArrow"}};
+Setting<int32> key_up{"key_up", input::event_id{"UpArrow"}};
+Setting<int32> key_down{"key_down", input::event_id{"DownArrow"}};
 
-Setting<int32> key_strafeleft{"key_strafeleft", ','};
-Setting<int32> key_straferight{"key_straferight", '.'};
+Setting<int32> key_strafeleft{"key_strafeleft", input::event_id{"Comma"}};
+Setting<int32> key_straferight{"key_straferight", input::event_id{"Period"}};
 
-Setting<int32> key_fire{"key_fire", KEY_RCTRL};
-Setting<int32> key_use{"key_use", ' '};
-Setting<int32> key_strafe{"key_strafe", KEY_RALT};
-Setting<int32> key_speed{"key_speed", KEY_RSHIFT};
+Setting<int32> key_fire{"key_fire", input::event_id{"LeftCtrl"}};
+Setting<int32> key_use{"key_use", input::event_id{"Space"}};
+Setting<int32> key_strafe{"key_strafe", input::event_id{"LeftAlt"}};
+Setting<int32> key_speed{"key_speed", input::event_id{"LeftShift"}};
 
 // machine-independent sound params
 Setting<int32> numChannels{"snd_channels", 3};
@@ -157,6 +158,39 @@ Setting<int32> viewWidth{"viewWidth", 0};
 
 const filesys::path Settings::DevDataPath = "devdata";
 const filesys::path Settings::DevMapPath = "devmaps";
+
+void Settings::Init()
+{
+    action_bindings["MoveForward"].insert("UpArrow");
+    action_bindings["MoveForward"].insert("W");
+    action_bindings["MoveBack"].insert("DownArrow");
+    action_bindings["MoveBack"].insert("S");
+    action_bindings["MoveLeft"].insert("LeftArrow");
+    action_bindings["MoveLeft"].insert("A");
+    action_bindings["MoveRight"].insert("RightArrow");
+    action_bindings["MoveRight"].insert("D");
+    action_bindings["Fire"].insert("Ctrl");
+    action_bindings["Fire"].insert("LeftCtrl");
+    action_bindings["Fire"].insert("RightCtrl");
+    action_bindings["Fire"].insert("MouseLeft");
+    action_bindings["Use"].insert("Space");
+    action_bindings["Use"].insert("MouseRight");
+    action_bindings["MapOpen"].insert("Tab");
+    action_bindings["MapClose"].insert("Tab");
+    action_bindings["MapRight"].insert("RightArrow");
+    action_bindings["MapLeft"].insert("LeftArrow");
+    action_bindings["MapUp"].insert("UpArrow");
+    action_bindings["MapDown"].insert("DownArrow");
+    action_bindings["MapZoomOut"].insert("Minus");
+    action_bindings["MapZoomIn"].insert("Plus");
+    action_bindings["MapGoBig"].insert("0");
+    action_bindings["MapToggleFollow"].insert("F");
+    action_bindings["MapToggleGrid"].insert("G");
+    action_bindings["MapSetMark"].insert("M");
+    action_bindings["MapClearMark"].insert("C");
+    action_bindings["MsgRefresh"].insert("Enter");
+}
+
 const filesys::path Settings::DefaultConfigFile = Settings::DevDataPath / "default.cfg";
 
 void Settings::Save(const filesys::path& path /*= DefaultConfigFile*/)

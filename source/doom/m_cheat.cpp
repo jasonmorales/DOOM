@@ -26,7 +26,7 @@ static unsigned char	cheat_xlate_table[256];
 
 // Called in st_stuff module, which handles the input.
 // Returns a 1 if the cheat was successful, 0 if failed.
-int cht_CheckCheat(cheatseq_t* cht, char key)
+int32 cht_CheckCheat(cheatseq_t* cht, input::event_id id)
 {
     int i;
     int rc = 0;
@@ -36,6 +36,12 @@ int cht_CheckCheat(cheatseq_t* cht, char key)
         firsttime = 0;
         for (i = 0;i < 256;i++) cheat_xlate_table[i] = SCRAMBLE(i);
     }
+
+    byte key = 0;
+    if (id >= input::event_id("A") && id <= input::event_id("Z"))
+        key = static_cast<byte>('A' + id - input::event_id("A"));
+    else if (id >= input::event_id("0") && id <= input::event_id("9"))
+        key = static_cast<byte>('0' + id - input::event_id("0"));
 
     if (!cht->p)
         cht->p = cht->sequence; // initialize if first time

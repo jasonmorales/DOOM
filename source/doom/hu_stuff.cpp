@@ -33,6 +33,7 @@ import std;
 
 #include "dstrings.h"
 #include "sounds.h"
+#include "m_misc.h"
 
 
 extern Doom* g_doom;
@@ -434,7 +435,7 @@ char HU_dequeueChatChar()
     return c;
 }
 
-bool HU_Responder(const event_t& event)
+bool HU_Responder(const input::event& event)
 {
     const char* macromessage;
     bool eatkey = false;
@@ -456,29 +457,29 @@ bool HU_Responder(const event_t& event)
     for (int32 i = 0; i < MAXPLAYERS; i++)
         numplayers += playeringame[i];
 
-    if (event.data1 == KEY_RSHIFT)
+    if (event.is("RightShift") || event.is("LeftShift") || event.is("Shift"))
     {
-        shiftdown = event.type == ev_keydown;
+        shiftdown = event.down();
         return false;
     }
-    else if (event.data1 == KEY_RALT || event.data1 == KEY_LALT)
+    else if (event.is("RightAlt") || event.is("LeftAlt") || event.is("Alt"))
     {
-        altdown = event.type == ev_keydown;
+        altdown = event.down();
         return false;
     }
 
-    if (event.type != ev_keydown)
+    if (!event.down())
         return false;
 
     if (!chat_on)
     {
-        if (event.data1 == HU_MSGREFRESH)
+        if (Settings::CheckBind("MsgRefresh", event.id))
         {
             message_on = true;
             message_counter = HU_MSGTIMEOUT;
             eatkey = true;
         }
-        else if (netgame && event.data1 == HU_INPUTTOGGLE)
+        else if (netgame && Settings::CheckBind("Talk", event.id))
         {
             eatkey = chat_on = true;
             HUlib_resetIText(&w_chat);
@@ -488,7 +489,7 @@ bool HU_Responder(const event_t& event)
         {
             for (char i = 0; i < MAXPLAYERS; i++)
             {
-                if (event.data1 == destination_keys[i])
+                if (event.id.value == destination_keys[i])
                 {
                     if (playeringame[i] && i != consoleplayer)
                     {
@@ -517,7 +518,7 @@ bool HU_Responder(const event_t& event)
     }
     else
     {
-        c = static_cast<unsigned char>(event.data1);
+        c = static_cast<unsigned char>(event.id.value);
         // send a macro
         if (altdown)
         {

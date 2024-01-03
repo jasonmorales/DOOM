@@ -455,31 +455,31 @@ void R_FillBackScreen()
         }
     }
 
-    auto* patch = WadManager::GetLumpData<patch_t>("brdr_t");
+    auto* patch = WadManager::GetLumpData<patch_t>("BRDR_T");
 
     for (x = 0; x < scaledviewwidth; x += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx + x, viewwindowy - 8, 1, patch);
-    patch = WadManager::GetLumpData<patch_t>("brdr_b");
+    patch = WadManager::GetLumpData<patch_t>("BRDR_B");
 
     for (x = 0; x < scaledviewwidth; x += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx + x, viewwindowy + viewheight, 1, patch);
-    patch = WadManager::GetLumpData<patch_t>("brdr_l");
+    patch = WadManager::GetLumpData<patch_t>("BRDR_L");
 
     for (y = 0; y < viewheight; y += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + y, 1, patch);
-    patch = WadManager::GetLumpData<patch_t>("brdr_r");
+    patch = WadManager::GetLumpData<patch_t>("BRDR_R");
 
     for (y = 0; y < viewheight; y += 8)
         g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + y, 1, patch);
 
     // Draw beveled edge. 
-    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, WadManager::GetLumpData<patch_t>("brdr_tl"));
+    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy - 8, 1, WadManager::GetLumpData<patch_t>("BRDR_TL"));
 
-    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, WadManager::GetLumpData<patch_t>("brdr_tr"));
+    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy - 8, 1, WadManager::GetLumpData<patch_t>("BRDR_TR"));
 
-    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, WadManager::GetLumpData<patch_t>("brdr_bl"));
+    g_doom->GetVideo()->DrawPatch(viewwindowx - 8, viewwindowy + viewheight, 1, WadManager::GetLumpData<patch_t>("BRDR_BL"));
 
-    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, WadManager::GetLumpData<patch_t>("brdr_br"));
+    g_doom->GetVideo()->DrawPatch(viewwindowx + scaledviewwidth, viewwindowy + viewheight, 1, WadManager::GetLumpData<patch_t>("BRDR_BR"));
 }
 
 // Copy a screen buffer.

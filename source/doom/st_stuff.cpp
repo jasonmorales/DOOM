@@ -496,33 +496,30 @@ void ST_refreshBackground()
 }
 
 // Respond to keyboard input events, intercept cheats.
-bool ST_Responder(const event_t& event)
+bool ST_Responder(const input::event& event)
 {
     // Filter automap on/off.
-    if (event.type == ev_keyup
-        && ((event.data1 & 0xffff0000) == AM_MSGHEADER))
+    if (event.flags.all<"automap">())
     {
-        switch (event.data1)
+        if (event.down())
         {
-        case AM_MSGENTERED:
             st_gamestate = AutomapState;
             st_firsttime = true;
-            break;
-
-        case AM_MSGEXITED:
+        }
+        else if (event.up())
+        {
             //	fprintf(stderr, "AM exited\n");
             st_gamestate = FirstPersonState;
-            break;
         }
     }
 
     // if a user keypress...
-    else if (event.type == ev_keydown)
+    else if (event.is_keyboard() && event.down())
     {
         if (!netgame)
         {
             // 'dqd' cheat for toggleable god mode
-            if (cht_CheckCheat(&cheat_god, event.data1))
+            if (cht_CheckCheat(&cheat_god, event.id.value))
             {
                 plyr->cheats ^= CF_GODMODE;
                 if (plyr->cheats & CF_GODMODE)
@@ -537,7 +534,7 @@ bool ST_Responder(const event_t& event)
                     plyr->message = STSTR_DQDOFF;
             }
             // 'fa' cheat for killer fucking arsenal
-            else if (cht_CheckCheat(&cheat_ammonokey, event.data1))
+            else if (cht_CheckCheat(&cheat_ammonokey, event.id.value))
             {
                 plyr->armorpoints = 200;
                 plyr->armortype = 2;
@@ -551,7 +548,7 @@ bool ST_Responder(const event_t& event)
                 plyr->message = STSTR_FAADDED;
             }
             // 'kfa' cheat for key full ammo
-            else if (cht_CheckCheat(&cheat_ammo, event.data1))
+            else if (cht_CheckCheat(&cheat_ammo, event.id.value))
             {
                 plyr->armorpoints = 200;
                 plyr->armortype = 2;
@@ -568,7 +565,7 @@ bool ST_Responder(const event_t& event)
                 plyr->message = STSTR_KFAADDED;
             }
             // 'mus' cheat for changing music
-            else if (cht_CheckCheat(&cheat_mus, event.data1))
+            else if (cht_CheckCheat(&cheat_mus, event.id.value))
             {
                 char buf[3];
                 plyr->message = STSTR_MUS;
@@ -595,8 +592,8 @@ bool ST_Responder(const event_t& event)
             }
             // Simplified, accepting both "noclip" and "idspispopd".
             // no clipping mode cheat
-            else if (cht_CheckCheat(&cheat_noclip, event.data1)
-                || cht_CheckCheat(&cheat_commercial_noclip, event.data1))
+            else if (cht_CheckCheat(&cheat_noclip, event.id.value)
+                || cht_CheckCheat(&cheat_commercial_noclip, event.id.value))
             {
                 plyr->cheats ^= CF_NOCLIP;
 
@@ -608,7 +605,7 @@ bool ST_Responder(const event_t& event)
             // 'behold?' power-up cheats
             for (int32 i = 0;i < 6;i++)
             {
-                if (cht_CheckCheat(&cheat_powerup[i], event.data1))
+                if (cht_CheckCheat(&cheat_powerup[i], event.id.value))
                 {
                     if (!plyr->powers[i])
                         P_GivePower(plyr, i);
@@ -622,19 +619,19 @@ bool ST_Responder(const event_t& event)
             }
 
             // 'behold' power-up menu
-            if (cht_CheckCheat(&cheat_powerup[6], event.data1))
+            if (cht_CheckCheat(&cheat_powerup[6], event.id.value))
             {
                 plyr->message = STSTR_BEHOLD;
             }
             // 'choppers' invulnerability & chainsaw
-            else if (cht_CheckCheat(&cheat_choppers, event.data1))
+            else if (cht_CheckCheat(&cheat_choppers, event.id.value))
             {
                 plyr->weaponowned[wp_chainsaw] = true;
                 plyr->powers[pw_invulnerability] = true;
                 plyr->message = STSTR_CHOPPERS;
             }
             // 'mypos' for player position
-            else if (cht_CheckCheat(&cheat_mypos, event.data1))
+            else if (cht_CheckCheat(&cheat_mypos, event.id.value))
             {
                 plyr->message = std::format("ang={:#06x};x,y=({:#010x},{:#010x})",
                     players[consoleplayer].mo->angle,
@@ -644,7 +641,7 @@ bool ST_Responder(const event_t& event)
         }
 
         // 'clev' change-level cheat
-        if (cht_CheckCheat(&cheat_clev, event.data1))
+        if (cht_CheckCheat(&cheat_clev, event.id.value))
         {
             char		buf[3];
             int		epsd;

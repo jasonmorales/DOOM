@@ -14,7 +14,18 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import std;
 import nstd;
+import input;
+
+using GameAction = nstd::ename<
+    "MoveForward", "MoveBack", "MoveLeft", "MoveRight", "TurnLeft", "TurnRight",
+    "Use", "Fire",
+    "Strafe", "Run",
+    "MapOpen", "MapClose", "MapToggle", "MapLeft", "MapRight", "MapUp", "MapDown", "MapZoomIn", "MapZoomOut",
+    "MapToggleFollow", "MapToggleGrid", "MapSetMark", "MapClearMark", "MapGoBig",
+    "MsgRefresh", "Talk"
+>;
 
 bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);
@@ -117,6 +128,8 @@ public:
     static const filesys::path DevDataPath;
     static const filesys::path DevMapPath;
 
+    static void Init();
+
     static void Save(const filesys::path& path = DefaultConfigFile);
     static void Load();
 
@@ -130,6 +143,14 @@ public:
     static void Register(SettingBase* setting)
     {
         Directory().insert({setting->Name(), setting});
+    }
+
+    static bool CheckBind(GameAction action, input::event_id input)
+    {
+        if (auto it = action_bindings.find(action); it != action_bindings.end())
+            return it->second.find(input) != it->second.end();
+
+        return false;
     }
 
 private:
@@ -148,6 +169,9 @@ private:
     filesys::path fileName;
 
     static DirectoryType* settings;
+
+    using bind_table = std::map<GameAction, std::set<input::event_id>>;
+    static bind_table action_bindings;
 };
 
 extern Setting<int32> screenBlocks;

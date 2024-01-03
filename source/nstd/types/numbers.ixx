@@ -47,12 +47,18 @@ using std::to_underlying;
 
 template<number T> const T zero = 0;
 
-template<typename T>
-constexpr bool is_in_type_range(number auto n)
+template<floating_point F>
+constexpr bool is_in_type_range(floating_point auto f)
+{
+    return f >= std::numeric_limits<F>::lowest() && f <= std::numeric_limits<F>::max();
+}
+
+template<integral I>
+constexpr bool is_in_type_range(integral auto n)
 {
     return
-        std::cmp_greater_equal(n, std::numeric_limits<T>::lowest()) &&
-        std::cmp_less_equal(n, std::numeric_limits<T>::max());
+        std::cmp_greater_equal(n, std::numeric_limits<I>::lowest()) &&
+        std::cmp_less_equal(n, std::numeric_limits<I>::max());
 }
 
 template<number TO, number FROM>
@@ -142,8 +148,10 @@ constexpr std::common_type<B, E> pow(B b, E e)
     return std::pow(b, e);
 }
 
-template<number T>
-constexpr T sign(T n) { return static_cast<T>(n == 0 ? 0 : (n > 0 ? 1 : -1)); }
+template<floating_point F>
+constexpr F sign(F f) { return std::copysign(1.f, f); }
+
+template<signed_int N> constexpr N sign(N n);
 
 template<number T>
 constexpr T sqr(T n) { return n * n; }
