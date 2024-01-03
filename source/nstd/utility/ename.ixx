@@ -38,6 +38,9 @@ struct ename
     static constexpr string_view name(index_type n)
     {
         assert(is_in_range(n));
+        if (n == Invalid)
+            return InvalidName;
+
         return names[n];
     }
     constexpr string_view name() const { return name(value); }
@@ -69,6 +72,7 @@ struct ename
     constexpr auto operator<=>(this_type other) const noexcept { return value <=> other.value; }
 
     static const index_type Invalid = -1;
+    static constexpr auto InvalidName = "<INVALID>";
     static constexpr index_type count = sizeof...(NAMES);
     static constexpr std::array<string_view, sizeof...(NAMES)> names = { NAMES.str... };
 

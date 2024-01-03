@@ -20,188 +20,69 @@ import platform.win64;
 
 namespace {
 
-input::event_id TranslateKey(WORD vk_code, uint32 scan_code = 0, bool is_extended = false)
-{
-    if (vk_code >= 'A' && vk_code <= 'Z')
-        return input::event_id("A") + (vk_code - 'A');
-
-    if (vk_code >= '0' && vk_code <= '9')
-        return input::event_id{"0"} + (vk_code - '0');
-
-    switch (vk_code)
-    {
-    case VK_BACK:       return {"Backspace"};
-    case VK_TAB:		return {"Tab"};
-    case VK_ESCAPE:		return {"Escape"};
-    case VK_SPACE:		return {"Space"};
-
-    case VK_PRIOR:      return {"PageUp"};
-    case VK_NEXT:       return {"PageDown"};
-    case VK_HOME:       return {"Home"};
-    case VK_END:        return {"End"};
-    case VK_INSERT:     return {"Insert"};
-    case VK_DELETE:     return {"Delete"};
-
-    case VK_UP:			return {"UpArrow"};
-    case VK_LEFT:		return {"LeftArrow"};
-    case VK_RIGHT:		return {"RightArrow"};
-    case VK_DOWN:		return {"DownArrow"};
-
-    case VK_RETURN:		return {is_extended ? "NumpadEnter" : "Enter"};
-    
-    case VK_SELECT:     return {"Select"};
-    case VK_PRINT:      return {"Print"};
-    case VK_EXECUTE:    return {"Execute"};
-    case VK_SNAPSHOT:   return {"PrintScreen"};
-    case VK_PAUSE:      return {"Pause"};
-    case VK_CANCEL:     return {"Break"};
-    case VK_HELP:       return {"Help"};
-    case VK_SLEEP:      return {"Sleep"};
-    case VK_CLEAR:      return {"Clear"};
-
-    case VK_OEM_PLUS:   return {"Plus"};
-    case VK_OEM_COMMA:	return {"Comma"};
-    case VK_OEM_MINUS:  return {"Minus"};
-    case VK_OEM_PERIOD:	return {"Period"};
-    case VK_OEM_1:		return {"Semicolon"};
-    case VK_OEM_2:		return {"Slash"};
-    case VK_OEM_3:		return {"Tilde"};
-    case VK_OEM_4:		return {"LeftBracket"};
-    case VK_OEM_5:		return {"BackSlash"};
-    case VK_OEM_6:		return {"RightBracket"};
-    case VK_OEM_7:		return {"Quote"};
-    case VK_OEM_8:		return {"OEM8"};
-
-    case VK_NUMPAD0:    return {"Numpad0"};
-    case VK_NUMPAD1:    return {"Numpad1"};
-    case VK_NUMPAD2:    return {"Numpad2"};
-    case VK_NUMPAD3:    return {"Numpad3"};
-    case VK_NUMPAD4:    return {"Numpad4"};
-    case VK_NUMPAD5:    return {"Numpad5"};
-    case VK_NUMPAD6:    return {"Numpad6"};
-    case VK_NUMPAD7:    return {"Numpad7"};
-    case VK_NUMPAD8:    return {"Numpad8"};
-    case VK_NUMPAD9:    return {"Numpad9"};
-    case VK_MULTIPLY:   return {"Multiply"};
-    case VK_ADD:        return {"Add"};
-    case VK_SEPARATOR:  return {"Separator"};
-    case VK_SUBTRACT:   return {"Subtract"};
-    case VK_DECIMAL:    return {"Decimal"};
-    case VK_DIVIDE:     return {"Divide"};
-
-    case VK_F1:			return {"F1"};
-    case VK_F2:			return {"F2"};
-    case VK_F3:			return {"F3"};
-    case VK_F4:			return {"F4"};
-    case VK_F5:			return {"F5"};
-    case VK_F6:			return {"F6"};
-    case VK_F7:			return {"F7"};
-    case VK_F8:			return {"F8"};
-    case VK_F9:			return {"F9"};
-    case VK_F10:		return {"F10"};
-    case VK_F11:		return {"F11"};
-    case VK_F12:		return {"F12"};
-    case VK_F13:		return {"F13"};
-    case VK_F14:		return {"F14"};
-    case VK_F15:		return {"F15"};
-    case VK_F16:		return {"F16"};
-    case VK_F17:		return {"F17"};
-    case VK_F18:		return {"F18"};
-    case VK_F19:		return {"F19"};
-    case VK_F20:		return {"F20"};
-    case VK_F21:		return {"F21"};
-    case VK_F22:		return {"F22"};
-    case VK_F23:		return {"F23"};
-    case VK_F24:		return {"F24"};
-
-    case VK_CAPITAL:    return {"CapsLock"};
-    case VK_NUMLOCK:    return {"NumLock"};
-    case VK_SCROLL:     return {"ScrollLock"};
-
-    case VK_SHIFT:
-        switch (MapVirtualKey(scan_code, MAPVK_VSC_TO_VK_EX))
-        {
-        case 0:         return {"Shift"};
-        case VK_LSHIFT: return {"LeftShift"};
-        case VK_RSHIFT: return {"RightShift"};
-        default:        return input::event_id::Invalid;
-        }
-    case VK_LSHIFT:		return {"LeftShift"};
-    case VK_RSHIFT:		return {"RightShift"};
-
-    case VK_CONTROL:
-        switch (MapVirtualKey(scan_code, MAPVK_VSC_TO_VK_EX))
-        {
-        case 0:             return {"Ctrl"};
-        case VK_LCONTROL:   return {"LeftCtrl"};
-        case VK_RCONTROL:   return {"RightCtrl"};
-        default:            return input::event_id::Invalid;
-        }
-    case VK_LCONTROL:   return {"LeftCtrl"};
-    case VK_RCONTROL:   return {"RightCtrl"};
-
-    case VK_MENU:
-        switch (MapVirtualKey(scan_code, MAPVK_VSC_TO_VK_EX))
-        {
-        case 0:         return {"Alt"};
-        case VK_LMENU:  return {"LeftAlt"};
-        case VK_RMENU:  return {"RightAlt"};
-        default:        return input::event_id::Invalid;
-        }
-    case VK_LMENU:      return {"LeftAlt"};
-    case VK_RMENU:      return {"RightAlt"};
-
-    case VK_LWIN:       return {"LeftWin"};
-    case VK_RWIN:       return {"RightWin"};
-
-    case VK_APPS:                   return {"Apps"};
-    case VK_LAUNCH_APP1:            return {"LaunchApp1"};
-    case VK_LAUNCH_APP2:            return {"LaunchApp2"};
-    case VK_LAUNCH_MAIL:            return {"LaunchMail"};
-    case VK_LAUNCH_MEDIA_SELECT:    return {"LaunchMedia"};
-
-    case VK_BROWSER_BACK:       return {"BrowserBack"};
-    case VK_BROWSER_FORWARD:    return {"BrowserForward"};
-    case VK_BROWSER_REFRESH:    return {"BrowserRefresh"};
-    case VK_BROWSER_STOP:       return {"BrowserStop"};
-    case VK_BROWSER_SEARCH:     return {"BrowserSearch"};
-    case VK_BROWSER_FAVORITES:  return {"BrowserFavorites"};
-    case VK_BROWSER_HOME:       return {"BrowserHome"};
-    
-    case VK_VOLUME_MUTE:        return {"VolumeMute"};
-    case VK_VOLUME_UP:          return {"VolumeUp"};
-    case VK_VOLUME_DOWN:        return {"VolumeDown"};
-
-    case VK_MEDIA_NEXT_TRACK:   return {"MediaNext"};
-    case VK_MEDIA_PREV_TRACK:   return {"MediaPrev"};
-    case VK_MEDIA_STOP:         return {"MediaStop"};
-    case VK_MEDIA_PLAY_PAUSE:   return {"MediaPlay"};
-
-    default:
-        return input::event_id::Invalid;
-    }
-}
-
 std::map<wstring, ATOM> WindowClassDefinitions;
+
+const vector<UINT> InputDownEvents = { WM_KEYDOWN, WM_SYSKEYDOWN, WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_MBUTTONDOWN, WM_XBUTTONDOWN };
+const vector<UINT> InputUpEvents = { WM_KEYUP, WM_SYSKEYUP, WM_LBUTTONUP, WM_RBUTTONUP, WM_MBUTTONUP, WM_XBUTTONUP };
+const vector<UINT> InputCharEvents = { WM_CHAR, WM_SYSCHAR, WM_DEADCHAR, WM_SYSDEADCHAR, WM_UNICHAR };
+const vector<UINT> InputDoubleClickEvents = { WM_LBUTTONDBLCLK, WM_RBUTTONDBLCLK, WM_MBUTTONDBLCLK, WM_XBUTTONDBLCLK };
+
+std::map<UINT, input::event_id> InputMouseEvents = {
+    { WM_LBUTTONDOWN, {"MouseLeft"} },
+    { WM_LBUTTONUP, {"MouseLeft"} },
+    { WM_LBUTTONDBLCLK, {"MouseLeft"} },
+    { WM_MBUTTONDOWN, {"MouseMiddle"} },
+    { WM_MBUTTONUP, {"MouseMiddle"} },
+    { WM_MBUTTONDBLCLK, {"MouseMiddle"} },
+    { WM_RBUTTONDOWN, {"MouseRight"} },
+    { WM_RBUTTONUP, {"MouseRight"} },
+    { WM_RBUTTONDBLCLK, {"MouseRight"} },
+    { WM_XBUTTONDOWN, {"MouseX"} },
+    { WM_XBUTTONUP, {"MouseX"} },
+    { WM_XBUTTONDBLCLK, {"MouseX"} },
+    { WM_MOUSEWHEEL, {"WheelVert"} },
+    { WM_MOUSEHWHEEL, {"WheelHorz"} },
+    { WM_MOUSEMOVE, {"MouseAbsolute"} },
+};
+
+std::map<UINT, input::event_id> InputKeyboardEvents = {
+    { VK_BACK, {"Backspace"} }, { VK_TAB, {"Tab"} }, { VK_ESCAPE, {"Escape"} }, { VK_SPACE, {"Space"} },
+    { VK_PRIOR, {"PageUp"} }, { VK_NEXT, {"PageDown"} }, { VK_HOME, {"Home"} }, { VK_END, {"End"} }, { VK_INSERT, {"Insert"} }, { VK_DELETE, {"Delete"} },
+    { VK_UP, {"UpArrow"} }, { VK_LEFT, {"LeftArrow"} }, { VK_RIGHT, {"RightArrow"} }, { VK_DOWN, {"DownArrow"} },
+    { VK_RETURN, {"Enter"}},
+    { VK_SELECT, {"Select"} }, { VK_PRINT, {"Print"} }, { VK_EXECUTE, {"Execute"} }, { VK_SNAPSHOT, {"PrintScreen"} },
+    { VK_PAUSE, {"Pause"} }, { VK_CANCEL, {"Break"} }, { VK_HELP, {"Help"} }, { VK_SLEEP, {"Sleep"} }, { VK_CLEAR, {"Clear"} },
+
+    { VK_OEM_PLUS, {"Plus"} }, { VK_OEM_COMMA, {"Comma"} }, { VK_OEM_MINUS, {"Minus"} }, { VK_OEM_PERIOD, {"Period"} }, { VK_OEM_1, {"Semicolon"} }, { VK_OEM_2, {"Slash"} },
+    { VK_OEM_3, {"Tilde"} }, { VK_OEM_4, {"LeftBracket"} }, { VK_OEM_5, {"BackSlash"} }, { VK_OEM_6, {"RightBracket"} }, { VK_OEM_7, {"Quote"} }, { VK_OEM_8, {"OEM8"} },
+
+    { VK_NUMPAD0, {"Numpad0"} }, { VK_NUMPAD1, {"Numpad1"} }, { VK_NUMPAD2, {"Numpad2"} }, { VK_NUMPAD3, {"Numpad3"} }, { VK_NUMPAD4, {"Numpad4"} },
+    { VK_NUMPAD5, {"Numpad5"} }, { VK_NUMPAD6, {"Numpad6"} }, { VK_NUMPAD7, {"Numpad7"} }, { VK_NUMPAD8, {"Numpad8"} }, { VK_NUMPAD9, {"Numpad9"} },
+    { VK_MULTIPLY, {"Multiply"} }, { VK_ADD, {"Add"} }, { VK_SEPARATOR, {"Separator"} }, { VK_SUBTRACT, {"Subtract"} }, { VK_DECIMAL, {"Decimal"} }, { VK_DIVIDE, {"Divide"} },
+
+    { VK_F1, {"F1"} }, { VK_F2, {"F2"} }, { VK_F3, {"F3"} }, { VK_F4, {"F4"} }, { VK_F5, {"F5"} }, { VK_F6, {"F6"} }, { VK_F7, {"F7"} }, { VK_F8, {"F8"} }, { VK_F9, {"F9"} }, { VK_F10, {"F10"} }, { VK_F11, {"F11"} }, { VK_F12, {"F12"} },
+    { VK_F13, {"F13"} }, { VK_F14, {"F14"} }, { VK_F15, {"F15"} }, { VK_F16, {"F16"} }, { VK_F17, {"F17"} }, { VK_F18, {"F18"} }, { VK_F19, {"F19"} }, { VK_F20, {"F20"} }, { VK_F21, {"F21"} }, { VK_F22, {"F22"} }, { VK_F23, {"F23"} }, { VK_F24, {"F24"} },
+
+    { VK_CAPITAL, {"CapsLock"} }, { VK_NUMLOCK, {"NumLock"} }, { VK_SCROLL, {"ScrollLock"} },
+
+    { VK_SHIFT, {"Shift"} }, { VK_LSHIFT, {"LeftShift"} }, { VK_RSHIFT, {"RightShift"} },
+    { VK_CONTROL, {"Ctrl"} }, { VK_LCONTROL, {"LeftCtrl"} }, { VK_RCONTROL, {"RightCtrl"} },
+    { VK_MENU, {"Alt"} }, { VK_LMENU, {"LeftAlt"} }, { VK_RMENU, {"RightAlt"} },
+    { VK_LWIN, {"LeftWin"} }, { VK_RWIN, {"RightWin"} },
+
+    { VK_APPS, {"Apps"} }, { VK_LAUNCH_APP1, {"LaunchApp1"} }, { VK_LAUNCH_APP2, {"LaunchApp2"} }, { VK_LAUNCH_MAIL, {"LaunchMail"} }, { VK_LAUNCH_MEDIA_SELECT, {"LaunchMedia"} },
+    { VK_BROWSER_BACK, {"BrowserBack"} }, { VK_BROWSER_FORWARD, {"BrowserForward"} }, { VK_BROWSER_REFRESH, {"BrowserRefresh"} }, { VK_BROWSER_STOP, {"BrowserStop"} },
+    { VK_BROWSER_SEARCH, {"BrowserSearch"} }, { VK_BROWSER_FAVORITES, {"BrowserFavorites"} }, { VK_BROWSER_HOME, {"BrowserHome"} },
+
+    { VK_VOLUME_MUTE, {"VolumeMute"} }, { VK_VOLUME_UP, {"VolumeUp"} }, { VK_VOLUME_DOWN, {"VolumeDown"} },
+    { VK_MEDIA_NEXT_TRACK, {"MediaNext"} }, { VK_MEDIA_PREV_TRACK, {"MediaPrev"} }, { VK_MEDIA_STOP, {"MediaStop"} }, { VK_MEDIA_PLAY_PAUSE, {"MediaPlay"} },
+};
 
 } // namespace
 
 namespace platform {
 
-export struct SystemEvent
-{
-    HWND handle = nullptr;
-    UINT message = 0;
-    WPARAM wParam = 0;
-    LPARAM lParam = 0;
-
-    SystemEvent(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
-        : handle{handle}
-        , message{message}
-        , wParam{wParam}
-        , lParam{lParam}
-    {}
-};
+export struct SystemEvent;
 
 export class Window
 {
@@ -217,25 +98,168 @@ public:
 
     void Show() { ShowWindow(handle, SW_SHOWNORMAL); }
     void SwapBuffers() { ::SwapBuffers(device_context); }
+    RECT GetClientArea() const;
+    POINT GetCursorPos() const;
 
 private:
     bool is_valid = false;
     bool hasFocus = true;
     WindowDefinition definition;
+    BOOL has_menu = FALSE;
+    DWORD style = 0;
+    DWORD style_ex = 0;
     HWND handle = NULL;
     HDC device_context = NULL;
     HGLRC render_context = NULL;
 
-    LRESULT HandleSystemEvent(const SystemEvent& event);
+    LRESULT HandleSystemEvent(SystemEvent event);
+    void CreateInputEvent(const SystemEvent& event);
 
-    static LRESULT CALLBACK Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
-    {
-        auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(handle, GWLP_USERDATA));
-        return window->HandleSystemEvent({handle, msg, wParam, lParam});
-    }
+    static LRESULT CALLBACK Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam);
     static LRESULT CALLBACK InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam);
 
     friend Window* CreateWindow(const WindowDefinition& definition);
+};
+
+export struct SystemEvent
+{
+    HWND handle = nullptr;
+    UINT message = 0;
+    WPARAM wParam = 0;
+    LPARAM lParam = 0;
+
+    bool is_keyboard_event() const noexcept { return message >= WM_KEYFIRST && message <= WM_KEYLAST; }
+    bool is_char_event() const noexcept { return InputCharEvents.find(message) != InputCharEvents.end(); }
+    bool is_mouse_event() const noexcept { return message >= WM_MOUSEFIRST && message <= WM_MOUSELAST; }
+    bool is_down_event() const noexcept { return InputDownEvents.find(message) != InputDownEvents.end(); }
+    bool is_up_event() const noexcept { return InputUpEvents.find(message) != InputUpEvents.end(); }
+    bool is_double_click_event() const noexcept { return InputDoubleClickEvents.find(message) != InputDoubleClickEvents.end(); }
+    bool is_wheel_event() const noexcept { return message == WM_MOUSEWHEEL || message == WM_MOUSEHWHEEL; }
+
+    input::event_flags get_input_flags() const noexcept
+    {
+        input::event_flags flags;
+        flags.set<"down">(is_down_event());
+        flags.set<"up">(is_up_event());
+        flags.set<"caps_lock">(nstd::is_bit_set<0>(GetKeyState(VK_CAPITAL)));
+        flags.set<"scroll_lock">(nstd::is_bit_set<0>(GetKeyState(VK_SCROLL)));
+        flags.set<"num_lock">(nstd::is_bit_set<0>(GetKeyState(VK_NUMLOCK)));
+
+        if (is_keyboard_event())
+        {
+            auto key_flags = HIWORD(lParam);
+            auto is_repeat = nstd::bit_test_all(key_flags, KF_REPEAT);
+            auto is_up = nstd::bit_test_all(key_flags, KF_UP);
+
+            flags.set<"ctrl">(nstd::is_bit_set<7>(GetKeyState(VK_CONTROL)));
+            flags.set<"shift">(nstd::is_bit_set<7>(GetKeyState(VK_SHIFT)));
+            flags.set<"alt">(nstd::bit_test_all(key_flags, KF_ALTDOWN));
+            flags.set<"repeated">(!is_up && is_repeat);
+            flags.set<"changed">(is_up || !is_repeat);
+        }
+        else if (is_mouse_event())
+        {
+            flags.set<"ctrl">(nstd::bit_test_all(wParam, MK_CONTROL));
+            flags.set<"shift">(nstd::bit_test_all(wParam, MK_SHIFT));
+            flags.set<"alt">(nstd::is_bit_set<7>(GetKeyState(VK_MENU)));
+            flags.set<"changed">();
+            flags.set<"mouse_left">(nstd::bit_test_all(wParam, MK_LBUTTON));
+            flags.set<"mouse_middle">(nstd::bit_test_all(wParam, MK_MBUTTON));
+            flags.set<"mouse_right">(nstd::bit_test_all(wParam, MK_RBUTTON));
+            flags.set<"mouse_x1">(nstd::bit_test_all(wParam, MK_XBUTTON1));
+            flags.set<"mouse_x2">(nstd::bit_test_all(wParam, MK_XBUTTON2));
+            flags.set<"double_click">(is_double_click_event());
+        }
+
+        return flags;
+    }
+
+    input::event_id get_keyboard_event_id() const noexcept
+    {
+        auto vk_code = LOWORD(wParam);
+
+        auto key_flags = HIWORD(lParam);
+        auto scan_code = LOBYTE(key_flags);
+        auto is_extended = (key_flags & KF_EXTENDED) == KF_EXTENDED;
+
+        if (vk_code >= 'A' && vk_code <= 'Z')
+            return input::event_id("A") + (vk_code - 'A');
+
+        if (vk_code >= '0' && vk_code <= '9')
+            return input::event_id{"0"} + (vk_code - '0');
+
+        if (vk_code == VK_RETURN && is_extended)
+            return "NumpadEnter";
+
+        if (vk_code == VK_CONTROL)
+            return {is_extended ? "RightCtrl" : "LeftCtrl"};
+
+        if (vk_code == VK_MENU)
+            return {is_extended ? "RightAlt" : "LeftAlt"};
+
+        if (vk_code == VK_SHIFT)
+        {
+            auto mapped_key = nstd::size_cast<WORD>(MapVirtualKey(scan_code, MAPVK_VSC_TO_VK_EX));
+            if (mapped_key != 0)
+                vk_code = mapped_key;
+        }
+
+        auto it = InputKeyboardEvents.find(vk_code);
+        if (it == InputKeyboardEvents.end())
+            return input::event_id::Invalid;
+
+        return it->second;
+    }
+
+    input::event_id get_mouse_event_id() const noexcept
+    {
+        auto it = InputMouseEvents.find(message);
+        if (it == InputMouseEvents.end())
+            return input::event_id::Invalid;
+
+        if (it->second == "MouseX")
+        {
+            if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1) return "MouseX1";
+            if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2) return "MouseX2";
+        }
+
+        if (it->second == "WheelVert")
+            return {GET_WHEEL_DELTA_WPARAM(wParam) < 0 ? "WheelDown" : "WheelUp"};
+        if (it->second == "WheelHorz")
+            return {GET_WHEEL_DELTA_WPARAM(wParam) < 0 ? "WheelLeft" : "WheelRight"};
+
+        return it->second;
+    }
+
+    nstd::v2i get_cursor_pos(Window* window) const noexcept
+    {
+        if (is_wheel_event()) return { GET_X_LPARAM(lParam) - window->GetClientArea().left, GET_Y_LPARAM(lParam) - window->GetClientArea().top };
+        if (is_mouse_event()) return { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+        
+        auto pos = window->GetCursorPos();
+        return { pos.x, pos.y };
+    }
+
+    input::event_id get_event_id() const noexcept
+    {
+        if (is_keyboard_event()) return get_keyboard_event_id();
+        if (is_mouse_event()) return get_mouse_event_id();
+        return input::event_id::Invalid;
+    }
+
+    input::device_id get_source_device() const noexcept
+    {
+        if (is_keyboard_event()) return "Keyboard";
+        if (is_mouse_event()) return "Mouse";
+        return input::device_id::Invalid;
+    }
+
+    WORD get_count() const noexcept
+    {
+        if (is_keyboard_event()) return LOWORD(lParam);
+        if (is_wheel_event()) return nstd::size_cast<WORD>(std::abs(GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA));
+        return 1;
+    }
 };
 
 LRESULT CALLBACK Window::InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -266,46 +290,8 @@ LRESULT CALLBACK Window::InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM l
     return DefWindowProc(handle, msg, wParam, lParam);
 }
 
-LRESULT Window::HandleSystemEvent(const SystemEvent& event)
+LRESULT Window::HandleSystemEvent(SystemEvent event)
 {
-#if 0
-    using Input::Button;
-
-    auto get_modifier_key_flags = [w_param = event.wParam]() -> Input::Event::Flag
-        {
-            Input::Event::Flag out;
-            if ((w_param & MK_CONTROL) != 0) out.set(Input::Event::Flag::Ctrl);
-            if ((w_param & MK_SHIFT) != 0) out.set(Input::Event::Flag::Shift);
-            if ((GetKeyState(VK_MENU) & 0x8000) != 0) out.set(Input::Event::Flag::Alt);
-            if ((w_param & MK_LBUTTON) != 0) out.set(Input::Event::Flag::MouseLeft);
-            if ((w_param & MK_MBUTTON) != 0) out.set(Input::Event::Flag::MouseMiddle);
-            if ((w_param & MK_RBUTTON) != 0) out.set(Input::Event::Flag::MouseRight);
-            if ((w_param & MK_XBUTTON1) != 0) out.set(Input::Event::Flag::MouseX1);
-            if ((w_param & MK_XBUTTON2) != 0) out.set(Input::Event::Flag::MouseX2);
-            return out;
-        };
-
-    auto cursor_pos = [this, l_param = event.lParam](bool absolute = false) -> v2i
-        {
-            if (!absolute)
-                return {GET_X_LPARAM(l_param), GET_Y_LPARAM(l_param)};
-
-            auto client = GetClientArea();
-            return {GET_X_LPARAM(l_param) - client.left(), GET_Y_LPARAM(l_param) - client.top()};
-        };
-
-    auto handle_mouse_wheel = [&, w_param = event.wParam](Input::Button key)
-        {
-            auto count = GET_WHEEL_DELTA_WPARAM(w_param) / WHEEL_DELTA;
-            key = enum_offset(key, sign(count));
-            count = std::abs(count);
-
-            for (int i(0); i < count; ++i)
-            {
-                input->AddEvent(Input::Device::Mouse, key, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos(true));
-            }
-        };
-#endif
     switch (event.message)
     {
     case WM_ACTIVATE:
@@ -383,99 +369,36 @@ LRESULT Window::HandleSystemEvent(const SystemEvent& event)
     case WM_MOUSEHWHEEL:
         handle_mouse_wheel(Button::MouseWheel_H);
         return 0;
-
-    case WM_LBUTTONDOWN:
-        input->AddEvent(Input::Device::Mouse, Button::MouseLeft, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_LBUTTONUP:
-        input->AddEvent(Input::Device::Mouse, Button::MouseLeft, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_RBUTTONDOWN:
-        input->AddEvent(Input::Device::Mouse, Button::MouseRight, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_RBUTTONUP:
-        input->AddEvent(Input::Device::Mouse, Button::MouseRight, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_MBUTTONDOWN:
-        input->AddEvent(Input::Device::Mouse, Button::MouseMiddle, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_MBUTTONUP:
-        input->AddEvent(Input::Device::Mouse, Button::MouseMiddle, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_XBUTTONDOWN:
-        if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON1)
-            input->AddEvent(Input::Device::Mouse, Button::MouseX1, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        else if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON2)
-            input->AddEvent(Input::Device::Mouse, Button::MouseX2, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return TRUE;
-    case WM_XBUTTONUP:
-        if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON1)
-            input->AddEvent(Input::Device::Mouse, Button::MouseX1, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
-        else if (GET_XBUTTON_WPARAM(event.wParam) == XBUTTON2)
-            input->AddEvent(Input::Device::Mouse, Button::MouseX2, Input::Event::Flag::Up | get_modifier_key_flags(), cursor_pos());
-        return TRUE;
-
-    case WM_LBUTTONDBLCLK:
-        input->AddEvent(Input::Device::Mouse, Button::MouseLeftDbl, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        input->AddEvent(Input::Device::Mouse, Button::MouseLeft, Input::Event::Flag::DoubleClick | Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_RBUTTONDBLCLK:
-        input->AddEvent(Input::Device::Mouse, Button::MouseRightDbl, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        input->AddEvent(Input::Device::Mouse, Button::MouseRight, Input::Event::Flag::DoubleClick | Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return 0;
-    case WM_MBUTTONDBLCLK:
-        input->AddEvent(Input::Device::Mouse, Button::MouseMiddleDbl, Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        input->AddEvent(Input::Device::Mouse, Button::MouseMiddle, Input::Event::Flag::DoubleClick | Input::Event::Flag::Down | get_modifier_key_flags(), cursor_pos());
-        return 0;
 #endif
+
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
     case WM_SYSKEYUP:
-    {
-        auto vk_code = LOWORD(event.wParam);
-        if (vk_code == VK_SHIFT)
-            return 0;
+    case WM_UNICHAR:
+    case WM_CHAR:
+    case WM_SYSCHAR:
 
-        auto key_flags = HIWORD(event.lParam);
-        auto count = LOWORD(event.lParam);
-        
-        auto scan_code = LOBYTE(key_flags);
-        auto is_extended = (key_flags & KF_EXTENDED) == KF_EXTENDED;
-        auto alt_down = (key_flags & KF_ALTDOWN) == KF_ALTDOWN;
-        auto is_repeat = (key_flags & KF_REPEAT) == KF_REPEAT;
-        auto is_up = (key_flags & KF_UP) == KF_UP;
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+    case WM_LBUTTONDBLCLK:
+    case WM_RBUTTONDBLCLK:
+    case WM_MBUTTONDBLCLK:
+    case WM_MOUSEWHEEL:
+    case WM_MOUSEHWHEEL:
+    case WM_MOUSEMOVE:
+        CreateInputEvent(event);
+        return 0;
 
-        auto key = TranslateKey(vk_code, scan_code, is_extended);
-
-        input::event_flags flags{is_up ? "up" : "down"};
-        flags.set<"alt">(alt_down);
-        flags.set<"repeated">(!is_up && is_repeat);
-        flags.set<"changed">(is_up || !is_repeat);
-
-        /*
-        auto nstd_flag_names = flags.names();
-        std::vector<string> flag_names(nstd_flag_names.begin(), nstd_flag_names.end());
-        std::cout << std::format("vk: {} scan code: {} count: {} extended: {} alt: {} repeat: {} down: {} name: {} [{}]\n",
-            vk_code, scan_code, count, is_extended, alt_down, is_repeat, !is_up, key.name(),
-            std::ranges::fold_left(flag_names | std::ranges::views::filter([](string& s){ return !s.empty(); }) | std::ranges::views::join_with(string{"|"}), string(), std::plus())
-            );
-        /**/
-
-        static const auto Keyboard = input::device_id{"Keyboard"};
-        for (int32 i = 0; i < count; ++i)
-        {
-            input::event input_event = {
-                .device = Keyboard,
-                .id = key,
-                .flags = flags,
-                .value = 1
-            };
-
-            //doom->PostEvent({ev_keydown, key});
-        }
-    }
-    return 0;
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
+    case WM_XBUTTONDBLCLK:
+        CreateInputEvent(event);
+        return TRUE;
 
 #if 0
     event_t event;
@@ -534,41 +457,54 @@ LRESULT Window::HandleSystemEvent(const SystemEvent& event)
             }
         }
         break;
-
-    case WM_UNICHAR:
-    case WM_CHAR:
-    case WM_SYSCHAR:
-    {
-        int count(event.lParam & 0xffff);
-        for (int i(0); i < count; ++i)
-        {
-            input->AddCharacterToStream(Input::Device::Keyboard, wchar_t(event.wParam));
-        }
-    }
-    return 0;
 #endif
     }
 
     return DefWindowProc(event.handle, event.message, event.wParam, event.lParam);
 }
 
+void Window::CreateInputEvent(const SystemEvent& event)
+{
+    if (event.is_char_event())
+    {
+        input::character_stream += wstring(event.get_count(), static_cast<wchar_t>(event.wParam));
+        return;
+    }
+
+    input::event_queue.push_front({
+        .device = event.get_source_device(),
+        .id = event.get_event_id(),
+        .count = event.get_count(),
+        .flags = event.get_input_flags(),
+        .cursor_pos = event.get_cursor_pos(this),
+    });
+    
+    //std::cout << std::format("{}\n", input_event.str());
+}
+
+LRESULT CALLBACK Window::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	auto* window = reinterpret_cast<Window*>(GetWindowLongPtr(handle, GWLP_USERDATA));
+	return window->HandleSystemEvent({ handle, msg, wParam, lParam });
+}
+
 export Window* CreateWindow(const WindowDefinition& definition)
 {
     auto* window = new Window{definition};
 
-    DWORD windowStyleEx = 0;
-    DWORD windowStyle = 0;
+    window->style = 0;
+    window->style_ex = 0;
 
-    windowStyle |= definition.withBorder ? WS_OVERLAPPEDWINDOW : WS_POPUP;
-    windowStyle |= WS_CAPTION;
+    window->style |= definition.withBorder ? WS_OVERLAPPEDWINDOW : WS_POPUP;
+    window->style |= WS_CAPTION;
 
     if (definition.isFullScreen)
-        windowStyle |= WS_MAXIMIZE;
+        window->style |= WS_MAXIMIZE;
 
     if (definition.isResizeable)
-        windowStyle |= WS_THICKFRAME;
+        window->style |= WS_THICKFRAME;
     else
-        windowStyle &= ~WS_THICKFRAME;
+        window->style &= ~WS_THICKFRAME;
 
     auto dpi = GetDpiForSystem();
     auto screenWidth = GetSystemMetricsForDpi(SM_CXSCREEN, dpi);
@@ -580,7 +516,7 @@ export Window* CreateWindow(const WindowDefinition& definition)
     if (definition.isFullScreen)
     {
         RECT rec_non_client = {};
-        AdjustWindowRectExForDpi(&rec_non_client, windowStyle, FALSE, 0, dpi);
+        AdjustWindowRectExForDpi(&rec_non_client, window->style, FALSE, 0, dpi);
         windowWidth = screenWidth - (rec_non_client.right - rec_non_client.left);
         windowHeight = screenHeight - (rec_non_client.bottom - rec_non_client.top);
     }
@@ -591,14 +527,14 @@ export Window* CreateWindow(const WindowDefinition& definition)
         .right = windowWidth,
         .bottom = windowHeight,
     };
-    AdjustWindowRectExForDpi(&rec, windowStyle, FALSE, 0, dpi);
+    AdjustWindowRectExForDpi(&rec, window->style, FALSE, 0, dpi);
 
     // Create the window
     window->handle = CreateWindowExW(
-        windowStyleEx,
+        window->style_ex,
         MAKEINTATOM(definition.class_id),
         definition.title.c_str(),
-        windowStyle,
+        window->style,
         definition.isFullScreen ? 0 : CW_USEDEFAULT,
         definition.isFullScreen ? 0 : CW_USEDEFAULT,
         rec.right - rec.left,
@@ -716,6 +652,36 @@ bool Window::RegisterClass(WindowClassDefinition& definition)
     WindowClassDefinitions.insert({signature, result});
 
     return true;
+}
+
+RECT Window::GetClientArea() const
+{
+    RECT client_area;
+    GetClientRect(handle, &client_area);
+    auto client_width = client_area.right;
+    auto client_height = client_area.bottom;
+    AdjustWindowRectEx(&client_area, style, has_menu, style_ex);
+
+    RECT window_area;
+    GetWindowRect(handle, &window_area);
+
+    return {
+        .left =  window_area.left - client_area.left,
+        .top = window_area.top - client_area.top,
+        .right = client_width,
+        .bottom = client_height,
+    };
+}
+
+POINT Window::GetCursorPos() const
+{
+    RECT client_area = GetClientArea();
+    POINT point;
+    ::GetCursorPos(&point);
+    return {
+        .x = point.x - client_area.left,
+        .y = point.y - client_area.top
+    };
 }
 
 } // namespace platform

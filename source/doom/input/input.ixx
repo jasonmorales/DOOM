@@ -3,6 +3,9 @@ export module input;
 import std;
 import nstd;
 
+namespace {
+}
+
 export namespace input {
 
 using device_id = nstd::ename<
@@ -40,8 +43,7 @@ using event_id = nstd::ename<
 	"VolumeMute", "VolumeUp", "VolumeDown",
 	"MediaNext", "MediaPrev", "MediaStop", "MediaPlay",
 
-	"MouseLeft", "MouseRight", "MouseCenter", "MouseX1", "MouseX2",
-	"MouseLeftDbl", "MouseRightDbl", "MouseCenterDbl",
+	"MouseLeft", "MouseRight", "MouseMiddle", "MouseX", "MouseX1", "MouseX2",
 	"WheelDown", "WheelUp", "WheelVert", "WheelLeft", "WheelRight", "WheelHorz",
 
 	"MouseAbsolute", "MouseDeltaX", "MouseDeltaY", "MouseDeltaXY",
@@ -76,6 +78,7 @@ using event_flags = nstd::flags<
 	"changed", "increased", "decreased",
 	"repeated", "held",
 	"shift", "alt", "ctrl",
+	"caps_lock", "scroll_lock", "num_lock",
 	"mouse_left", "mouse_right", "mouse_middle",
 	"mouse_x1", "mouse_x2",
 	"double_click",
@@ -85,14 +88,11 @@ using event_flags = nstd::flags<
 struct event
 {
 	device_id device;
-	int32 cursor_x = 0;
-	int32 cursor_y = 0;
 	event_id id;
+	int32 count = 0;
 	event_flags flags;
-	wchar_t chr = 0;
+	nstd::v2i cursor_pos;
 	float value = 0;
-
-	//constexpr event() noexcept = default;
 
 	constexpr bool is(event_id test_id) const { return id == Any || id == test_id; }
 	constexpr bool down(event_id test_id = Any) const { return flags.all<"down">() && is(test_id); }
@@ -111,7 +111,20 @@ struct event
 	constexpr bool is_keyboard() const { return device.is<"Keyboard">(); }
 	constexpr bool is_mouse() const { return device.is<"Mouse">(); }
 
+	constexpr string str() const noexcept
+	{
+		return std::format("{{{}|{}: {}x ({}, {}) [{}] {}}}",
+			device.name(), id.name(), count, cursor_pos.x, cursor_pos.y, flags.str(), value);
+	}
+
 	static constexpr auto Any = event_id{"Any"};
 };
+
+nstd::v2i cursor_pos;
+::wstring character_stream;
+std::deque<event> event_queue(64);
+
+void flush_character_stream() { character_stream.clear(); }
+void flush_event_queue() { event_queue.clear(); }
 
 } // export namespace input

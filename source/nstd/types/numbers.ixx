@@ -47,37 +47,71 @@ using std::to_underlying;
 
 template<number T> const T zero = 0;
 
-template<typename TO, typename FROM>
+template<typename T>
+constexpr bool is_in_type_range(number auto n)
+{
+    return
+        std::cmp_greater_equal(n, std::numeric_limits<T>::lowest()) &&
+        std::cmp_less_equal(n, std::numeric_limits<T>::max());
+}
+
+template<number TO, number FROM>
 constexpr TO saturate_cast(FROM in) noexcept
 {
     if constexpr (is_same<FROM, TO>)
         return in;
-
-    if constexpr (
-        std::cmp_less_equal(std::numeric_limits<TO>::min(), std::numeric_limits<FROM>::min()) &&
-        std::cmp_greater_equal(std::numeric_limits<TO>::max(), std::numeric_limits<FROM>::max()))
+    else if constexpr (
+        std::cmp_greater_equal(std::numeric_limits<TO>::max(), std::numeric_limits<FROM>::max()) &&
+        std::cmp_less_equal(std::numeric_limits<TO>::lowest(), std::numeric_limits<FROM>::lowest()))
         return static_cast<TO>(in);
-
-    if (std::cmp_greater(in, std::numeric_limits<TO>::max()))
+    else if (std::cmp_greater(in, std::numeric_limits<TO>::max()))
         return std::numeric_limits<TO>::max();
-
-    if (std::cmp_less(in, std::numeric_limits<TO>::min()))
-        return std::numeric_limits<TO>::min();
-
-    return static_cast<TO>(in);
+    else if (std::cmp_less(in, std::numeric_limits<TO>::lowest()))
+        return std::numeric_limits<TO>::lowest();
+    else
+        return static_cast<TO>(in);
 }
 
 template<integral TO, integral FROM>
 constexpr TO size_cast(FROM value) noexcept
 {
     if constexpr (is_same<FROM, TO>)
+    {
         return value;
+    }
+    else
+    {
+        assert(is_in_type_range<TO>(value));
+        return static_cast<TO>(value);
+    }
+}
 
-    assert(
-        std::cmp_greater_equal(value, std::numeric_limits<TO>::min()) &&
-        std::cmp_less_equal(value, std::numeric_limits<TO>::max()));
+template<floating_point TO>
+constexpr TO size_cast(floating_point auto value) noexcept
+{
+    if constexpr (is_same<decltype(value), TO>)
+    {
+        return value;
+    }
+    else
+    {
+        assert(is_in_type_range<TO>(value));
+        return static_cast<TO>(value);
+    }
+}
 
-    return static_cast<TO>(value);
+template<floating_point TO>
+constexpr inline TO round_to(number auto n) { return size_cast<TO>(std::round(n)); }
+
+template<integral TO>
+constexpr inline TO round_to(number auto n)
+{
+    if constexpr (
+        std::cmp_less_equal(std::numeric_limits<TO>::min(), std::numeric_limits<long>::min()) &&
+        std::cmp_greater_equal(std::numeric_limits<TO>::lowest(), std::numeric_limits<long>::lowest()))
+        return size_cast<TO>(std::lround(n));
+    else 
+        return size_cast<TO>(std::llround(n));
 }
 
 template<integral B, integral E>

@@ -7,5 +7,6 @@
 #define NOMINMAX
 #define NOMENUS
 #include <Windows.h>
+#include <windowsx.h>
 #undef CreateWindow
 #undef RegisterClass

@@ -11,6 +11,10 @@ import nstd.numbers;
 
 export namespace nstd {
 
+constexpr bool bit_test_all(integral auto bits, integral auto mask) { return (bits & mask) == mask; }
+constexpr bool bit_test_any(integral auto bits, integral auto mask) { return (bits & mask) != 0; }
+constexpr bool bit_test_none(integral auto bits, integral auto mask) { return (bits & mask) == 0; }
+
 template<typename T>
 constexpr size_t bit_size = sizeof(T) * CHAR_BIT;
 

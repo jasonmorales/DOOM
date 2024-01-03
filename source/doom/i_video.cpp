@@ -367,10 +367,10 @@ void Video::DeliverSystemMessages()
 {
     // TODO: This could be in a thread
     MSG msg;
-    while (PeekMessage(&msg, nullptr, 0, 0, PM_NOREMOVE))
+    while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
     {
         // Check for a WM_QUIT message
-        auto result(GetMessage(&msg, nullptr, 0, 0));
+        auto result = GetMessage(&msg, NULL, 0, 0);
         if (result == -1)
             continue;
 

@@ -51,6 +51,20 @@ struct flags
         return out;
     }
 
+    constexpr string str() const { return str(bits); }
+    static constexpr string str(bits_type n)
+    {
+        auto name_vec = names(n);
+        std::vector<string> std_name_vec{name_vec.begin(), name_vec.end()};
+
+        return std::ranges::fold_left(
+            std_name_vec |
+            std::ranges::views::filter([](const string& s){ return !s.empty(); }) |
+            std::ranges::views::join_with(string{" | "}),
+            string(),
+            std::plus());
+    }
+
     template<uint32 N, typename R = std::array<string_view, std::popcount(N)>>
     static consteval R names()
     {

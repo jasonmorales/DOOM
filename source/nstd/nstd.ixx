@@ -8,6 +8,7 @@ export import nstd.vector;
 export import nstd.numbers;
 export import nstd.strings;
 export import nstd.traits;
+export import nstd.vecs;
 
 // Utility
 export import nstd.memory;
