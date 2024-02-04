@@ -14,9 +14,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import nstd;
+import <cassert>;
 
-#include <cassert>
+import nstd;
 
 class bbox
 {

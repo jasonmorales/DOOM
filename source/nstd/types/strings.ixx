@@ -1,18 +1,16 @@
-module;
-
-#include <cassert>
-
 export module nstd.strings;
 
-import std;
+import <cassert>;
 
+import std;
 import nstd.traits;
 import nstd.numbers;
+
 
 export namespace nstd {
 
 template<typename CHAR> class string_t;
-template<typename CHAR> class string_view;
+template<typename CHAR> class string_view_t;
 
 template<typename T>
 concept has_value_type = requires { typename T::value_type; };
@@ -26,7 +24,7 @@ concept xstd_string = has_value_type<S> && is_xstd_string<S>;
 template<typename T>
 concept string_view_like =
     has_value_type<naked_type<T>> &&
-    (converts_to<const T&, string_view<typename naked_type<T>::value_type>> || converts_to<const T&, std::basic_string_view<typename naked_type<T>::value_type>>) &&
+    (converts_to<const T&, string_view_t<typename naked_type<T>::value_type>> || converts_to<const T&, std::basic_string_view<typename naked_type<T>::value_type>>) &&
     !converts_to<const T&, const typename naked_type<T>::value_type*>;
 
 template<typename CH>
@@ -89,19 +87,19 @@ public:
 };
 
 template<typename T>
-class string_view : public std::basic_string_view<T>
+class string_view_t : public std::basic_string_view<T>
 {
 public:
     using base = std::basic_string_view<T>;
-    using size_type = int32;
-    static constexpr size_type npos = -1;
+    using size_type = std::ptrdiff_t;
+    static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
     using base::base;
 
-    constexpr string_view() : base() {}
-    constexpr string_view(const xstd_string auto& in) : base(in.data(), in.size()) {}
-    constexpr string_view(const std::basic_string<T>& in) : base(in.data(), in.size()) {}
-    constexpr string_view(std::string_view in) : base(in.data(), in.size()) {}
+    constexpr string_view_t() : base() {}
+    constexpr string_view_t(const xstd_string auto& in) : base(in.data(), in.size()) {}
+    constexpr string_view_t(const std::basic_string<T>& in) : base(in.data(), in.size()) {}
+    constexpr string_view_t(std::string_view in) : base(in.data(), in.size()) {}
 
     constexpr size_type find(base::value_type ch, size_type pos = 0) const noexcept
     {
@@ -118,11 +116,16 @@ public:
         return saturate_cast<size_type>(out);
     }
 
-    [[nodiscard]] constexpr string_view trim() const
+    [[nodiscard]] constexpr string_view_t trim() const
     {
         auto start = base::find_first_not_of("\0 \t\n\r", 0, 5);
         return base::substr(start, base::find_last_not_of("\0 \t\n\r", base::npos, 5) - start + 1);
     };
+
+    constexpr size_type count(base::value_type ch) const
+    {
+        return static_cast<size_type>(std::count(base::begin(), base::end(), ch));
+    }
 
     string_t<T> to_lower()
     {
@@ -147,6 +150,7 @@ struct StringLiteralTemplate
     consteval StringLiteralTemplate(const char (&in)[N]) { std::copy_n(in, N, str); }
 
     char str[N];
+    constexpr size_t size() const noexcept { return N; }
 };
 
 namespace filesystem
@@ -200,7 +204,7 @@ template<typename T>
 concept string_type =
     has_value_type<naked_type<T>> &&
     (same_as<naked_type<T>, string_t<typename naked_type<T>::value_type>> ||
-    same_as<naked_type<T>, string_view<typename naked_type<T>::value_type>>);
+    same_as<naked_type<T>, string_view_t<typename naked_type<T>::value_type>>);
 
 template<typename T>
 concept path_like = is_same<naked_type<T>, filesystem::path> || converts_to<T, filesystem::path>;
@@ -208,9 +212,9 @@ concept path_like = is_same<naked_type<T>, filesystem::path> || converts_to<T, f
 } // export namespace nstd
 
 export using string = nstd::string_t<char>;
-export using string_view = nstd::string_view<char>;
+export using string_view = nstd::string_view_t<char>;
 export using wstring = nstd::string_t<wchar_t>;
-export using wstring_view = nstd::string_view<wchar_t>;
+export using wstring_view = nstd::string_view_t<wchar_t>;
 
 //using path = nstd::filesystem::path;
 export namespace filesys = nstd::filesystem;
@@ -225,9 +229,9 @@ struct std::formatter<string> : std::formatter<std::string>
 };
 
 template<>
-struct std::formatter<nstd::string_view<char>> : std::formatter<std::basic_string_view<char>>
+struct std::formatter<nstd::string_view_t<char>> : std::formatter<std::basic_string_view<char>>
 {
-    auto format(const nstd::string_view<char>& sv, std::format_context& ctx) const
+    auto format(const nstd::string_view_t<char>& sv, std::format_context& ctx) const
     {
         return std::formatter<std::basic_string_view<char>>::format(sv, ctx);
     }

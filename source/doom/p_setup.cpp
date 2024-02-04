@@ -16,25 +16,20 @@
 //	set up initial state and misc. LUTs.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "d_main.h"
 #include "z_zone.h"
-
 #include "m_swap.h"
 #include "m_bbox.h"
-
 #include "g_game.h"
-
 #include "i_system.h"
 #include "w_wad.h"
-
 #include "doomdef.h"
 #include "p_local.h"
-
 #include "s_sound.h"
-
 #include "doomstat.h"
+#include "r_things.h"
+
+import std;
 
 
 extern Doom* g_doom;
@@ -158,7 +153,7 @@ void P_LoadSegs(int32 lump)
 
     numsegs = WadManager::GetLump(lump).size / sizeof(mapseg_t);
     segs = Z_Malloc<seg_t>(numsegs * sizeof(seg_t), PU_LEVEL, 0);
-    memset(segs, 0, numsegs * sizeof(seg_t));
+    std::memset(segs, 0, numsegs * sizeof(seg_t));
     auto* data = WadManager::GetLumpData<mapseg_t>(lump);
 
     auto* ml = data;
@@ -194,7 +189,7 @@ void P_LoadSubsectors(int lump)
     auto* data = WadManager::GetLumpData<byte>(lump);
 
     ms = (mapsubsector_t*)data;
-    memset(subsectors, 0, numsubsectors * sizeof(subsector_t));
+    std::memset(subsectors, 0, numsubsectors * sizeof(subsector_t));
     ss = subsectors;
 
     for (i = 0; i < numsubsectors; i++, ss++, ms++)
@@ -212,7 +207,7 @@ void P_LoadSectors(int32 lumpId)
 
     numsectors = lump->size / sizeof(mapsector_t);
     sectors = Z_Malloc<sector_t>(numsectors * sizeof(sector_t), PU_LEVEL, 0);
-    memset(sectors, 0, numsectors * sizeof(sector_t));
+    std::memset(sectors, 0, numsectors * sizeof(sector_t));
 
     auto* ms = lump->as<mapsector_t>();
     auto* ss = sectors;
@@ -311,7 +306,7 @@ void P_LoadLineDefs(intptr_t lump)
 
     numlines = WadManager::GetLump(lump).size / sizeof(maplinedef_t);
     lines = Z_Malloc<line_t>(numlines * sizeof(line_t), PU_LEVEL, 0);
-    memset(lines, 0, numlines * sizeof(line_t));
+    std::memset(lines, 0, numlines * sizeof(line_t));
     auto* data = WadManager::GetLumpData<byte>(lump);
 
     mld = (maplinedef_t*)data;
@@ -383,7 +378,7 @@ void P_LoadSideDefs(intptr_t lump)
 
     numsides = WadManager::GetLump(lump).size / sizeof(mapsidedef_t);
     sides = Z_Malloc<side_t>(numsides * sizeof(side_t), PU_LEVEL, 0);
-    memset(sides, 0, numsides * sizeof(side_t));
+    std::memset(sides, 0, numsides * sizeof(side_t));
     auto* data = WadManager::GetLumpData<byte>(lump);
 
     msd = (mapsidedef_t*)data;
@@ -413,7 +408,7 @@ void P_LoadBlockMap(intptr_t lump)
     // clear out mobj chains
     count = sizeof(*blocklinks) * bmapwidth * bmapheight;
     blocklinks = Z_Malloc<mobj_t*>(count, PU_LEVEL, 0);
-    memset(blocklinks, 0, count);
+    std::memset(blocklinks, 0, count);
 }
 
 // Builds sector line lists and subsector sector numbers.
@@ -517,7 +512,7 @@ void P_SetupLevel(int episode, int map, int /*playermask*/, skill_t /*skill*/)
 
 
 #if 0 // UNUSED
-    if (debugfile)
+    if (debugfile.is_open())
     {
         Z_FreeTags(PU_LEVEL, MAXINT);
         Z_FileDumpHeap(debugfile);

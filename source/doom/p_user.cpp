@@ -17,14 +17,14 @@
 //	Pending weapon.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "doomdef.h"
 #include "d_main.h"
 #include "doomstat.h"
-
 #include "d_event.h"
 #include "p_local.h"
+#include "r_main.h"
+
+import std;
 
 
 extern Doom* g_doom;

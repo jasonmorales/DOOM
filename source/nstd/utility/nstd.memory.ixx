@@ -1,9 +1,8 @@
-module;
-
 export module nstd.memory;
 
 import std;
 import nstd.traits;
+
 
 export namespace nstd {
 

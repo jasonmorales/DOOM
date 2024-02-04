@@ -28,6 +28,7 @@ import std;
 #include "r_draw.h"
 #include "d_main.h"
 #include "i_video.h"
+#include "r_main.h"
 
 
 extern Doom* g_doom;

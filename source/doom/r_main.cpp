@@ -16,16 +16,20 @@
 //	See tables.c, too.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "doomdef.h"
-
 #include "d_net.h"
 #include "m_bbox.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "d_main.h"
 #include "m_misc.h"
+#include "r_main.h"
+#include "r_draw.h"
+#include "r_things.h"
+#include "r_bsp.h"
+#include "r_plane.h"
+
+import std;
 
 
 extern Doom* g_doom;
@@ -597,22 +601,22 @@ bool Render::CheckSetViewSize()
 void Render::Init()
 {
     R_InitData();
-    printf("\nR_InitData");
+    std::printf("\nR_InitData");
     R_InitPointToAngle();
-    printf("\nR_InitPointToAngle");
+    std::printf("\nR_InitPointToAngle");
     R_InitTables();
     // viewwidth / viewheight / detailLevel are set by the defaults
-    printf("\nR_InitTables");
+    std::printf("\nR_InitTables");
 
     RequestSetViewSize(screenBlocks, detailLevel);
     R_InitPlanes();
-    printf("\nR_InitPlanes");
+    std::printf("\nR_InitPlanes");
     R_InitLightTables();
-    printf("\nR_InitLightTables");
+    std::printf("\nR_InitLightTables");
     R_InitSkyMap();
-    printf("\nR_InitSkyMap");
+    std::printf("\nR_InitSkyMap");
     R_InitTranslationTables();
-    printf("\nR_InitTranslationsTables");
+    std::printf("\nR_InitTranslationsTables");
 
     framecount = 0;
 }

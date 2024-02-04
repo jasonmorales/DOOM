@@ -16,22 +16,18 @@
 //	Shooting and aiming.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "m_bbox.h"
 #include "m_random.h"
 #include "i_system.h"
-
 #include "doomdef.h"
 #include "p_local.h"
-
 #include "s_sound.h"
-
-// State.
 #include "doomstat.h"
 #include "r_state.h"
-// Data.
 #include "sounds.h"
+#include "r_main.h"
+
+import std;
 
 
 mobj_t* tmthing;

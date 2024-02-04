@@ -1,14 +1,13 @@
-module;
-
-#include <cassert>
-
 export module nstd.ename;
+
+import <cassert>;
 
 import nstd.strings;
 import nstd.numbers;
 import nstd.bits;
 import nstd.vector;
 import nstd.traits;
+
 
 namespace nstd {
 
@@ -60,6 +59,7 @@ struct ename
 
     constexpr auto operator+(integral auto offset) const noexcept { return this_type{size_cast<index_type>(value + offset)}; }
     constexpr auto operator-(integral auto offset) const noexcept { return this_type{size_cast<index_type>(value - offset)}; }
+    constexpr index_type operator-(this_type other) const noexcept { return value - other.value; }
     
     constexpr operator index_type() const noexcept { return value; }
     constexpr operator bool() const noexcept { return is_valid(); }

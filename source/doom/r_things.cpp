@@ -15,19 +15,23 @@
 //	Refresh of things, i.e. objects represented by sprites.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "doomdef.h"
 #include "m_swap.h"
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "w_wad.h"
-
 #include "r_local.h"
-
 #include "doomstat.h"
 #include "d_main.h"
+#include "r_defs.h"
+#include "r_state.h"
+#include "r_main.h"
+#include "r_things.h"
+#include "r_draw.h"
+#include "r_segs.h"
+#include "r_bsp.h"
+
+import std;
 
 
 #define MINZ				(FRACUNIT*4)
@@ -130,7 +134,7 @@ void R_InitSpriteDefs(Doom* doom, const vector<string_view>& names)
     for (int i = 0; i < numsprites; ++i)
     {
         auto name = names[i];
-        memset(sprtemp, -1, sizeof(sprtemp));
+        std::memset(sprtemp, -1, sizeof(sprtemp));
 
         maxframe = -1;
 
@@ -189,7 +193,7 @@ void R_InitSpriteDefs(Doom* doom, const vector<string_view>& names)
         // allocate space for the frames present and copy sprtemp to it
         sprites[i].numframes = maxframe;
         sprites[i].spriteframes = Z_Malloc<spriteframe_t>(maxframe * sizeof(spriteframe_t), PU_STATIC, nullptr);
-        memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
+        std::memcpy(sprites[i].spriteframes, sprtemp, maxframe * sizeof(spriteframe_t));
     }
 }
 
@@ -285,12 +289,7 @@ void R_DrawMaskedColumn(column_t* column)
     dc_texturemid = basetexturemid;
 }
 
-
-
-//
-// R_DrawVisSprite
 //  mfloorclip and mceilingclip should also be set.
-//
 void R_DrawVisSprite(vissprite_t* vis, [[maybe_unused]] int x1, [[maybe_unused]] int x2)
 {
     column_t* column;

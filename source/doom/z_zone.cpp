@@ -48,9 +48,6 @@ typedef struct
 
 memzone_t* mainzone;
 
-//
-// Z_ClearZone
-//
 void Z_ClearZone(memzone_t* zone)
 {
     // set the entire zone to one free block
@@ -68,9 +65,6 @@ void Z_ClearZone(memzone_t* zone)
     block->size = zone->size - sizeof(memzone_t);
 }
 
-//
-// Z_Init
-//
 void Z_Init()
 {
     intptr_t size = 0;
@@ -247,9 +241,6 @@ void* Z_Malloc_internal(intptr_t size, int tag, void* user)
     return (void*)((byte*)base + sizeof(memblock_t));
 }
 
-//
-// Z_FreeTags
-//
 void Z_FreeTags(int lowtag, int hightag)
 {
     memblock_t* next = nullptr;
@@ -267,25 +258,19 @@ void Z_FreeTags(int lowtag, int hightag)
     }
 }
 
-//
-// Z_DumpHeap
-// Note: TFileDumpHeap( stdout ) ?
-//
-void
-Z_DumpHeap
-(int		lowtag,
-    int		hightag)
+void Z_DumpHeap(int32 lowtag, int32 hightag)
 {
     memblock_t* block;
 
-    printf("zone size: %Ii  location: %p\n", mainzone->size, mainzone);
+    std::cout << std::format("zone size: {}  location: {}\n", mainzone->size, static_cast<void*>(mainzone));
 
-    printf("tag range: %i to %i\n", lowtag, hightag);
+    std::cout << std::format("tag range: {} to {}\n", lowtag, hightag);
 
     for (block = mainzone->blocklist.next; ; block = block->next)
     {
         if (block->tag >= lowtag && block->tag <= hightag)
-            printf("block:%p    size:%7Ii    user:%p    tag:%3i\n", block, block->size, block->user, block->tag);
+            std::cout << std::format("block:{}    size:{:7}    user:{}    tag:{:3}\n",
+                static_cast<void*>(block), block->size, static_cast<void*>(block->user), block->tag);
 
         if (block->next == &mainzone->blocklist)
         {
@@ -294,24 +279,24 @@ Z_DumpHeap
         }
 
         if ((byte*)block + block->size != (byte*)block->next)
-            printf("ERROR: block size does not touch the next block\n");
+            std::cerr << "ERROR: block size does not touch the next block\n";
 
         if (block->next->prev != block)
-            printf("ERROR: next block doesn't have proper back link\n");
+            std::cerr << "ERROR: next block doesn't have proper back link\n";
 
         if (!block->user && !block->next->user)
-            printf("ERROR: two consecutive free blocks\n");
+            std::cerr << "ERROR: two consecutive free blocks\n";
     }
 }
 
-void Z_FileDumpHeap(FILE* f)
+void Z_FileDumpHeap(std::ofstream& file)
 {
-    fprintf(f, "zone size: %Ii  location: %p\n", mainzone->size, mainzone);
+    file << std::format("zone size: {}  location: {}\n", mainzone->size, static_cast<void*>(mainzone));
 
     for (auto* block = mainzone->blocklist.next; ; block = block->next)
     {
-        fprintf(f, "block:%p    size:%7Ii    user:%p    tag:%3i\n",
-            block, block->size, block->user, block->tag);
+        file << std::format("block:{}    size:{:7}    user:{}    tag:{:3}\n",
+            static_cast<void*>(block), block->size, static_cast<void*>(block->user), block->tag);
 
         if (block->next == &mainzone->blocklist)
         {
@@ -320,13 +305,13 @@ void Z_FileDumpHeap(FILE* f)
         }
 
         if ((byte*)block + block->size != (byte*)block->next)
-            fprintf(f, "ERROR: block size does not touch the next block\n");
+            file << "ERROR: block size does not touch the next block\n";
 
         if (block->next->prev != block)
-            fprintf(f, "ERROR: next block doesn't have proper back link\n");
+            file << "ERROR: next block doesn't have proper back link\n";
 
         if (!block->user && !block->next->user)
-            fprintf(f, "ERROR: two consecutive free blocks\n");
+            file << "ERROR: two consecutive free blocks\n";
     }
 }
 

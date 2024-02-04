@@ -1,13 +1,12 @@
-module;
-
-#include <cassert>
-
 export module nstd.flags;
+
+import <cassert>;
 
 import nstd.strings;
 import nstd.numbers;
 import nstd.bits;
 import nstd.vector;
+
 
 namespace nstd {
 

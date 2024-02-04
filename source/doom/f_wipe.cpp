@@ -15,10 +15,9 @@
 //	Mission begin melt/wipe screen special effect.
 //
 //-----------------------------------------------------------------------------
-import std;
+#include "i_video.h"
 
 #include "z_zone.h"
-#include "i_video.h"
 #include "v_video.h"
 #include "m_random.h"
 #include "d_main.h"
@@ -26,6 +25,8 @@ import std;
 #include "doomdef.h"
 
 #include "f_wipe.h"
+
+import std;
 
 
 extern Doom* g_doom;

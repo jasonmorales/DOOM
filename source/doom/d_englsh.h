@@ -295,11 +295,6 @@ extern const char* DefaultChatMacros[];
 #define HUSTR_PLRBROWN	"Brown: "
 #define HUSTR_PLRRED		"Red: "
 
-#define HUSTR_KEYGREEN	'G'
-#define HUSTR_KEYINDIGO	'I'
-#define HUSTR_KEYBROWN	'B'
-#define HUSTR_KEYRED	'R'
-
 //
 //	AM_map.C
 //

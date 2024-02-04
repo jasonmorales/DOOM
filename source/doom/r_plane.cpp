@@ -17,18 +17,21 @@
 //	Moreover, the sky areas have to be determined.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "w_wad.h"
-
 #include "doomdef.h"
 #include "doomstat.h"
-
 #include "r_local.h"
 #include "r_sky.h"
+#include "r_plane.h"
+#include "r_defs.h"
+#include "r_main.h"
+#include "r_draw.h"
+#include "r_bsp.h"
+#include "r_things.h"
 
+import std;
 
 
 planefunction_t		floorfunc;
@@ -162,7 +165,7 @@ void R_ClearPlanes()
     lastopening = openings;
 
     // texture calculation
-    memset(cachedheight, 0, sizeof(cachedheight));
+    std::memset(cachedheight, 0, sizeof(cachedheight));
 
     // left to right mapping
     angle_t	angle = (viewangle - ANG90) >> ANGLETOFINESHIFT;
@@ -207,20 +210,12 @@ visplane_t* R_FindPlane(fixed_t height, int32 picnum, int32 lightlevel)
     check->minx = SCREENWIDTH;
     check->maxx = -1;
 
-    memset(check->top, 0xff, sizeof(check->top));
+    std::memset(check->top, 0xff, sizeof(check->top));
 
     return check;
 }
 
-
-//
-// R_CheckPlane
-//
-visplane_t*
-R_CheckPlane
-(visplane_t* pl,
-    int		start,
-    int		stop)
+visplane_t* R_CheckPlane(visplane_t* pl, int32 start, int32 stop)
 {
     int		intrl;
     int		intrh;

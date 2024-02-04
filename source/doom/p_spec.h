@@ -20,6 +20,8 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include "r_state.h"
+
 // End-level timer (-TIMER option)
 extern	bool levelTimer;
 extern	int	levelTimeCount;

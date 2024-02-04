@@ -20,7 +20,7 @@
 import std;
 import nstd;
 
-#include <cassert>
+import <cassert>;
 
 int32 W_GetNumForName(string_view name);
 

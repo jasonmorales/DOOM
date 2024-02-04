@@ -472,7 +472,7 @@ void WI_drawOnLnode(int n, const patch_t* c[])
     else
     {
         // DEBUG
-        printf("Could not place patch on level %d", n + 1);
+        std::cout << std::format("Could not place patch on level {}", n + 1);
     }
 }
 

@@ -20,11 +20,10 @@
 import std;
 
 // Data.
+#include "info.h"
 #include "sounds.h"
 #include "m_fixed.h"
-#include "info.h"
 #include "p_mobj.h"
-
 
 struct player_t;
 struct pspdef_t;

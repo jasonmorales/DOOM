@@ -22,7 +22,7 @@
 
 import nstd;
 
-#include <stdio.h>
+//#include <cstdio>
 
 //
 // ZONE MEMORY
@@ -41,7 +41,7 @@ import nstd;
 
 void Z_Init();
 
-void* Z_Malloc_internal(intptr_t size, int tag, void* p);
+void* Z_Malloc_internal(std::intptr_t size, int tag, void* p);
 template<typename T = byte>
 T* Z_Malloc(intptr_t size, int tag, void* p)
 {
@@ -51,7 +51,7 @@ T* Z_Malloc(intptr_t size, int tag, void* p)
 void Z_Free(void* p);
 void Z_FreeTags(int lowtag, int hightag);
 void Z_DumpHeap(int lowtag, int hightag);
-void Z_FileDumpHeap(FILE* f);
+void Z_FileDumpHeap(std::ofstream& file);
 void Z_CheckHeap();
 void Z_ChangeTag2(void* p, int tag);
 intptr_t Z_FreeMemory();

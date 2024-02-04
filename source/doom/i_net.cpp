@@ -12,23 +12,19 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
-import std;
-
-import nstd;
-import config;
+#include "system/windows.h"
+#include <winsock.h>
 
 #include "i_system.h"
 #include "d_event.h"
 #include "d_net.h"
-
 #include "doomstat.h"
-
 #include "i_net.h"
 
-#include "system/windows.h"
-#include <winsock.h>
+import std;
+import nstd;
+import config;
 
-#include <cstdlib>
 
 // For some odd reason...
 #define ntohl(x) \
@@ -210,7 +206,7 @@ int GetLocalAddress()
 //
 void I_InitNetwork()
 {
-    doomcom = static_cast<doomcom_t*>(malloc(sizeof(*doomcom)));
+    doomcom = static_cast<doomcom_t*>(std::malloc(sizeof(*doomcom)));
     memset(doomcom, 0, sizeof(*doomcom));
 
     // set up for network
@@ -230,7 +226,7 @@ void I_InitNetwork()
         doomcom->extratics = 0;
 
     if (CommandLine::TryGetValues("-port", DOOMPORT))
-        printf("using alternate port %i\n", DOOMPORT);
+        std::cout << std::format("using alternate port {}\n", DOOMPORT);
 
     // parse network game options,
     //  -net <consoleplayer> <host> <host> ...

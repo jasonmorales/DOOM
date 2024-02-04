@@ -1,11 +1,10 @@
-module;
-
-#include <cassert>
-
 export module nstd.vector;
+
+import <cassert>;
 
 import std;
 import nstd.numbers;
+
 
 export namespace nstd {
 

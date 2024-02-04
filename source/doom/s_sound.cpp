@@ -12,24 +12,21 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "s_sound.h"
-
 #include "m_misc.h"
 #include "i_system.h"
 #include "i_sound.h"
 #include "sounds.h"
-
 #include "z_zone.h"
 #include "m_random.h"
 #include "w_wad.h"
-
 #include "doomdef.h"
 #include "d_main.h"
 #include "p_local.h"
-
 #include "doomstat.h"
+#include "r_main.h"
+
+import std;
 
 
 extern Doom* g_doom;

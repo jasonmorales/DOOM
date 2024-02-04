@@ -17,32 +17,23 @@
 //	PCX Screenshots.
 //
 //-----------------------------------------------------------------------------
+#include "i_video.h"
+
+#include "doomdef.h"
+#include "z_zone.h"
+#include "m_swap.h"
+#include "w_wad.h"
+#include "i_system.h"
+#include "v_video.h"
+#include "hu_stuff.h"
+#include "doomstat.h"
+#include "dstrings.h"
+#include "m_misc.h"
+#include "d_main.h"
+
 import std;
 import nstd;
 import config;
-
-#include "doomdef.h"
-
-#include "z_zone.h"
-
-#include "m_swap.h"
-
-#include "w_wad.h"
-
-#include "i_system.h"
-#include "i_video.h"
-#include "v_video.h"
-
-#include "hu_stuff.h"
-
-// State.
-#include "doomstat.h"
-
-// Data.
-#include "dstrings.h"
-
-#include "m_misc.h"
-#include "d_main.h"
 
 
 extern Doom* g_doom;

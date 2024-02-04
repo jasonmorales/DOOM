@@ -17,23 +17,19 @@
 //	that are associated with states/frames. 
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "m_random.h"
 #include "i_system.h"
-
 #include "doomdef.h"
 #include "d_main.h"
 #include "p_local.h"
-
 #include "s_sound.h"
-
 #include "g_game.h"
-
 #include "doomstat.h"
 #include "r_state.h"
-
 #include "sounds.h"
+#include "r_main.h"
+
+import std;
 
 
 extern Doom* g_doom;

@@ -17,40 +17,32 @@
 //	Does palette indicators as well (red pain/berserk, bright pickup)
 //
 //-----------------------------------------------------------------------------
-import std;
+#include "i_video.h"
 
 #include "i_system.h"
-#include "i_video.h"
 #include "z_zone.h"
 #include "m_random.h"
 #include "w_wad.h"
-
 #include "doomdef.h"
-
 #include "g_game.h"
-
 #include "st_stuff.h"
 #include "st_lib.h"
 #include "r_local.h"
-
 #include "p_local.h"
 #include "p_inter.h"
-
 #include "am_map.h"
 #include "m_cheat.h"
-
 #include "s_sound.h"
-
-// Needs access to LFB.
 #include "v_video.h"
-
-// State.
 #include "doomstat.h"
-
-// Data.
 #include "dstrings.h"
 #include "sounds.h"
 #include "d_main.h"
+#include "d_items.h"
+#include "r_main.h"
+#include "st_lib.h"
+
+import std;
 
 
 extern Doom* g_doom;

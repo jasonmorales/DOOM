@@ -183,7 +183,7 @@ void V_DrawPatchFlipped(int x, int y, int scrn, const patch_t* patch)
         || y + (patch->height)>SCREENHEIGHT
         || (unsigned)scrn > 4)
     {
-        fprintf(stderr, "Patch origin %d,%d exceeds LFB\n", x, y);
+        std::cerr << std::format("Patch origin {},{} exceeds LFB\n", x, y);
         I_Error("Bad V_DrawPatch in V_DrawPatchFlipped");
     }
 #endif 

@@ -15,10 +15,10 @@
 //	Fixed point implementation.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "i_system.h"
 #include "m_fixed.h"
+
+import std;
 
 
 // Fixme. __USE_C_FIXED__ or something.

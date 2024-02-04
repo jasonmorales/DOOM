@@ -2,8 +2,10 @@ export module nstd.vecs;
 
 import std;
 import nstd.numbers;
+import nstd.math;
 import nstd.traits;
 import nstd.strings;
+
 
 export namespace nstd {
 

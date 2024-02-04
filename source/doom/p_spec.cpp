@@ -335,8 +335,7 @@ P_FindNextHighestFloor
         // Check for overflow. Exit.
         if (h >= MAX_ADJOINING_SECTORS)
         {
-            fprintf(stderr,
-                "Sector with more than 20 adjoining sectors\n");
+            std::cerr << "Sector with more than 20 adjoining sectors\n";
             break;
         }
     }
@@ -1118,7 +1117,7 @@ void P_UpdateSpecials()
                     break;
                 }
                 S_StartSound((mobj_t*)&buttonlist[i].soundorg, sfx_swtchn);
-                memset(&buttonlist[i], 0, sizeof(button_t));
+                std::memset(&buttonlist[i], 0, sizeof(button_t));
             }
         }
     }
@@ -1303,7 +1302,7 @@ void P_SpawnSpecials()
         activeplats[i] = nullptr;
 
     for (i = 0;i < MAXBUTTONS;i++)
-        memset(&buttonlist[i], 0, sizeof(button_t));
+        std::memset(&buttonlist[i], 0, sizeof(button_t));
 
     // UNUSED: no horizonal sliders.
     //	P_InitSlidingDoorFrames();

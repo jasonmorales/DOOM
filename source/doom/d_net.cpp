@@ -13,28 +13,25 @@
 //
 // DESCRIPTION:
 //	DOOM Network game communication and protocol,
-//	all OS independend parts.
+//	all OS independent parts.
 //
 //-----------------------------------------------------------------------------
-import std;
-
-#include "m_menu.h"
-#include "i_system.h"
 #include "i_video.h"
+
+#include "i_system.h"
 #include "i_net.h"
 #include "g_game.h"
-#include "doomdef.h"
+#include "m_menu.h"
 #include "doomstat.h"
-
 #include "d_main.h"
+
+import std;
 
 
 extern Doom* g_doom;
 
 
 void G_BuildTiccmd(ticcmd_t* cmd);
-
-#include <stdint.h>
 
 int32 Net::ticks[Net::MaxNodes] = {0};
 
@@ -146,32 +143,26 @@ void HSendPacket(int node, int	flags)
     doomcom->remotenode = static_cast<short>(node);
     doomcom->datalength = static_cast<short>(NetbufferSize());
 
-    if (debugfile)
+    if (debugfile.is_open())
     {
-        int		i;
-        int		realretrans;
+        int32 realretrans = -1;
         if (netbuffer->checksum & NCMD_RETRANSMIT)
             realretrans = ExpandTics(netbuffer->retransmitfrom);
-        else
-            realretrans = -1;
 
-        fprintf(debugfile, "send (%i + %i, R %i) [%i] ",
+        debugfile << std::format("send ({} + {}, R {}) [{}] ",
             ExpandTics(netbuffer->starttic),
             netbuffer->numtics, realretrans, doomcom->datalength);
 
-        for (i = 0; i < doomcom->datalength; i++)
-            fprintf(debugfile, "%i ", ((byte*)netbuffer)[i]);
+        for (int32 i = 0; i < doomcom->datalength; ++i)
+            debugfile << std::format("{} ", ((byte*)netbuffer)[i]);
 
-        fprintf(debugfile, "\n");
+        debugfile << "\n";
     }
 
     I_NetCmd();
 }
 
-//
-// HGetPacket
 // Returns false if no packet is waiting
-//
 bool HGetPacket()
 {
     if (reboundpacket)
@@ -196,25 +187,25 @@ bool HGetPacket()
 
     if (doomcom->datalength != NetbufferSize())
     {
-        if (debugfile)
-            fprintf(debugfile, "bad packet length %i\n", doomcom->datalength);
+        if (debugfile.is_open())
+            debugfile << std::format("bad packet length {}\n", doomcom->datalength);
         return false;
     }
 
     if (NetbufferChecksum() != (netbuffer->checksum & NCMD_CHECKSUM))
     {
-        if (debugfile)
-            fprintf(debugfile, "bad packet checksum\n");
+        if (debugfile.is_open())
+            debugfile << "bad packet checksum\n";
         return false;
     }
 
-    if (debugfile)
+    if (debugfile.is_open())
     {
         int		realretrans;
         int	i;
 
         if (netbuffer->checksum & NCMD_SETUP)
-            fprintf(debugfile, "setup packet\n");
+            debugfile << "setup packet\n";
         else
         {
             if (netbuffer->checksum & NCMD_RETRANSMIT)
@@ -222,14 +213,14 @@ bool HGetPacket()
             else
                 realretrans = -1;
 
-            fprintf(debugfile, "get %i = (%i + %i, R %i)[%i] ",
+            debugfile << std::format("get {} = ({} + {}, R {})[{}] ",
                 doomcom->remotenode,
                 ExpandTics(netbuffer->starttic),
                 netbuffer->numtics, realretrans, doomcom->datalength);
 
             for (i = 0; i < doomcom->datalength; i++)
-                fprintf(debugfile, "%i ", ((byte*)netbuffer)[i]);
-            fprintf(debugfile, "\n");
+                debugfile << std::format("{} ", ((byte*)netbuffer)[i]);
+            debugfile << "\n";
         }
     }
     return true;
@@ -280,8 +271,8 @@ void GetPackets()
             && (netbuffer->checksum & NCMD_RETRANSMIT))
         {
             resendto[netnode] = ExpandTics(netbuffer->retransmitfrom);
-            if (debugfile)
-                fprintf(debugfile, "retransmit from %i\n", resendto[netnode]);
+            if (debugfile.is_open())
+                debugfile << std::format("retransmit from {}\n", resendto[netnode]);
             resendcount[netnode] = RESENDCOUNT;
         }
         else
@@ -293,10 +284,8 @@ void GetPackets()
 
         if (realend < Net::ticks[netnode])
         {
-            if (debugfile)
-                fprintf(debugfile,
-                    "out of order packet (%i + %i)\n",
-                    realstart, netbuffer->numtics);
+            if (debugfile.is_open())
+                debugfile << std::format("out of order packet ({} + {})\n", realstart, netbuffer->numtics);
             continue;
         }
 
@@ -304,10 +293,8 @@ void GetPackets()
         if (realstart > Net::ticks[netnode])
         {
             // stop processing until the other system resends the missed tics
-            if (debugfile)
-                fprintf(debugfile,
-                    "missed tics from %i (%i - %i)\n",
-                    netnode, realstart, Net::ticks[netnode]);
+            if (debugfile.is_open())
+                debugfile << std::format("missed tics from {} ({} - {})\n", netnode, realstart, Net::ticks[netnode]);
             remoteresend[netnode] = true;
             continue;
         }
@@ -432,7 +419,7 @@ void D_ArbitrateNetStart()
     if (doomcom->consoleplayer)
     {
         // listen for setup info from key player
-        printf("listening for network start info...\n");
+        std::cout << "listening for network start info...\n";
         while (1)
         {
             CheckAbort();
@@ -456,7 +443,7 @@ void D_ArbitrateNetStart()
     else
     {
         // key player, send the setup info
-        printf("sending network start info...\n");
+        std::cout << "sending network start info...\n";
         do
         {
             CheckAbort();
@@ -516,8 +503,8 @@ void Net::CheckGame()
     if (netgame)
         D_ArbitrateNetStart();
 
-    printf("startskill %i  deathmatch: %i  startmap: %i  startepisode: %i\n",
-        startskill, deathmatch, startmap, startepisode);
+    std::cout << std::format("startskill {}  deathmatch: {}  startmap: {}  startepisode: {}\n",
+        nstd::to_underlying(startskill), deathmatch, startmap, startepisode);
 
     // read values out of doomcom
     ticdup = doomcom->ticdup;
@@ -531,15 +518,15 @@ void Net::CheckGame()
     for (int i = 0; i < doomcom->numnodes; i++)
         nodeingame[i] = true;
 
-    printf("player %i of %i (%i nodes)\n", consoleplayer + 1, doomcom->numplayers, doomcom->numnodes);
+    std::cout << std::format("player {} of {} ({} nodes)\n", consoleplayer + 1, doomcom->numplayers, doomcom->numnodes);
 }
 
 // Called before quitting to leave a net game
 // without hanging the other players
 void D_QuitNetGame()
 {
-    if (debugfile)
-        fclose(debugfile);
+    if (debugfile.is_open())
+        debugfile.close();
 
     if (!netgame || !usergame || consoleplayer == -1 || demoplayback)
         return;
@@ -607,8 +594,8 @@ void TryRunTics()
 
     frameon++;
 
-    if (debugfile)
-        fprintf(debugfile, "=======real: %Ii  avail: %Ii  game: %Ii\n", realtics, availabletics, counts);
+    if (debugfile.is_open())
+        debugfile << std::format("=======real: {}  avail: {}  game: {}\n", realtics, availabletics, counts);
 
     if (!demoplayback)
     {

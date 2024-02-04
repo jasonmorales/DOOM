@@ -32,7 +32,7 @@ void CommandLine::Parse(string_view source)
 {
     int32 start = 0;
     int32 end = 0;
-    int32 last = source.length();
+    auto last = source.length();
 
     while(end < last)
     {

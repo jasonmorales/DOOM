@@ -15,23 +15,23 @@
 //	DOOM graphics stuff for Windows
 //
 //-----------------------------------------------------------------------------
+#include "i_video.h"
+
+#include "d_main.h"
+#include "v_video.h"
+#include "z_zone.h"
+#include "i_system.h"
+#include "st_stuff.h"
+
+#include <GL/wglew.h>
+#include <gl/gl.h>
+
 import std;
 import nstd;
 
 import config;
 import platform;
 
-#include "i_system.h"
-#include "i_video.h"
-#include "v_video.h"
-#include "d_main.h"
-#include "m_bbox.h"
-#include "st_stuff.h"
-#include "doomdef.h"
-#include "z_zone.h"
-
-#include <GL/wglew.h>
-#include <gl/gl.h>
 
 #undef CreateWindow
 #undef RegisterClass

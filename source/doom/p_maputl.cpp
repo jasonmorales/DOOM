@@ -18,14 +18,13 @@
 //	and some PIT_* functions to use for iteration.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "m_bbox.h"
-
 #include "doomdef.h"
 #include "p_local.h"
-
 #include "r_state.h"
+#include "r_main.h"
+
+import std;
 
 
 // Gives an estimation of distance (not exact)

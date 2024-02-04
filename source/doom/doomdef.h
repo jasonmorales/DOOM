@@ -18,9 +18,9 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import nstd;
+//import nstd;
 
-#include <stdio.h>
+//#include <stdio.h>
 
 //
 // Global parameters/defines.
@@ -164,10 +164,6 @@ typedef enum
 // DOOM keyboard definition.
 // This is the stuff configured by Setup.Exe.
 // Most key data are simple ascii (uppercased).
-#define KEY_RIGHTARROW	0xae
-#define KEY_LEFTARROW	0xac
-#define KEY_UPARROW	0xad
-#define KEY_DOWNARROW	0xaf
 #define KEY_ESCAPE	27
 #define KEY_ENTER	13
 #define KEY_TAB		9

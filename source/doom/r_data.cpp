@@ -183,7 +183,7 @@ R_DrawColumnInCache
             count = cacheheight - position;
 
         if (count > 0)
-            memcpy(cache + position, source, count);
+            std::memcpy(cache + position, source, count);
 
         patch = (column_t*)((byte*)patch + patch->length + 4);
     }
@@ -275,7 +275,7 @@ void R_GenerateLookup(int texnum)
     // Fill in the lump / offset, so columns
     //  with only a single patch are all done.
     byte* patchcount = (byte*)alloca(texture->width);
-    memset(patchcount, 0, texture->width);
+    std::memset(patchcount, 0, texture->width);
     texpatch_t* patch = texture->patches;
 
     for (int i = 0; i < texture->patchcount; i++, patch++)
@@ -301,7 +301,7 @@ void R_GenerateLookup(int texnum)
     {
         if (!patchcount[x])
         {
-            printf("R_GenerateLookup: column without a patch (%s)\n", texture->name);
+            std::cout << std::format("R_GenerateLookup: column without a patch ({})\n", texture->name);
             return;
         }
         // I_Error ("R_GenerateLookup: column without a patch");
@@ -391,18 +391,18 @@ void R_InitTextures()
     auto temp1 = W_GetNumForName("S_START");  // P_???????
     auto temp2 = W_GetNumForName("S_END") - 1;
     auto temp3 = ((temp2 - temp1 + 63) / 64) + ((numtextures + 63) / 64);
-    printf("[");
+    std::printf("[");
     for (int i = 0; i < temp3; i++)
-        printf(" ");
-    printf("         ]");
+        std::printf(" ");
+    std::printf("         ]");
     for (int i = 0; i < temp3; i++)
-        printf("\x8");
-    printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");
+        std::printf("\x8");
+    std::printf("\x8\x8\x8\x8\x8\x8\x8\x8\x8\x8");
 
     for (int32 i = 0; i < numtextures; i++, directory++)
     {
         if (!(i & 63))
-            printf(".");
+            std::printf(".");
 
         if (i == numtextures1)
         {
@@ -425,7 +425,7 @@ void R_InitTextures()
         texture->height = mtexture->height;
         texture->patchcount = mtexture->patchcount;
 
-        memcpy(texture->name, mtexture->name, sizeof(texture->name));
+        std::memcpy(texture->name, mtexture->name, sizeof(texture->name));
         mappatch_t* mpatch = &mtexture->patches[0];
         texpatch_t* patch = &texture->patches[0];
 
@@ -495,7 +495,7 @@ void R_InitSpriteLumps()
     for (int32 i = 0; i < numspritelumps; ++i)
     {
         if (!(i & 63))
-            printf(".");
+            std::printf(".");
 
         auto* patch = WadManager::GetLumpData<patch_t>(firstspritelump + i);
         spritewidth[i] = (patch->width) << FRACBITS;
@@ -510,7 +510,7 @@ void R_InitColormaps()
     auto& lump = WadManager::GetLump("COLORMAP");
     colormaps = Z_Malloc(lump.size + 255, PU_STATIC, 0);
     colormaps = (byte*)(((intptr_t)colormaps + 255) & ~0xff);
-    memcpy(colormaps, lump.data, lump.size);
+    std::memcpy(colormaps, lump.data, lump.size);
 }
 
 // Locates all the lumps that will be used by all views
@@ -518,13 +518,13 @@ void R_InitColormaps()
 void R_InitData()
 {
     R_InitTextures();
-    printf("\nInitTextures");
+    std::printf("\nInitTextures");
     R_InitFlats();
-    printf("\nInitFlats");
+    std::printf("\nInitFlats");
     R_InitSpriteLumps();
-    printf("\nInitSprites");
+    std::printf("\nInitSprites");
     R_InitColormaps();
-    printf("\nInitColormaps");
+    std::printf("\nInitColormaps");
 }
 
 // Retrieval, get a flat number for a flat name.
@@ -542,7 +542,7 @@ int32 R_FlatNumForName(string_view name)
 
 // Check whether texture is available.
 // Filter out NoTexture indicator.
-int	R_CheckTextureNumForName(const char* name)
+int32 R_CheckTextureNumForName(string_view name)
 {
     int		i;
 
@@ -551,20 +551,23 @@ int	R_CheckTextureNumForName(const char* name)
         return 0;
 
     for (i = 0; i < numtextures; i++)
-        if (!_strnicmp(textures[i]->name, name, 8))
+    {
+        const auto* test_name = textures[i]->name;
+        auto len = std::min(8ll, std::find(test_name, test_name + 8, '\0') - test_name);
+        if (string_view(textures[i]->name, len).to_lower() == name.to_lower())
             return i;
+    }
 
     return -1;
 }
 
 // Calls R_CheckTextureNumForName, aborts with error message.
-int	R_TextureNumForName(const char* name)
+int32 R_TextureNumForName(string_view name)
 {
-    int i = R_CheckTextureNumForName(name);
+    auto i = R_CheckTextureNumForName(name);
     if (i == -1)
-    {
         I_Error("R_TextureNumForName: {} not found", name);
-    }
+
     return i;
 }
 
@@ -584,7 +587,7 @@ void R_PrecacheLevel()
 
     // Precache flats.
     auto* flatpresent = static_cast<char*>(_malloca(numflats));
-    memset(flatpresent, 0, numflats);
+    std::memset(flatpresent, 0, numflats);
 
     for (int32 i = 0; i < numsectors; i++)
     {
@@ -608,7 +611,7 @@ void R_PrecacheLevel()
 
     // Precache textures.
     auto* texturepresent = static_cast<char*>(_malloca(numtextures));
-    memset(texturepresent, 0, numtextures);
+    std::memset(texturepresent, 0, numtextures);
 
     for (int32 i = 0; i < numsides; i++)
     {
@@ -644,7 +647,7 @@ void R_PrecacheLevel()
     if (numsprites > 0)
     {
         spritepresent = static_cast<char*>(_malloca(numsprites));
-        memset(spritepresent, 0, numsprites);
+        std::memset(spritepresent, 0, numsprites);
     }
 
     if (!spritepresent)

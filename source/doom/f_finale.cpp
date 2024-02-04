@@ -15,7 +15,7 @@
 //	Game completion, final screen animation.
 //
 //-----------------------------------------------------------------------------
-import std;
+#include "i_video.h"
 
 #include "i_system.h"
 #include "m_swap.h"
@@ -23,7 +23,6 @@ import std;
 #include "v_video.h"
 #include "w_wad.h"
 #include "s_sound.h"
-#include "i_video.h"
 
 // Data.
 #include "dstrings.h"
@@ -34,9 +33,11 @@ import std;
 #include "d_main.h"
 
 #include "hu_stuff.h"
+
+import std;
+
+
 extern	const patch_t* hu_font[HU_FONTSIZE];
-
-
 extern Doom* g_doom;
 extern GameState wipegamestate;
 

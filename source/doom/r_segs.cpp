@@ -15,15 +15,20 @@
 //	All the clipping: columns, horizontal spans, sky columns.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "i_system.h"
-
 #include "doomdef.h"
 #include "doomstat.h"
-
 #include "r_local.h"
 #include "r_sky.h"
+#include "r_defs.h"
+#include "r_plane.h"
+#include "r_main.h"
+#include "r_bsp.h"
+#include "r_things.h"
+#include "r_draw.h"
+#include "r_data.h"
+
+import std;
 
 
 // OPTIMIZE: closed two sided lines as single sided
@@ -660,7 +665,7 @@ void R_StoreWallRange(int32 start, int32 stop)
     if (((ds_p->silhouette & SIL_TOP) || maskedtexture)
         && !ds_p->sprtopclip)
     {
-        memcpy(lastopening, ceilingclip + start, 2 * (rw_stopx - start));
+        std::memcpy(lastopening, ceilingclip + start, 2 * (rw_stopx - start));
         ds_p->sprtopclip = lastopening - start;
         lastopening += rw_stopx - start;
     }
@@ -668,7 +673,7 @@ void R_StoreWallRange(int32 start, int32 stop)
     if (((ds_p->silhouette & SIL_BOTTOM) || maskedtexture)
         && !ds_p->sprbottomclip)
     {
-        memcpy(lastopening, floorclip + start, 2 * (rw_stopx - start));
+        std::memcpy(lastopening, floorclip + start, 2 * (rw_stopx - start));
         ds_p->sprbottomclip = lastopening - start;
         lastopening += rw_stopx - start;
     }

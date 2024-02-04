@@ -1,3 +1,8 @@
+import std;
+import nstd;
+
+void test_strings()
+{
     auto L = "asdf";
 
     string_view NSV = L;
@@ -65,4 +70,4 @@
     std::string ss4(SV);
     std::string ss5(S);
     std::string ss6("ss6");
-
+}

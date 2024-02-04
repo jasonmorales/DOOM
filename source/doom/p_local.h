@@ -21,6 +21,12 @@ import std;
 
 #include "r_local.h"
 
+#include "d_think.h"
+#include "doomdata.h"
+#include "m_fixed.h"
+#include "info.h"
+#include "r_defs.h"
+
 #define FLOATSPEED		(FRACUNIT*4)
 
 

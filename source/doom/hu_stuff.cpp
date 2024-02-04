@@ -14,26 +14,28 @@
 // DESCRIPTION:  Heads-up displays
 //
 //-----------------------------------------------------------------------------
-import std;
-
-#include "doomdef.h"
 #include "d_main.h"
+#include "d_englsh.h"
+#include "d_player.h"
+#include "r_defs.h"
+#include "hu_stuff.h"
+#include "hu_lib.h"
+#include "w_wad.h"
+#include "doomstat.h"
+#include "sounds.h"
+#include "s_sound.h"
+#include "m_misc.h"
+/*
+#include "doomdef.h"
 
 #include "z_zone.h"
 
 #include "m_swap.h"
 
-#include "hu_stuff.h"
-#include "hu_lib.h"
-#include "w_wad.h"
-
-#include "s_sound.h"
-
-#include "doomstat.h"
-
 #include "dstrings.h"
-#include "sounds.h"
-#include "m_misc.h"
+*/
+
+import std;
 
 
 extern Doom* g_doom;
@@ -437,23 +439,14 @@ char HU_dequeueChatChar()
 
 bool HU_Responder(const input::event& event)
 {
-    const char* macromessage;
-    bool eatkey = false;
     static bool shiftdown = false;
     static bool altdown = false;
-    unsigned char c;
-    int32 numplayers;
 
-    static char destination_keys[MAXPLAYERS] =
-    {
-        HUSTR_KEYGREEN,
-        HUSTR_KEYINDIGO,
-        HUSTR_KEYBROWN,
-        HUSTR_KEYRED
-    };
+    static input::event_id destination_keys[] = { "G", "I", "B", "R" };
 
     static int32 num_nobrainers = 0;
-    numplayers = 0;
+
+    int32 numplayers = 0;
     for (int32 i = 0; i < MAXPLAYERS; i++)
         numplayers += playeringame[i];
 
@@ -470,6 +463,8 @@ bool HU_Responder(const input::event& event)
 
     if (!event.down())
         return false;
+
+    bool eatkey = false;
 
     if (!chat_on)
     {
@@ -489,7 +484,7 @@ bool HU_Responder(const input::event& event)
         {
             for (char i = 0; i < MAXPLAYERS; i++)
             {
-                if (event.id.value == destination_keys[i])
+                if (event.id == destination_keys[i])
                 {
                     if (playeringame[i] && i != consoleplayer)
                     {
@@ -518,15 +513,16 @@ bool HU_Responder(const input::event& event)
     }
     else
     {
-        c = static_cast<unsigned char>(event.id.value);
         // send a macro
         if (altdown)
         {
-            c = c - '0';
-            if (c > 9)
+            if (event.id < "0" && event.id > "9")
                 return false;
+
+            auto index = event.id - "0";
+
             // fprintf(stderr, "got here\n");
-            macromessage = chat_macros[c];
+            auto* macromessage = chat_macros[index];
 
             // kill last message with a '\n'
             HU_queueChatChar(KEY_ENTER); // DEBUG!!!
@@ -538,13 +534,12 @@ bool HU_Responder(const input::event& event)
 
             // leave chat mode and notify that it was sent
             chat_on = false;
-            plr->message = chat_macros[c];
+            plr->message = chat_macros[index];
             eatkey = true;
         }
-        else
+        else if (event.is("Character"))
         {
-            if (shiftdown || (c >= 'a' && c <= 'z'))
-                c = shiftxform[c];
+            char c = static_cast<char>(event.ch);
             eatkey = HUlib_keyInIText(&w_chat, c);
             if (eatkey)
             {
@@ -554,16 +549,16 @@ bool HU_Responder(const input::event& event)
                 // sprintf(buf, "KEY: %d => %d", event.data1, c);
                 //      plr->message = buf;
             }
-            if (c == KEY_ENTER)
-            {
-                chat_on = false;
-                if (w_chat.l.len)
-                    plr->message = w_chat.l.l;
-            }
-            else if (c == KEY_ESCAPE)
-            {
-                chat_on = false;
-            }
+        }
+        else if (event.down("Enter"))
+        {
+            chat_on = false;
+            if (w_chat.l.len)
+                plr->message = w_chat.l.l;
+        }
+        else if (event.down("Escape"))
+        {
+            chat_on = false;
         }
     }
 

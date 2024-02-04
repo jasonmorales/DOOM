@@ -18,6 +18,7 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#if 0
 // Binary Angles, sine/cosine/atan lookups.
 #include "tables.h"
 
@@ -39,3 +40,5 @@
 #include "r_data.h"
 #include "r_things.h"
 #include "r_draw.h"
+
+#endif

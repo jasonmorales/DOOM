@@ -15,24 +15,21 @@
 //	Handling interactions (i.e., collisions).
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "doomdef.h"
 #include "d_main.h"
 #include "dstrings.h"
 #include "sounds.h"
-
 #include "doomstat.h"
-
 #include "m_random.h"
 #include "i_system.h"
-
 #include "am_map.h"
-
 #include "p_local.h"
-
 #include "s_sound.h"
 #include "p_inter.h"
+#include "d_items.h"
+#include "r_main.h"
+
+import std;
 
 
 extern Doom* g_doom;

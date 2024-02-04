@@ -16,21 +16,19 @@
 //	Action functions for weapons.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "doomdef.h"
 #include "d_main.h"
 #include "d_event.h"
-
 #include "m_random.h"
 #include "p_local.h"
 #include "s_sound.h"
-
 #include "doomstat.h"
-
 #include "sounds.h"
-
 #include "p_pspr.h"
+#include "r_main.h"
+#include "d_items.h"
+
+import std;
 
 
 extern Doom* g_doom;
@@ -223,9 +221,6 @@ bool P_CheckAmmo(player_t* player)
     return false;
 }
 
-//
-// P_FireWeapon.
-//
 void P_FireWeapon(player_t* player)
 {
     if (!P_CheckAmmo(player))
@@ -247,26 +242,16 @@ void P_DropWeapon(player_t* player)
 }
 
 //
-// A_WeaponReady
-// The player can fire the weapon
-// or change to another weapon at this time.
-// Follows after getting weapon up,
-// or after previous attack/fire sequence.
-//
-void
-A_WeaponReady
-(player_t* player,
-    pspdef_t* psp)
+// The player can fire the weapon or change to another weapon at this time.
+// Follows after getting weapon up, or after previous attack/fire sequence.
+void A_WeaponReady(player_t* player, pspdef_t* psp)
 {
     statenum_t	newstate;
     int		angle;
 
     // get out of attack state
-    if (player->mo->state == &states[S_PLAY_ATK1]
-        || player->mo->state == &states[S_PLAY_ATK2])
-    {
+    if (player->mo->state == &states[S_PLAY_ATK1] || player->mo->state == &states[S_PLAY_ATK2])
         P_SetMobjState(player->mo, S_PLAY);
-    }
 
     if (player->readyweapon == wp_chainsaw
         && psp->state == &states[S_SAW])
@@ -308,18 +293,9 @@ A_WeaponReady
     psp->sy = WEAPONTOP + FixedMul(player->bob, finesine[angle]);
 }
 
-
-
-//
-// A_ReFire
-// The player can re-fire the weapon
-// without lowering it entirely.
-//
-void A_ReFire
-(player_t* player,
-    [[maybe_unused]] pspdef_t* psp)
+// The player can re-fire the weapon without lowering it entirely.
+void A_ReFire(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
-
     // check for fire
     //  (if a weapon change is pending, let it go through instead)
     if ((player->cmd.buttons & BT_ATTACK)
@@ -336,11 +312,7 @@ void A_ReFire
     }
 }
 
-
-void
-A_CheckReload
-(player_t* player,
-    [[maybe_unused]] pspdef_t* psp)
+void A_CheckReload(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
     P_CheckAmmo(player);
 #if 0
@@ -349,17 +321,8 @@ A_CheckReload
 #endif
 }
 
-
-
-//
-// A_Lower
-// Lowers current weapon,
-//  and changes weapon at bottom.
-//
-void
-A_Lower
-(player_t* player,
-    pspdef_t* psp)
+// Lowers current weapon, and changes weapon at bottom.
+void A_Lower(player_t* player, pspdef_t* psp)
 {
     psp->sy += LOWERSPEED;
 
@@ -390,14 +353,7 @@ A_Lower
     P_BringUpWeapon(player);
 }
 
-
-//
-// A_Raise
-//
-void
-A_Raise
-(player_t* player,
-    pspdef_t* psp)
+void A_Raise(player_t* player, pspdef_t* psp)
 {
     psp->sy -= RAISESPEED;
 
@@ -426,20 +382,9 @@ A_GunFlash
     P_SetPsprite(player, ps_flash, weaponinfo[player->readyweapon].flashstate);
 }
 
-
-
-//
 // WEAPON ATTACKS
-//
 
-
-//
-// A_Punch
-//
-void
-A_Punch
-(player_t* player,
-    [[maybe_unused]] pspdef_t* psp)
+void A_Punch(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
     angle_t	angle;
     int		damage;
@@ -466,25 +411,14 @@ A_Punch
     }
 }
 
-
-//
-// A_Saw
-//
-void
-A_Saw
-(player_t* player,
-    [[maybe_unused]] pspdef_t* psp)
+void A_Saw(player_t* player, [[maybe_unused]] pspdef_t* psp)
 {
-    angle_t	angle;
-    int		damage;
-    int		slope;
-
-    damage = 2 * (P_Random() % 10 + 1);
-    angle = player->mo->angle;
+    int32 damage = 2 * (P_Random() % 10 + 1);
+    angle_t	angle = player->mo->angle;
     angle += (P_Random() - P_Random()) << 18;
 
     // use meleerange + 1 se the puff doesn't skip the flash
-    slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1);
+    auto slope = P_AimLineAttack(player->mo, angle, MELEERANGE + 1);
     P_LineAttack(player->mo, angle, MELEERANGE + 1, slope, damage);
 
     if (!linetarget)
@@ -492,6 +426,7 @@ A_Saw
         S_StartSound(player->mo, sfx_sawful);
         return;
     }
+
     S_StartSound(player->mo, sfx_sawhit);
 
     // turn to face target

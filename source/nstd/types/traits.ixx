@@ -1,10 +1,9 @@
-module;
-
-#include <stdint.h>
-
 export module nstd.traits;
 
+import <cstdint>;
+
 import std;
+
 
 // General
 
@@ -85,9 +84,7 @@ template<typename T>
 concept numeric = is_scalar<T>;
 
 template<typename T>
-constexpr bool is_enum = std::is_enum_v<T>;
-template<typename T>
-concept enum_t = is_enum<T>;
+concept is_enum = std::is_enum_v<T> or derived_from<T, class named_enum>;
 
 template<typename T>
 using underlying_type = std::underlying_type_t<naked_type<T>>;
@@ -98,7 +95,7 @@ struct int_rep_s { using type = T; };
 template<typename T>
 struct int_rep_s<T, false> {};
 
-template<enum_t E>
+template<is_enum E>
 struct int_rep_s<E, true> { using type = underlying_type<E>; };
 
 template<pointer P>

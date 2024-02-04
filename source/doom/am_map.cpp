@@ -14,25 +14,19 @@
 // DESCRIPTION:  the automap code
 //
 //-----------------------------------------------------------------------------
-import std;
+#include "i_video.h"
 
-#include "doomdef.h"
 #include "doomstat.h"
-#include "dstrings.h"
-
-#include "am_map.h"
-#include "d_event.h"
-#include "i_system.h"
+#include "st_stuff.h"
+#include "m_misc.h"
+#include "d_englsh.h"
+#include "w_wad.h"
 #include "m_cheat.h"
 #include "p_local.h"
-#include "r_state.h"
-#include "st_stuff.h"
-#include "v_video.h"
-#include "w_wad.h"
-#include "z_zone.h"
 #include "d_main.h"
-#include "i_video.h"
-#include "m_misc.h"
+
+import std;
+
 
 extern Doom* g_doom;
 
@@ -923,7 +917,7 @@ void AM_drawFline(fline_t* fl, byte color)
         || fl->b.x < 0 || fl->b.x >= f_w
         || fl->b.y < 0 || fl->b.y >= f_h)
     {
-        fprintf(stderr, "fuck %d \r", fuck++);
+        std::cerr << std::format("fuck {} \n", fuck++);
         return;
     }
 

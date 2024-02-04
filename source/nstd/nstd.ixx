@@ -16,3 +16,4 @@ export import nstd.bits;
 export import nstd.convert;
 export import nstd.flags;
 export import nstd.ename;
+export import nstd.math;

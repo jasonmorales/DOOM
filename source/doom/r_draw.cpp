@@ -17,24 +17,19 @@
 //	 e.g. inline assembly, different algorithms.
 //
 //-----------------------------------------------------------------------------
-import std;
+#include "i_video.h"
 
 #include "doomdef.h"
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "w_wad.h"
-
 #include "r_local.h"
-
-// Needs access to LFB (guess what).
 #include "v_video.h"
-#include "i_video.h"
-
-// State.
 #include "doomstat.h"
-
 #include "d_main.h"
+#include "r_main.h"
+
+import std;
 
 
 extern Doom* g_doom;

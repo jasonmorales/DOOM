@@ -15,22 +15,19 @@
 //	Moving object handling. Spawn functions.
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "i_system.h"
 #include "z_zone.h"
 #include "m_random.h"
-
 #include "doomdef.h"
 #include "p_local.h"
 #include "sounds.h"
-
 #include "st_stuff.h"
 #include "hu_stuff.h"
-
 #include "s_sound.h"
-
 #include "doomstat.h"
+#include "r_main.h"
+
+import std;
 
 
 void G_PlayerReborn(int player);
@@ -454,22 +451,13 @@ void P_MobjThinker(mobj_t* mobj)
 
 }
 
-
-//
-// P_SpawnMobj
-//
-mobj_t*
-P_SpawnMobj
-(fixed_t	x,
-    fixed_t	y,
-    fixed_t	z,
-    mobjtype_t	type)
+mobj_t* P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 {
     state_t* st;
     mobjinfo_t* info;
 
     auto mobj = Z_Malloc<mobj_t>(sizeof(mobj_t), PU_LEVEL, nullptr);
-    memset(mobj, 0, sizeof(*mobj));
+    std::memset(mobj, 0, sizeof(*mobj));
     info = &mobjinfo[type];
 
     mobj->type = type;
@@ -696,7 +684,7 @@ void P_SpawnMapThing(mapthing_t* mthing)
     {
         if (deathmatch_p < &deathmatchstarts[10])
         {
-            memcpy(deathmatch_p, mthing, sizeof(*mthing));
+            std::memcpy(deathmatch_p, mthing, sizeof(*mthing));
             deathmatch_p++;
         }
         return;
@@ -964,7 +952,7 @@ P_SpawnPlayerMissile
 byte* mobj_t::GetSaveData() const
 {
 	auto* out = new mobj_t;
-	memcpy(out, this, sizeof(mobj_t));
+    std::memcpy(out, this, sizeof(mobj_t));
 
 	if (out->state)
 		*reinterpret_cast<intptr_t*>(out->state) = out->state - states;

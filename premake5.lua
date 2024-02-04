@@ -24,6 +24,35 @@ premake.override(premake.vstudio.sln2005, 'projects', function(base, wks)
 	base(wks)
 end)
 
+function project_common(project_name)
+	project(project_name)
+		language 'C++'
+		cppdialect 'C++latest'
+		systemversion '10.0'
+		characterset 'unicode'
+		warnings 'extra'
+		rtti 'Off'
+		dpiawareness 'HighPerMonitor'
+		usestandardpreprocessor 'On'
+		buildstlmodules 'On'
+
+		location 'project'
+		objdir 'intermediate'
+		targetdir 'bin'
+
+		filter 'Debug'
+			defines { 'DEBUG', '_DEBUG' }
+			symbols 'on'
+			optimize 'off'
+			targetsuffix '_d'
+			
+		filter 'Release'
+			defines { 'NDEBUG' }
+			optimize 'full'
+
+		filter {}
+end
+
 workspace 'Doom'
 	editorintegration "On"
 	configurations { 'Debug', 'Release' }
@@ -42,34 +71,9 @@ workspace 'Doom'
             '.gitignore',
 		}
 	}
-	project 'nstd'
+
+	project_common 'nstd'
 		kind 'StaticLib'
-		language 'C++'
-		cppdialect 'C++latest'
-		systemversion '10.0'
-		characterset 'unicode'
-		warnings 'extra'
-		rtti 'Off'
-		dpiawareness 'HighPerMonitor'
-		usestandardpreprocessor 'On'
-		buildstlmodules 'On'
-		flags {}
-
-		location 'project'
-		objdir 'intermediate'
-		targetdir 'bin'
-
-		filter 'Debug'
-			defines { 'DEBUG', '_DEBUG' }
-			symbols 'On'
-			optimize 'Off'
-			targetsuffix '_d'
-			
-		filter 'Release'
-			defines { 'NDEBUG' }
-			optimize 'full'
-			
-		filter {}
 
 		files {
             'source/nstd/**',
@@ -85,36 +89,16 @@ workspace 'Doom'
 		libdirs {
 		}
 			
-	project 'doom'
-		--kind 'WindowedApp'
-		kind 'ConsoleApp'
-		language 'C++'
-		cppdialect 'C++latest'
-		entrypoint 'WinMainCRTStartup'
-		systemversion '10.0'
-		characterset 'unicode'
-		warnings 'extra'
-		rtti 'Off'
-		dpiawareness 'HighPerMonitor'
-		usestandardpreprocessor 'On'
-		buildstlmodules 'On'
-		flags {}
+	project_common 'doom'
+		kind 'WindowedApp'
+		--kind 'ConsoleApp'
 
-		location 'project'
-		objdir 'intermediate'
-		targetdir 'bin'
 		debugdir '.'
 
 		filter 'Debug'
-			defines { 'DEBUG', '_DEBUG' }
-			symbols 'on'
-			optimize 'off'
-			targetsuffix '_d'
 			debugcommand ('bin/doom_d.exe')
 
 		filter 'Release'
-			defines { 'NDEBUG' }
-			optimize 'full'
 			debugcommand ('bin/doom.exe')
 			
 		filter {}
@@ -131,6 +115,7 @@ workspace 'Doom'
 
 		includedirs {
 			'source/doom',
+			'source',
 			'lib/glew-' .. glew_version .. '/include',
 		}
 
@@ -152,6 +137,35 @@ workspace 'Doom'
 			--'dinput8',
 			--'dxguid',
 			'ws2_32',
+		}
+
+	project_common 'tests'
+		kind 'ConsoleApp'
+
+		debugdir '.'
+
+		filter 'Debug'
+			debugcommand ('bin/tests_d.exe')
+
+		filter 'Release'
+			debugcommand ('bin/tests.exe')
+
+		filter {}
+
+		files {
+            'source/tests/**',
+		}
+
+		vpaths {
+			["source/*"] = 'source/tests/**',
+		}
+
+		includedirs {
+			'source'
+		}
+
+		links {
+			'nstd'
 		}
 
 	project 'ipx_driver'

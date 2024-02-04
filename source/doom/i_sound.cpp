@@ -15,24 +15,22 @@
 //	System interface for sound.
 //
 //-----------------------------------------------------------------------------
-import std;
-import nstd;
-import config;
-import log;
-
-#include "z_zone.h"
-
-#include "i_system.h"
-#include "i_sound.h"
-#include "m_misc.h"
-#include "w_wad.h"
-
-#include "doomdef.h"
-
 #include "system/windows.h"
 
 #include <mmdeviceapi.h>
 #include <Audioclient.h>
+
+#include "z_zone.h"
+#include "i_system.h"
+#include "i_sound.h"
+#include "m_misc.h"
+#include "w_wad.h"
+#include "doomdef.h"
+
+import std;
+import nstd;
+import config;
+import log;
 
 
 // The number of internal mixing channels, the samples calculated for each mixing step, the size

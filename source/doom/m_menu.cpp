@@ -16,38 +16,29 @@
 //	Sliders and icons. Kinda widget stuff.
 //
 //-----------------------------------------------------------------------------
-import std;
-import config;
+#include "i_video.h"
 
 #include "doomdef.h"
 #include "dstrings.h"
-
 #include "d_main.h"
-
 #include "i_system.h"
-#include "i_video.h"
 #include "z_zone.h"
 #include "v_video.h"
 #include "w_wad.h"
-
 #include "r_local.h"
-
-
 #include "hu_stuff.h"
-
 #include "g_game.h"
-
 #include "m_swap.h"
-
 #include "s_sound.h"
-
 #include "doomstat.h"
-
-// Data.
 #include "sounds.h"
-
 #include "m_menu.h"
 #include "m_misc.h"
+#include "r_main.h"
+
+import std;
+import nstd;
+import config;
 
 
 extern Doom* g_doom;
@@ -818,8 +809,7 @@ void M_Episode(int choice)
     // Yet another hack...
     if ((g_doom->GetGameMode() == GameMode::Doom1Registered) && (choice > 2))
     {
-        fprintf(stderr,
-            "M_Episode: 4th episode requires UltimateDOOM\n");
+        std::cerr << "M_Episode: 4th episode requires UltimateDOOM\n";
         choice = 0;
     }
 
@@ -1179,10 +1169,10 @@ bool M_Responder(const input::event& event)
         {
             static const float delta_threshold = 100.f;
 
-            y_count += event.value;
+            y_count += event.i_value;
             if (menuactive && std::abs(y_count) > delta_threshold)
             {
-                nav_up_down(nstd::round_to<int32>(nstd::sign(event.value)));
+                nav_up_down(nstd::sign(event.i_value));
                 y_count -= std::copysign(delta_threshold, y_count);
             }
         }
@@ -1191,10 +1181,10 @@ bool M_Responder(const input::event& event)
         {
             static const float delta_threshold = 100.f;
 
-            x_count += event.value;
+            x_count += event.i_value;
             if (std::abs(x_count) > delta_threshold)
             {
-                nav_left_right(nstd::round_to<int32>(nstd::sign((event.value) + 1) / 2));
+                nav_left_right(nstd::sign((event.i_value) + 1) / 2);
                 x_count -= std::copysign(delta_threshold, x_count);
             }
         }

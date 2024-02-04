@@ -252,9 +252,9 @@ export struct SystemEvent
 
     input::device_id get_source_device() const noexcept
     {
-        if (is_keyboard_event()) return "Keyboard";
-        if (is_mouse_event()) return "Mouse";
-        return input::device_id::Invalid;
+        if (is_keyboard_event()) return input::enhanced_enum_base_type_device_id::Keyboard;
+        if (is_mouse_event()) return input::enhanced_enum_base_type_device_id::Mouse;
+        return input::enhanced_enum_base_type_device_id::Invalid;
     }
 
     WORD get_count() const noexcept
@@ -300,8 +300,24 @@ bool Window::RegisterClass(WindowClassDefinition& definition)
     return true;
 }
 
+enum class EEE : int32 { A, B, C };
+class CCC
+{
+public:
+    using enum EEE;
+};
+
 void Window::Update()
 {
+    input::EnumExportTestA::A;
+    //input::EnumExportTestB::A;
+
+    EE::A;
+    //CC::A;
+
+    EEE::A;
+    CCC::A;
+
     auto new_cursor_pos = GetCursorPos();
     auto delta = new_cursor_pos - old_cursor_pos;
 
@@ -321,36 +337,32 @@ void Window::Update()
         flags.set<"alt">(nstd::is_bit_set<7>(GetKeyState(VK_MENU)));
 
         input::event event = {
-            .device = input::Mouse,
+            .device = input::enhanced_enum_base_type_device_id::Mouse,
             .id = MouseAbsolute,
             .count = 1,
             .flags = flags,
             .cursor_pos = new_cursor_pos,
             };
 
-        input::event_queue.push_front(event);
-        std::cout << std::format("{}\n", input::event_queue.front().str());
+        input::manager::add_event(event);
 
         event.id = "MouseDelta";
         event.cursor_pos = delta;
-        event.value = delta.length<float>();
-        input::event_queue.push_front(event);
-        std::cout << std::format("{}\n", input::event_queue.front().str());
+        event.f_value = delta.length<float>();
+        input::manager::add_event(event);
 
         if (delta.x != 0)
         {
             event.id = "MouseDeltaX";
-            event.value = static_cast<float>(delta.x);
-            input::event_queue.push_front(event);
-            std::cout << std::format("{}\n", input::event_queue.front().str());
+            event.i_value = delta.x;
+            input::manager::add_event(event);
         }
 
         if (delta.y != 0)
         {
             event.id = "MouseDeltaY";
-            event.value = static_cast<float>(delta.y);
-            input::event_queue.push_front(event);
-            std::cout << std::format("{}\n", input::event_queue.front().str());
+            event.i_value = delta.y;
+            input::manager::add_event(event);
         }
     }
 
@@ -497,19 +509,17 @@ void Window::CreateInputEvent(const SystemEvent& event)
 {
     if (event.is_char_event())
     {
-        input::character_stream += wstring(event.get_count(), static_cast<wchar_t>(event.wParam));
+        //input::character_stream += wstring(event.get_count(), static_cast<wchar_t>(event.wParam));
         return;
     }
 
-    input::event_queue.push_front({
+    input::manager::add_event({
         .device = event.get_source_device(),
         .id = event.get_event_id(),
         .count = event.get_count(),
         .flags = event.get_input_flags(),
         .cursor_pos = event.get_cursor_pos(this),
         });
-
-    std::cout << std::format("{}\n", input::event_queue.front().str());
 }
 
 LRESULT CALLBACK Window::Proc(HWND handle, UINT msg, WPARAM wParam, LPARAM lParam)

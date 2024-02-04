@@ -18,10 +18,11 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import nstd;
-
 #include "r_defs.h"
 #include "r_state.h"
+
+import nstd;
+
 
 // Retrieve column data for span blitting.
 const byte* R_GetColumn(int32 tex, int32 col);
@@ -30,14 +31,10 @@ const byte* R_GetColumn(int32 tex, int32 col);
 void R_InitData();
 void R_PrecacheLevel();
 
-
 // Retrieval.
-// Floor/ceiling opaque texture tiles,
-// lookup by name. For animation?
+// Floor/ceiling opaque texture tiles, lookup by name. For animation?
 int32 R_FlatNumForName(string_view name);
 
-
-// Called by P_Ticker for switches and animations,
-// returns the texture number for the texture name.
-int R_TextureNumForName(const char* name);
-int R_CheckTextureNumForName(const char* name);
+// Called by P_Ticker for switches and animations, returns the texture number for the texture name.
+int32 R_TextureNumForName(string_view name);
+int32 R_CheckTextureNumForName(string_view name);

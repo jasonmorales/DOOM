@@ -19,11 +19,23 @@ import std;
 import nstd;
 import config;
 
-#include "d_main.h"
-
 #include "system/windows.h"
 
+#include "d_main.h"
+
 Doom* g_doom = nullptr;
+
+template<typename T>
+consteval string_view get_type_name()
+{
+    string_view fn_name = std::source_location::current().function_name();
+    auto start = fn_name.find_last_of('<') + 1;
+    auto type_name = fn_name.substr(start, fn_name.find_last_of('>') - start);
+    if (type_name.starts_with("class "))
+        type_name = type_name.substr(6);
+
+    return type_name;
+}
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR args, int)
 {

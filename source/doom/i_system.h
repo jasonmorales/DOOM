@@ -17,13 +17,14 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
-import std;
-import nstd;
-
 #include "d_ticcmd.h"
 #include "d_event.h"
 
-#include <ctime>
+//#include <ctime>
+
+import std;
+import nstd;
+
 
 // Called by DoomMain.
 void I_Init();
@@ -36,7 +37,7 @@ byte* I_ZoneBase(intptr_t* size);
 
 // Called by Doom::Loop,
 // returns current time in tics.
-time_t I_GetTime();
+std::time_t I_GetTime();
 
 // Asynchronous interrupt functions should maintain private queues
 // that are read by the synchronous functions

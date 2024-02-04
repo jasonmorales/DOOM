@@ -1,13 +1,12 @@
-module;
-
-#include <limits.h>
-#include <cassert>
-
 export module nstd.bits;
+
+import <limits.h>;
+import <cassert>;
 
 import std;
 import nstd.traits;
 import nstd.numbers;
+
 
 export namespace nstd {
 

@@ -14,18 +14,15 @@
 // DESCRIPTION:  Ceiling animation (lowering, crushing, raising)
 //
 //-----------------------------------------------------------------------------
-import std;
-
 #include "z_zone.h"
 #include "doomdef.h"
 #include "p_local.h"
-
 #include "s_sound.h"
-
 #include "doomstat.h"
 #include "r_state.h"
-
 #include "sounds.h"
+
+import std;
 
 
 // CEILINGS

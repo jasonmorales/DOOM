@@ -12,16 +12,12 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
-import std;
-import config;
-import log;
-import input;
+#include "i_video.h"
 
 #include "doomdef.h" 
 #include "doomstat.h"
 #include "dstrings.h"
 #include "sounds.h"
-
 #include "am_map.h"
 #include "d_main.h"
 #include "f_finale.h"
@@ -44,7 +40,12 @@ import input;
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
-#include "i_video.h"
+#include "r_draw.h"
+
+import std;
+import config;
+import log;
+import input;
 
 
 extern Doom* g_doom;
@@ -470,9 +471,9 @@ bool G_Responder(const input::event& event)
             return true;	// finale ate the event 
     }
 
-    switch (event.device.value)
+    switch (event.device)
     {
-    case input::Keyboard:
+    case input::enhanced_enum_base_type_device_id::Keyboard:
         if (event.down("Pause"))
         {
             sendpause = true;
@@ -485,21 +486,21 @@ bool G_Responder(const input::event& event)
         
         return false;   // always let key up events filter down 
 
-    case input::Mouse:
+    case input::enhanced_enum_base_type_device_id::Mouse:
         if (event.is("MouseLeft")) mousebuttons[0] = event.down();
         if (event.is("MouseRight")) mousebuttons[1] = event.down();
         if (event.is("MouseMiddle")) mousebuttons[2] = event.down();
-        if (event.is("MouseDeltaX")) mousex = event.value * (mouseSensitivity + 5) / 10;
-        if (event.is("MouseDeltaY")) mousey = event.value * (mouseSensitivity + 5) / 10;
+        if (event.is("MouseDeltaX")) mousex = event.i_value * (mouseSensitivity + 5) / 10;
+        if (event.is("MouseDeltaY")) mousey = event.i_value * (mouseSensitivity + 5) / 10;
         return true;    // eat events 
 
-    case input::Controller:
+    case input::enhanced_enum_base_type_device_id::Controller:
         if (event.is("Button1")) joybuttons[0] = event.down();
         if (event.is("Button2")) joybuttons[1] = event.down();
         if (event.is("Button3")) joybuttons[2] = event.down();
         if (event.is("Button4")) joybuttons[3] = event.down();
-        if (event.is("JoyX")) joyxmove = event.value;
-        if (event.is("JoyY")) joyymove = event.value;
+        if (event.is("JoyX")) joyxmove = event.i_value;
+        if (event.is("JoyY")) joyymove = event.i_value;
         return true;    // eat events 
 
     default:
@@ -1366,7 +1367,7 @@ void G_DoPlayDemo()
     demo_ibuffer = demo_g = WadManager::GetLumpData<byte>(defdemoname.to_upper());
     if (*demo_g++ != Doom::Version)
     {
-        fprintf(stderr, "Demo is from a different game version!\n");
+        std::cerr << "Demo is from a different game version!\n";
         gameaction = ga_nothing;
         return;
     }

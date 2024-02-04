@@ -12,22 +12,22 @@
 // for more details.
 //
 //-----------------------------------------------------------------------------
-import std;
+#include "i_video.h"
 
 #include "doomdef.h"
 #include "m_misc.h"
-#include "i_video.h"
 #include "i_sound.h"
-
 #include "d_net.h"
 #include "g_game.h"
-
 #include "i_system.h"
 #include "d_main.h"
 
 #include <cassert>
 #include <cstdlib>
 #include <ctime>
+
+import std;
+
 
 extern Doom* g_doom;
 

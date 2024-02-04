@@ -1,27 +1,27 @@
-module;
-
-#include <stdint.h>
-#include <cassert>
-
 export module nstd.numbers;
+
+import <cstdint>;
+import <cassert>;
 
 import std;
 import nstd.traits;
 
+
 export {
 
 using std::intptr_t;
+using std::ptrdiff_t;
 
-using int8 = int8_t;
-using int16 = int16_t;
-using int32 = int32_t;
-using int64 = int64_t;
+using int8 = std::int8_t;
+using int16 = std::int16_t;
+using int32 = std::int32_t;
+using int64 = std::int64_t;
 
-using byte = uint8_t;
-using uint8 = uint8_t;
-using uint16 = uint16_t;
-using uint32 = uint32_t;
-using uint64 = uint64_t;
+using byte = std::uint8_t;
+using uint8 = std::uint8_t;
+using uint16 = std::uint16_t;
+using uint32 = std::uint32_t;
+using uint64 = std::uint64_t;
 
 constexpr int32 INVALID_ID = -1;
 
@@ -41,11 +41,13 @@ constexpr double Tau_d = Tau_t<double>;
 constexpr float Tau_f = Tau_t<float>;
 constexpr auto Tau = Tau_d;
 
+using size_t = std::ptrdiff_t;
+
 using std::in_range;
 
 using std::to_underlying;
 
-template<number T> const T zero = 0;
+template<number T> constexpr T zero = 0;
 
 template<floating_point F>
 constexpr bool is_in_type_range(floating_point auto f)
@@ -141,19 +143,5 @@ constexpr std::common_type_t<B, E> pow(B b, E e)
     assert(out <= std::numeric_limits<R>::max());
     return static_cast<R>(out);
 }
-
-template<floating_point B, floating_point E>
-constexpr std::common_type<B, E> pow(B b, E e)
-{
-    return std::pow(b, e);
-}
-
-template<floating_point F>
-constexpr F sign(F f) { return std::copysign(1.f, f); }
-
-template<signed_int N> constexpr N sign(N n);
-
-template<number T>
-constexpr T sqr(T n) { return n * n; }
 
 } // export namespace nstd

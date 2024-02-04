@@ -1,12 +1,11 @@
-module;
-
-#include <cassert>
-
 export module nstd.convert;
+
+import <cassert>;
 
 import nstd.strings;
 import nstd.traits;
 import nstd.numbers;
+
 
 export namespace nstd {
 

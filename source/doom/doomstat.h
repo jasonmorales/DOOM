@@ -24,11 +24,17 @@
 
 // We need globally shared data structures,
 //  for defining the global state variables.
-#include "doomdata.h"
+#include "doomdef.h"
+//#include "doomdata.h"
 #include "d_net.h"
+//#include "d_ticcmd.h"
 
-// We need the playr data structure as well.
+// We need the player data structure as well.
 #include "d_player.h"
+
+//#include <cstdio>
+
+import nstd;
 
 // ------------------------
 // Command line parameters.
@@ -182,7 +188,7 @@ extern  int		maxammo[NUMAMMO];
 //
 
 // File handling stuff.
-extern  FILE* debugfile;
+extern std::ofstream debugfile;
 
 // if true, load all graphics at level load
 extern  bool         precache;

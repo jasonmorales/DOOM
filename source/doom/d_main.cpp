@@ -18,16 +18,12 @@
 //	and call the startup functions.
 //
 //-----------------------------------------------------------------------------
-import std;
-import config;
-import log;
-import input;
+#include "i_video.h"
 
 #include "doomdef.h"
 #include "doomstat.h"
 #include "dstrings.h"
 #include "sounds.h"
-
 #include "am_map.h"
 #include "d_main.h"
 #include "f_finale.h"
@@ -36,7 +32,6 @@ import input;
 #include "hu_stuff.h"
 #include "i_system.h"
 #include "i_sound.h"
-#include "i_video.h"
 #include "m_misc.h"
 #include "m_menu.h"
 #include "p_setup.h"
@@ -48,6 +43,14 @@ import input;
 #include "w_wad.h"
 #include "wi_stuff.h"
 #include "z_zone.h"
+#include "r_draw.h"
+
+//#include <cstdio>
+
+import std;
+import config;
+import log;
+import input;
 
 
 #define BGCOLOR 7
@@ -73,7 +76,7 @@ int startepisode;
 int startmap;
 bool autostart;
 
-FILE* debugfile;
+std::ofstream debugfile;
 
 char wadfile[1024];		// primary wad file
 char mapdir[1024];		// directory of development maps
@@ -82,7 +85,7 @@ char mapdir[1024];		// directory of development maps
 
 bool Doom::HasEscEventInQueue()
 {
-    for (auto& event : input::event_queue)
+    for (auto& event : input::manager::get_event_queue())
     {
         if (event.down("Escape"))
             return true;
@@ -95,7 +98,7 @@ void Doom::Main()
 {
     IdentifyVersion();
 
-    setvbuf(stdout, nullptr, _IONBF, 0);
+    std::cout.setf(std::ios::unitbuf);
 
     nomonsters = CommandLine::HasArg("-nomonsters");
     respawnparm = CommandLine::HasArg("-respawn");
@@ -150,7 +153,7 @@ void Doom::Main()
     log::write(title);
 
     if (isDevMode)
-        printf(D_DEVSTR);
+        std::printf(D_DEVSTR);
 
     // turbo option
     if (CommandLine::HasArg("-turbo"))
@@ -163,7 +166,7 @@ void Doom::Main()
         if (scale > 400)
             scale = 400;
 
-        printf("turbo scale: %i%%\n", scale);
+        std::printf("turbo scale: %i%%\n", scale);
         forwardmove[0] = forwardmove[0] * scale / 100;
         forwardmove[1] = forwardmove[1] * scale / 100;
         sidemove[0] = sidemove[0] * scale / 100;
@@ -298,14 +301,14 @@ void Doom::Main()
     // If additional PWAD files are used, print modified banner
     if (isModified)
     {
-        /*m*/ printf(
+        /*m*/ std::printf(
             "===========================================================================\n"
             "ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
             "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
             "        You will not receive technical support for modified games.\n"
             "                      press enter to continue\n"
             "===========================================================================\n");
-        getchar();
+        std::getchar();
     }
 
     // Check and print which version is executed.
@@ -313,7 +316,7 @@ void Doom::Main()
     {
     case GameMode::Doom1Shareware:
     case GameMode::Unknown:
-        printf(
+        std::printf(
             "===========================================================================\n"
             "                                Shareware!\n"
             "===========================================================================\n");
@@ -321,7 +324,7 @@ void Doom::Main()
     case GameMode::Doom1Registered:
     case GameMode::Doom1Retail:
     case GameMode::Doom2Commercial:
-        printf(
+        std::printf(
             "===========================================================================\n"
             "                 Commercial product - do not distribute!\n"
             "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
@@ -333,23 +336,23 @@ void Doom::Main()
         break;
     }
 
-    printf("Menu::Init: Init miscellaneous info.\n");
+    std::printf("Menu::Init: Init miscellaneous info.\n");
     Menu::Init();
 
-    printf("Render::Init: Init DOOM refresh daemon - ");
+    std::printf("Render::Init: Init DOOM refresh daemon - ");
     render = new Render;
     render->Init();
 
-    printf("\nP_Init: Init Playloop state.\n");
+    std::printf("\nP_Init: Init Playloop state.\n");
     P_Init(this);
 
-    printf("I_Init: Setting up machine state.\n");
+    std::printf("I_Init: Setting up machine state.\n");
     I_Init();
 
-    printf("Net::CheckGame: Checking network game status.\n");
+    std::printf("Net::CheckGame: Checking network game status.\n");
     Net::CheckGame();
 
-    printf("S_Init: Setting up sound.\n");
+    std::printf("S_Init: Setting up sound.\n");
     S_Init(snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/);
 
     printf("HU_Init: Setting up heads up display.\n");
@@ -414,7 +417,7 @@ void Doom::Loop()
     {
         string fileName = std::format("debug{}.txt", consoleplayer);
         std::cout << "debug output to: " << fileName << "\n";
-        fopen_s(&debugfile, fileName.c_str(), "w");
+        debugfile.open(fileName, std::ios_base::out);
     }
 
     while (1)
@@ -453,7 +456,7 @@ void Doom::Loop()
 // Send all the events of the given timestamp down the responder chain
 void Doom::ProcessEvents()
 {
-    for (auto& event : input::event_queue)
+    for (auto& event : input::manager::get_event_queue())
     {
         if (M_Responder(event))
             continue; // menu ate the event
@@ -461,8 +464,8 @@ void Doom::ProcessEvents()
         G_Responder(event);
     }
 
-    input::flush_character_stream();
-    input::flush_event_queue();
+    input::manager::flush_character_stream();
+    input::manager::flush_event_queue();
 }
 
 int pagetic;
