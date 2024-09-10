@@ -387,9 +387,9 @@ void P_LoadSideDefs(intptr_t lump)
     {
         sd->textureoffset = (msd->textureoffset) << FRACBITS;
         sd->rowoffset = (msd->rowoffset) << FRACBITS;
-        sd->toptexture = R_TextureNumForName(msd->toptexture);
-        sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
-        sd->midtexture = R_TextureNumForName(msd->midtexture);
+        sd->toptexture = R_TextureNumForName({msd->toptexture, 8});
+        sd->bottomtexture = R_TextureNumForName({msd->bottomtexture, 8});
+        sd->midtexture = R_TextureNumForName({msd->midtexture, 8});
         sd->sector = &sectors[(msd->sector)];
     }
 }

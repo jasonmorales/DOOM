@@ -8,25 +8,11 @@ import std;
 import nstd;
 import nstd.enum_ref;
 
-export enum class EE : int32 { A, B, C };
-export class CC
-{
-public:
-	using enum EE;
-};
-
 namespace input {
 
 export {
 ENUM(device_id, int32, Invalid, Keyboard, Mouse, Controller);
 }
-
-export enum class EnumExportTestA : int32 { A, B, C };
-export class EnumExportTestB
-{
-public:
-	using enum EnumExportTestA;
-};
 
 export using event_id = nstd::ename<
 	"None", "Any",
@@ -133,15 +119,12 @@ export struct event
 	constexpr bool held(event_id test_id = Any) const { return flags.all<"held">() && is(test_id); }
 
 	constexpr bool is_device(device_id test_id) const { return device == test_id; }
-	constexpr bool is_keyboard() const { return device == device_id::Keyboard; }
-	constexpr bool is_mouse() const { return device == device_id::Mouse; }
-	constexpr bool is_controller() const { return device == device_id::Controller; }
+	constexpr bool is_keyboard() const { return device == enhanced_enum_base_type_device_id::Keyboard; }
+	constexpr bool is_mouse() const { return device == enhanced_enum_base_type_device_id::Mouse; }
+	constexpr bool is_controller() const { return device == enhanced_enum_base_type_device_id::Controller; }
 
 	constexpr string str() const noexcept
 	{
-		input::EnumExportTestA::A;
-		input::EnumExportTestB::A;
-
 		return std::format("{{{}|{}: {}x ({}, {}) [{}] {}}}",
 			device.name(), id.name(), count, cursor_pos.x, cursor_pos.y, flags.str(), i_value);
 	}
@@ -169,7 +152,7 @@ void add_event(event in)
 void add_keypress(event_id id, bool down, int32 count)
 {
 	event_queue.push_front({
-		.device = device_id::Keyboard,
+		//.device = device_id::Keyboard,
 		.id = id,
 		.count = count,
 		.flags = {},

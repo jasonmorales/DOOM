@@ -15,8 +15,12 @@ import nstd;
 
 import log;
 import input;
+
 import platform.window;
 import platform.win64;
+#if 0
+#endif
+
 
 namespace {
 
@@ -290,7 +294,7 @@ bool Window::RegisterClass(WindowClassDefinition& definition)
     auto result = RegisterClassExW(&window_class);
     if (result == 0)
     {
-        log::error(error::get_message());
+        logger::error(error::get_message());
         return false;
     }
 
@@ -300,24 +304,8 @@ bool Window::RegisterClass(WindowClassDefinition& definition)
     return true;
 }
 
-enum class EEE : int32 { A, B, C };
-class CCC
-{
-public:
-    using enum EEE;
-};
-
 void Window::Update()
 {
-    input::EnumExportTestA::A;
-    //input::EnumExportTestB::A;
-
-    EE::A;
-    //CC::A;
-
-    EEE::A;
-    CCC::A;
-
     auto new_cursor_pos = GetCursorPos();
     auto delta = new_cursor_pos - old_cursor_pos;
 
@@ -540,7 +528,7 @@ LRESULT CALLBACK Window::InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM l
     auto result = SetWindowLongPtr(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(create->lpCreateParams));
     if (auto error_code = GetLastError(); result == 0 && error_code != 0)
     {
-        log::error(error::get_message());
+        logger::error(error::get_message());
         return FALSE;
     }
 
@@ -549,7 +537,7 @@ LRESULT CALLBACK Window::InitProc(HWND handle, UINT msg, WPARAM wParam, LPARAM l
     result = SetWindowLongPtr(handle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Window::Proc));
     if (auto error_code = GetLastError(); result == 0 && error_code != 0)
     {
-        log::error(error::get_message());
+        logger::error(error::get_message());
         return FALSE;
     }
 
@@ -614,7 +602,7 @@ export Window* CreateWindow(const WindowDefinition& definition)
 
     if (window->handle == NULL)
     {
-        log::error(error::get_message());
+        logger::error(error::get_message());
         delete window;
         return nullptr;
     }

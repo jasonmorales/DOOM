@@ -544,13 +544,13 @@ int32 R_FlatNumForName(string_view name)
 // Filter out NoTexture indicator.
 int32 R_CheckTextureNumForName(string_view name)
 {
-    int		i;
+    name = name.trim();
 
     // "NoTexture" marker.
     if (name[0] == '-')
         return 0;
 
-    for (i = 0; i < numtextures; i++)
+    for (int32 i = 0; i < numtextures; ++i)
     {
         const auto* test_name = textures[i]->name;
         auto len = std::min(8ll, std::find(test_name, test_name + 8, '\0') - test_name);

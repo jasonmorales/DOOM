@@ -3,7 +3,7 @@ export module log;
 import std;
 import nstd;
 
-export namespace log {
+export namespace logger {
 
 enum class Verbosity : uint8
 {

@@ -65,7 +65,7 @@ public:
     ~Doom() = default;
 
     void Main();
-    void Loop();
+    [[noreturn]] void Loop();
     void ProcessEvents();
     void DoAdvanceDemo();
 

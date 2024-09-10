@@ -10,10 +10,10 @@ import std;
 export namespace nstd {
 
 template<typename T>
-using x_const = std::remove_const_t<T>;
+using rm_const = std::remove_const_t<T>;
 
 template<typename T>
-using x_ref = std::remove_reference_t<T>;
+using rm_ref = std::remove_reference_t<T>;
 
 template<typename T>
 using naked_type = std::remove_cvref_t<T>;
@@ -24,7 +24,7 @@ template<typename T>
 concept pointer = is_pointer<T>;
 
 template<typename T>
-using x_ptr = std::remove_pointer_t<T>;
+using rm_ptr = std::remove_pointer_t<T>;
 template<typename T>
 using ptr = std::add_pointer_t<T>;
 

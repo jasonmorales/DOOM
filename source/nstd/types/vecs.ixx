@@ -59,13 +59,14 @@ public:
 
 	v2_t& SetLength(T f) { if (x != 0.f || y != 0.f) { T scale(f / sqrt(x * x + y * y)); x *= scale; y *= scale; } return *this; }
 
-	template<typename TO = double>
+	template<typename TO = T>
 	TO length() const { return size_cast<TO>(std::sqrt(x * x + y * y)); }
+	template<typename TO = T>
+	TO length_sq() const { return size_cast<TO>(x * x + y * y); }
 
-	T GetLengthSq() const { return x * x + y * y; }
 	v2_t& Clamp(double length)
 	{
-		auto currentSqr = GetLengthSq();
+		auto currentSqr = length_sq();
 		auto clampSqr = sqr(length);
 		if (currentSqr > clampSqr)
 		{
@@ -151,8 +152,6 @@ public:
 			::GetRandomValueInRange(min.x, max.x, rand),
 			::GetRandomValueInRange(min.y, max.y, rand) };
 	}
-
-	static v2_t DefaultValue() { return {}; }
 
 	static constexpr v2_t from_string(::string_view str);
 

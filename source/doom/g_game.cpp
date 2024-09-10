@@ -46,7 +46,7 @@ import std;
 import config;
 import log;
 import input;
-
+import nstd;
 
 extern Doom* g_doom;
 
@@ -1024,7 +1024,7 @@ void Game::DoLoadGame()
     auto inFile = std::ifstream{loadFileName, std::ifstream::binary};
     if (!inFile.is_open())
     {
-        log::write(log::Verbosity::Error, "Failed to open load file: ", loadFileName);
+        logger::write(logger::Verbosity::Error, "Failed to open load file: ", loadFileName);
         return;
     }
 
@@ -1037,7 +1037,7 @@ void Game::DoLoadGame()
         return;
 
     auto read_byte = [&inFile](auto* val){
-        using T = nstd::int_rep<nstd::x_ptr<decltype(val)>>;
+        using T = nstd::int_rep<nstd::rm_ptr<decltype(val)>>;
         *reinterpret_cast<T*>(val) = nstd::zero<T>;
         inFile.read(reinterpret_cast<char*>(val), 1);
     };

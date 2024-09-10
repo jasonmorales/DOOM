@@ -150,7 +150,7 @@ void Doom::Main()
         break;
     }
 
-    log::write(title);
+    logger::write(title);
 
     if (isDevMode)
         std::printf(D_DEVSTR);
@@ -255,7 +255,7 @@ void Doom::Main()
         doWarp(ep,map);
 
     // init subsystems
-    log::write("Z_Init: Init zone memory allocation daemon.");
+    logger::write("Z_Init: Init zone memory allocation daemon.");
     Z_Init();
 
     std::cout << "Video::Init: allocate screens.\n";
@@ -420,7 +420,7 @@ void Doom::Loop()
         debugfile.open(fileName, std::ios_base::out);
     }
 
-    while (1)
+    for (;;)
     {
         // frame synchronous IO operations
         video->StartFrame();

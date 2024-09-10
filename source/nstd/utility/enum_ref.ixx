@@ -86,6 +86,7 @@ public:
     constexpr enum_ref() noexcept = default;
     constexpr enum_ref(const enum_ref&) noexcept = default;
     constexpr enum_ref& operator=(const enum_ref&) noexcept = default;
+    constexpr enum_ref& operator=(enum_type value) noexcept { _my_value = value; return *this; }
     constexpr enum_ref(enum_type value) noexcept : _my_value{value} {}
 
     static constexpr size_t size() { return DATA.size(); }
@@ -224,6 +225,7 @@ public:
     }
     set;
 
+    static constexpr auto _my_data = DATA;
 protected:
     enum_type _my_value = DATA[0].value;
 };

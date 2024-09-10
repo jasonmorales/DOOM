@@ -24,8 +24,8 @@ concept xstd_string = has_value_type<S> && is_xstd_string<S>;
 template<typename T>
 concept string_view_like =
     has_value_type<naked_type<T>> &&
-    (converts_to<const T&, string_view_t<typename naked_type<T>::value_type>> || converts_to<const T&, std::basic_string_view<typename naked_type<T>::value_type>>) &&
-    !converts_to<const T&, const typename naked_type<T>::value_type*>;
+    (converts_to<const naked_type<T>&, string_view_t<typename naked_type<T>::value_type>> || converts_to<const naked_type<T>&, std::basic_string_view<typename naked_type<T>::value_type>>) &&
+    !converts_to<const naked_type<T>&, const typename naked_type<T>::value_type*>;
 
 template<typename CH>
 class string_t : public std::basic_string<CH, std::char_traits<CH>, std::allocator<CH>>
@@ -92,7 +92,7 @@ class string_view_t : public std::basic_string_view<T>
 public:
     using base = std::basic_string_view<T>;
     using size_type = std::ptrdiff_t;
-    static constexpr size_type npos = std::numeric_limits<size_type>::max();
+    static constexpr size_type npos = -1;
 
     using base::base;
 
@@ -181,8 +181,7 @@ namespace filesystem
         path(const std::filesystem::path& in) : base(in) {}
         path(const is_path_src auto& in) : base(in) {}
         explicit path(const xstd_string auto& in) : base(static_cast<const std::string>(in)) {}
-        template<string_view_like T>
-        path(const T& in) : base(static_cast<std::basic_string_view<T::value_type>>(in)) {}
+        path(const string_view_like auto& in) : base(std::string_view(in)) {}
 
         [[nodiscard]] path extension() const { return base::extension(); }
 
