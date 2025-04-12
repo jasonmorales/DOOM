@@ -134,7 +134,7 @@ fixed_t		angleturn[3] = { 640, 1280, 320 };	// + slow turn
 
 #define SLOWTURNTICS	6 
 
-bool gamekeydown[input::event_id::count] = {};
+std::map<input::event_id, bool> gamekeydown = {};
 int32 turnheld;				// for accelerative turning 
 
 bool mousearray[4];
@@ -276,7 +276,7 @@ void G_BuildTiccmd(ticcmd_t* cmd)
 
     // chainsaw overrides 
     for (int32 i = 0; i < NUMWEAPONS - 1; i++)
-        if (gamekeydown['1' + i])
+        if (gamekeydown[input::event_id_e::One + i])
         {
             cmd->buttons |= BT_CHANGE;
             cmd->buttons |= i << BT_WEAPONSHIFT;
@@ -415,7 +415,6 @@ void G_DoLoadLevel()
     Z_CheckHeap();
 
     // clear cmd building stuff
-    memset(gamekeydown, 0, sizeof(gamekeydown));
     joyxmove = joyymove = 0;
     mousex = mousey = 0;
     sendpause = sendsave = paused = false;
@@ -426,8 +425,12 @@ void G_DoLoadLevel()
 // Get info needed to make ticcmd_ts for the players.
 bool G_Responder(const input::event& event)
 {
+    auto x = input::event_flag_f::ctrl | input::event_flag_f::alt;
+    auto y = x | input::event_flag_f::shift;
+    auto z = input::event_flag_f::scroll_lock | y;
+
     // allow spy mode changes even during the demo
-    if (g_doom->GetGameState() == GameState::Level && event.is_keyboard() && event.down("F12") && (singledemo || !deathmatch))
+    if (g_doom->GetGameState() == GameState::Level && event.is_keyboard() && event.down(input::event_id_e::F12) && (singledemo || !deathmatch))
     {
         // spy mode
         do
@@ -473,34 +476,34 @@ bool G_Responder(const input::event& event)
 
     switch (event.device)
     {
-    case input::enhanced_enum_base_type_device_id::Keyboard:
-        if (event.down("Pause"))
+    case input::device_id_e::Keyboard:
+        if (event.down(input::event_id_e::Pause))
         {
             sendpause = true;
             return true;
         }
 
-        gamekeydown[event.id.value] = event.down();
+        gamekeydown[event.id] = event.down();
         if (event.down())
             return true;    // eat key down events 
         
         return false;   // always let key up events filter down 
 
-    case input::enhanced_enum_base_type_device_id::Mouse:
-        if (event.is("MouseLeft")) mousebuttons[0] = event.down();
-        if (event.is("MouseRight")) mousebuttons[1] = event.down();
-        if (event.is("MouseMiddle")) mousebuttons[2] = event.down();
-        if (event.is("MouseDeltaX")) mousex = event.i_value * (mouseSensitivity + 5) / 10;
-        if (event.is("MouseDeltaY")) mousey = event.i_value * (mouseSensitivity + 5) / 10;
+    case input::device_id_e::Mouse:
+        if (event.is(input::event_id_e::MouseLeft)) mousebuttons[0] = event.down();
+        if (event.is(input::event_id_e::MouseRight)) mousebuttons[1] = event.down();
+        if (event.is(input::event_id_e::MouseMiddle)) mousebuttons[2] = event.down();
+        if (event.is(input::event_id_e::MouseDeltaX)) mousex = event.i_value * (mouseSensitivity + 5) / 10;
+        if (event.is(input::event_id_e::MouseDeltaY)) mousey = event.i_value * (mouseSensitivity + 5) / 10;
         return true;    // eat events 
 
-    case input::enhanced_enum_base_type_device_id::Controller:
-        if (event.is("Button1")) joybuttons[0] = event.down();
-        if (event.is("Button2")) joybuttons[1] = event.down();
-        if (event.is("Button3")) joybuttons[2] = event.down();
-        if (event.is("Button4")) joybuttons[3] = event.down();
-        if (event.is("JoyX")) joyxmove = event.i_value;
-        if (event.is("JoyY")) joyymove = event.i_value;
+    case input::device_id_e::Controller:
+        if (event.is(input::event_id_e::Button1)) joybuttons[0] = event.down();
+        if (event.is(input::event_id_e::Button2)) joybuttons[1] = event.down();
+        if (event.is(input::event_id_e::Button3)) joybuttons[2] = event.down();
+        if (event.is(input::event_id_e::Button4)) joybuttons[3] = event.down();
+        if (event.is(input::event_id_e::JoyX)) joyxmove = event.i_value;
+        if (event.is(input::event_id_e::JoyY)) joyymove = event.i_value;
         return true;    // eat events 
 
     default:
@@ -722,14 +725,14 @@ bool G_CheckSpot(int32 playernum, mapthing_t* mthing)
     {
         // first spawn of level, before corpses
         for (i = 0; i < playernum; i++)
-            if (players[i].mo->x == mthing->x << FRACBITS
-                && players[i].mo->y == mthing->y << FRACBITS)
+            if (players[i].mo->x == mthing->x << fixed::frac_bits
+                && players[i].mo->y == mthing->y << fixed::frac_bits)
                 return false;
         return true;
     }
 
-    int32 x = mthing->x << FRACBITS;
-    int32 y = mthing->y << FRACBITS;
+    int32 x = mthing->x << fixed::frac_bits;
+    int32 y = mthing->y << fixed::frac_bits;
 
     if (!P_CheckPosition(players[playernum].mo, x, y))
         return false;
@@ -1297,7 +1300,7 @@ void G_ReadDemoTiccmd(ticcmd_t* cmd)
 
 void G_WriteDemoTiccmd(ticcmd_t* cmd)
 {
-    if (gamekeydown['q'])           // press q to end demo recording 
+    if (gamekeydown[input::event_id_e::Q])           // press q to end demo recording 
         G_CheckDemoStatus(g_doom);
     *demo_p++ = cmd->forwardmove;
     *demo_p++ = cmd->sidemove;

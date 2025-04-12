@@ -37,9 +37,9 @@ import std;
 // against lines and things
 #define MAPBLOCKUNITS	128
 #define MAPBLOCKSIZE	(MAPBLOCKUNITS*FRACUNIT)
-#define MAPBLOCKSHIFT	(FRACBITS+7)
+#define MAPBLOCKSHIFT	(fixed::frac_bits+7)
 #define MAPBMASK		(MAPBLOCKSIZE-1)
-#define MAPBTOFRAC		(MAPBLOCKSHIFT-FRACBITS)
+#define MAPBTOFRAC		(MAPBLOCKSHIFT-fixed::frac_bits)
 
 
 // player radius for movement checking

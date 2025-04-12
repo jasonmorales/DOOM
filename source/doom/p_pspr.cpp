@@ -67,8 +67,8 @@ void P_SetPsprite(player_t* player, int32 position, statenum_t	stnum)
         if (state->misc1)
         {
             // coordinate set
-            psp->sx = state->misc1 << FRACBITS;
-            psp->sy = state->misc2 << FRACBITS;
+            psp->sx = state->misc1 << fixed::frac_bits;
+            psp->sy = state->misc2 << fixed::frac_bits;
         }
 
         // Call action routine.

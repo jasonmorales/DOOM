@@ -327,13 +327,7 @@ void P_ZMovement(mobj_t* mo)
     }
 }
 
-
-
-//
-// P_NightmareRespawn
-//
-void
-P_NightmareRespawn(mobj_t* mobj)
+void P_NightmareRespawn(mobj_t* mobj)
 {
     fixed_t		x;
     fixed_t		y;
@@ -342,12 +336,12 @@ P_NightmareRespawn(mobj_t* mobj)
     mobj_t* mo;
     mapthing_t* mthing;
 
-    x = mobj->spawnpoint.x << FRACBITS;
-    y = mobj->spawnpoint.y << FRACBITS;
+    x = mobj->spawnpoint.x << fixed::frac_bits;
+    y = mobj->spawnpoint.y << fixed::frac_bits;
 
-    // somthing is occupying it's position?
+    // something is occupying it's position?
     if (!P_CheckPosition(mobj, x, y))
-        return;	// no respwan
+        return;	// no respawn
 
     // spawn a teleport fog at old spot
     // because of removal of the body?
@@ -568,8 +562,8 @@ void P_RespawnSpecials()
 
     mthing = &itemrespawnque[iquetail];
 
-    x = mthing->x << FRACBITS;
-    y = mthing->y << FRACBITS;
+    x = mthing->x << fixed::frac_bits;
+    y = mthing->y << fixed::frac_bits;
 
     // spawn a teleport fog at the new spot
     ss = R_PointInSubsector(x, y);
@@ -624,8 +618,8 @@ void P_SpawnPlayer(mapthing_t* mthing)
     if (p->playerstate == PST_REBORN)
         G_PlayerReborn(mthing->type - 1);
 
-    x = mthing->x << FRACBITS;
-    y = mthing->y << FRACBITS;
+    x = mthing->x << fixed::frac_bits;
+    y = mthing->y << fixed::frac_bits;
     z = ONFLOORZ;
     mobj = P_SpawnMobj(x, y, z, MT_PLAYER);
 
@@ -736,8 +730,8 @@ void P_SpawnMapThing(mapthing_t* mthing)
     }
 
     // spawn it
-    x = mthing->x << FRACBITS;
-    y = mthing->y << FRACBITS;
+    x = mthing->x << fixed::frac_bits;
+    y = mthing->y << fixed::frac_bits;
 
     if (mobjinfo[i].flags & MF_SPAWNCEILING)
         z = ONCEILINGZ;

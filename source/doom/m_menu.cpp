@@ -1130,34 +1130,34 @@ bool M_Responder(const input::event& event)
 
     if (event.is_controller() && joywait < I_GetTime())
     {
-        if (event.is("JoyYNeg"))
+        if (event.is(input::event_id_e::JoyYNeg))
         {
             nav_up_down(-1);
             joywait = I_GetTime() + 5;
         }
-        else if (event.is("JoyYPos"))
+        else if (event.is(input::event_id_e::JoyYPos))
         {
             nav_up_down(1);
             joywait = I_GetTime() + 5;
         }
 
-        if (event.is("JoyXNeg"))
+        if (event.is(input::event_id_e::JoyXNeg))
         {
             nav_left_right(0);
             joywait = I_GetTime() + 2;
         }
-        else if (event.is("JoyXPos"))
+        else if (event.is(input::event_id_e::JoyXPos))
         {
             nav_left_right(1);
             joywait = I_GetTime() + 2;
         }
 
-        if (event.down("Button1"))
+        if (event.down(input::event_id_e::Button1))
         {
             ch = KEY_ENTER;
             joywait = I_GetTime() + 5;
         }
-        if (event.down("Button2"))
+        if (event.down(input::event_id_e::Button2))
         {
             ch = KEY_BACKSPACE;
             joywait = I_GetTime() + 5;
@@ -1165,7 +1165,7 @@ bool M_Responder(const input::event& event)
     }
     else if (event.is_mouse())
     {
-        if (event.is("MouseDeltaY"))
+        if (event.is(input::event_id_e::MouseDeltaY))
         {
             static const float delta_threshold = 100.f;
 
@@ -1177,7 +1177,7 @@ bool M_Responder(const input::event& event)
             }
         }
 
-        if (event.is("MouseDeltaX"))
+        if (event.is(input::event_id_e::MouseDeltaX))
         {
             static const float delta_threshold = 100.f;
 
@@ -1189,15 +1189,15 @@ bool M_Responder(const input::event& event)
             }
         }
 
-        if (event.down("MouseLeft"))
+        if (event.down(input::event_id_e::MouseLeft))
             ch = KEY_ENTER;
 
-        if (event.down("MouseRight"))
+        if (event.down(input::event_id_e::MouseRight))
             ch = KEY_BACKSPACE;
     }
     else if (event.is_keyboard() && event.down())
     {
-        ch = event.id.value;
+        ch = input::event_id::index(event.id);
     }
 
     if (ch == -1)
@@ -1247,8 +1247,8 @@ bool M_Responder(const input::event& event)
     // Take care of any messages that need input
     if (messageToPrint)
     {
-        bool is_affirmative = event.down("Space") || event.down("Y");
-        bool is_relevant = is_affirmative || event.down("N") || event.down("Escape");
+        bool is_affirmative = event.down(input::event_id_e::Space) || event.down(input::event_id_e::Y);
+        bool is_relevant = is_affirmative || event.down(input::event_id_e::N) || event.down(input::event_id_e::Escape);
 
         if (messageNeedsInput && !is_relevant)
             return false;
@@ -1263,7 +1263,7 @@ bool M_Responder(const input::event& event)
         return true;
     }
 
-    if (g_doom->IsDevMode() && event.down("F1"))
+    if (g_doom->IsDevMode() && event.down(input::event_id_e::F1))
     {
         G_ScreenShot();
         return true;
@@ -1272,23 +1272,23 @@ bool M_Responder(const input::event& event)
     // F-Keys
     if (!menuactive)
     {
-        switch (event.id.value)
+        switch (event.id)
         {
-        case input::event_id("Minus"):         // Screen size down
+        case input::event_id_e::Minus:         // Screen size down
             if (automapactive || chat_on)
                 return false;
             M_SizeDisplay(0);
             S_StartSound(nullptr, sfx_stnmov);
             return true;
 
-        case input::event_id("Plus"):        // Screen size up
+        case input::event_id_e::Plus:        // Screen size up
             if (automapactive || chat_on)
                 return false;
             M_SizeDisplay(1);
             S_StartSound(nullptr, sfx_stnmov);
             return true;
 
-        case input::event_id("F1"):            // Help key
+        case input::event_id_e::F1:            // Help key
             M_StartControlPanel();
 
             if (g_doom->GetGameMode() == GameMode::Doom1Retail)
@@ -1300,56 +1300,56 @@ bool M_Responder(const input::event& event)
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case input::event_id("F2"):            // Save
+        case input::event_id_e::F2:            // Save
             M_StartControlPanel();
             S_StartSound(nullptr, sfx_swtchn);
             M_SaveGame(0);
             return true;
 
-        case input::event_id("F3"):            // Load
+        case input::event_id_e::F3:            // Load
             M_StartControlPanel();
             S_StartSound(nullptr, sfx_swtchn);
             M_LoadGame(0);
             return true;
 
-        case input::event_id("F4"):            // Sound Volume
+        case input::event_id_e::F4:            // Sound Volume
             M_StartControlPanel();
             currentMenu = &SoundDef;
             itemOn = sfx_vol;
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case input::event_id("F5"):            // Detail toggle
+        case input::event_id_e::F5:            // Detail toggle
             M_ChangeDetail(0);
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case input::event_id("F6"):            // Quicksave
+        case input::event_id_e::F6:            // Quicksave
             S_StartSound(nullptr, sfx_swtchn);
             M_QuickSave();
             return true;
 
-        case input::event_id("F7"):            // End game
+        case input::event_id_e::F7:            // End game
             S_StartSound(nullptr, sfx_swtchn);
             M_EndGame(0);
             return true;
 
-        case input::event_id("F8"):            // Toggle messages
+        case input::event_id_e::F8:            // Toggle messages
             M_ChangeMessages(0);
             S_StartSound(nullptr, sfx_swtchn);
             return true;
 
-        case input::event_id("F9"):            // Quickload
+        case input::event_id_e::F9:            // Quickload
             S_StartSound(nullptr, sfx_swtchn);
             M_QuickLoad();
             return true;
 
-        case input::event_id("F10"):           // Quit DOOM
+        case input::event_id_e::F10:           // Quit DOOM
             S_StartSound(nullptr, sfx_swtchn);
             M_QuitDOOM(0);
             return true;
 
-        case input::event_id("F11"):           // gamma toggle
+        case input::event_id_e::F11:           // gamma toggle
             usegamma++;
             if (usegamma > 4)
                 usegamma = 0;
@@ -1362,7 +1362,7 @@ bool M_Responder(const input::event& event)
     // Pop-up menu?
     if (!menuactive)
     {
-        if (event.is("Escape"))
+        if (event.is(input::event_id_e::Escape))
         {
             M_StartControlPanel();
             S_StartSound(nullptr, sfx_swtchn);
@@ -1372,25 +1372,25 @@ bool M_Responder(const input::event& event)
     }
 
     // Keys usable within menu
-    switch (event.id.value)
+    switch (event.id)
     {
-    case input::event_id("DownArrow"):
+    case input::event_id_e::DownArrow:
         nav_up_down(1);
         return true;
 
-    case input::event_id("UpArrow"):
+    case input::event_id_e::UpArrow:
         nav_up_down(-1);
         return true;
 
-    case input::event_id("LeftArrow"):
+    case input::event_id_e::LeftArrow:
         nav_left_right(0);
         return true;
 
-    case input::event_id("RightArrow"):
+    case input::event_id_e::RightArrow:
         nav_left_right(1);
         return true;
 
-    case input::event_id("Enter"):
+    case input::event_id_e::Enter:
         if (currentMenu->menuitems[itemOn].routine &&
             currentMenu->menuitems[itemOn].status)
         {
@@ -1408,13 +1408,13 @@ bool M_Responder(const input::event& event)
         }
         return true;
 
-    case input::event_id("Escape"):
+    case input::event_id_e::Escape:
         currentMenu->lastOn = itemOn;
         M_ClearMenus();
         S_StartSound(nullptr, sfx_swtchx);
         return true;
 
-    case input::event_id("Backspace"):
+    case input::event_id_e::Backspace:
         currentMenu->lastOn = itemOn;
         if (currentMenu->prevMenu)
         {

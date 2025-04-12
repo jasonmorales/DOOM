@@ -62,7 +62,7 @@ extern fixed_t		finetangent[FINEANGLES / 2];
 
 #define SLOPERANGE		2048
 #define SLOPEBITS		11
-#define DBITS			(FRACBITS-SLOPEBITS)
+#define DBITS			(fixed::frac_bits-SLOPEBITS)
 
 typedef unsigned angle_t;
 

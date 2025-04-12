@@ -17,9 +17,17 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+import nstd.numbers;
+
+class fixed
+{
+public:
+    static const int32 frac_bits = 16;
+    static const int32 frac_unit = 1 << frac_bits;
+};
+
 // Fixed point, 32bit as 16.16.
-#define FRACBITS		16
-#define FRACUNIT		(1<<FRACBITS)
+#define FRACUNIT		(1<<fixed::frac_bits)
 
 typedef int fixed_t;
 

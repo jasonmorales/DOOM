@@ -27,7 +27,7 @@
 #include <ctime>
 
 import std;
-
+import log;
 
 extern Doom* g_doom;
 
@@ -107,7 +107,7 @@ void I_EndRead()
 
 void I_Error(const string& error)
 {
-    std::cerr << "Error: " << error << "\n";
+    logger::error(error);
     std::cerr.flush();
 
     // Shutdown. Here might be other errors.

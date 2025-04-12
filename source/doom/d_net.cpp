@@ -26,7 +26,7 @@
 #include "d_main.h"
 
 import std;
-
+import log;
 
 extern Doom* g_doom;
 
@@ -503,8 +503,8 @@ void Net::CheckGame()
     if (netgame)
         D_ArbitrateNetStart();
 
-    std::cout << std::format("startskill {}  deathmatch: {}  startmap: {}  startepisode: {}\n",
-        nstd::to_underlying(startskill), deathmatch, startmap, startepisode);
+    logger::write(std::format("startskill {}  deathmatch: {}  startmap: {}  startepisode: {}",
+        nstd::to_underlying(startskill), deathmatch, startmap, startepisode));
 
     // read values out of doomcom
     ticdup = doomcom->ticdup;
@@ -518,7 +518,7 @@ void Net::CheckGame()
     for (int i = 0; i < doomcom->numnodes; i++)
         nodeingame[i] = true;
 
-    std::cout << std::format("player {} of {} ({} nodes)\n", consoleplayer + 1, doomcom->numplayers, doomcom->numnodes);
+    logger::write(std::format("player {} of {} ({} nodes)", consoleplayer + 1, doomcom->numplayers, doomcom->numnodes));
 }
 
 // Called before quitting to leave a net game

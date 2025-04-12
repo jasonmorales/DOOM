@@ -107,7 +107,7 @@ void R_DrawColumn()
     do
     {
         // Re-map color indices from wall texture column using a lighting/special effects LUT.
-        *dest = dc_colormap[dc_source[(frac >> FRACBITS) & 127]];
+        *dest = dc_colormap[dc_source[(frac >> fixed::frac_bits) & 127]];
 
         dest += SCREENWIDTH;
         frac += fracstep;
@@ -140,7 +140,7 @@ void R_DrawColumnLow()
 
     do
     {
-        *dest2 = *dest = dc_colormap[dc_source[(frac >> FRACBITS) & 127]];
+        *dest2 = *dest = dc_colormap[dc_source[(frac >> fixed::frac_bits) & 127]];
 
         dest += SCREENWIDTH;
         dest2 += SCREENWIDTH;
@@ -249,9 +249,9 @@ void R_DrawTranslatedColumn()
         // Translation tables are used to map certain colorramps to other ones, used with PLAY
         // sprites.
         // Thus the "green" ramp of the player 0 sprite is mapped to gray, red, black/indigo. 
-        *dest = dc_colormap[dc_translation[dc_source[frac >> FRACBITS]]];
+        *dest = dc_colormap[dc_translation[dc_source[frac >> fixed::frac_bits]]];
         if (detailshift)
-            *dest2 = dc_colormap[dc_translation[dc_source[frac >> FRACBITS]]];
+            *dest2 = dc_colormap[dc_translation[dc_source[frac >> fixed::frac_bits]]];
 
         dest += SCREENWIDTH;
         dest2 += SCREENWIDTH;

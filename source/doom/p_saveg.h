@@ -40,11 +40,20 @@ enum class SaveFileMarker : uint8
 };
 
 template<>
-struct std::formatter<SaveFileMarker> : std::formatter<string>
+struct std::formatter<SaveFileMarker, char>
 {
+    constexpr auto parse(std::format_parse_context& ctx)
+    {
+        auto it = ctx.begin();
+        while (it != ctx.end() && *it != '}') { ++it; }
+        return it;
+    }
+
     auto format(SaveFileMarker mark, std::format_context& ctx) const
     {
-        return formatter<string>::format(std::format("{}", to_underlying(mark)), ctx);
+        std::ostringstream out;
+        out << to_underlying(mark);
+        return std::ranges::copy(std::move(out).str(), ctx.out()).out;
     }
 };
 

@@ -33,7 +33,7 @@ template<typename T>
 byte* GetSaveData(const T* object)
 {
     auto* out = new T;
-    memcpy(out, object, sizeof(T));
+    std::memcpy(out, object, sizeof(T));
 
     *reinterpret_cast<intptr_t*>(out->sector) = out->sector - sectors;
     return reinterpret_cast<byte*>(out);

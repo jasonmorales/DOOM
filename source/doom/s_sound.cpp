@@ -43,7 +43,7 @@ extern Doom* g_doom;
 #define S_CLOSE_DIST		(160*0x10000)
 
 
-#define S_ATTENUATOR		((S_CLIPPING_DIST-S_CLOSE_DIST)>>FRACBITS)
+#define S_ATTENUATOR		((S_CLIPPING_DIST-S_CLOSE_DIST)>>fixed::frac_bits)
 
 // Adjustable by menu.
 #define NORM_VOLUME    		snd_MaxVolume
@@ -202,7 +202,7 @@ int32 S_AdjustSoundParams(mobj_t* listener, mobj_t* source, int32* vol, int32* s
     angle >>= ANGLETOFINESHIFT;
 
     // stereo separation
-    *sep = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> FRACBITS);
+    *sep = 128 - (FixedMul(S_STEREO_SWING, finesine[angle]) >> fixed::frac_bits);
 
     // volume calculation
     if (approx_dist < S_CLOSE_DIST)
@@ -215,14 +215,14 @@ int32 S_AdjustSoundParams(mobj_t* listener, mobj_t* source, int32* vol, int32* s
             approx_dist = S_CLIPPING_DIST;
 
         *vol = 15 + ((snd_SfxVolume - 15)
-            * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS))
+            * ((S_CLIPPING_DIST - approx_dist) >> fixed::frac_bits))
             / S_ATTENUATOR;
     }
     else
     {
         // distance effect
         *vol = (snd_SfxVolume
-            * ((S_CLIPPING_DIST - approx_dist) >> FRACBITS))
+            * ((S_CLIPPING_DIST - approx_dist) >> fixed::frac_bits))
             / S_ATTENUATOR;
     }
 

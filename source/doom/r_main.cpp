@@ -30,7 +30,7 @@
 #include "r_plane.h"
 
 import std;
-
+import log;
 
 extern Doom* g_doom;
 
@@ -153,8 +153,8 @@ int32 R_PointOnSide(fixed_t x, fixed_t y, node_t* node)
         return 0;
     }
 
-    left = FixedMul(node->dy >> FRACBITS, dx);
-    right = FixedMul(dy, node->dx >> FRACBITS);
+    left = FixedMul(node->dy >> fixed::frac_bits, dx);
+    right = FixedMul(dy, node->dx >> fixed::frac_bits);
 
     if (right < left)
     {
@@ -211,8 +211,8 @@ int32 R_PointOnSegSide(fixed_t x, fixed_t y, seg_t* line)
         return 0;
     }
 
-    left = FixedMul(ldy >> FRACBITS, dx);
-    right = FixedMul(dy, ldx >> FRACBITS);
+    left = FixedMul(ldy >> fixed::frac_bits, dx);
+    right = FixedMul(dy, ldx >> fixed::frac_bits);
 
     if (right < left)
     {
@@ -430,7 +430,7 @@ void R_InitTextureMapping()
         else
         {
             t = FixedMul(finetangent[i], focallength);
-            t = (centerxfrac - t + FRACUNIT - 1) >> FRACBITS;
+            t = (centerxfrac - t + FRACUNIT - 1) >> fixed::frac_bits;
 
             if (t < -1)
                 t = -1;
@@ -529,8 +529,8 @@ bool Render::CheckSetViewSize()
 
     centery = viewheight / 2;
     centerx = viewwidth / 2;
-    centerxfrac = centerx << FRACBITS;
-    centeryfrac = centery << FRACBITS;
+    centerxfrac = centerx << fixed::frac_bits;
+    centeryfrac = centery << fixed::frac_bits;
     projection = centerxfrac;
 
     if (!detailshift)
@@ -563,7 +563,7 @@ bool Render::CheckSetViewSize()
     // planes
     for (int32 i = 0; i < viewheight; i++)
     {
-        fixed_t dy = ((i - viewheight / 2) << FRACBITS) + FRACUNIT / 2;
+        fixed_t dy = ((i - viewheight / 2) << fixed::frac_bits) + FRACUNIT / 2;
         dy = std::abs(dy);
         yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT, dy);
     }
@@ -601,22 +601,22 @@ bool Render::CheckSetViewSize()
 void Render::Init()
 {
     R_InitData();
-    std::printf("\nR_InitData");
+    logger::write("R_InitData");
     R_InitPointToAngle();
-    std::printf("\nR_InitPointToAngle");
+    logger::write("R_InitPointToAngle");
     R_InitTables();
     // viewwidth / viewheight / detailLevel are set by the defaults
-    std::printf("\nR_InitTables");
+    logger::write("R_InitTables");
 
     RequestSetViewSize(screenBlocks, detailLevel);
     R_InitPlanes();
-    std::printf("\nR_InitPlanes");
+    logger::write("R_InitPlanes");
     R_InitLightTables();
-    std::printf("\nR_InitLightTables");
+    logger::write("R_InitLightTables");
     R_InitSkyMap();
-    std::printf("\nR_InitSkyMap");
+    logger::write("R_InitSkyMap");
     R_InitTranslationTables();
-    std::printf("\nR_InitTranslationsTables");
+    logger::write("R_InitTranslationsTables");
 
     framecount = 0;
 }

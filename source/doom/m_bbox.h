@@ -16,6 +16,7 @@
 
 import <cassert>;
 
+import std;
 import nstd;
 
 class bbox

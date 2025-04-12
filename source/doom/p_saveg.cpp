@@ -74,8 +74,8 @@ void P_ArchiveWorld(std::ofstream& outFile)
     auto* sector = sectors;
     for (int32 i = 0; i < numsectors; ++i, ++sector)
     {
-        outFile << static_cast<int16>(sector->floorheight >> FRACBITS);
-        outFile << static_cast<int16>(sector->ceilingheight >> FRACBITS);
+        outFile << static_cast<int16>(sector->floorheight >> fixed::frac_bits);
+        outFile << static_cast<int16>(sector->ceilingheight >> fixed::frac_bits);
         outFile << sector->floorpic;
         outFile << sector->ceilingpic;
         outFile << sector->lightlevel;
@@ -99,8 +99,8 @@ void P_ArchiveWorld(std::ofstream& outFile)
 
             auto* side = sides + line->sidenum[j];
             outFile
-                << static_cast<int16>(side->textureoffset >> FRACBITS)
-                << static_cast<int16>(side->rowoffset >> FRACBITS)
+                << static_cast<int16>(side->textureoffset >> fixed::frac_bits)
+                << static_cast<int16>(side->rowoffset >> fixed::frac_bits)
                 << side->toptexture
                 << side->bottomtexture
                 << side->midtexture;
@@ -117,11 +117,11 @@ void P_UnArchiveWorld(std::ifstream& inFile)
 
         sector->floorheight = 0;
         inFile.read(reinterpret_cast<char*>(&sector->floorheight), 2);
-        sector->floorheight <<= FRACBITS;
+        sector->floorheight <<= fixed::frac_bits;
 
         sector->ceilingheight = 0;
         inFile.read(reinterpret_cast<char*>(&sector->ceilingheight), 2);
-        sector->ceilingheight <<= FRACBITS;
+        sector->ceilingheight <<= fixed::frac_bits;
 
         inFile.read(reinterpret_cast<char*>(&sector->floorpic), 2);
         inFile.read(reinterpret_cast<char*>(&sector->ceilingpic), 2);
@@ -151,11 +151,11 @@ void P_UnArchiveWorld(std::ifstream& inFile)
 
             side->textureoffset = 0;
             inFile.read(reinterpret_cast<char*>(&side->textureoffset), 2);
-            side->textureoffset <<= FRACBITS;
+            side->textureoffset <<= fixed::frac_bits;
 
             side->rowoffset = 0;
             inFile.read(reinterpret_cast<char*>(&side->rowoffset), 2);
-            side->rowoffset <<= FRACBITS;
+            side->rowoffset <<= fixed::frac_bits;
 
             inFile.read(reinterpret_cast<char*>(&side->toptexture), 2);
             inFile.read(reinterpret_cast<char*>(&side->bottomtexture), 2);

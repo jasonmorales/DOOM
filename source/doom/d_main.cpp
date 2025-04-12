@@ -87,7 +87,7 @@ bool Doom::HasEscEventInQueue()
 {
     for (auto& event : input::manager::get_event_queue())
     {
-        if (event.down("Escape"))
+        if (event.down(input::event_id_e::Escape))
             return true;
     }
 
@@ -196,13 +196,15 @@ void Doom::Main()
         case GameMode::Doom1Shareware:
         case GameMode::Doom1Retail:
         case GameMode::Doom1Registered:
-            file = std::format("~{}E{}M{}.wad", Settings::DevMapPath, ep, map);
-            std::cout << "Warping to Episode " << ep << ", Map " << map << ".\n";
+            //file = std::format("~{}E{}M{}.wad", Settings::DevMapPath, ep, map);
+            file = std::format("~{}E{}M{}.wad", Settings::DevMapPath.string().c_str(), ep, map);
+            logger::write("Warping to Episode ", ep, ", Map ", map, ".");
             break;
 
         case GameMode::Doom2Commercial:
         default:
-            file = std::format("~{}cdata/map{:02d}.wad", Settings::DevMapPath, ep);
+            //file = std::format("~{}cdata/map{:02d}.wad", Settings::DevMapPath, ep);
+            file = std::format("~{}cdata/map{:02d}.wad", "", ep);
             break;
         }
         WadManager::AddFile(file);
@@ -224,7 +226,7 @@ void Doom::Main()
         string fileName(name);
         fileName += ".lmp";
         WadManager::AddFile(fileName);
-        std::cout << "Playing demo " << fileName << ".\n";
+        logger::write("Playing demo ", fileName, ".\n");
     }
 
     // get skill / episode / map from parms
@@ -246,10 +248,10 @@ void Doom::Main()
     }
 
     if (int32 time = 0; CommandLine::TryGetValues("-timer", time) && deathmatch)
-        std::cout << std::format("Levels will end after {} minute{}.\n", time, (time > 1) ? "s" : "");
+        logger::write(std::format("Levels will end after {} minute{}.", time, (time > 1) ? "s" : ""));
 
     if (CommandLine::HasArg("-avg") && deathmatch)
-        std::cout << "Austin Virtual Gaming: Levels will end after 20 minutes\n";
+        logger::write("Austin Virtual Gaming: Levels will end after 20 minutes");
 
     if (int32 ep = 0, map = 0; CommandLine::TryGetValues("-warp", ep, map))
         doWarp(ep,map);
@@ -258,18 +260,18 @@ void Doom::Main()
     logger::write("Z_Init: Init zone memory allocation daemon.");
     Z_Init();
 
-    std::cout << "Video::Init: allocate screens.\n";
+    logger::write("Video::Init: allocate screens.");
     video = new Video(this);
     video->Init();
 
-    std::cout << "Settings::Load: Load system defaults.\n";
+    logger::write("Settings::Load: Load system defaults.");
     Settings::Init();
     Settings::Load(); // load before initing other systems
 
-    std::cout << "WadManger::LoadAllFiles: Init WADfiles.\n";
+    logger::write("WadManger::LoadAllFiles: Init WADfiles.");
     WadManager::LoadAllFiles();
 
-    std::cout << "Init Game\n";
+    logger::write("Init Game");
     game = new Game(this);
 
     // Check for -file in shareware
@@ -284,7 +286,7 @@ void Doom::Main()
             "dphoof", "bfgga0", "heada1", "cybra1", "spida1d1" };
 
         if (gameMode == GameMode::Doom1Shareware)
-            I_Error("\nYou cannot -file with the shareware version. Register!");
+            I_Error("You cannot -file with the shareware version. Register!");
 
         // Check for fake IWAD with right name,
         // but w/o all the lumps of the registered version.
@@ -293,7 +295,7 @@ void Doom::Main()
             for (int32 i = 0; i < 23; ++i)
             {
                 if (WadManager::GetLumpId(names[i]) == INVALID_ID)
-                    I_Error("\nThis is not the registered version.");
+                    I_Error("This is not the registered version.");
             }
         }
     }
@@ -301,7 +303,7 @@ void Doom::Main()
     // If additional PWAD files are used, print modified banner
     if (isModified)
     {
-        /*m*/ std::printf(
+        /*m*/ logger::write(
             "===========================================================================\n"
             "ATTENTION:  This version of DOOM has been modified.  If you would like to\n"
             "get a copy of the original game, call 1-800-IDGAMES or see the readme file.\n"
@@ -316,7 +318,7 @@ void Doom::Main()
     {
     case GameMode::Doom1Shareware:
     case GameMode::Unknown:
-        std::printf(
+        logger::write(
             "===========================================================================\n"
             "                                Shareware!\n"
             "===========================================================================\n");
@@ -324,7 +326,7 @@ void Doom::Main()
     case GameMode::Doom1Registered:
     case GameMode::Doom1Retail:
     case GameMode::Doom2Commercial:
-        std::printf(
+        logger::write(
             "===========================================================================\n"
             "                 Commercial product - do not distribute!\n"
             "         Please report software piracy to the SPA: 1-800-388-PIR8\n"
@@ -336,29 +338,29 @@ void Doom::Main()
         break;
     }
 
-    std::printf("Menu::Init: Init miscellaneous info.\n");
+    logger::write("Menu::Init: Init miscellaneous info.");
     Menu::Init();
 
-    std::printf("Render::Init: Init DOOM refresh daemon - ");
+    logger::write("Render::Init: Init DOOM refresh daemon - ");
     render = new Render;
     render->Init();
 
-    std::printf("\nP_Init: Init Playloop state.\n");
+    logger::write("P_Init: Init Playloop state.");
     P_Init(this);
 
-    std::printf("I_Init: Setting up machine state.\n");
+    logger::write("I_Init: Setting up machine state.");
     I_Init();
 
-    std::printf("Net::CheckGame: Checking network game status.\n");
+    logger::write("Net::CheckGame: Checking network game status.");
     Net::CheckGame();
 
-    std::printf("S_Init: Setting up sound.\n");
+    logger::write("S_Init: Setting up sound.");
     S_Init(snd_SfxVolume /* *8 */, snd_MusicVolume /* *8*/);
 
-    printf("HU_Init: Setting up heads up display.\n");
+    logger::write("HU_Init: Setting up heads up display.");
     HU_Init();
 
-    printf("ST_Init: Init status bar.\n");
+    logger::write("ST_Init: Init status bar.");
     ST_Init();
 
     // check for a driver that wants intermission stats
@@ -416,7 +418,7 @@ void Doom::Loop()
     if (CommandLine::HasArg("-debugfile"))
     {
         string fileName = std::format("debug{}.txt", consoleplayer);
-        std::cout << "debug output to: " << fileName << "\n";
+        logger::write("debug output to: ", fileName);
         debugfile.open(fileName, std::ios_base::out);
     }
 
@@ -605,7 +607,7 @@ void Doom::IdentifyVersion()
     }
 
     if (gameMode == GameMode::Unknown)
-        std::cout << "Game mode indeterminate.\n";
+        logger::write("Game mode indeterminate.");
 }
 
 //  draw current display, possibly wiping it from the previous

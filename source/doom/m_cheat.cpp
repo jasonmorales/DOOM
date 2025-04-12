@@ -38,10 +38,10 @@ int32 cht_CheckCheat(cheatseq_t* cht, input::event_id id)
     }
 
     byte key = 0;
-    if (id >= input::event_id("A") && id <= input::event_id("Z"))
-        key = static_cast<byte>('A' + id - input::event_id("A"));
-    else if (id >= input::event_id("0") && id <= input::event_id("9"))
-        key = static_cast<byte>('0' + id - input::event_id("0"));
+    if (id >= input::event_id_e::A && id <= input::event_id_e::Z)
+        key = static_cast<byte>(input::event_id::index(input::event_id_e::A) + (id - input::event_id_e::A));
+    else if (id >= input::event_id_e::Zero && id <= input::event_id_e::Nine)
+        key = static_cast<byte>(input::event_id::index(input::event_id_e::Zero) + (id - input::event_id_e::Zero));
 
     if (!cht->p)
         cht->p = cht->sequence; // initialize if first time

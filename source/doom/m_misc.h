@@ -14,18 +14,20 @@
 //-----------------------------------------------------------------------------
 #pragma once
 
+#include "nstd/utility/enum.h"
+
 import std;
 import nstd;
 import input;
 
-using GameAction = nstd::ename<
-    "MoveForward", "MoveBack", "MoveLeft", "MoveRight", "TurnLeft", "TurnRight",
-    "Use", "Fire",
-    "Strafe", "Run",
-    "MapOpen", "MapClose", "MapToggle", "MapLeft", "MapRight", "MapUp", "MapDown", "MapZoomIn", "MapZoomOut",
-    "MapToggleFollow", "MapToggleGrid", "MapSetMark", "MapClearMark", "MapGoBig",
-    "MsgRefresh", "Talk"
->;
+ENUM(GameAction, int32,
+    MoveForward, MoveBack, MoveLeft, MoveRight, TurnLeft, TurnRight,
+    Use, Fire,
+    Strafe, Run,
+    MapOpen, MapClose, MapToggle, MapLeft, MapRight, MapUp, MapDown, MapZoomIn, MapZoomOut,
+    MapToggleFollow, MapToggleGrid, MapSetMark, MapClearMark, MapGoBig,
+    MsgRefresh, Talk
+);
 
 bool M_WriteFile(const filesys::path&, const char* source, uint32 length);
 vector<byte> M_ReadFile(const filesys::path& path);
@@ -39,7 +41,7 @@ public:
 
     string_view Name() const { return name; }
 
-    using VariantType = std::variant<int32, float, bool, string>;
+    using VariantType = std::variant<int32, float, bool, string, input::event_id>;
 
     template<typename AS>
     std::optional<AS> GetAs() const
@@ -177,19 +179,19 @@ private:
 extern Setting<int32> screenBlocks;
 extern Setting<int32> detailLevel;
 
-extern Setting<int32> key_right;
-extern Setting<int32> key_right;
-extern Setting<int32> key_left;
-extern Setting<int32> key_up;
-extern Setting<int32> key_down;
+extern Setting<input::event_id> key_right;
+extern Setting<input::event_id> key_right;
+extern Setting<input::event_id> key_left;
+extern Setting<input::event_id> key_up;
+extern Setting<input::event_id> key_down;
 
-extern Setting<int32> key_strafeleft;
-extern Setting<int32> key_straferight;
+extern Setting<input::event_id> key_strafeleft;
+extern Setting<input::event_id> key_straferight;
 
-extern Setting<int32> key_fire;
-extern Setting<int32> key_use;
-extern Setting<int32> key_strafe;
-extern Setting<int32> key_speed;
+extern Setting<input::event_id> key_fire;
+extern Setting<input::event_id> key_use;
+extern Setting<input::event_id> key_strafe;
+extern Setting<input::event_id> key_speed;
 
 extern Setting<int32> numChannels;
 extern Setting<int32> usegamma;

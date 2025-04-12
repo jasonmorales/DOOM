@@ -74,8 +74,8 @@ P_PointOnLineSide
     dx = (x - line->v1->x);
     dy = (y - line->v1->y);
 
-    left = FixedMul(line->dy >> FRACBITS, dx);
-    right = FixedMul(dy, line->dx >> FRACBITS);
+    left = FixedMul(line->dy >> fixed::frac_bits, dx);
+    right = FixedMul(dy, line->dx >> fixed::frac_bits);
 
     if (right < left)
         return 0;		// front side
@@ -766,12 +766,12 @@ bool P_PathTraverse(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2, int flags, b
             break;
         }
 
-        if ((yintercept >> FRACBITS) == mapy)
+        if ((yintercept >> fixed::frac_bits) == mapy)
         {
             yintercept += ystep;
             mapx += mapxstep;
         }
-        else if ((xintercept >> FRACBITS) == mapx)
+        else if ((xintercept >> fixed::frac_bits) == mapx)
         {
             xintercept += xstep;
             mapy += mapystep;

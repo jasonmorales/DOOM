@@ -108,6 +108,13 @@ public:
         return (out == base::npos) ? npos : saturate_cast<size_type>(out);
     }
 
+    constexpr size_type find(string_view_t str, size_type pos = 0) const noexcept
+    {
+        auto out = base::find(str, pos);
+        assert(out == base::npos || in_range<size_type>(out));
+        return (out == base::npos) ? npos : saturate_cast<size_type>(out);
+    }
+
     constexpr size_type size() const noexcept { return length(); }
     constexpr size_type length() const noexcept
     {
@@ -218,24 +225,41 @@ export using wstring_view = nstd::string_view_t<wchar_t>;
 //using path = nstd::filesystem::path;
 export namespace filesys = nstd::filesystem;
 
-template<>
-struct std::formatter<string> : std::formatter<std::string>
+export
 {
-    auto format(const string& sv, std::format_context& ctx) const
+template<>
+struct std::formatter<string, char>
+{
+    constexpr auto parse(std::format_parse_context& ctx)
     {
-        return std::formatter<std::string>::format(sv, ctx);
+        auto it = ctx.begin();
+        while (it != ctx.end() && *it != '}') { ++it; }
+        return it;
+    }
+
+    auto format(const string& str, std::format_context& ctx) const
+    {
+        return std::ranges::copy(str, ctx.out()).out;
     }
 };
 
 template<>
-struct std::formatter<nstd::string_view_t<char>> : std::formatter<std::basic_string_view<char>>
+struct std::formatter<string_view, char> 
 {
-    auto format(const nstd::string_view_t<char>& sv, std::format_context& ctx) const
+    constexpr auto parse(std::format_parse_context& ctx)
     {
-        return std::formatter<std::basic_string_view<char>>::format(sv, ctx);
+        auto it = ctx.begin();
+        while (it != ctx.end() && *it != '}') { ++it; }
+        return it;
+    }
+
+    auto format(string_view sv, std::format_context& ctx) const
+    {
+        return std::ranges::copy(sv, ctx.out()).out;
     }
 };
 
+/*
 template<>
 struct std::formatter<nstd::filesystem::path> : std::formatter<string>
 {
@@ -244,3 +268,5 @@ struct std::formatter<nstd::filesystem::path> : std::formatter<string>
         return std::formatter<string>::format(path.string(), ctx);
     }
 };
+/**/
+}

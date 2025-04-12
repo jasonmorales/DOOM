@@ -77,8 +77,8 @@ P_DivlineSide
     dx = (x - node->x);
     dy = (y - node->y);
 
-    left = (node->dy >> FRACBITS) * (dx >> FRACBITS);
-    right = (dy >> FRACBITS) * (node->dx >> FRACBITS);
+    left = (node->dy >> fixed::frac_bits) * (dx >> fixed::frac_bits);
+    right = (dy >> fixed::frac_bits) * (node->dx >> fixed::frac_bits);
 
     if (right < left)
         return 0;	// front side

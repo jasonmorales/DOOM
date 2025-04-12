@@ -447,7 +447,7 @@ void R_InitTextures()
             j <<= 1;
 
         texturewidthmask[i] = j - 1;
-        textureheight[i] = texture->height << FRACBITS;
+        textureheight[i] = texture->height << fixed::frac_bits;
 
         totalwidth += texture->width;
     }
@@ -498,9 +498,9 @@ void R_InitSpriteLumps()
             std::printf(".");
 
         auto* patch = WadManager::GetLumpData<patch_t>(firstspritelump + i);
-        spritewidth[i] = (patch->width) << FRACBITS;
-        spriteoffset[i] = (patch->leftoffset) << FRACBITS;
-        spritetopoffset[i] = (patch->topoffset) << FRACBITS;
+        spritewidth[i] = (patch->width) << fixed::frac_bits;
+        spriteoffset[i] = (patch->leftoffset) << fixed::frac_bits;
+        spritetopoffset[i] = (patch->topoffset) << fixed::frac_bits;
     }
 }
 

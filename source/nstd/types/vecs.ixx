@@ -15,17 +15,8 @@ class v2_t
 public:
 	using value_type = T;
 
-	T x = 0;
-	T y = 0;
-
-	/*constexpr ~v2_t() noexcept = default;
-	constexpr v2_t() noexcept = default;
-	constexpr v2_t(const v2_t&) noexcept = default;
-	constexpr v2_t(v2_t&&) noexcept = default;*/
-	//constexpr explicit v2_t(T p[2]) noexcept : x{p[0]}, y{p[1]} {}
-
-	/*constexpr v2_t& operator=(const v2_t&) noexcept = default;
-	constexpr v2_t& operator=(v2_t&&) noexcept = default;*/
+	T x = zero<T>;
+	T y = zero<T>;
 
 	template<typename TO> v2_t<TO> cast() const noexcept { return {static_cast<TO>(x), static_cast<TO>(y)}; }
 	template<typename TO = T> v2_t<TO> round() const noexcept { return {round_to<TO>(x), round_to<TO>(y)}; }
@@ -35,21 +26,6 @@ public:
 	constexpr v2_t xx() const noexcept { return {x, x}; }
 	constexpr v2_t yy() const noexcept { return {y, y}; }
 	constexpr v2_t yx() const noexcept { return {y, x}; }
-
-	/*v3_t<T> xxx() const { return {x, x, x}; }
-	v3_t<T> yyy() const { return {y, y, y}; }
-	v3_t<T> _xy() const { return {0, x, y}; }
-	v3_t<T> x_y() const { return {x, 0, y}; }
-	v3_t<T> xy_() const { return {y, y, 0}; }
-
-	v4_t<T> xxxx() const { return {x, x, x, x}; }
-	v4_t<T> yyyy() const { return {y, y, x, y}; }
-	v4_t<T> xy__() const { return {x, y, 0, 0}; }
-	v4_t<T> x_y_() const { return {x, 0, y, 0}; }
-	v4_t<T> x__y() const { return {x, 0, 0, y}; }
-	v4_t<T> _xy_() const { return {0, x, y, 0}; }
-	v4_t<T> _x_y() const { return {0, x, 0, y}; }
-	v4_t<T> __xy() const { return {0, 0, x, y}; }*/
 
 	static v2_t from_angle(number auto a) noexcept { return { cos(a), sin(a) }; }
 	template<typename AS = T> constexpr AS get_angle() const noexcept { return atan2(y, x); }
@@ -119,15 +95,15 @@ public:
 	template<typename V> v2_t<decltype(T() * V())> operator*(v2_t<V> v) const { return { x * v.x, y * v.y }; }
 	template<typename V> v2_t<decltype(T() / V())> operator/(v2_t<V> v) const { return { x / v.x, y / v.y }; }
 
-	template<typename N> v2_t& operator+=(N n) { x = ::rcast<T>(x + n); y = ::rcast<T>(y + n); return *this; }
-	template<typename N> v2_t& operator-=(N n) { x = ::rcast<T>(x - n); y = ::rcast<T>(y - n); return *this; }
-	template<typename N> v2_t& operator*=(N n) { x = ::rcast<T>(x * n); y = ::rcast<T>(y * n); return *this; }
-	template<typename N> v2_t& operator/=(N n) { x = ::rcast<T>(x / n); y = ::rcast<T>(y / n); return *this; }
+	template<typename N> v2_t& operator+=(N n) { x = round<T>(x + n); y = round<T>(y + n); return *this; }
+	template<typename N> v2_t& operator-=(N n) { x = round<T>(x - n); y = round<T>(y - n); return *this; }
+	template<typename N> v2_t& operator*=(N n) { x = round<T>(x * n); y = round<T>(y * n); return *this; }
+	template<typename N> v2_t& operator/=(N n) { x = round<T>(x / n); y = round<T>(y / n); return *this; }
 
-	template<typename V> v2_t& operator+=(v2_t<V> v) { x = ::rcast<T>(x + v.x); y = ::rcast<T>(y + v.y); return *this; }
-	template<typename V> v2_t& operator-=(v2_t<V> v) { x = ::rcast<T>(x - v.x); y = ::rcast<T>(y - v.y); return *this; }
-	template<typename V> v2_t& operator*=(v2_t<V> v) { x = ::rcast<T>(x * v.x); y = ::rcast<T>(y * v.y); return *this; }
-	template<typename V> v2_t& operator/=(v2_t<V> v) { x = ::rcast<T>(x / v.x); y = ::rcast<T>(y / v.y); return *this; }
+	template<typename V> v2_t& operator+=(v2_t<V> v) { x = round<T>(x + v.x); y = round<T>(y + v.y); return *this; }
+	template<typename V> v2_t& operator-=(v2_t<V> v) { x = round<T>(x - v.x); y = round<T>(y - v.y); return *this; }
+	template<typename V> v2_t& operator*=(v2_t<V> v) { x = round<T>(x * v.x); y = round<T>(y * v.y); return *this; }
+	template<typename V> v2_t& operator/=(v2_t<V> v) { x = round<T>(x / v.x); y = round<T>(y / v.y); return *this; }
 
 	template<integral V>
 		requires std::is_integral_v<T>

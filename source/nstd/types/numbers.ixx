@@ -84,35 +84,27 @@ template<integral TO, integral FROM>
 constexpr TO size_cast(FROM value) noexcept
 {
     if constexpr (is_same<FROM, TO>)
-    {
         return value;
-    }
-    else
-    {
-        assert(is_in_type_range<TO>(value));
-        return static_cast<TO>(value);
-    }
+
+    assert(is_in_type_range<TO>(value));
+    return static_cast<TO>(value);
 }
 
 template<floating_point TO>
 constexpr TO size_cast(floating_point auto value) noexcept
 {
     if constexpr (is_same<decltype(value), TO>)
-    {
         return value;
-    }
-    else
-    {
-        assert(is_in_type_range<TO>(value));
-        return static_cast<TO>(value);
-    }
+
+    assert(is_in_type_range<TO>(value));
+    return static_cast<TO>(value);
 }
 
 template<floating_point TO>
-constexpr inline TO round_to(number auto n) { return size_cast<TO>(std::round(n)); }
+constexpr inline TO round(number auto n) { return size_cast<TO>(std::round(n)); }
 
 template<integral TO>
-constexpr inline TO round_to(number auto n)
+constexpr inline TO round(number auto n)
 {
     if constexpr (
         std::cmp_less_equal(std::numeric_limits<TO>::min(), std::numeric_limits<long>::min()) &&

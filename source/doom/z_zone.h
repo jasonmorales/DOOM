@@ -20,6 +20,7 @@
 //---------------------------------------------------------------------
 #pragma once
 
+import std;
 import nstd;
 
 //#include <cstdio>

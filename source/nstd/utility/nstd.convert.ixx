@@ -5,7 +5,7 @@ import <cassert>;
 import nstd.strings;
 import nstd.traits;
 import nstd.numbers;
-
+import nstd.enum_ref;
 
 export namespace nstd {
 
@@ -159,5 +159,8 @@ TO convert(::string_view in)
 
 template<nstd::boolean TO>
 TO convert(::string_view in) { return in == "true"; }
+
+template<derived_from<nstd::enum_base> TO>
+TO convert(::string_view in) { return TO::value(in).value_or(TO{}); }
 
 } // export namespace nstd

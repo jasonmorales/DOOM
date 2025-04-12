@@ -246,7 +246,7 @@ void R_RenderSegLoop()
             // calculate texture offset
             angle = (rw_centerangle + xtoviewangle[rw_x]) >> ANGLETOFINESHIFT;
             texturecolumn = rw_offset - FixedMul(finetangent[angle], rw_distance);
-            texturecolumn >>= FRACBITS;
+            texturecolumn >>= fixed::frac_bits;
             // calculate lighting
             index = rw_scale >> LIGHTSCALESHIFT;
 

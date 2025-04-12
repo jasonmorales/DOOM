@@ -166,10 +166,10 @@ mline_t cheat_player_arrow[] = {
 #define NUMCHEATPLYRLINES (sizeof(cheat_player_arrow)/sizeof(mline_t))
 
 auto _mult = [](const auto in) consteval
-    {
-        constexpr auto R = FRACUNIT;
-        return static_cast<fixed_t>(in * R);
-    };
+{
+    constexpr auto R = FRACUNIT;
+    return static_cast<fixed_t>(in * R);
+};
 
 mline_t triangle_guy[] = {
     { { _mult(-.867), _mult(-.5) }, { _mult(.867), _mult(-.5) } },
@@ -332,7 +332,7 @@ void AM_restoreScaleAndLoc()
     m_y2 = m_y + m_h;
 
     // Change the scaling multipliers
-    scale_mtof = FixedDiv(f_w << FRACBITS, m_w);
+    scale_mtof = FixedDiv(f_w << fixed::frac_bits, m_w);
     scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
 }
 
@@ -379,11 +379,11 @@ void AM_findMinMaxBoundaries()
     min_w = 2 * PLAYERRADIUS; // const? never changed?
     min_h = 2 * PLAYERRADIUS;
 
-    a = FixedDiv(f_w << FRACBITS, max_w);
-    b = FixedDiv(f_h << FRACBITS, max_h);
+    a = FixedDiv(f_w << fixed::frac_bits, max_w);
+    b = FixedDiv(f_h << fixed::frac_bits, max_h);
 
     min_scale_mtof = a < b ? a : b;
-    max_scale_mtof = FixedDiv(f_h << FRACBITS, 2 * PLAYERRADIUS);
+    max_scale_mtof = FixedDiv(f_h << fixed::frac_bits, 2 * PLAYERRADIUS);
 
 }
 
@@ -417,7 +417,7 @@ void AM_changeWindowLoc()
 
 void AM_initVariables()
 {
-    static input::event st_notify { .flags = {"down", "automap"} };
+    static input::event st_notify { .flags = input::event_flag(input::event_flag_f::down, input::event_flag_f::automap) };
 
     automapactive = true;
     fb = g_doom->GetVideo()->GetScreen(0);
@@ -503,7 +503,7 @@ void AM_LevelInit()
 
 void AM_Stop()
 {
-    static input::event st_notify = { .flags = {"up", "automap"} };
+    static input::event st_notify = { .flags = input::event_flag_f::up | input::event_flag_f::automap };
 
     AM_unloadPics();
     automapactive = false;
@@ -557,7 +557,7 @@ bool AM_Responder(const input::event& event)
 
     if (!automapactive)
     {
-        if (event.down() && Settings::CheckBind("MapOpen", event.id))
+        if (event.down() && Settings::CheckBind(GameAction_e::MapOpen, event.id))
         {
             AM_Start();
             viewactive = false;
@@ -567,43 +567,43 @@ bool AM_Responder(const input::event& event)
     else if (event.down())
     {
         rc = true;
-        if (Settings::CheckBind("MapRight", event.id))
+        if (Settings::CheckBind(GameAction_e::MapRight, event.id))
         {
             if (!followplayer) m_paninc.x = FTOM(F_PANINC);
             else rc = false;
         }
-        else if (Settings::CheckBind("MapLeft", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapLeft, event.id))
         {
             if (!followplayer) m_paninc.x = -FTOM(F_PANINC);
             else rc = false;
         }
-        else if (Settings::CheckBind("MapUp", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapUp, event.id))
         {
             if (!followplayer) m_paninc.y = FTOM(F_PANINC);
             else rc = false;
         }
-        else if (Settings::CheckBind("MapDown", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapDown, event.id))
         {
             if (!followplayer) m_paninc.y = -FTOM(F_PANINC);
             else rc = false;
         }
-        else if (Settings::CheckBind("MapZoomOut", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapZoomOut, event.id))
         {
             mtof_zoommul = M_ZOOMOUT;
             ftom_zoommul = M_ZOOMIN;
         }
-        else if (Settings::CheckBind("MapZoomIn", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapZoomIn, event.id))
         {
             mtof_zoommul = M_ZOOMIN;
             ftom_zoommul = M_ZOOMOUT;
         }
-        else if (Settings::CheckBind("MapClose", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapClose, event.id))
         {
             bigstate = 0;
             viewactive = true;
             AM_Stop();
         }
-        else if (Settings::CheckBind("MapGoBig", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapGoBig, event.id))
         {
             bigstate = !bigstate;
             if (bigstate)
@@ -613,23 +613,23 @@ bool AM_Responder(const input::event& event)
             }
             else AM_restoreScaleAndLoc();
         }
-        else if (Settings::CheckBind("MapToggleFollow", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapToggleFollow, event.id))
         {
             followplayer = !followplayer;
             f_oldloc.x = std::numeric_limits<decltype(f_oldloc.x)>::max();;
             plr->message = followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF;
         }
-        else if (Settings::CheckBind("MapToggleGrid", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapToggleGrid, event.id))
         {
             grid = !grid;
             plr->message = grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
         }
-        else if (Settings::CheckBind("MapSetMark", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapSetMark, event.id))
         {
             plr->message = std::format("{} {}", AMSTR_MARKEDSPOT, markpointnum);
             AM_addMark();
         }
-        else if (Settings::CheckBind("MapClearMark", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapClearMark, event.id))
         {
             AM_clearMarks();
             plr->message = AMSTR_MARKSCLEARED;
@@ -640,7 +640,7 @@ bool AM_Responder(const input::event& event)
             rc = false;
         }
 
-        if (!deathmatch && cht_CheckCheat(&cheat_amap, event.id.value))
+        if (!deathmatch && cht_CheckCheat(&cheat_amap, event.id))
         {
             rc = false;
             cheating = (cheating + 1) % 3;
@@ -649,23 +649,23 @@ bool AM_Responder(const input::event& event)
     else if (event.is_keyboard() && event.up())
     {
         rc = false;
-        if (Settings::CheckBind("MapRight", event.id))
+        if (Settings::CheckBind(GameAction_e::MapRight, event.id))
         {
             if (!followplayer) m_paninc.x = 0;
         }
-        else if (Settings::CheckBind("MapLeft", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapLeft, event.id))
         {
             if (!followplayer) m_paninc.x = 0;
         }
-        else if (Settings::CheckBind("MapUp", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapUp, event.id))
         {
             if (!followplayer) m_paninc.y = 0;
         }
-        else if (Settings::CheckBind("MapDown", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapDown, event.id))
         {
             if (!followplayer) m_paninc.y = 0;
         }
-        else if (Settings::CheckBind("MapZoomIn", event.id) || Settings::CheckBind("MapZoomOut", event.id))
+        else if (Settings::CheckBind(GameAction_e::MapZoomIn, event.id) || Settings::CheckBind(GameAction_e::MapZoomOut, event.id))
         {
             mtof_zoommul = FRACUNIT;
             ftom_zoommul = FRACUNIT;
@@ -1001,15 +1001,15 @@ void AM_drawGrid(byte color)
 
     // Figure out start of vertical gridlines
     start = m_x;
-    if ((start - bmaporgx) % (MAPBLOCKUNITS << FRACBITS))
-        start += (MAPBLOCKUNITS << FRACBITS)
-        - ((start - bmaporgx) % (MAPBLOCKUNITS << FRACBITS));
+    if ((start - bmaporgx) % (MAPBLOCKUNITS << fixed::frac_bits))
+        start += (MAPBLOCKUNITS << fixed::frac_bits)
+        - ((start - bmaporgx) % (MAPBLOCKUNITS << fixed::frac_bits));
     end = m_x + m_w;
 
     // draw vertical gridlines
     ml.a.y = m_y;
     ml.b.y = m_y + m_h;
-    for (x = start; x < end; x += (MAPBLOCKUNITS << FRACBITS))
+    for (x = start; x < end; x += (MAPBLOCKUNITS << fixed::frac_bits))
     {
         ml.a.x = x;
         ml.b.x = x;
@@ -1018,15 +1018,15 @@ void AM_drawGrid(byte color)
 
     // Figure out start of horizontal gridlines
     start = m_y;
-    if ((start - bmaporgy) % (MAPBLOCKUNITS << FRACBITS))
-        start += (MAPBLOCKUNITS << FRACBITS)
-        - ((start - bmaporgy) % (MAPBLOCKUNITS << FRACBITS));
+    if ((start - bmaporgy) % (MAPBLOCKUNITS << fixed::frac_bits))
+        start += (MAPBLOCKUNITS << fixed::frac_bits)
+        - ((start - bmaporgy) % (MAPBLOCKUNITS << fixed::frac_bits));
     end = m_y + m_h;
 
     // draw horizontal gridlines
     ml.a.x = m_x;
     ml.b.x = m_x + m_w;
-    for (y = start; y < end; y += (MAPBLOCKUNITS << FRACBITS))
+    for (y = start; y < end; y += (MAPBLOCKUNITS << fixed::frac_bits))
     {
         ml.a.y = y;
         ml.b.y = y;
@@ -1198,7 +1198,7 @@ void AM_drawThings(byte colors, [[maybe_unused]] byte colorrange)
         mobj_t* t = sectors[i].thinglist;
         while (t)
         {
-            AM_drawLineCharacter(thintriangle_guy, NUMTHINTRIANGLEGUYLINES, 16 << FRACBITS, t->angle, colors + lightlev, t->x, t->y);
+            AM_drawLineCharacter(thintriangle_guy, NUMTHINTRIANGLEGUYLINES, 16 << fixed::frac_bits, t->angle, colors + lightlev, t->x, t->y);
             t = t->snext;
         }
     }

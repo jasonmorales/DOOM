@@ -141,8 +141,8 @@ void P_LoadVertexes(int lump)
     // internal representation as fixed.
     for (int i = 0; i < numvertexes; i++, li++, ml++)
     {
-        li->x = (ml->x) << FRACBITS;
-        li->y = (ml->y) << FRACBITS;
+        li->x = (ml->x) << fixed::frac_bits;
+        li->y = (ml->y) << fixed::frac_bits;
     }
 }
 
@@ -213,8 +213,8 @@ void P_LoadSectors(int32 lumpId)
     auto* ss = sectors;
     for (int32 i = 0; i < numsectors; ++i, ++ss, ++ms)
     {
-        ss->floorheight = (ms->floorheight) << FRACBITS;
-        ss->ceilingheight = (ms->ceilingheight) << FRACBITS;
+        ss->floorheight = (ms->floorheight) << fixed::frac_bits;
+        ss->ceilingheight = (ms->ceilingheight) << fixed::frac_bits;
         ss->floorpic = R_FlatNumForName(ms->floorpic);
         ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
         ss->lightlevel = (ms->lightlevel);
@@ -234,15 +234,15 @@ void P_LoadNodes(intptr_t lump)
 
     for (int32 i = 0; i < numnodes; i++, no++, mn++)
     {
-        no->x = (mn->x) << FRACBITS;
-        no->y = (mn->y) << FRACBITS;
-        no->dx = (mn->dx) << FRACBITS;
-        no->dy = (mn->dy) << FRACBITS;
+        no->x = (mn->x) << fixed::frac_bits;
+        no->y = (mn->y) << fixed::frac_bits;
+        no->dx = (mn->dx) << fixed::frac_bits;
+        no->dy = (mn->dy) << fixed::frac_bits;
         for (int32 j = 0; j < 2; j++)
         {
             no->children[j] = (mn->children[j]);
             for (int32 k = 0; k < 4; k++)
-                no->bounds[j][k] = (mn->bounds[j][k]) << FRACBITS;
+                no->bounds[j][k] = (mn->bounds[j][k]) << fixed::frac_bits;
         }
     }
 }
@@ -385,8 +385,8 @@ void P_LoadSideDefs(intptr_t lump)
     sd = sides;
     for (i = 0; i < numsides; i++, msd++, sd++)
     {
-        sd->textureoffset = (msd->textureoffset) << FRACBITS;
-        sd->rowoffset = (msd->rowoffset) << FRACBITS;
+        sd->textureoffset = (msd->textureoffset) << fixed::frac_bits;
+        sd->rowoffset = (msd->rowoffset) << fixed::frac_bits;
         sd->toptexture = R_TextureNumForName({msd->toptexture, 8});
         sd->bottomtexture = R_TextureNumForName({msd->bottomtexture, 8});
         sd->midtexture = R_TextureNumForName({msd->midtexture, 8});
@@ -400,8 +400,8 @@ void P_LoadBlockMap(intptr_t lump)
     blockmap = blockmaplump + 4;
     auto count = WadManager::GetLump(lump).size / 2;
 
-    bmaporgx = blockmaplump[0] << FRACBITS;
-    bmaporgy = blockmaplump[1] << FRACBITS;
+    bmaporgx = blockmaplump[0] << fixed::frac_bits;
+    bmaporgy = blockmaplump[1] << fixed::frac_bits;
     bmapwidth = blockmaplump[2];
     bmapheight = blockmaplump[3];
 

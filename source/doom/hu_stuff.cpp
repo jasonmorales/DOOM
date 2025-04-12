@@ -442,7 +442,7 @@ bool HU_Responder(const input::event& event)
     static bool shiftdown = false;
     static bool altdown = false;
 
-    static input::event_id destination_keys[] = { "G", "I", "B", "R" };
+    static input::event_id destination_keys[] = { input::event_id_e::G, input::event_id_e::I, input::event_id_e::B, input::event_id_e::R };
 
     static int32 num_nobrainers = 0;
 
@@ -450,12 +450,12 @@ bool HU_Responder(const input::event& event)
     for (int32 i = 0; i < MAXPLAYERS; i++)
         numplayers += playeringame[i];
 
-    if (event.is("RightShift") || event.is("LeftShift") || event.is("Shift"))
+    if (event.is(input::event_id_e::RightShift) || event.is(input::event_id_e::LeftShift) || event.is(input::event_id_e::Shift))
     {
         shiftdown = event.down();
         return false;
     }
-    else if (event.is("RightAlt") || event.is("LeftAlt") || event.is("Alt"))
+    else if (event.is(input::event_id_e::RightAlt) || event.is(input::event_id_e::LeftAlt) || event.is(input::event_id_e::Alt))
     {
         altdown = event.down();
         return false;
@@ -468,13 +468,13 @@ bool HU_Responder(const input::event& event)
 
     if (!chat_on)
     {
-        if (Settings::CheckBind("MsgRefresh", event.id))
+        if (Settings::CheckBind(GameAction_e::MsgRefresh, event.id))
         {
             message_on = true;
             message_counter = HU_MSGTIMEOUT;
             eatkey = true;
         }
-        else if (netgame && Settings::CheckBind("Talk", event.id))
+        else if (netgame && Settings::CheckBind(GameAction_e::Talk, event.id))
         {
             eatkey = chat_on = true;
             HUlib_resetIText(&w_chat);
@@ -516,10 +516,10 @@ bool HU_Responder(const input::event& event)
         // send a macro
         if (altdown)
         {
-            if (event.id < "0" && event.id > "9")
+            if (event.id < input::event_id_e::Zero && event.id > input::event_id_e::Nine)
                 return false;
 
-            auto index = event.id - "0";
+            auto index = event.id - input::event_id_e::Zero;
 
             // fprintf(stderr, "got here\n");
             auto* macromessage = chat_macros[index];
@@ -537,7 +537,7 @@ bool HU_Responder(const input::event& event)
             plr->message = chat_macros[index];
             eatkey = true;
         }
-        else if (event.is("Character"))
+        else if (event.is(input::event_id_e::Character))
         {
             char c = static_cast<char>(event.ch);
             eatkey = HUlib_keyInIText(&w_chat, c);
@@ -550,13 +550,13 @@ bool HU_Responder(const input::event& event)
                 //      plr->message = buf;
             }
         }
-        else if (event.down("Enter"))
+        else if (event.down(input::event_id_e::Enter))
         {
             chat_on = false;
             if (w_chat.l.len)
                 plr->message = w_chat.l.l;
         }
-        else if (event.down("Escape"))
+        else if (event.down(input::event_id_e::Escape))
         {
             chat_on = false;
         }

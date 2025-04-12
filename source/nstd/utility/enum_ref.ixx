@@ -72,8 +72,10 @@ struct data
 
 } // namespace enum_helpers
 
+export class enum_base {};
+
 export template<is_enum ENUM, StringLiteralTemplate NAME, std::array DATA>
-class enum_ref
+class enum_ref : public enum_base
 {
 public:
     using enum_type = ENUM;
@@ -159,6 +161,7 @@ public:
     enum_ref operator--(int) noexcept { enum_ref out = *this; dec(); return out; }
 
     constexpr auto operator<=>(const enum_ref& other) const noexcept { return index() <=> other.index(); }
+    constexpr auto operator<=>(enum_type other) const noexcept { return index() <=> index(other); }
 
     constexpr enum_ref operator+(index_type offset) const noexcept
     {
@@ -173,6 +176,8 @@ public:
         auto clamped_index = std::clamp(target, zero<index_type>, size() - 1);
         return DATA[clamped_index].value;
     }
+
+    constexpr index_type operator-(enum_type other) const noexcept { return index() - index(other); }
 
     static constexpr struct
     {

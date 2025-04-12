@@ -74,18 +74,18 @@ Setting<bool> useJoystick{"use_joystick", false};
 // Blocky mode, has default, 0 = high, 1 = normal
 Setting<int32> detailLevel{"detail_level", 0};
 
-Setting<int32> key_right{"key_right", input::event_id{"RightArrow"}};
-Setting<int32> key_left{"key_left", input::event_id{"LeftArrow"}};
-Setting<int32> key_up{"key_up", input::event_id{"UpArrow"}};
-Setting<int32> key_down{"key_down", input::event_id{"DownArrow"}};
+Setting<input::event_id> key_right{"key_right", input::event_id_e::RightArrow};
+Setting<input::event_id> key_left{"key_left", input::event_id_e::LeftArrow};
+Setting<input::event_id> key_up{"key_up", input::event_id_e::UpArrow};
+Setting<input::event_id> key_down{"key_down", input::event_id_e::DownArrow};
 
-Setting<int32> key_strafeleft{"key_strafeleft", input::event_id{"Comma"}};
-Setting<int32> key_straferight{"key_straferight", input::event_id{"Period"}};
+Setting<input::event_id> key_strafeleft{"key_strafeleft", input::event_id_e::Comma};
+Setting<input::event_id> key_straferight{"key_straferight", input::event_id_e::Period};
 
-Setting<int32> key_fire{"key_fire", input::event_id{"LeftCtrl"}};
-Setting<int32> key_use{"key_use", input::event_id{"Space"}};
-Setting<int32> key_strafe{"key_strafe", input::event_id{"LeftAlt"}};
-Setting<int32> key_speed{"key_speed", input::event_id{"LeftShift"}};
+Setting<input::event_id> key_fire{"key_fire", input::event_id_e::LeftCtrl};
+Setting<input::event_id> key_use{"key_use", input::event_id_e::Space};
+Setting<input::event_id> key_strafe{"key_strafe", input::event_id_e::LeftAlt};
+Setting<input::event_id> key_speed{"key_speed", input::event_id_e::LeftShift};
 
 // machine-independent sound params
 Setting<int32> numChannels{"snd_channels", 3};
@@ -152,37 +152,55 @@ const filesys::path Settings::DevMapPath = "devmaps";
 
 void Settings::Init()
 {
-    action_bindings["MoveForward"].insert("UpArrow");
-    action_bindings["MoveForward"].insert("W");
-    action_bindings["MoveBack"].insert("DownArrow");
-    action_bindings["MoveBack"].insert("S");
-    action_bindings["MoveLeft"].insert("LeftArrow");
-    action_bindings["MoveLeft"].insert("A");
-    action_bindings["MoveRight"].insert("RightArrow");
-    action_bindings["MoveRight"].insert("D");
-    action_bindings["Fire"].insert("Ctrl");
-    action_bindings["Fire"].insert("LeftCtrl");
-    action_bindings["Fire"].insert("RightCtrl");
-    action_bindings["Fire"].insert("MouseLeft");
-    action_bindings["Use"].insert("Space");
-    action_bindings["Use"].insert("MouseRight");
-    action_bindings["MapOpen"].insert("Tab");
-    action_bindings["MapClose"].insert("Tab");
-    action_bindings["MapRight"].insert("RightArrow");
-    action_bindings["MapLeft"].insert("LeftArrow");
-    action_bindings["MapUp"].insert("UpArrow");
-    action_bindings["MapDown"].insert("DownArrow");
-    action_bindings["MapZoomOut"].insert("Minus");
-    action_bindings["MapZoomIn"].insert("Plus");
-    action_bindings["MapGoBig"].insert("0");
-    action_bindings["MapToggleFollow"].insert("F");
-    action_bindings["MapToggleGrid"].insert("G");
-    action_bindings["MapSetMark"].insert("M");
-    action_bindings["MapClearMark"].insert("C");
-    action_bindings["MsgRefresh"].insert("Enter");
+    action_bindings[GameAction_e::MoveForward].insert(input::event_id_e::UpArrow);
+    action_bindings[GameAction_e::MoveForward].insert(input::event_id_e::W);
+    action_bindings[GameAction_e::MoveBack].insert(input::event_id_e::DownArrow);
+    action_bindings[GameAction_e::MoveBack].insert(input::event_id_e::S);
+    action_bindings[GameAction_e::MoveLeft].insert(input::event_id_e::LeftArrow);
+    action_bindings[GameAction_e::MoveLeft].insert(input::event_id_e::A);
+    action_bindings[GameAction_e::MoveRight].insert(input::event_id_e::RightArrow);
+    action_bindings[GameAction_e::MoveRight].insert(input::event_id_e::D);
+    action_bindings[GameAction_e::Fire].insert(input::event_id_e::Ctrl);
+    action_bindings[GameAction_e::Fire].insert(input::event_id_e::LeftCtrl);
+    action_bindings[GameAction_e::Fire].insert(input::event_id_e::RightCtrl);
+    action_bindings[GameAction_e::Fire].insert(input::event_id_e::MouseLeft);
+    action_bindings[GameAction_e::Use].insert(input::event_id_e::Space);
+    action_bindings[GameAction_e::Use].insert(input::event_id_e::MouseRight);
+    action_bindings[GameAction_e::MapOpen].insert(input::event_id_e::Tab);
+    action_bindings[GameAction_e::MapClose].insert(input::event_id_e::Tab);
+    action_bindings[GameAction_e::MapRight].insert(input::event_id_e::RightArrow);
+    action_bindings[GameAction_e::MapLeft].insert(input::event_id_e::LeftArrow);
+    action_bindings[GameAction_e::MapUp].insert(input::event_id_e::UpArrow);
+    action_bindings[GameAction_e::MapDown].insert(input::event_id_e::DownArrow);
+    action_bindings[GameAction_e::MapZoomOut].insert(input::event_id_e::Minus);
+    action_bindings[GameAction_e::MapZoomIn].insert(input::event_id_e::Plus);
+    action_bindings[GameAction_e::MapGoBig].insert(input::event_id_e::Zero);
+    action_bindings[GameAction_e::MapToggleFollow].insert(input::event_id_e::F);
+    action_bindings[GameAction_e::MapToggleGrid].insert(input::event_id_e::G);
+    action_bindings[GameAction_e::MapSetMark].insert(input::event_id_e::M);
+    action_bindings[GameAction_e::MapClearMark].insert(input::event_id_e::C);
+    action_bindings[GameAction_e::MsgRefresh].insert(input::event_id_e::Enter);
 }
 
 const filesys::path Settings::DefaultConfigFile = Settings::DevDataPath / "default.cfg";
+
+template<>
+struct std::formatter<input::event_id, char>
+{
+    constexpr auto parse(std::format_parse_context& ctx)
+    {
+        auto it = ctx.begin();
+        while (it != ctx.end() && *it != '}') { ++it; }
+        return it;
+    }
+
+    auto format(const input::event_id& id, std::format_context& ctx) const
+    {
+        std::ostringstream out;
+        out << id.name();
+        return std::ranges::copy(std::move(out).str(), ctx.out()).out;
+    }
+};
 
 void Settings::Save(const filesys::path& path /*= DefaultConfigFile*/)
 {

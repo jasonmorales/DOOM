@@ -491,7 +491,7 @@ void ST_refreshBackground()
 bool ST_Responder(const input::event& event)
 {
     // Filter automap on/off.
-    if (event.flags.all<"automap">())
+    if (event.flags.all(input::event_flag_f::automap))
     {
         if (event.down())
         {
@@ -511,7 +511,7 @@ bool ST_Responder(const input::event& event)
         if (!netgame)
         {
             // 'dqd' cheat for toggleable god mode
-            if (cht_CheckCheat(&cheat_god, event.id.value))
+            if (cht_CheckCheat(&cheat_god, event.id))
             {
                 plyr->cheats ^= CF_GODMODE;
                 if (plyr->cheats & CF_GODMODE)
@@ -526,7 +526,7 @@ bool ST_Responder(const input::event& event)
                     plyr->message = STSTR_DQDOFF;
             }
             // 'fa' cheat for killer fucking arsenal
-            else if (cht_CheckCheat(&cheat_ammonokey, event.id.value))
+            else if (cht_CheckCheat(&cheat_ammonokey, event.id))
             {
                 plyr->armorpoints = 200;
                 plyr->armortype = 2;
@@ -540,7 +540,7 @@ bool ST_Responder(const input::event& event)
                 plyr->message = STSTR_FAADDED;
             }
             // 'kfa' cheat for key full ammo
-            else if (cht_CheckCheat(&cheat_ammo, event.id.value))
+            else if (cht_CheckCheat(&cheat_ammo, event.id))
             {
                 plyr->armorpoints = 200;
                 plyr->armortype = 2;
@@ -557,7 +557,7 @@ bool ST_Responder(const input::event& event)
                 plyr->message = STSTR_KFAADDED;
             }
             // 'mus' cheat for changing music
-            else if (cht_CheckCheat(&cheat_mus, event.id.value))
+            else if (cht_CheckCheat(&cheat_mus, event.id))
             {
                 char buf[3];
                 plyr->message = STSTR_MUS;
@@ -584,8 +584,8 @@ bool ST_Responder(const input::event& event)
             }
             // Simplified, accepting both "noclip" and "idspispopd".
             // no clipping mode cheat
-            else if (cht_CheckCheat(&cheat_noclip, event.id.value)
-                || cht_CheckCheat(&cheat_commercial_noclip, event.id.value))
+            else if (cht_CheckCheat(&cheat_noclip, event.id)
+                || cht_CheckCheat(&cheat_commercial_noclip, event.id))
             {
                 plyr->cheats ^= CF_NOCLIP;
 
@@ -597,7 +597,7 @@ bool ST_Responder(const input::event& event)
             // 'behold?' power-up cheats
             for (int32 i = 0;i < 6;i++)
             {
-                if (cht_CheckCheat(&cheat_powerup[i], event.id.value))
+                if (cht_CheckCheat(&cheat_powerup[i], event.id))
                 {
                     if (!plyr->powers[i])
                         P_GivePower(plyr, i);
@@ -611,19 +611,19 @@ bool ST_Responder(const input::event& event)
             }
 
             // 'behold' power-up menu
-            if (cht_CheckCheat(&cheat_powerup[6], event.id.value))
+            if (cht_CheckCheat(&cheat_powerup[6], event.id))
             {
                 plyr->message = STSTR_BEHOLD;
             }
             // 'choppers' invulnerability & chainsaw
-            else if (cht_CheckCheat(&cheat_choppers, event.id.value))
+            else if (cht_CheckCheat(&cheat_choppers, event.id))
             {
                 plyr->weaponowned[wp_chainsaw] = true;
                 plyr->powers[pw_invulnerability] = true;
                 plyr->message = STSTR_CHOPPERS;
             }
             // 'mypos' for player position
-            else if (cht_CheckCheat(&cheat_mypos, event.id.value))
+            else if (cht_CheckCheat(&cheat_mypos, event.id))
             {
                 plyr->message = std::format("ang={:#06x};x,y=({:#010x},{:#010x})",
                     players[consoleplayer].mo->angle,
@@ -633,7 +633,7 @@ bool ST_Responder(const input::event& event)
         }
 
         // 'clev' change-level cheat
-        if (cht_CheckCheat(&cheat_clev, event.id.value))
+        if (cht_CheckCheat(&cheat_clev, event.id))
         {
             char		buf[3];
             int		epsd;

@@ -2,9 +2,12 @@ export module log;
 
 import std;
 import nstd;
+import platform.debug;
 
-export namespace logger {
 
+namespace logger {
+
+export {
 enum class Verbosity : uint8
 {
     Silent,
@@ -21,18 +24,28 @@ struct Category
     string_view name = "";
 };
 
-Category Default
-{
-    .name = "Default",
-};
+Category Default("Default");
+}
 
-void write([[maybe_unused]] const Category& category, [[maybe_unused]] Verbosity verbosity, const auto& ...args)
+void write_internal(const Category& category, Verbosity verbosity, string_view msg)
+{
+    (verbosity == Verbosity::Error ? std::cerr : std::cout) << msg;
+    platform::debug::write(msg.str());
+}
+
+export {
+
+void write(const Category& category, Verbosity verbosity, const auto& ...args)
 {
     constexpr auto hasArgs = sizeof...(args) > 0;
     static_assert(hasArgs, "log::write() - Category and Verbosity specified, but no message provided");
 
     if constexpr (hasArgs)
-        ((std::cout << "[" << category.name << "] ") << ... << args) << "\n";
+    {
+        std::ostringstream msg;
+        (msg << ... << args) << "\n";
+        write_internal(category, verbosity, msg.str());
+    }
 }
 
 void write(Category category, const auto& ...args)
@@ -53,13 +66,9 @@ void write(Verbosity verbosity, const auto& ...args)
         write(Default, verbosity, args...);
 }
 
-void write(const auto& ...args)
-{
-    (std::cout << ... << args) << "\n";
-}
-
 void error(const auto& ...args) { write(Default, Verbosity::Error, args...); }
 void warn(const auto& ...args) { write(Default, Verbosity::Warning, args...); }
 void info(const auto& ...args) { write(Default, Verbosity::Info, args...); }
+void write(const auto& ...args) { write(Default, Verbosity::Info, args...); }
 
-} // export namespace log
+}} // export namespace log
